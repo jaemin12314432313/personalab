@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# 환경변수 (API 키 절대 커밋 금지)
+.env
+.env.*
+!.env.example
+
+# DB
+*.db
+*.sqlite3
+
+# 데이터 (용량 큼, 커밋 금지)
+data/raw/
+data/nvidia_personas/
+data/reviews/
+*.parquet
+*.csv
+!data/samples/*.csv
+
+# LLM 호출 결과 캐시
+cache/
+runs_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 로그
+*.log
+logs/
