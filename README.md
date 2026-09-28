@@ -82,6 +82,27 @@ fix/figma-parsing
 
 ---
 
+### 작업 흐름
+
+```bash
+git clone https://github.com/jaemin12314432313/personalab.git   # 처음 한 번
+git checkout main && git pull                                    # 작업 시작 전 최신화
+git checkout -b feat/study-api                                   # 작업 브랜치
+# ... 작업 · 커밋 ...
+git push -u origin feat/study-api
+gh pr create --base main                                         # PR 생성 → 팀장 승인 후 머지
+```
+
+머지는 팀장(`@jaemin12314432313`)이 리뷰 후 진행합니다. PR 작성자가 직접 머지하지 않습니다.
+
+### Claude Code / Codex로 작업할 때
+
+- Claude Code는 `CLAUDE.md`, Codex는 `AGENTS.md`를 자동으로 읽습니다. 둘 다 위 흐름대로 브랜치 → PR까지만 하도록 적혀 있습니다
+- Claude Code는 `git commit`·`push`·`gh` 실행 전에 승인을 묻도록 설정되어 있습니다 (`.claude/settings.json`). **끄지 마세요**
+- AI가 만든 코드도 PR 올리기 전에 본인이 한 번 읽고 올립니다
+
+---
+
 ## 커밋 메시지
 
 한국어로 써도 됩니다. 앞에 타입만 붙여주세요.
