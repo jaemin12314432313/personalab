@@ -1,0 +1,6 @@
+# 줄바꿈을 LF로 통일 (Windows / macOS 혼용 시 diff 오염 방지)
+* text=auto eol=lf
+
+*.bat eol=crlf
+*.cmd eol=crlf
+*.ps1 eol=crlf
