@@ -4,81 +4,226 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PersonaLab Act 데모</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-  :root { --bg:#f7f7f5; --card:#fff; --line:#e3e3df; --ink:#1d1d1b; --mute:#6b6b66; --ok:#1f7a4d; --bad:#b3261e; --acc:#3651d4; }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
-  main { max-width:1100px; margin:0 auto; padding:24px 16px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-  @media (max-width:860px) { main { grid-template-columns:1fr; } }
-  h1 { grid-column:1/-1; margin:0; font-size:20px; }
-  h1 small { color:var(--mute); font-weight:400; font-size:13px; margin-left:8px; }
-  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
-  h2 { font-size:14px; margin:0 0 10px; }
-  label { display:block; font-size:12px; color:var(--mute); margin:10px 0 4px; }
-  input, textarea, select { width:100%; font:inherit; padding:7px 9px; border:1px solid var(--line); border-radius:6px; background:#fff; color:inherit; }
-  textarea { resize:vertical; }
-  .mono { font-family:ui-monospace, Consolas, monospace; font-size:12px; }
-  button { font:inherit; padding:7px 12px; border:1px solid var(--line); border-radius:6px; background:#fff; cursor:pointer; }
-  button.primary { background:var(--acc); color:#fff; border-color:var(--acc); }
-  button:disabled { opacity:.5; cursor:default; }
-  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  .screen { border:1px solid var(--line); border-radius:8px; padding:10px; margin-top:10px; display:grid; grid-template-columns:72px 1fr; gap:10px; }
-  .thumb { width:72px; height:128px; border:1px dashed var(--line); border-radius:6px; background:#fafafa; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--mute); font-size:11px; cursor:pointer; overflow:hidden; }
-  .thumb img { width:100%; height:100%; object-fit:cover; }
-  .screen .head { display:flex; gap:6px; align-items:center; }
-  .screen .head b { min-width:34px; }
-  .screen label { margin-top:6px; }
-  .log { display:flex; flex-direction:column; gap:10px; }
-  .turn { border-left:3px solid var(--line); padding:4px 0 4px 12px; }
-  .turn .who { font-size:12px; color:var(--mute); }
-  .turn .act { font-weight:600; }
-  .turn .say { margin-top:4px; }
-  .tag { display:inline-block; font-size:10px; color:var(--mute); border:1px solid var(--line); border-radius:4px; padding:0 5px; margin-right:6px; }
-  .end { padding:12px; border-radius:8px; font-weight:600; }
-  .end.complete { background:#e7f4ec; color:var(--ok); }
-  .end.drop, .end.error { background:#fbeaea; color:var(--bad); }
-  .empty { color:var(--mute); }
+  :root {
+    --bg:#f4f3ef; --panel:#fff; --line:#e6e4de; --line-2:#efede8;
+    --ink:#16161a; --ink-2:#4a4a52; --mute:#8a8a92;
+    --acc:#3553e0; --acc-soft:#eaeefe; --ok:#16875a; --ok-soft:#e5f5ec; --bad:#cf3b2c; --bad-soft:#fdecea;
+    --r:14px; --shadow:0 1px 2px rgba(20,20,30,.04), 0 8px 24px rgba(20,20,30,.06);
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; }
+  body { background:var(--bg); color:var(--ink); font:14px/1.55 "Pretendard Variable", Pretendard, system-ui, "Malgun Gothic", sans-serif; -webkit-font-smoothing:antialiased; }
+  button { font:inherit; color:inherit; cursor:pointer; }
+  input, textarea, select { font:inherit; color:inherit; }
+
+  /* ── 상단 ─────────────────────────────── */
+  header { display:flex; align-items:center; gap:14px; padding:14px 28px; border-bottom:1px solid var(--line); background:rgba(244,243,239,.85); backdrop-filter:blur(8px); position:sticky; top:0; z-index:5; }
+  .logo { font-weight:800; font-size:17px; letter-spacing:-.02em; display:flex; align-items:center; gap:8px; }
+  .logo i { width:22px; height:22px; border-radius:7px; background:linear-gradient(135deg,#3553e0,#8a5cf6); display:inline-block; }
+  .pill { font-size:12px; font-weight:600; color:var(--acc); background:var(--acc-soft); padding:3px 9px; border-radius:99px; }
+  .tabs { margin-left:auto; display:flex; background:#e9e7e1; padding:3px; border-radius:10px; }
+  .tabs button { border:0; background:none; padding:6px 14px; border-radius:8px; font-weight:600; color:var(--ink-2); }
+  .tabs button.on { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+
+  /* ── 실행 화면 ────────────────────────── */
+  .stage { max-width:1320px; margin:0 auto; padding:28px; display:grid; grid-template-columns:300px 1fr 360px; gap:28px; align-items:start; }
+  @media (max-width:1100px) { .stage { grid-template-columns:1fr; } .phone-col { order:-1; } }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); }
+  .eyebrow { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--mute); }
+
+  .persona { padding:20px; }
+  .who { display:flex; gap:12px; align-items:center; margin-top:12px; }
+  .avatar { width:52px; height:52px; border-radius:16px; display:grid; place-items:center; font-weight:800; font-size:18px; color:#fff; background:linear-gradient(135deg,#ff8a5b,#f0508a); flex:none; }
+  .who b { font-size:17px; display:block; letter-spacing:-.01em; }
+  .who span { color:var(--mute); font-size:13px; }
+  .meters { margin-top:18px; display:grid; gap:11px; }
+  .meter .top { display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink-2); }
+  .meter .top em { font-style:normal; font-variant-numeric:tabular-nums; color:var(--ink); font-weight:600; }
+  .bar { height:6px; border-radius:6px; background:var(--line-2); margin-top:5px; overflow:hidden; }
+  .bar > div { height:100%; border-radius:6px; background:var(--ink); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:16px; }
+  .chip { font-size:12px; padding:3px 9px; border-radius:99px; background:var(--line-2); color:var(--ink-2); }
+  .task { padding:20px; margin-top:16px; }
+  .task textarea { width:100%; border:0; resize:none; padding:0; margin-top:8px; font-size:16px; font-weight:600; line-height:1.4; background:none; outline:none; }
+  .goal { margin-top:10px; font-size:12.5px; color:var(--mute); display:flex; align-items:center; gap:6px; }
+  .goal select { border:1px solid var(--line); border-radius:8px; padding:3px 6px; background:#fff; font-size:12.5px; }
+  .run { width:100%; margin-top:16px; border:0; border-radius:12px; padding:14px; font-size:15px; font-weight:700; color:#fff; background:var(--ink); display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .12s, opacity .2s; }
+  .run:hover { transform:translateY(-1px); }
+  .run:disabled { opacity:.55; transform:none; cursor:default; }
+  .run .dot { width:8px; height:8px; border-radius:50%; background:#6ee7a8; }
+
+  /* 폰 */
+  .phone-col { display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .phone { width:320px; height:660px; border-radius:46px; background:#101014; padding:11px; box-shadow:0 30px 60px -20px rgba(20,20,40,.35), 0 0 0 1px #2a2a30 inset; position:relative; }
+  .phone::before { content:""; position:absolute; top:20px; left:50%; translate:-50% 0; width:92px; height:26px; border-radius:20px; background:#101014; z-index:3; }
+  .screen-wrap { width:100%; height:100%; border-radius:36px; overflow:hidden; background:#fff; position:relative; }
+  .app { position:absolute; inset:0; display:flex; flex-direction:column; transition:transform .45s cubic-bezier(.2,.8,.2,1), opacity .45s; }
+  .app.enter { transform:translateX(40px); opacity:0; }
+  .app.leave { transform:translateX(-40px); opacity:0; }
+  .app .status { height:48px; flex:none; display:flex; justify-content:space-between; align-items:flex-end; padding:0 26px 6px; font-size:12px; font-weight:700; }
+  .app .body { flex:1; padding:22px 24px; display:flex; flex-direction:column; overflow:hidden; }
+  .app .sid { font-size:11px; font-weight:700; color:var(--mute); letter-spacing:.06em; }
+  .app h3 { margin:6px 0 10px; font-size:24px; line-height:1.25; letter-spacing:-.02em; }
+  .app p { margin:0; color:var(--ink-2); font-size:14px; }
+  .app .fields { margin-top:22px; display:grid; gap:10px; }
+  .app .field { height:44px; border-radius:10px; background:#f3f3f1; }
+  .app .actions { margin-top:auto; display:grid; gap:8px; }
+  .app .btn { height:50px; border-radius:14px; border:0; font-weight:700; font-size:15px; background:#f0f0ee; color:var(--ink); position:relative; overflow:visible; transition:transform .15s; }
+  .app .btn.primary { background:var(--acc); color:#fff; }
+  .app img.shot { width:100%; height:100%; object-fit:cover; object-position:top; }
+  .app .sheet { position:absolute; left:0; right:0; bottom:0; padding:14px 16px 20px; background:linear-gradient(transparent, rgba(255,255,255,.95) 30%); display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+  .app .sheet .btn { height:38px; padding:0 14px; font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  .btn.tap { transform:scale(.96); outline:3px solid #ffb020; outline-offset:3px; }
+  .btn.tap::after { content:""; position:absolute; left:50%; top:50%; width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; background:rgba(255,176,32,.55); animation:ripple .8s ease-out; }
+  @keyframes ripple { from { transform:scale(.3); opacity:1; } to { transform:scale(4); opacity:0; } }
+  .veil { position:absolute; inset:0; display:grid; place-items:center; background:rgba(16,16,20,.55); color:#fff; text-align:center; opacity:0; transition:opacity .35s; pointer-events:none; z-index:2; }
+  .veil.show { opacity:1; }
+  .veil b { font-size:22px; display:block; }
+  .veil span { font-size:13px; opacity:.85; }
+  .thinking { position:absolute; left:50%; bottom:22px; translate:-50% 0; background:rgba(16,16,20,.82); color:#fff; font-size:12.5px; padding:7px 13px; border-radius:99px; display:flex; gap:7px; align-items:center; opacity:0; transition:opacity .25s; z-index:2; white-space:nowrap; }
+  .thinking.show { opacity:1; }
+  .thinking i { width:5px; height:5px; border-radius:50%; background:#fff; animation:blink 1.2s infinite; }
+  .thinking i:nth-child(2) { animation-delay:.2s; } .thinking i:nth-child(3) { animation-delay:.4s; }
+  @keyframes blink { 0%,80%,100% { opacity:.25; } 40% { opacity:1; } }
+  .steps { display:flex; align-items:center; gap:4px; justify-content:center; max-width:100%; overflow-x:auto; }
+  .step { font-size:11.5px; font-weight:600; color:var(--mute); padding:4px 8px; white-space:nowrap; border-radius:99px; border:1px solid var(--line); background:var(--panel); transition:all .3s; }
+  .step.seen { color:var(--ink); border-color:#cfcdc6; }
+  .step.now { color:#fff; background:var(--ink); border-color:var(--ink); }
+  .step.is-goal { border-style:dashed; }
+  .step.done { color:#fff; background:var(--ok); border-color:var(--ok); }
+  .step.fail { color:#fff; background:var(--bad); border-color:var(--bad); }
+  .sep { width:6px; height:1px; background:#cfcdc6; }
+
+  /* 기록 */
+  .log-card { padding:20px; min-height:300px; }
+  .result { border-radius:12px; padding:16px; margin-top:12px; display:none; }
+  .result.show { display:block; animation:rise .4s ease-out; }
+  .result.complete { background:var(--ok-soft); color:#0d5c3c; }
+  .result.drop, .result.error { background:var(--bad-soft); color:#8c2419; }
+  .result b { font-size:16px; display:block; }
+  .result small { display:block; margin-top:3px; font-size:13px; opacity:.9; }
+  .result code { font:600 12px ui-monospace, Consolas, monospace; background:rgba(255,255,255,.6); padding:1px 6px; border-radius:5px; }
+  .timeline { list-style:none; margin:16px 0 0; padding:0; }
+  .timeline li { position:relative; padding:0 0 18px 26px; animation:rise .35s ease-out; }
+  .timeline li::before { content:""; position:absolute; left:6px; top:18px; bottom:0; width:1px; background:var(--line); }
+  .timeline li:last-child::before { display:none; }
+  .timeline .node { position:absolute; left:0; top:4px; width:13px; height:13px; border-radius:50%; border:2px solid var(--ink); background:#fff; }
+  .timeline li.drop .node { border-color:var(--bad); background:var(--bad); }
+  .timeline li.warn .node { border-color:#d99a00; }
+  .timeline .where { font-size:12px; color:var(--mute); font-weight:600; }
+  .timeline .what { font-weight:700; margin-top:1px; }
+  .timeline .what kbd { font:inherit; background:var(--acc-soft); color:var(--acc); padding:1px 7px; border-radius:6px; }
+  .quote { margin-top:8px; background:#f7f6f3; border-radius:4px 12px 12px 12px; padding:9px 12px; color:var(--ink-2); font-size:13.5px; }
+  .quote .tag { display:block; font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--mute); text-transform:uppercase; margin-bottom:3px; }
+  .empty { color:var(--mute); font-size:13.5px; margin-top:14px; }
+  @keyframes rise { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+  /* ── 설정 화면 ────────────────────────── */
+  .setup { max-width:1000px; margin:0 auto; padding:28px; display:none; }
+  .setup.on { display:block; }
+  .stage.off { display:none; }
+  .setup .card { padding:22px; margin-bottom:20px; }
+  .setup h2 { margin:0 0 4px; font-size:16px; }
+  .setup .hint { color:var(--mute); font-size:13px; margin:0 0 14px; }
+  .setup .hint code { font:12px ui-monospace, Consolas, monospace; background:var(--line-2); padding:1px 5px; border-radius:4px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .ghost { border:1px solid var(--line); background:#fff; border-radius:9px; padding:8px 13px; font-weight:600; }
+  .ghost:hover { border-color:#cfcdc6; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(290px, 1fr)); gap:14px; margin-top:16px; }
+  .sc { border:1px solid var(--line); border-radius:12px; padding:12px; display:grid; grid-template-columns:78px 1fr; gap:12px; background:#fff; }
+  .thumb { width:78px; height:140px; border-radius:10px; border:1px dashed #d6d4cd; background:#faf9f7; display:grid; place-items:center; text-align:center; color:var(--mute); font-size:11px; cursor:pointer; overflow:hidden; }
+  .thumb img { width:100%; height:100%; object-fit:cover; object-position:top; }
+  .sc .head { display:flex; gap:6px; align-items:center; }
+  .sc .head b { font-size:12px; color:var(--mute); min-width:28px; }
+  .sc label { display:block; font-size:11.5px; color:var(--mute); margin:8px 0 3px; }
+  .sc input { width:100%; border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:13px; }
+  .sc .x { border:0; background:none; color:var(--mute); font-size:16px; padding:2px 6px; }
+  .mono { font-family:ui-monospace, Consolas, monospace !important; font-size:12px !important; }
+  textarea.json { width:100%; border:1px solid var(--line); border-radius:10px; padding:12px; min-height:220px; resize:vertical; }
+  .err { color:var(--bad); font-size:12.5px; margin-top:6px; }
 </style>
 </head>
 <body>
-<main>
-  <h1>PersonaLab · Act 데모 <small>페르소나 1명이 앱 화면을 보며 과제를 수행한다</small></h1>
+<header>
+  <div class="logo"><i></i>PersonaLab</div>
+  <span class="pill">Act 모드 데모</span>
+  <nav class="tabs">
+    <button id="tab-run" class="on">실행</button>
+    <button id="tab-setup">화면 설정 <span id="count"></span></button>
+  </nav>
+</header>
 
+<!-- 실행 -->
+<main class="stage" id="stage">
   <div>
-    <section>
-      <h2>1. 페르소나</h2>
-      <textarea id="persona" class="mono" rows="9"></textarea>
-      <label for="task">과제</label>
-      <input id="task" value="회원가입을 완료하세요">
+    <section class="card persona">
+      <div class="eyebrow">AI 페르소나</div>
+      <div id="persona-card"></div>
     </section>
-
-    <section style="margin-top:20px">
-      <h2>2. 앱 화면</h2>
-      <div class="row">
-        <button id="upload">이미지 여러 장 올리기</button>
-        <button id="add">화면 추가</button>
-        <button id="sample">샘플(일정메이트)</button>
-        <input id="files" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
-      </div>
-      <p class="empty" style="margin:8px 0 0;font-size:12px">이미지는 파일 이름 순서대로 S01, S02… 가 된다. 버튼 칸에는 <span class="mono">버튼글자&gt;이동할화면</span>을 쉼표로 적는다. 예: <span class="mono">다음&gt;S03, 뒤로&gt;S01</span></p>
-      <div id="screens"></div>
-      <label for="goal">목표 화면 (도달하면 성공)</label>
-      <select id="goal"></select>
+    <section class="card task">
+      <div class="eyebrow">과제</div>
+      <textarea id="task" rows="2">회원가입을 완료하세요</textarea>
+      <div class="goal">목표 화면 <select id="goal"></select></div>
     </section>
+    <button id="run" class="run"><span class="dot"></span><span id="run-label">에이전트 실행</span></button>
   </div>
 
-  <section>
-    <div class="row" style="justify-content:space-between">
-      <h2 style="margin:0">3. 실행</h2>
-      <button id="run" class="primary">에이전트 실행</button>
+  <div class="phone-col">
+    <div class="phone">
+      <div class="screen-wrap" id="viewport">
+        <div class="veil" id="veil"></div>
+        <div class="thinking" id="thinking"><i></i><i></i><i></i><span>화면을 보는 중</span></div>
+      </div>
     </div>
-    <div id="log" class="log" style="margin-top:14px"><p class="empty">실행하면 턴마다 기록이 여기에 쌓인다.</p></div>
+    <div class="steps" id="steps"></div>
+  </div>
+
+  <section class="card log-card">
+    <div class="eyebrow">행동 기록</div>
+    <div class="result" id="result"></div>
+    <ol class="timeline" id="timeline"></ol>
+    <p class="empty" id="empty">실행하면 페르소나가 화면을 한 장씩 보며 무엇을 누를지, 그만둘지 판단한다.</p>
+  </section>
+</main>
+
+<!-- 설정 -->
+<main class="setup" id="setup">
+  <section class="card">
+    <h2>앱 화면</h2>
+    <p class="hint">이미지는 파일 이름 순서대로 S01, S02…가 된다. 버튼 칸에는 <code>버튼글자&gt;이동할화면</code>을 쉼표로 적는다. 예: <code>다음&gt;S03, 뒤로&gt;S01</code></p>
+    <div class="row">
+      <button class="ghost" id="upload">＋ 이미지 여러 장 올리기</button>
+      <button class="ghost" id="add">＋ 빈 화면</button>
+      <button class="ghost" id="sample">샘플로 되돌리기</button>
+      <input id="files" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+    </div>
+    <div class="grid" id="screens"></div>
+  </section>
+  <section class="card">
+    <h2>페르소나</h2>
+    <p class="hint">계획서 6-3 스키마. 실행 시 이 JSON이 그대로 프롬프트에 들어간다.</p>
+    <textarea id="persona" class="json mono" spellcheck="false"></textarea>
+    <div class="err" id="persona-err"></div>
   </section>
 </main>
 
 <script>
 const $ = (id) => document.getElementById(id);
-let screens = [];
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const sid = (i) => "S" + String(i + 1).padStart(2, "0");
+
+// 계획서 8-5 (+ 8-2 강제 종료)
+const DROP_LABEL = {
+  UNCLEAR_PURPOSE: "무슨 앱인지 모르겠다", TOO_MANY_STEPS: "단계·입력 항목이 너무 많다", PRIVACY: "개인정보를 과하게 요구한다",
+  PRICE: "가격이 부담된다", TRUST: "믿기 어렵다", FEATURE_MISSING: "필요한 기능이 없다",
+  SWITCHING_COST: "쓰던 것을 옮기기 번거롭다", NAVIGATION_LOST: "어디로 가야 할지 모르겠다", MAX_TURNS: "턴 상한 도달 (강제 종료)",
+};
+const OCCUPATION = { university_student: "대학생", office_worker: "직장인", freelancer: "프리랜서" };
+const TOOL = { google_calendar: "구글 캘린더", notion: "노션", naver_calendar: "네이버 캘린더" };
+const TRAIT = { productivity_app_user: "생산성 앱 사용자", time_sensitive: "시간에 쫓김" };
 
 // 계획서 6-3 예시 페르소나
 $("persona").value = JSON.stringify({
@@ -87,18 +232,88 @@ $("persona").value = JSON.stringify({
   existing_tool: "google_calendar", traits: ["productivity_app_user", "time_sensitive"],
 }, null, 2);
 
-// 계획서 3장 ③ / 8-1 예시
+// 계획서 3장 ③ / 8-1 예시. 마지막 숫자 = 이미지 없을 때 폰에 그릴 입력칸 수
 const SAMPLE = [
-  ["온보딩", "일정을 자동 정리하고 우선순위를 추천해 주는 앱이라는 소개 화면", "시작하기>S02"],
-  ["회원가입", "이메일, 비밀번호, 휴대폰 번호 인증을 받는 폼", "다음>S03, 뒤로>S01"],
-  ["학교·학년", "학교명, 학년, 전공을 입력받는 폼", "다음>S04, 건너뛰기>S04"],
-  ["관심분야 선택", "관심분야를 5개 이상 골라야 하는 화면", "완료>S05, 건너뛰기>S05"],
-  ["홈", "오늘의 일정과 추천 우선순위가 보이는 홈", ""],
+  ["온보딩", "일정을 자동으로 정리하고 오늘 할 일의 우선순위를 추천해 드려요.", "시작하기>S02", 0],
+  ["회원가입", "이메일, 비밀번호, 휴대폰 번호 인증이 필요해요.", "다음>S03, 뒤로>S01", 3],
+  ["학교·학년", "학교명, 학년, 전공을 알려주세요.", "다음>S04, 건너뛰기>S04", 3],
+  ["관심분야 선택", "관심분야를 5개 이상 골라주세요.", "완료>S05, 건너뛰기>S05", 4],
+  ["홈", "오늘의 일정과 추천 우선순위", "", 2],
 ];
+let screens = [];
 
-const sid = (i) => "S" + String(i + 1).padStart(2, "0");
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const labelOf = (id) => screens.find((s) => s.id === id)?.label || id;
+// ── 페르소나 카드 ─────────────────────────
+function persona() {
+  try { $("persona-err").textContent = ""; return JSON.parse($("persona").value); }
+  catch { $("persona-err").textContent = "JSON 형식이 올바르지 않습니다."; return null; }
+}
+function renderPersona() {
+  const p = persona();
+  if (!p) return;
+  const meters = [["앱 사용 빈도", p.app_usage_freq], ["가격 민감도", p.price_sensitivity], ["디지털 수용도", p.digital_adoption]]
+    .filter(([, v]) => typeof v === "number")
+    .map(([k, v]) => `<div class="meter"><div class="top">${k}<em>${v.toFixed(2)}</em></div><div class="bar"><div style="width:${Math.round(v * 100)}%"></div></div></div>`).join("");
+  const chips = [p.existing_tool && `지금 쓰는 것 · ${TOOL[p.existing_tool] ?? p.existing_tool}`, ...(p.traits ?? []).map((t) => TRAIT[t] ?? t)]
+    .filter(Boolean).map((c) => `<span class="chip">${esc(c)}</span>`).join("");
+  $("persona-card").innerHTML = `
+    <div class="who"><div class="avatar">${esc(String(p.persona_id ?? "P").slice(-2))}</div>
+      <div><b>${esc(p.persona_id ?? "페르소나")}</b><span>${p.age ? p.age + "세 · " : ""}${esc(OCCUPATION[p.occupation] ?? p.occupation ?? "")}</span></div></div>
+    <div class="meters">${meters}</div><div class="chips">${chips}</div>`;
+}
+$("persona").addEventListener("input", renderPersona);
+
+// ── 화면 모델 ─────────────────────────────
+function parseButtons(str) {
+  return String(str).split(",").map((p) => p.trim()).filter((p) => p.includes(">")).map((p) => {
+    const at = p.lastIndexOf(">");
+    return { text: p.slice(0, at).trim(), to: p.slice(at + 1).trim().toUpperCase() };
+  });
+}
+const byId = (id) => screens.find((s) => s.id === id);
+
+function appHTML(s) {
+  const btns = parseButtons(s.buttons);
+  if (s.image) {
+    return `<img class="shot" src="${s.image}" alt="${esc(s.label)}">
+      <div class="sheet">${btns.map((b) => `<button class="btn" data-t="${esc(b.text)}">${esc(b.text)}</button>`).join("")}</div>`;
+  }
+  return `<div class="status"><span>9:41</span><span>●●● ▮</span></div>
+    <div class="body">
+      <div class="sid">${s.id}</div>
+      <h3>${esc(s.label || s.id)}</h3>
+      <p>${esc(s.description)}</p>
+      <div class="fields">${'<div class="field"></div>'.repeat(s.fields ?? 0)}</div>
+      <div class="actions">${btns.map((b, i) => `<button class="btn ${i === 0 ? "primary" : ""}" data-t="${esc(b.text)}">${esc(b.text)}</button>`).join("")}</div>
+    </div>`;
+}
+
+let shown = null;
+async function show(id, animate = true) {
+  const s = byId(id);
+  if (!s) return;
+  const vp = $("viewport");
+  const next = document.createElement("div");
+  next.className = "app" + (animate ? " enter" : "");
+  next.innerHTML = appHTML(s);
+  const prev = vp.querySelector(".app");
+  vp.prepend(next);
+  if (animate) {
+    prev?.classList.add("leave");
+    requestAnimationFrame(() => requestAnimationFrame(() => next.classList.remove("enter")));
+    await sleep(450);
+  }
+  prev?.remove();
+  shown = id;
+}
+
+function renderSteps(state = {}) {
+  const goal = $("goal").value;
+  $("steps").innerHTML = screens.map((s, i) => {
+    const cls = ["step", s.id === goal && "is-goal", state.seen?.has(s.id) && "seen", state.now === s.id && "now",
+      state.done === s.id && "done", state.fail === s.id && "fail"].filter(Boolean).join(" ");
+    return (i ? '<span class="sep"></span>' : "") + `<span class="${cls}">${s.id} ${esc(s.label)}</span>`;
+  }).join("");
+}
 
 function renderGoal() {
   const prev = $("goal").value;
@@ -106,88 +321,128 @@ function renderGoal() {
   $("goal").value = screens.some((s) => s.id === prev) ? prev : (screens.at(-1)?.id ?? "");
 }
 
-function render() {
-  screens.forEach((s, i) => (s.id = sid(i)));
+function renderSetup() {
+  $("count").textContent = screens.length ? `· ${screens.length}` : "";
   $("screens").innerHTML = screens.map((s, i) => `
-    <div class="screen">
-      <div class="thumb" data-i="${i}" title="클릭해서 이미지 넣기">${s.image ? `<img src="${s.image}" alt="${esc(s.label)}">` : "이미지<br>없음"}</div>
+    <div class="sc">
+      <div class="thumb" data-i="${i}" title="클릭해서 이미지 넣기">${s.image ? `<img src="${s.image}" alt="">` : "＋<br>이미지"}</div>
       <div>
-        <div class="head"><b>${s.id}</b><input data-i="${i}" data-k="label" value="${esc(s.label)}" placeholder="화면 이름"><button data-del="${i}" title="삭제">✕</button></div>
+        <div class="head"><b>${s.id}</b><input data-i="${i}" data-k="label" value="${esc(s.label)}" placeholder="화면 이름"><button class="x" data-del="${i}" title="삭제">✕</button></div>
         <label>설명 (이미지가 있으면 생략 가능)</label>
         <input data-i="${i}" data-k="description" value="${esc(s.description)}">
         <label>버튼</label>
         <input class="mono" data-i="${i}" data-k="buttons" value="${esc(s.buttons)}" placeholder="다음>S03, 뒤로>S01">
       </div>
     </div>`).join("");
-  renderGoal();
+}
+
+function renderAll() {
+  screens.forEach((s, i) => (s.id = sid(i)));
+  renderSetup(); renderGoal(); renderSteps();
+  if (screens.length) show(screens[0].id, false); else $("viewport").querySelector(".app")?.remove();
 }
 
 const readAsDataURL = (f) => new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(f); });
-
 $("screens").addEventListener("input", (e) => {
   const { i, k } = e.target.dataset;
   if (!k) return;
   screens[i][k] = e.target.value;
-  if (k === "label") renderGoal();
+  if (k === "label") { renderGoal(); renderSteps(); }
+  if (screens[i].id === shown) show(shown, false);
 });
 $("screens").addEventListener("click", (e) => {
   const del = e.target.closest("[data-del]");
-  if (del) { screens.splice(+del.dataset.del, 1); return render(); }
+  if (del) { screens.splice(+del.dataset.del, 1); return renderAll(); }
   const th = e.target.closest(".thumb");
   if (!th) return;
   const inp = Object.assign(document.createElement("input"), { type: "file", accept: $("files").accept });
-  inp.onchange = async () => { if (inp.files[0]) { screens[th.dataset.i].image = await readAsDataURL(inp.files[0]); render(); } };
+  inp.onchange = async () => { if (inp.files[0]) { screens[th.dataset.i].image = await readAsDataURL(inp.files[0]); renderAll(); } };
   inp.click();
 });
-
 $("upload").onclick = () => $("files").click();
 $("files").onchange = async () => {
   const files = [...$("files").files].sort((a, b) => a.name.localeCompare(b.name, "ko", { numeric: true }));
   for (const f of files) screens.push({ label: f.name.replace(/\.[^.]+$/, ""), description: "", buttons: "", image: await readAsDataURL(f) });
   $("files").value = "";
-  render();
+  renderAll();
 };
-$("add").onclick = () => { screens.push({ label: "", description: "", buttons: "", image: null }); render(); };
-$("sample").onclick = () => { screens = SAMPLE.map(([label, description, buttons]) => ({ label, description, buttons, image: null })); render(); };
+$("add").onclick = () => { screens.push({ label: "", description: "", buttons: "", image: null }); renderAll(); };
+$("sample").onclick = () => { screens = SAMPLE.map(([label, description, buttons, fields]) => ({ label, description, buttons, fields, image: null })); renderAll(); };
+$("goal").onchange = () => renderSteps();
 
-function parseButtons(str) {
-  return str.split(",").map((p) => p.trim()).filter((p) => p.includes(">")).map((p) => {
-    const at = p.lastIndexOf(">");
-    return { text: p.slice(0, at).trim(), to: p.slice(at + 1).trim().toUpperCase() };
-  });
+// 탭
+function tab(setup) {
+  $("tab-run").classList.toggle("on", !setup); $("tab-setup").classList.toggle("on", setup);
+  $("stage").classList.toggle("off", setup); $("setup").classList.toggle("on", setup);
 }
+$("tab-run").onclick = () => tab(false);
+$("tab-setup").onclick = () => tab(true);
 
-function logRow(html) {
-  $("log").insertAdjacentHTML("beforeend", html);
-  $("log").lastElementChild.scrollIntoView({ block: "nearest" });
-}
+// ── 실행 ──────────────────────────────────
+const state = { seen: new Set(), now: null };
+const addLog = (html, cls = "") => {
+  $("empty").style.display = "none";
+  $("timeline").insertAdjacentHTML("beforeend", `<li class="${cls}"><span class="node"></span>${html}</li>`);
+};
+const where = (id) => `${id} ${esc(byId(id)?.label ?? "")}`;
+const thinking = (on) => $("thinking").classList.toggle("show", on);
 
-function show(ev) {
+async function handle(ev) {
   if (ev.type === "turn") {
-    const act = ev.continue ? `[${esc(ev.target)}] 클릭` : `그만둠 · ${esc(ev.drop_reason)}`;
-    logRow(`<div class="turn"><div class="who">턴 ${ev.turn + 1} · ${ev.screen} ${esc(ev.label)}</div>
-      <div class="act">${act}</div>
-      <div class="say"><span class="tag">Synthetic User Response</span>${esc(ev.reason)}</div></div>`);
+    thinking(false);
+    const quote = `<div class="quote"><span class="tag">Synthetic User Response</span>${esc(ev.reason)}</div>`;
+    if (ev.continue) {
+      addLog(`<div class="where">턴 ${ev.turn + 1} · ${where(ev.screen)}</div><div class="what"><kbd>${esc(ev.target)}</kbd> 누름</div>${quote}`);
+      const btn = [...$("viewport").querySelectorAll(".app .btn")].find((b) => b.dataset.t === ev.target);
+      btn?.classList.add("tap");
+      await sleep(750);
+      const to = parseButtons(byId(ev.screen)?.buttons ?? "").find((b) => b.text === ev.target)?.to;
+      if (byId(to)) { state.now = to; state.seen.add(to); renderSteps(state); await show(to); }
+    } else {
+      addLog(`<div class="where">턴 ${ev.turn + 1} · ${where(ev.screen)}</div><div class="what">그만둠</div>${quote}`, "drop");
+    }
+    thinking(true);
   } else if (ev.type === "invalid") {
-    logRow(`<div class="turn"><div class="who">턴 ${ev.turn + 1}</div><div class="act">목록 밖 응답 "${esc(ev.target)}" → 다시 묻는다</div></div>`);
-  } else if (ev.type === "end") {
-    const where = `${ev.screen} ${esc(labelOf(ev.screen))}`;
-    logRow(`<div class="end ${ev.result}">${ev.result === "complete" ? `✓ 과제 완료 — ${where} 도달` : `✕ 이탈 — ${where} · ${esc(ev.drop_reason)}`}</div>`);
-  } else if (ev.type === "error") {
-    logRow(`<div class="end error">오류: ${esc(ev.message)}</div>`);
+    addLog(`<div class="where">턴 ${ev.turn + 1}</div><div class="what">목록에 없는 "${esc(ev.target)}" 선택 → 다시 묻는다</div>`, "warn");
+  } else if (ev.type === "end" || ev.type === "error") {
+    thinking(false);
+    const r = $("result");
+    if (ev.type === "error") {
+      r.className = "result show error";
+      r.innerHTML = `<b>실행 오류</b><small>${esc(ev.message)}</small>`;
+      return;
+    }
+    const turns = $("timeline").querySelectorAll("li:not(.warn)").length;
+    if (ev.result === "complete") {
+      renderSteps({ ...state, now: null, done: ev.screen });
+      r.className = "result show complete";
+      r.innerHTML = `<b>✓ 과제 완료</b><small>${turns}턴 만에 ${where(ev.screen)} 도달</small>`;
+    } else {
+      renderSteps({ ...state, now: null, fail: ev.screen });
+      $("veil").innerHTML = `<div><b>이탈</b><span>${esc(DROP_LABEL[ev.drop_reason] ?? ev.drop_reason)}</span></div>`;
+      $("veil").classList.add("show");
+      r.className = "result show drop";
+      r.innerHTML = `<b>✕ ${where(ev.screen)}에서 이탈</b><small><code>${esc(ev.drop_reason)}</code> ${esc(DROP_LABEL[ev.drop_reason] ?? "")}</small>`;
+    }
   }
 }
 
 $("run").onclick = async () => {
-  let persona;
-  try { persona = JSON.parse($("persona").value); } catch { return alert("페르소나 JSON 형식이 올바르지 않습니다."); }
-  if (!screens.length) return alert("화면을 한 개 이상 추가하세요.");
+  const p = persona();
+  if (!p || !screens.length) return tab(true);
   const body = {
-    persona, task: $("task").value, goal: $("goal").value,
+    persona: p, task: $("task").value, goal: $("goal").value,
     screens: screens.map((s) => ({ id: s.id, label: s.label || s.id, description: s.description, image: s.image, elements: parseButtons(s.buttons) })),
   };
-  $("run").disabled = true;
-  $("log").innerHTML = "";
+  $("run").disabled = true; $("run-label").textContent = "실행 중…";
+  $("timeline").innerHTML = ""; $("result").className = "result"; $("veil").classList.remove("show");
+  state.seen = new Set([screens[0].id]); state.now = screens[0].id; renderSteps(state);
+  await show(screens[0].id, shown !== screens[0].id);
+  thinking(true);
+
+  // 스트림 이벤트는 애니메이션 순서대로 하나씩 처리한다
+  let chain = Promise.resolve();
+  const enqueue = (ev) => (chain = chain.then(() => handle(ev)));
   try {
     const res = await fetch("/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
@@ -199,15 +454,17 @@ $("run").onclick = async () => {
       buf += value;
       const lines = buf.split("\n");
       buf = lines.pop();
-      lines.filter(Boolean).forEach((l) => show(JSON.parse(l)));
+      lines.filter(Boolean).forEach((l) => enqueue(JSON.parse(l)));
     }
   } catch (err) {
-    show({ type: "error", message: err.message });
-  } finally {
-    $("run").disabled = false;
+    enqueue({ type: "error", message: err.message });
   }
+  await chain;
+  thinking(false);
+  $("run").disabled = false; $("run-label").textContent = "다시 실행";
 };
 
+renderPersona();
 $("sample").click();
 </script>
 </body>

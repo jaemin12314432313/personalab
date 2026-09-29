@@ -180,7 +180,7 @@ def agent_loop(req: RunRequest):
 
 @app.get("/")
 def index():
-    return FileResponse(Path(__file__).with_name("index.html"))
+    return FileResponse(Path(__file__).with_name("index.html"), headers={"Cache-Control": "no-store"})
 
 
 @app.post("/run")
