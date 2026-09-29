@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PersonaLab Act 데모</title>
+<style>
+  :root { --bg:#f7f7f5; --card:#fff; --line:#e3e3df; --ink:#1d1d1b; --mute:#6b6b66; --ok:#1f7a4d; --bad:#b3261e; --acc:#3651d4; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:24px 16px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:860px) { main { grid-template-columns:1fr; } }
+  h1 { grid-column:1/-1; margin:0; font-size:20px; }
+  h1 small { color:var(--mute); font-weight:400; font-size:13px; margin-left:8px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  h2 { font-size:14px; margin:0 0 10px; }
+  label { display:block; font-size:12px; color:var(--mute); margin:10px 0 4px; }
+  input, textarea, select { width:100%; font:inherit; padding:7px 9px; border:1px solid var(--line); border-radius:6px; background:#fff; color:inherit; }
+  textarea { resize:vertical; }
+  .mono { font-family:ui-monospace, Consolas, monospace; font-size:12px; }
+  button { font:inherit; padding:7px 12px; border:1px solid var(--line); border-radius:6px; background:#fff; cursor:pointer; }
+  button.primary { background:var(--acc); color:#fff; border-color:var(--acc); }
+  button:disabled { opacity:.5; cursor:default; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .screen { border:1px solid var(--line); border-radius:8px; padding:10px; margin-top:10px; display:grid; grid-template-columns:72px 1fr; gap:10px; }
+  .thumb { width:72px; height:128px; border:1px dashed var(--line); border-radius:6px; background:#fafafa; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--mute); font-size:11px; cursor:pointer; overflow:hidden; }
+  .thumb img { width:100%; height:100%; object-fit:cover; }
+  .screen .head { display:flex; gap:6px; align-items:center; }
+  .screen .head b { min-width:34px; }
+  .screen label { margin-top:6px; }
+  .log { display:flex; flex-direction:column; gap:10px; }
+  .turn { border-left:3px solid var(--line); padding:4px 0 4px 12px; }
+  .turn .who { font-size:12px; color:var(--mute); }
+  .turn .act { font-weight:600; }
+  .turn .say { margin-top:4px; }
+  .tag { display:inline-block; font-size:10px; color:var(--mute); border:1px solid var(--line); border-radius:4px; padding:0 5px; margin-right:6px; }
+  .end { padding:12px; border-radius:8px; font-weight:600; }
+  .end.complete { background:#e7f4ec; color:var(--ok); }
+  .end.drop, .end.error { background:#fbeaea; color:var(--bad); }
+  .empty { color:var(--mute); }
+</style>
+</head>
+<body>
+<main>
+  <h1>PersonaLab · Act 데모 <small>페르소나 1명이 앱 화면을 보며 과제를 수행한다</small></h1>
+
+  <div>
+    <section>
+      <h2>1. 페르소나</h2>
+      <textarea id="persona" class="mono" rows="9"></textarea>
+      <label for="task">과제</label>
+      <input id="task" value="회원가입을 완료하세요">
+    </section>
+
+    <section style="margin-top:20px">
+      <h2>2. 앱 화면</h2>
+      <div class="row">
+        <button id="upload">이미지 여러 장 올리기</button>
+        <button id="add">화면 추가</button>
+        <button id="sample">샘플(일정메이트)</button>
+        <input id="files" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+      </div>
+      <p class="empty" style="margin:8px 0 0;font-size:12px">이미지는 파일 이름 순서대로 S01, S02… 가 된다. 버튼 칸에는 <span class="mono">버튼글자&gt;이동할화면</span>을 쉼표로 적는다. 예: <span class="mono">다음&gt;S03, 뒤로&gt;S01</span></p>
+      <div id="screens"></div>
+      <label for="goal">목표 화면 (도달하면 성공)</label>
+      <select id="goal"></select>
+    </section>
+  </div>
+
+  <section>
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">3. 실행</h2>
+      <button id="run" class="primary">에이전트 실행</button>
+    </div>
+    <div id="log" class="log" style="margin-top:14px"><p class="empty">실행하면 턴마다 기록이 여기에 쌓인다.</p></div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let screens = [];
+
+// 계획서 6-3 예시 페르소나
+$("persona").value = JSON.stringify({
+  persona_id: "P023", age: 23, occupation: "university_student",
+  app_usage_freq: 0.82, price_sensitivity: 0.76, digital_adoption: 0.88,
+  existing_tool: "google_calendar", traits: ["productivity_app_user", "time_sensitive"],
+}, null, 2);
+
+// 계획서 3장 ③ / 8-1 예시
+const SAMPLE = [
+  ["온보딩", "일정을 자동 정리하고 우선순위를 추천해 주는 앱이라는 소개 화면", "시작하기>S02"],
+  ["회원가입", "이메일, 비밀번호, 휴대폰 번호 인증을 받는 폼", "다음>S03, 뒤로>S01"],
+  ["학교·학년", "학교명, 학년, 전공을 입력받는 폼", "다음>S04, 건너뛰기>S04"],
+  ["관심분야 선택", "관심분야를 5개 이상 골라야 하는 화면", "완료>S05, 건너뛰기>S05"],
+  ["홈", "오늘의 일정과 추천 우선순위가 보이는 홈", ""],
+];
+
+const sid = (i) => "S" + String(i + 1).padStart(2, "0");
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const labelOf = (id) => screens.find((s) => s.id === id)?.label || id;
+
+function renderGoal() {
+  const prev = $("goal").value;
+  $("goal").innerHTML = screens.map((s) => `<option value="${s.id}">${s.id} ${esc(s.label)}</option>`).join("");
+  $("goal").value = screens.some((s) => s.id === prev) ? prev : (screens.at(-1)?.id ?? "");
+}
+
+function render() {
+  screens.forEach((s, i) => (s.id = sid(i)));
+  $("screens").innerHTML = screens.map((s, i) => `
+    <div class="screen">
+      <div class="thumb" data-i="${i}" title="클릭해서 이미지 넣기">${s.image ? `<img src="${s.image}" alt="${esc(s.label)}">` : "이미지<br>없음"}</div>
+      <div>
+        <div class="head"><b>${s.id}</b><input data-i="${i}" data-k="label" value="${esc(s.label)}" placeholder="화면 이름"><button data-del="${i}" title="삭제">✕</button></div>
+        <label>설명 (이미지가 있으면 생략 가능)</label>
+        <input data-i="${i}" data-k="description" value="${esc(s.description)}">
+        <label>버튼</label>
+        <input class="mono" data-i="${i}" data-k="buttons" value="${esc(s.buttons)}" placeholder="다음>S03, 뒤로>S01">
+      </div>
+    </div>`).join("");
+  renderGoal();
+}
+
+const readAsDataURL = (f) => new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(f); });
+
+$("screens").addEventListener("input", (e) => {
+  const { i, k } = e.target.dataset;
+  if (!k) return;
+  screens[i][k] = e.target.value;
+  if (k === "label") renderGoal();
+});
+$("screens").addEventListener("click", (e) => {
+  const del = e.target.closest("[data-del]");
+  if (del) { screens.splice(+del.dataset.del, 1); return render(); }
+  const th = e.target.closest(".thumb");
+  if (!th) return;
+  const inp = Object.assign(document.createElement("input"), { type: "file", accept: $("files").accept });
+  inp.onchange = async () => { if (inp.files[0]) { screens[th.dataset.i].image = await readAsDataURL(inp.files[0]); render(); } };
+  inp.click();
+});
+
+$("upload").onclick = () => $("files").click();
+$("files").onchange = async () => {
+  const files = [...$("files").files].sort((a, b) => a.name.localeCompare(b.name, "ko", { numeric: true }));
+  for (const f of files) screens.push({ label: f.name.replace(/\.[^.]+$/, ""), description: "", buttons: "", image: await readAsDataURL(f) });
+  $("files").value = "";
+  render();
+};
+$("add").onclick = () => { screens.push({ label: "", description: "", buttons: "", image: null }); render(); };
+$("sample").onclick = () => { screens = SAMPLE.map(([label, description, buttons]) => ({ label, description, buttons, image: null })); render(); };
+
+function parseButtons(str) {
+  return str.split(",").map((p) => p.trim()).filter((p) => p.includes(">")).map((p) => {
+    const at = p.lastIndexOf(">");
+    return { text: p.slice(0, at).trim(), to: p.slice(at + 1).trim().toUpperCase() };
+  });
+}
+
+function logRow(html) {
+  $("log").insertAdjacentHTML("beforeend", html);
+  $("log").lastElementChild.scrollIntoView({ block: "nearest" });
+}
+
+function show(ev) {
+  if (ev.type === "turn") {
+    const act = ev.continue ? `[${esc(ev.target)}] 클릭` : `그만둠 · ${esc(ev.drop_reason)}`;
+    logRow(`<div class="turn"><div class="who">턴 ${ev.turn + 1} · ${ev.screen} ${esc(ev.label)}</div>
+      <div class="act">${act}</div>
+      <div class="say"><span class="tag">Synthetic User Response</span>${esc(ev.reason)}</div></div>`);
+  } else if (ev.type === "invalid") {
+    logRow(`<div class="turn"><div class="who">턴 ${ev.turn + 1}</div><div class="act">목록 밖 응답 "${esc(ev.target)}" → 다시 묻는다</div></div>`);
+  } else if (ev.type === "end") {
+    const where = `${ev.screen} ${esc(labelOf(ev.screen))}`;
+    logRow(`<div class="end ${ev.result}">${ev.result === "complete" ? `✓ 과제 완료 — ${where} 도달` : `✕ 이탈 — ${where} · ${esc(ev.drop_reason)}`}</div>`);
+  } else if (ev.type === "error") {
+    logRow(`<div class="end error">오류: ${esc(ev.message)}</div>`);
+  }
+}
+
+$("run").onclick = async () => {
+  let persona;
+  try { persona = JSON.parse($("persona").value); } catch { return alert("페르소나 JSON 형식이 올바르지 않습니다."); }
+  if (!screens.length) return alert("화면을 한 개 이상 추가하세요.");
+  const body = {
+    persona, task: $("task").value, goal: $("goal").value,
+    screens: screens.map((s) => ({ id: s.id, label: s.label || s.id, description: s.description, image: s.image, elements: parseButtons(s.buttons) })),
+  };
+  $("run").disabled = true;
+  $("log").innerHTML = "";
+  try {
+    const res = await fetch("/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+    const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+    let buf = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += value;
+      const lines = buf.split("\n");
+      buf = lines.pop();
+      lines.filter(Boolean).forEach((l) => show(JSON.parse(l)));
+    }
+  } catch (err) {
+    show({ type: "error", message: err.message });
+  } finally {
+    $("run").disabled = false;
+  }
+};
+
+$("sample").click();
+</script>
+</body>
+</html>
