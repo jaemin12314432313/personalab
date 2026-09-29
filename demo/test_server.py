@@ -85,6 +85,13 @@ def test_extract_prototype():
     assert out[1]["elements"] == [{"text": "다음", "to_fid": "1:4"}, {"text": "뒤로", "to_fid": "1:2"}]
 
 
+def test_figma_mock_without_token(monkeypatch):
+    monkeypatch.setattr(d.settings, "figma_access_token", "")
+    out = d.import_figma("https://www.figma.com/proto/anything/x")
+    ids = {s["id"] for s in out["screens"]}
+    assert out["mock"] and all(e["to"] in ids for s in out["screens"] for e in s["elements"])
+
+
 def test_figma_file_key():
     assert d.figma_file_key("https://www.figma.com/design/AbC123xyz/My-App?node-id=1-2") == "AbC123xyz"
     assert d.figma_file_key("https://www.figma.com/proto/Zz9/x") == "Zz9"

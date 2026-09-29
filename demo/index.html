@@ -293,7 +293,7 @@
 <main class="view off" data-view="proto">
   <div class="page-head"><div><div class="eyebrow">Step 2 · Act 입력</div><h1>프로토타입</h1><p>피그마 링크를 붙이면 화면과 버튼 연결을 자동으로 읽는다. 안 되면 이미지를 올리고 연결을 직접 적는다.</p></div></div>
   <section class="card figma">
-    <input id="figma-url" placeholder="https://www.figma.com/design/…  또는  /proto/…">
+    <input id="figma-url" value="https://www.figma.com/proto/demo/일정메이트-온보딩" placeholder="https://www.figma.com/design/…  또는  /proto/…">
     <button class="primary-btn" id="figma-go">피그마에서 불러오기</button>
     <div class="figma-status" id="figma-status"></div>
   </section>
@@ -401,13 +401,6 @@ const AVATAR = ["#ff8a5b,#f0508a", "#4f7cff,#8a5cf6", "#18a57a,#6bc76b", "#f5a52
 
 // 계획서 3장 ② / ③ 예시
 const SAMPLE_PRODUCT = { name: "일정메이트", description: "일정을 자동 정리하고 우선순위를 추천해 주는 대학생용 일정 앱", features: ["자동 정리", "우선순위 추천", "캘린더 연동", "친구 공유", "알림 설정"], price: "무료 + 월 유료 전환" };
-const SAMPLE_SCREENS = [
-  ["온보딩", "일정을 자동으로 정리하고 오늘 할 일의 우선순위를 추천해 드려요.", "시작하기>S02", 0],
-  ["회원가입", "이메일, 비밀번호, 휴대폰 번호 인증이 필요해요.", "다음>S03, 뒤로>S01", 3],
-  ["학교·학년", "학교명, 학년, 전공을 알려주세요.", "다음>S04, 건너뛰기>S04", 3],
-  ["관심분야 선택", "관심분야를 5개 이상 골라주세요.", "완료>S05, 건너뛰기>S05", 4],
-  ["홈", "오늘의 일정과 추천 우선순위", "", 2],
-];
 
 // 스터디 상태 — 저장/불러오기 단위
 let S = { product: { ...SAMPLE_PRODUCT }, screens: [], task: "회원가입을 완료하세요", goal: "", panel: [], ask: [], act: [] };
@@ -511,27 +504,27 @@ $("files").onchange = async () => {
   renderScreens();
 };
 $("add").onclick = () => { S.screens.push({ label: "", description: "", buttons: "", image: null }); renderScreens(); };
-$("sample").onclick = () => {
-  S.screens = SAMPLE_SCREENS.map(([label, description, buttons, fields]) => ({ label, description, buttons, fields, image: null }));
-  S.task = "회원가입을 완료하세요"; $("task").value = S.task;
-  renderScreens();
-};
 $("goal").onchange = () => (S.goal = $("goal").value);
 $("task").oninput = () => (S.task = $("task").value);
-$("figma-go").onclick = async () => {
+// 피그마 토큰이 없으면 서버가 샘플 프로토타입을 돌려준다
+async function loadPrototype(mock) {
   const st = $("figma-status");
   st.className = "figma-status"; st.textContent = "피그마에서 화면과 연결을 읽는 중… (화면이 많으면 30초쯤 걸린다)";
-  $("figma-go").disabled = true;
+  $("figma-go").disabled = $("sample").disabled = true;
   try {
-    const r = await api("/figma/import", { url: $("figma-url").value.trim() });
-    S.screens = r.screens.map((s) => ({ label: s.label, description: "", image: s.image, buttons: s.elements.map((e) => `${e.text}>${e.to}`).join(", ") }));
+    const r = await api("/figma/import", { url: $("figma-url").value.trim(), mock });
+    S.screens = r.screens.map((s) => ({ label: s.label, description: s.description ?? "", fields: s.fields, image: s.image,
+      buttons: s.elements.map((e) => `${e.text}>${e.to}`).join(", ") }));
     renderScreens();
     const links = r.screens.reduce((n, s) => n + s.elements.length, 0);
-    st.className = "figma-status ok"; st.textContent = `✓ "${r.name}" 연결됨 — 화면 ${r.screens.length}개, 버튼 연결 ${links}개 인식. 과제와 목표 화면을 확인하세요.`;
+    st.className = "figma-status ok";
+    st.textContent = `✓ "${r.name}" 연결됨 — 화면 ${r.screens.length}개, 버튼 연결 ${links}개 인식${r.mock ? " (피그마 토큰이 없어 샘플 프로토타입을 불러왔다)" : ""}. 과제와 목표 화면을 확인하세요.`;
   } catch (err) {
     st.className = "figma-status err"; st.textContent = `✕ ${err.message}`;
-  } finally { $("figma-go").disabled = false; }
-};
+  } finally { $("figma-go").disabled = $("sample").disabled = false; }
+}
+$("figma-go").onclick = () => loadPrototype(false);
+$("sample").onclick = () => loadPrototype(true);
 
 // ── ③ AI 패널 ────────────────────────────
 const dist = { count: 5, occupation: "university_student", age: [20, 29], app_usage: [0.2, 0.95], price_sensitivity: [0.6, 1], digital_adoption: [0.3, 0.95] };
@@ -865,7 +858,8 @@ $("load-snap").onclick = async () => {
 
 // ── 시작 ─────────────────────────────────
 bindProduct();
-$("sample").click();
+$("task").value = S.task;
+renderScreens();
 renderPcards();
 go("product");
 </script>

@@ -5,7 +5,7 @@
 실행 (저장소 루트에서):
     backend/.venv/Scripts/python -m pip install -r demo/requirements.txt
     .env 에 LLM_API_KEY=...        (Google AI Studio 무료 키, https://aistudio.google.com/apikey)
-    .env 에 FIGMA_ACCESS_TOKEN=... (피그마 링크를 읽을 때만. Figma → Settings → Personal access tokens)
+    .env 에 FIGMA_ACCESS_TOKEN=... (선택. 없으면 피그마 불러오기가 샘플 프로토타입을 돌려준다)
     backend/.venv/Scripts/python demo/server.py
     → http://localhost:8001
 """
@@ -398,15 +398,32 @@ def extract_prototype(document: dict) -> list[dict]:
 
 
 class FigmaRequest(BaseModel):
-    url: str
+    url: str = ""
+    mock: bool = False
 
 
-def import_figma(url: str) -> dict:
+# 피그마 토큰이 없을 때 쓰는 목업 프로토타입 (계획서 3장 ③ 일정메이트). fields = 폰에 그릴 입력칸 수
+MOCK_PROTOTYPE = {
+    "name": "일정메이트 온보딩 (샘플)",
+    "mock": True,
+    "screens": [
+        {"id": "S01", "label": "온보딩", "description": "일정을 자동으로 정리하고 오늘 할 일의 우선순위를 추천해 드려요.",
+         "fields": 0, "image": None, "elements": [{"text": "시작하기", "to": "S02"}]},
+        {"id": "S02", "label": "회원가입", "description": "이메일, 비밀번호, 휴대폰 번호 인증이 필요해요.",
+         "fields": 3, "image": None, "elements": [{"text": "다음", "to": "S03"}, {"text": "뒤로", "to": "S01"}]},
+        {"id": "S03", "label": "학교·학년", "description": "학교명, 학년, 전공을 알려주세요.",
+         "fields": 3, "image": None, "elements": [{"text": "다음", "to": "S04"}, {"text": "건너뛰기", "to": "S04"}]},
+        {"id": "S04", "label": "관심분야 선택", "description": "관심분야를 5개 이상 골라주세요.",
+         "fields": 4, "image": None, "elements": [{"text": "완료", "to": "S05"}, {"text": "건너뛰기", "to": "S05"}]},
+        {"id": "S05", "label": "홈", "description": "오늘의 일정과 추천 우선순위", "fields": 2, "image": None, "elements": []},
+    ],
+}
+
+
+def import_figma(url: str, mock: bool = False) -> dict:
     token = settings.figma_access_token
-    if not token:
-        raise HTTPException(
-            400, ".env 에 FIGMA_ACCESS_TOKEN 을 넣고 서버를 다시 켜세요 (Figma → Settings → Personal access tokens)"
-        )
+    if mock or not token:
+        return MOCK_PROTOTYPE
     key = figma_file_key(url)
     if not key:
         raise HTTPException(400, "피그마 링크 형식이 아닙니다 (figma.com/design/... 또는 /proto/...)")
@@ -470,7 +487,7 @@ def run(req: RunRequest):
 @app.post("/figma/import")
 def figma_import(req: FigmaRequest):
     try:
-        return import_figma(req.url)
+        return import_figma(req.url, req.mock)
     except httpx.HTTPError as e:
         raise HTTPException(502, f"피그마 API 오류: {e}") from e
 
