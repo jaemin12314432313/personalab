@@ -4,24 +4,29 @@
 
 실행 (저장소 루트에서):
     backend/.venv/Scripts/python -m pip install -r demo/requirements.txt
-    .env 에 LLM_API_KEY=sk-ant-...  (또는 환경변수 ANTHROPIC_API_KEY)
+    .env 에 LLM_API_KEY=...  (Google AI Studio 무료 키, https://aistudio.google.com/apikey)
     backend/.venv/Scripts/python demo/act_demo.py
     → http://localhost:8001
 """
 
+import base64
 import json
 import sys
+import time
+from functools import cache
 from pathlib import Path
 
-import anthropic
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, StreamingResponse
+from google import genai
+from google.genai import errors, types
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from app.core.config import DROP_REASON_MAX_TURNS, DROP_REASONS, settings  # noqa: E402
 
-DEFAULT_MODEL = "claude-opus-5"
+DEFAULT_MODEL = "gemini-2.5-flash"  # 무료 티어. .env 의 LLM_MODEL 로 교체
+RATE_LIMIT_WAIT_SEC = 10  # 무료 티어 분당 한도(429)에 걸리면 쉬었다 재시도
 IMAGE_TYPES = ("image/png", "image/jpeg", "image/webp", "image/gif")
 
 SYSTEM = (
@@ -67,16 +72,25 @@ class RunRequest(BaseModel):
     screens: list[Screen]
 
 
-client = anthropic.Anthropic(api_key=settings.llm_api_key or None, timeout=settings.llm_timeout)
 app = FastAPI()
 
 
-def image_block(data_url: str) -> dict | None:
+@cache
+def get_client() -> genai.Client:
+    """키가 없어도 서버는 뜨도록 첫 호출 때 만든다."""
+    if not settings.llm_api_key:
+        raise RuntimeError(".env 에 LLM_API_KEY 를 넣으세요 (https://aistudio.google.com/apikey)")
+    return genai.Client(
+        api_key=settings.llm_api_key, http_options=types.HttpOptions(timeout=settings.llm_timeout * 1000)
+    )
+
+
+def image_part(data_url: str) -> types.Part | None:
     head, _, data = data_url.partition(",")
     media = head.removeprefix("data:").removesuffix(";base64")
     if media not in IMAGE_TYPES or not data:
         return None
-    return {"type": "image", "source": {"type": "base64", "media_type": media, "data": data}}
+    return types.Part.from_bytes(data=base64.b64decode(data), mime_type=media)
 
 
 def llm(req: RunRequest, screen: Screen, history: list[str]) -> dict:
@@ -89,33 +103,35 @@ def llm(req: RunRequest, screen: Screen, history: list[str]) -> dict:
         f"클릭 가능: {' '.join(f'[{e.text}]' for e in screen.elements) or '(없음)'}\n\n"
         f"History\n지금까지: {' → '.join([*history, '(현재)'])}"
     )
-    img = image_block(screen.image) if screen.image else None
-    content = ([img] if img else []) + [{"type": "text", "text": text}]
+    img = image_part(screen.image) if screen.image else None
+    contents = ([img] if img else []) + [text]
+    config = types.GenerateContentConfig(
+        system_instruction=SYSTEM, response_mime_type="application/json", response_json_schema=SCHEMA
+    )
 
     last_err = None
     for _ in range(settings.llm_max_retries):
         try:
-            resp = client.messages.create(
-                model=settings.llm_model or DEFAULT_MODEL,
-                max_tokens=16000,
-                system=SYSTEM,
-                output_config={"effort": "low", "format": {"type": "json_schema", "schema": SCHEMA}},
-                messages=[{"role": "user", "content": content}],
+            resp = get_client().models.generate_content(
+                model=settings.llm_model or DEFAULT_MODEL, contents=contents, config=config
             )
-            if resp.stop_reason == "refusal":
-                last_err = "refusal"
+            out = json.loads(resp.text or "null")  # 차단되면 text 가 None
+            if not isinstance(out, dict) or out.get("action") not in ("click", "abandon"):
+                last_err = f"형식 오류: {resp.text}"
                 continue
-            out = json.loads(next(b.text for b in resp.content if b.type == "text"))
-            if out["action"] == "abandon" and out["drop_reason"] not in DROP_REASONS:
+            if out["action"] == "abandon" and out.get("drop_reason") not in DROP_REASONS:
                 last_err = f"drop_reason 누락: {out}"
                 continue
             return out
-        except (anthropic.APIConnectionError, anthropic.RateLimitError, anthropic.InternalServerError) as e:
+        except json.JSONDecodeError:
+            last_err = f"JSON 아님: {resp.text}"
+        except errors.ServerError as e:
             last_err = str(e)
-        except anthropic.APIStatusError as e:  # 400/401 등 — 재시도해도 같다
-            raise RuntimeError(f"LLM 호출 오류: {e}") from e
-        except TypeError as e:  # SDK 가 키를 못 찾으면 TypeError
-            raise RuntimeError(".env 에 LLM_API_KEY 를 넣으세요") from e
+        except errors.ClientError as e:  # 400/403 등은 재시도해도 같다
+            if e.code != 429:
+                raise RuntimeError(f"LLM 호출 오류: {e}") from e
+            last_err = str(e)
+            time.sleep(RATE_LIMIT_WAIT_SEC)
     raise RuntimeError(f"LLM 응답 실패: {last_err}")
 
 
@@ -133,7 +149,7 @@ def agent_loop(req: RunRequest):
         screen = screens[current]
         try:
             resp = llm(req, screen, history)
-        except RuntimeError as e:
+        except Exception as e:  # 네트워크 오류 포함, 스트림이 조용히 끊기지 않게 화면에 알린다
             yield emit(type="error", message=str(e))
             return
         cont = resp["action"] == "click"
