@@ -84,10 +84,10 @@ def call_llm(system: str, contents: list, schema: dict, check) -> dict:
     raise RuntimeError(f"LLM 응답 실패: {last_err}")
 
 
-def image_part(data_url: str) -> types.Part | None:
+def image_part(data_url: str, allowed: tuple[str, ...] = IMAGE_TYPES) -> types.Part | None:
     head, _, data = data_url.partition(",")
     media = head.removeprefix("data:").removesuffix(";base64")
-    if media not in IMAGE_TYPES or not data:
+    if media not in allowed or not data:
         return None
     return types.Part.from_bytes(data=base64.b64decode(data), mime_type=media)
 
@@ -157,6 +157,48 @@ class Product(BaseModel):
 class AskRequest(BaseModel):
     persona: dict
     product: Product
+
+
+# 기획서 → Ask 입력 자동 정리. 없는 정보를 지어내면 Ask 결과가 왜곡되므로 비워 두게 한다.
+EXTRACT_SYSTEM = (
+    "너는 제품 기획서에서 정보를 뽑아 정리한다. 기획서에 적힌 내용만 쓴다. "
+    "name 은 제품명, description 은 사용자에게 보여줄 한두 문장 소개, "
+    "features 는 사용자가 쓰는 기능 이름을 짧은 명사구로 (최대 8개), "
+    "price 는 가격·요금제 정보. 기획서에 없는 항목은 빈 문자열이나 빈 배열로 둔다. 추측해서 채우지 않는다."
+)
+EXTRACT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "features": {"type": "array", "items": {"type": "string"}},
+        "price": {"type": "string"},
+    },
+    "required": ["name", "description", "features", "price"],
+    "additionalProperties": False,
+}
+MAX_FEATURES = 8
+DOC_TYPES = ("application/pdf",)
+
+
+class ExtractRequest(BaseModel):
+    text: str = ""
+    file: str | None = None  # PDF data URL
+
+
+def check_extract(out: dict) -> str | None:
+    if not out.get("description") and not out.get("features"):
+        return "기획서에서 내용을 찾지 못함"
+    out["features"] = [f.strip() for f in out.get("features", []) if f.strip()][:MAX_FEATURES]
+    return None
+
+
+def extract_product(req: ExtractRequest) -> dict:
+    doc = image_part(req.file, DOC_TYPES) if req.file else None
+    if not doc and not req.text.strip():
+        raise RuntimeError("기획서 내용이 없습니다")
+    contents = ([doc] if doc else []) + [f"기획서\n{req.text.strip() or '(첨부 PDF)'}"]
+    return call_llm(EXTRACT_SYSTEM, contents, EXTRACT_SCHEMA, check_extract)
 
 
 def ask_schema(features: list[str]) -> dict:
@@ -469,6 +511,14 @@ def index():
 @app.post("/panel/generate")
 def panel_generate(req: PanelRequest):
     return {"personas": sample_panel(req)}
+
+
+@app.post("/product/extract")
+def product_extract(req: ExtractRequest):
+    try:
+        return extract_product(req)
+    except RuntimeError as e:
+        raise HTTPException(502, str(e)) from e
 
 
 @app.post("/ask")

@@ -273,7 +273,17 @@
 
 <!-- ① 제품 기획 (Ask 입력) -->
 <main class="view" data-view="product">
-  <div class="page-head"><div><div class="eyebrow">Step 1 · Ask 입력</div><h1>제품 기획</h1><p>기획서에 있는 내용을 붙여넣는다. AI 패널이 이걸 읽고 쓸지 말지 답한다.</p></div></div>
+  <div class="page-head"><div><div class="eyebrow">Step 1 · Ask 입력</div><h1>제품 기획</h1><p>기획서를 붙여넣거나 올리면 AI가 읽고 제품 정보를 정리한다. AI 패널은 정리된 내용을 읽고 쓸지 말지 답한다.</p></div></div>
+  <section class="card form" style="margin-bottom:18px">
+    <div><label for="plan">기획서</label><textarea id="plan" rows="7" placeholder="기획서 내용을 붙여넣는다"></textarea></div>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+      <button class="ghost" id="plan-file-btn">파일 올리기 (.txt .md .pdf)</button>
+      <input id="plan-file" type="file" accept=".txt,.md,.pdf,text/plain,text/markdown,application/pdf" hidden>
+      <span class="hint" id="plan-file-name" style="margin:0"></span>
+      <button class="primary-btn" id="extract" style="margin-left:auto">AI로 정리 →</button>
+    </div>
+    <div class="figma-status" id="extract-status"></div>
+  </section>
   <div class="two">
     <section class="card form">
       <div><label for="p-name">제품명</label><input id="p-name"></div>
@@ -399,11 +409,30 @@ const TRAIT = {
 };
 const AVATAR = ["#ff8a5b,#f0508a", "#4f7cff,#8a5cf6", "#18a57a,#6bc76b", "#f5a524,#f06a3a", "#6b7280,#374151", "#e0508a,#8a5cf6", "#0ea5b7,#3553e0", "#84a83a,#18a57a", "#c2410c,#f5a524", "#475569,#0ea5b7"];
 
-// 계획서 3장 ② / ③ 예시
-const SAMPLE_PRODUCT = { name: "일정메이트", description: "일정을 자동 정리하고 우선순위를 추천해 주는 대학생용 일정 앱", features: ["자동 정리", "우선순위 추천", "캘린더 연동", "친구 공유", "알림 설정"], price: "무료 + 월 유료 전환" };
+// 시연용 기획서 (계획서 3장 ② 일정메이트)
+const SAMPLE_PLAN = `[서비스 기획서] 일정메이트
+
+1. 배경
+대학생은 수업, 과제, 동아리, 아르바이트 일정이 여러 앱에 흩어져 있어 무엇부터 해야 할지 판단하기 어렵다.
+
+2. 목표 사용자
+일정 관리가 필요한 20대 대학생
+
+3. 핵심 기능
+- 자동 정리: 흩어진 일정을 한곳에 모아 자동으로 정리한다
+- 우선순위 추천: 마감과 중요도를 보고 오늘 할 일의 순서를 추천한다
+- 캘린더 연동: 구글·네이버 캘린더와 동기화한다
+- 친구 공유: 조별 과제 일정을 친구와 공유한다
+- 알림 설정: 마감 전에 알림을 보낸다
+
+4. 수익 모델
+기본 기능은 무료, 고급 기능은 월 구독으로 유료 전환
+
+5. 온보딩
+회원가입(이메일·휴대폰 인증) → 학교·학년 입력 → 관심분야 선택 → 홈`;
 
 // 스터디 상태 — 저장/불러오기 단위
-let S = { product: { ...SAMPLE_PRODUCT }, screens: [], task: "회원가입을 완료하세요", goal: "", panel: [], ask: [], act: [] };
+let S = { product: { name: "", description: "", features: [], price: "" }, screens: [], task: "회원가입을 완료하세요", goal: "", panel: [], ask: [], act: [] };
 let running = false;
 let selected = 0;
 let shown = null;
@@ -448,6 +477,38 @@ function storeHTML(p, mini = false) {
     : `<div class="top"><div class="icon"></div><div><h2>${esc(p.name || "제품명")}</h2><div class="price">${esc(p.price || "가격 미정")}</div></div></div><p>${esc(p.description)}</p><ul>${feats}</ul>`;
 }
 const renderStore = () => ($("store").innerHTML = storeHTML(S.product));
+
+// 기획서 → LLM 이 제품 정보 정리 (.txt/.md 는 글자로, .pdf 는 파일째 보낸다)
+let planPdf = null;
+$("plan-file-btn").onclick = () => $("plan-file").click();
+$("plan-file").onchange = async () => {
+  const f = $("plan-file").files[0];
+  if (!f) return;
+  $("plan-file-name").textContent = f.name;
+  if (f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf")) {
+    planPdf = (await readAsDataURL(f)).replace(/^data:[^;]*;/, "data:application/pdf;");
+    $("plan").value = ""; $("plan").placeholder = `${f.name} (PDF) — AI로 정리를 누른다`;
+  } else {
+    planPdf = null; $("plan").value = await f.text();
+  }
+  $("plan-file").value = "";
+};
+$("plan").addEventListener("input", () => { if ($("plan").value) { planPdf = null; $("plan-file-name").textContent = ""; } });
+$("extract").onclick = async () => {
+  const st = $("extract-status");
+  st.className = "figma-status"; st.textContent = "AI가 기획서를 읽는 중…";
+  $("extract").disabled = true;
+  try {
+    const r = await api("/product/extract", { text: $("plan").value, file: planPdf });
+    S.product = { name: r.name, description: r.description, features: r.features, price: r.price };
+    bindProduct(); refreshStepper();
+    const missing = [!r.name && "제품명", !r.price && "가격"].filter(Boolean);
+    st.className = "figma-status ok";
+    st.textContent = `✓ 정리 완료 — 기능 ${r.features.length}개를 찾았다.${missing.length ? ` 기획서에 ${missing.join("·")} 정보가 없어 비워 두었다.` : ""} 아래에서 확인하고 고친다.`;
+  } catch (err) {
+    st.className = "figma-status err"; st.textContent = `✕ ${err.message}`;
+  } finally { $("extract").disabled = false; }
+};
 
 // ── ② 프로토타입 ─────────────────────────
 function parseButtons(str) {
@@ -728,6 +789,7 @@ async function runAct(i, body) {
 
 $("run").onclick = async () => {
   readProduct();
+  if (!S.product.name && !S.product.description) return go("product");
   if (!S.goal || !S.screens.length) return go("proto");
   running = true; refreshStepper(); $("run").disabled = true;
   S.ask = S.panel.map(() => undefined); S.act = S.panel.map(() => undefined);
@@ -857,6 +919,7 @@ $("load-snap").onclick = async () => {
 };
 
 // ── 시작 ─────────────────────────────────
+$("plan").value = SAMPLE_PLAN;
 bindProduct();
 $("task").value = S.task;
 renderScreens();

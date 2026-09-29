@@ -52,6 +52,13 @@ def test_check_ask():
     assert d.check_ask({**ok, "concern": "OTHER"}, ["A", "B"]) == "concern 카테고리 밖"
 
 
+# ── 기획서 정리: 빈 응답은 재시도, 기능은 다듬고 8개까지 ──
+def test_check_extract():
+    assert d.check_extract({"name": "", "description": "", "features": [], "price": ""}) == "기획서에서 내용을 찾지 못함"
+    out = {"name": "앱", "description": "설명", "features": [" A ", "", *"BCDEFGHIJ"], "price": ""}
+    assert d.check_extract(out) is None and out["features"] == ["A", *"BCDEFGH"]
+
+
 # ── 페르소나 샘플링: 범위 안, 같은 seed 면 같은 결과 ──
 def test_sample_panel():
     req = d.PanelRequest(count=5, age=(21, 24), price_sensitivity=(0.6, 0.9), seed=1)
