@@ -52,6 +52,8 @@
   .form textarea { resize:vertical; }
   .hint { color:var(--mute); font-size:12.5px; margin:4px 0 0; }
   .next-row { display:flex; justify-content:flex-end; margin-top:18px; gap:8px; }
+  .next-row .prev { margin-right:auto; }
+  .ghost:disabled { opacity:.45; cursor:default; }
 
   /* 페르소나 공통 */
   .av { width:34px; height:34px; border-radius:11px; display:grid; place-items:center; font-weight:800; font-size:13px; color:#fff; flex:none; }
@@ -320,7 +322,7 @@
     <div><label for="task">과제 (AI와 실제 참가자에게 똑같이 제시)</label><input id="task"></div>
     <div><label for="goal">목표 화면</label><select id="goal"></select></div>
   </section>
-  <div class="next-row"><button class="primary-btn" data-go="panel">다음: AI 패널 →</button></div>
+  <div class="next-row"><button class="ghost prev" data-go="product">← 이전: 제품 기획</button><button class="primary-btn" data-go="panel">다음: AI 패널 →</button></div>
 </main>
 
 <!-- ③ AI 패널 -->
@@ -343,7 +345,7 @@
       <p class="note">데모는 고른 범위 안에서 균등하게 뽑는다. 본 제품은 통계청·건보공단 시드 기반 공개 데이터의 분포에서 뽑는다(계획서 6-2). 학습이 아니라 <b>페르소나 샘플링</b>이다.</p>
     </div>
   </div>
-  <div class="next-row"><button class="primary-btn" data-go="run">다음: 실행 →</button></div>
+  <div class="next-row"><button class="ghost prev" data-go="proto">← 이전: 프로토타입</button><button class="primary-btn" data-go="run">다음: 실행 →</button></div>
 </main>
 
 <!-- ④ 실행 -->
@@ -355,6 +357,7 @@
         <div class="plist" id="plist"></div>
         <div class="phase"><div id="ph-ask">① Ask 기획서</div><div id="ph-act">② Act 프로토타입</div></div>
         <button class="run-btn" id="run"><span class="dot"></span><span id="run-label">전체 실행 (Ask → Act)</span></button>
+        <button class="ghost prev" data-go="panel" style="width:100%; margin-top:8px">← 이전: AI 패널</button>
       </section>
     </div>
     <div class="phone-col">
@@ -438,7 +441,9 @@ let selected = 0;
 let shown = null;
 
 // ── 단계 이동 ────────────────────────────
-function go(v) {
+// 단계마다 브라우저 기록을 남겨 뒤로가기로 이전 단계에 돌아간다
+function go(v, push = true) {
+  if (push && history.state?.v !== v) history.pushState({ v }, "", `#${v}`);
   $$("[data-view]").forEach((el) => el.classList.toggle("off", el.dataset.view !== v));
   $$("#stepper button").forEach((b) => b.classList.toggle("on", b.dataset.v === v));
   if (v === "run") renderRun();
@@ -454,7 +459,13 @@ function refreshStepper() {
     b.disabled = running || (b.dataset.v === "report" && !hasResults());
   });
   $("load-snap").disabled = running;
+  $$(".prev").forEach((b) => (b.disabled = running));
 }
+addEventListener("popstate", (e) => {
+  if (running) return history.pushState({ v: "run" }, "", "#run");   // 실행 중에는 화면을 떠나지 않는다
+  const v = e.state?.v ?? "product";
+  go(v === "report" && !hasResults() ? "run" : v, false);
+});
 $("stepper").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b && !b.disabled) go(b.dataset.v); });
 document.addEventListener("click", (e) => { const b = e.target.closest("[data-go]"); if (b && !running) go(b.dataset.go); });
 
@@ -924,7 +935,8 @@ bindProduct();
 $("task").value = S.task;
 renderScreens();
 renderPcards();
-go("product");
+history.replaceState({ v: "product" }, "", "#product");
+go("product", false);
 </script>
 </body>
 </html>
