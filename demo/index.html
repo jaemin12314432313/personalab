@@ -8,42 +8,61 @@
 <style>
   :root {
     --bg:#f4f3ef; --panel:#fff; --line:#e6e4de; --line-2:#efede8;
-    --ink:#16161a; --ink-2:#4a4a52; --mute:#8a8a92;
-    --acc:#3553e0; --acc-soft:#eaeefe; --ok:#16875a; --ok-soft:#e5f5ec; --bad:#cf3b2c; --bad-soft:#fdecea; --warn:#b77900; --warn-soft:#fdf3dc;
-    --r:14px; --shadow:0 1px 2px rgba(20,20,30,.04), 0 8px 24px rgba(20,20,30,.06);
+    --ink:#16161a; --ink-2:#45454d; --mute:#6b6b73;
+    --acc:#3553e0; --acc-soft:#eaeefe; --acc-ink:#2a41b3; --ok:#12704a; --ok-soft:#e5f5ec; --bad:#c0321f; --bad-soft:#fdecea; --warn:#8f5f00; --warn-soft:#fdf3dc;
+    --r:14px; --shadow:0 1px 2px rgba(20,20,30,.04), 0 8px 24px -6px rgba(20,20,30,.08);
+    --ease:cubic-bezier(.2,.8,.2,1);
   }
   * { box-sizing:border-box; }
   html, body { margin:0; }
-  body { background:var(--bg); color:var(--ink); font:14px/1.55 "Pretendard Variable", Pretendard, system-ui, "Malgun Gothic", sans-serif; -webkit-font-smoothing:antialiased; }
+  html { scrollbar-color:#cfcdc6 transparent; scrollbar-width:thin; }
+  body { background:var(--bg); color:var(--ink); font:14px/1.6 "Pretendard Variable", Pretendard, system-ui, "Malgun Gothic", sans-serif; -webkit-font-smoothing:antialiased; font-feature-settings:"ss06"; caret-color:var(--acc); word-break:keep-all; overflow-wrap:anywhere; }
+  ::selection { background:#d4dbfb; color:var(--ink); }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb { background:#d6d4cd; border-radius:10px; border:3px solid var(--bg); }
+  :focus-visible { outline:2px solid var(--acc); outline-offset:2px; border-radius:6px; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible { outline:none; border-color:var(--acc) !important; box-shadow:0 0 0 3px var(--acc-soft); }
   button { font:inherit; color:inherit; cursor:pointer; }
-  input, textarea, select { font:inherit; color:inherit; }
-  code { font:600 12px ui-monospace, Consolas, monospace; background:rgba(0,0,0,.05); padding:1px 6px; border-radius:5px; }
+  input, textarea, select { font:inherit; color:inherit; transition:border-color .15s, box-shadow .15s; }
+  ::placeholder { color:#8d8d94; }
+  code { font:600 11.5px ui-monospace, Consolas, monospace; background:rgba(22,22,26,.06); padding:1px 6px; border-radius:5px; letter-spacing:.01em; }
+  svg.i { width:16px; height:16px; flex:none; vertical-align:-3px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
   .off { display:none !important; }
 
   /* ── 상단 ─────────────────────────────── */
-  header { display:flex; align-items:center; gap:18px; padding:12px 28px; border-bottom:1px solid var(--line); background:rgba(244,243,239,.9); backdrop-filter:blur(8px); position:sticky; top:0; z-index:5; }
-  .logo { font-weight:800; font-size:17px; letter-spacing:-.02em; display:flex; align-items:center; gap:8px; white-space:nowrap; }
-  .logo i { width:22px; height:22px; border-radius:7px; background:linear-gradient(135deg,#3553e0,#8a5cf6); display:inline-block; }
-  .stepper { display:flex; gap:2px; margin:0 auto; background:#e9e7e1; padding:3px; border-radius:11px; }
-  .stepper button { border:0; background:none; padding:6px 13px; border-radius:8px; font-weight:600; color:var(--ink-2); display:flex; gap:7px; align-items:center; white-space:nowrap; }
-  .stepper button span { width:18px; height:18px; border-radius:50%; font-size:11px; display:grid; place-items:center; background:#d9d7d0; color:var(--ink-2); }
-  .stepper button.on { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
-  .stepper button.on span { background:var(--ink); color:#fff; }
-  .stepper button.done span { background:var(--ok); color:#fff; }
-  .stepper button:disabled { opacity:.45; cursor:default; }
-  .ghost { border:1px solid var(--line); background:#fff; border-radius:9px; padding:7px 12px; font-weight:600; white-space:nowrap; }
-  .ghost:hover { border-color:#cfcdc6; }
-  .primary-btn { border:0; border-radius:11px; padding:11px 18px; font-weight:700; color:#fff; background:var(--ink); white-space:nowrap; }
+  header { display:flex; align-items:center; gap:18px; padding:12px 28px; border-bottom:1px solid var(--line); background:rgba(244,243,239,.88); backdrop-filter:saturate(1.4) blur(10px); position:sticky; top:0; z-index:5; }
+  .logo { font-weight:800; font-size:16.5px; letter-spacing:-.025em; display:flex; align-items:center; gap:9px; white-space:nowrap; }
+  .logo svg { width:24px; height:24px; }
+  /* 진행 트랙: 번호 → 완료 체크, 단계 사이 연결선 */
+  .stepper { display:flex; align-items:center; margin:0 auto; }
+  .stepper button { border:0; background:none; padding:6px 10px; border-radius:9px; font-weight:600; font-size:13.5px; color:var(--mute); display:flex; gap:8px; align-items:center; white-space:nowrap; transition:color .2s, background .2s; }
+  .stepper button + button::before { content:""; width:18px; height:1px; background:#cfcdc6; margin:0 6px 0 -12px; }
+  .stepper button:hover:not(:disabled) { color:var(--ink); }
+  .stepper button span { width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:700; display:grid; place-items:center; border:1.5px solid #c9c7c0; color:var(--mute); transition:all .2s; }
+  .stepper button.on { color:var(--ink); background:#fff; box-shadow:0 1px 2px rgba(20,20,30,.08); }
+  .stepper button.on span { background:var(--ink); border-color:var(--ink); color:#fff; }
+  .stepper button.done { color:var(--ink-2); }
+  .stepper button.done span { background:var(--ok); border-color:var(--ok); color:transparent; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); background-size:12px; background-position:center; background-repeat:no-repeat; }
+  .stepper button:disabled { opacity:.5; cursor:default; }
+  .ghost { border:1px solid var(--line); background:#fff; border-radius:10px; padding:8px 13px; font-weight:600; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; transition:border-color .15s, background .15s; }
+  .ghost:hover:not(:disabled) { border-color:#c9c7c0; background:#fbfaf8; }
+  .primary-btn { border:0; border-radius:11px; padding:11px 18px; font-weight:700; color:#fff; background:var(--ink); white-space:nowrap; display:inline-flex; align-items:center; gap:7px; transition:background .15s, transform .15s var(--ease); }
+  .primary-btn:hover:not(:disabled) { background:#2b2b31; }
+  .primary-btn:active:not(:disabled) { transform:translateY(1px); }
   .primary-btn:disabled { opacity:.5; cursor:default; }
-  @media (max-width:1100px) { .stepper button b { display:none; } }
+  @media (max-width:1100px) { .stepper button b { display:none; } .stepper button + button::before { margin-left:-6px; } }
+  @media (max-width:640px) { header { flex-wrap:wrap; padding:10px 16px; gap:10px; } .stepper { order:3; width:100%; justify-content:space-between; } #load-snap { margin-left:auto; } }
 
   /* ── 공통 레이아웃 ────────────────────── */
-  .view { max-width:1240px; margin:0 auto; padding:26px 28px 60px; }
+  .view { max-width:1240px; margin:0 auto; padding:34px 28px 64px; }
+  @media (max-width:640px) { .view { padding:22px 16px 48px; } }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); }
-  .eyebrow { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--mute); }
-  .page-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:18px; }
-  .page-head h1 { margin:4px 0 0; font-size:24px; letter-spacing:-.02em; }
-  .page-head p { margin:4px 0 0; color:var(--ink-2); }
+  /* 카드 안 소제목 — 대문자 라벨 대신 차분한 문장형 */
+  .eyebrow { font-size:13px; font-weight:700; color:var(--ink); letter-spacing:-.01em; }
+  .page-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:24px; }
+  .page-head h1 { margin:0; font-size:30px; line-height:1.2; letter-spacing:-.03em; font-weight:800; text-wrap:balance; }
+  .page-head p { margin:8px 0 0; color:var(--ink-2); font-size:15px; max-width:62ch; text-wrap:pretty; }
+  @media (max-width:640px) { .page-head { flex-direction:column; align-items:flex-start; } .page-head h1 { font-size:24px; } }
   .two { display:grid; grid-template-columns:1.2fr 1fr; gap:22px; align-items:start; }
   @media (max-width:980px) { .two { grid-template-columns:1fr !important; } }
   .form { padding:22px; display:grid; gap:14px; }
@@ -56,8 +75,8 @@
   .ghost:disabled { opacity:.45; cursor:default; }
 
   /* 페르소나 공통 */
-  .av { width:34px; height:34px; border-radius:11px; display:grid; place-items:center; font-weight:800; font-size:13px; color:#fff; flex:none; }
-  .av.lg { width:46px; height:46px; border-radius:14px; font-size:16px; }
+  .av { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:12.5px; flex:none; font-variant-numeric:tabular-nums; letter-spacing:-.02em; box-shadow:inset 0 0 0 1px rgba(22,22,26,.06); }
+  .av.lg { width:44px; height:44px; font-size:15px; }
   .meters { display:grid; gap:8px; }
   .meter .top { display:flex; justify-content:space-between; font-size:12px; color:var(--ink-2); }
   .meter .top em { font-style:normal; font-variant-numeric:tabular-nums; color:var(--ink); font-weight:600; }
@@ -65,7 +84,10 @@
   .bar > div { height:100%; border-radius:5px; background:var(--ink); }
   .chips { display:flex; flex-wrap:wrap; gap:5px; }
   .chip { font-size:11.5px; padding:2px 8px; border-radius:99px; background:var(--line-2); color:var(--ink-2); }
-  .st { font-size:11px; font-weight:700; padding:2px 7px; border-radius:99px; white-space:nowrap; color:var(--mute); background:var(--line-2); }
+  .st { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; color:var(--mute); background:var(--line-2); display:inline-flex; align-items:center; gap:3px; }
+  .st svg.i { width:11px; height:11px; stroke-width:3; }
+  .result b svg.i { width:15px; height:15px; stroke-width:2.6; vertical-align:-2px; }
+  .sc .x svg.i, .thumb svg.i { width:15px; height:15px; }
   .st.running { color:var(--acc); background:var(--acc-soft); }
   .st.complete, .st.ok { color:var(--ok); background:var(--ok-soft); }
   .st.drop, .st.error { color:var(--bad); background:var(--bad-soft); }
@@ -74,7 +96,7 @@
   /* ① 제품 — 스토어 카드 미리보기 */
   .store { padding:22px; }
   .store .top { display:flex; gap:14px; align-items:center; }
-  .store .icon { width:64px; height:64px; border-radius:18px; background:linear-gradient(135deg,#3553e0,#8a5cf6); flex:none; }
+  .store .icon, .app .store-mini .icon { width:64px; height:64px; border-radius:18px; background:var(--acc); color:#fff; flex:none; display:grid; place-items:center; font-size:28px; font-weight:800; letter-spacing:-.04em; box-shadow:inset 0 -3px 0 rgba(0,0,0,.12), 0 6px 14px -6px rgba(20,20,30,.3); }
   .store h2 { margin:0; font-size:20px; letter-spacing:-.02em; }
   .store .price { color:var(--mute); font-size:13px; }
   .store p { color:var(--ink-2); margin:14px 0; }
@@ -109,7 +131,7 @@
   .seg button { flex:1; border:0; background:none; padding:6px 0; border-radius:7px; font-size:12.5px; font-weight:600; color:var(--ink-2); }
   .seg button.on { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
   .pcards { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px; }
-  .pcard { padding:16px; animation:rise .35s ease-out both; }
+  .pcard { padding:18px; }
   .pcard .who { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
   .pcard .who b { display:block; font-size:15px; line-height:1.2; }
   .pcard .who span { font-size:12px; color:var(--mute); }
@@ -130,7 +152,6 @@
   .run-card { padding:16px; }
   .run-btn { width:100%; margin-top:12px; border:0; border-radius:12px; padding:13px; font-size:15px; font-weight:700; color:#fff; background:var(--ink); display:flex; align-items:center; justify-content:center; gap:8px; }
   .run-btn:disabled { opacity:.55; cursor:default; }
-  .run-btn .dot { width:8px; height:8px; border-radius:50%; background:#6ee7a8; }
   .phase { display:flex; gap:6px; margin-top:12px; }
   .phase div { flex:1; text-align:center; font-size:12px; font-weight:700; padding:6px; border-radius:8px; background:#efede8; color:var(--mute); }
   .phase div.on { background:var(--acc-soft); color:var(--acc); }
@@ -158,7 +179,8 @@
   .app img.shot { width:100%; height:100%; object-fit:cover; object-position:top; }
   .app .sheet { position:absolute; left:0; right:0; bottom:0; padding:14px 16px 20px; background:linear-gradient(transparent, rgba(255,255,255,.95) 30%); display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
   .app .sheet .btn { height:38px; padding:0 14px; font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,.12); }
-  .app .store-mini .icon { width:56px; height:56px; border-radius:16px; background:linear-gradient(135deg,#3553e0,#8a5cf6); margin-bottom:10px; }
+  .app .store-mini .icon { width:56px; height:56px; border-radius:16px; font-size:24px; margin-bottom:12px; }
+  .app .status svg { height:11px; width:auto; fill:currentColor; }
   .app .store-mini ul { padding:0; margin:14px 0 0; }
   .app .store-mini li { list-style:none; padding:8px 10px; background:#f7f6f3; border-radius:9px; font-size:13px; font-weight:600; margin-top:6px; }
   .app .store-mini .price { margin-top:12px; font-size:13px; color:var(--mute); }
@@ -171,6 +193,7 @@
   .veil span { font-size:13px; opacity:.85; }
   .thinking { position:absolute; left:50%; top:52px; translate:-50% 0; background:rgba(16,16,20,.82); color:#fff; font-size:12.5px; padding:7px 13px; border-radius:99px; display:flex; gap:7px; align-items:center; opacity:0; transition:opacity .25s; z-index:2; white-space:nowrap; }
   .thinking.show { opacity:1; }
+  /* 의도된 예외: LLM 응답을 실제로 기다리는 동안에만 보이는 진행 표시 */
   .thinking i { width:5px; height:5px; border-radius:50%; background:#fff; animation:blink 1.2s infinite; }
   .thinking i:nth-child(2) { animation-delay:.2s; } .thinking i:nth-child(3) { animation-delay:.4s; }
   @keyframes blink { 0%,80%,100% { opacity:.25; } 40% { opacity:1; } }
@@ -204,7 +227,7 @@
   .timeline .what { font-weight:700; margin-top:1px; }
   kbd { font:inherit; font-weight:700; background:var(--acc-soft); color:var(--acc); padding:1px 7px; border-radius:6px; }
   .quote { margin-top:8px; background:#f7f6f3; border-radius:4px 12px 12px 12px; padding:9px 12px; color:var(--ink-2); font-size:13.5px; }
-  .quote .tag { display:block; font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--mute); text-transform:uppercase; margin-bottom:3px; }
+  .quote .tag { display:block; font-size:11px; font-weight:600; color:var(--mute); margin-bottom:2px; }
   .empty { color:var(--mute); font-size:13.5px; margin-top:12px; }
   @keyframes rise { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 
@@ -213,21 +236,34 @@
   .rsec > h2 { margin:0 0 4px; font-size:19px; letter-spacing:-.02em; display:flex; gap:10px; align-items:center; }
   .rsec > p { margin:0 0 14px; color:var(--mute); font-size:13px; }
   .tag-mode { font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; background:var(--acc-soft); color:var(--acc); }
-  .hero { padding:26px; display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:10px; align-items:center; text-align:center; }
-  .hero .n { font-size:44px; font-weight:800; letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; }
-  .hero .l { font-size:13px; color:var(--ink-2); margin-top:8px; }
-  .hero .l small { display:block; color:var(--mute); }
-  .hero .op { font-size:22px; color:var(--mute); }
-  .hero .gap .n { color:var(--bad); }
-  .hero-say { padding:14px 20px; margin-top:12px; font-size:15px; }
-  .hero-say b { color:var(--bad); }
-  .kpis { display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; }
-  .kpis.k3 { grid-template-columns:repeat(3, 1fr); }
-  @media (max-width:900px) { .kpis, .kpis.k3 { grid-template-columns:repeat(2, 1fr); } .charts, .hero { grid-template-columns:1fr !important; } }
-  .kpi { padding:16px 18px; }
-  .kpi .v { font-size:28px; font-weight:800; letter-spacing:-.03em; margin-top:6px; font-variant-numeric:tabular-nums; line-height:1.15; }
-  .kpi .v small { font-size:14px; font-weight:600; color:var(--mute); margin-left:3px; }
-  .kpi .s { font-size:12.5px; color:var(--ink-2); margin-top:4px; }
+  /* 말 vs 행동 — 한 문장 + 같은 축의 두 막대로 대조 */
+  .verdict { padding:30px 32px 26px; }
+  .verdict h2 { margin:0; font-size:26px; line-height:1.35; letter-spacing:-.03em; font-weight:800; text-wrap:balance; max-width:30ch; }
+  .verdict h2 em { font-style:normal; font-variant-numeric:tabular-nums; }
+  .verdict h2 em.lo { color:var(--bad); }
+  .compare { margin-top:24px; display:grid; gap:14px; }
+  .crow { display:grid; grid-template-columns:150px 1fr 104px; gap:16px; align-items:center; }
+  .crow .who { font-size:13px; color:var(--ink-2); line-height:1.35; }
+  .crow .who b { display:block; color:var(--ink); font-size:13.5px; }
+  .crow .track { height:30px; border-radius:8px; background:var(--line-2); position:relative; overflow:hidden; }
+  .crow .fill { position:absolute; inset:0 auto 0 0; border-radius:8px; background:var(--acc); transform-origin:left; animation:grow .9s var(--ease) both; }
+  .crow.act .fill { background:var(--ink); }
+  .crow .num { font-size:24px; font-weight:800; letter-spacing:-.03em; font-variant-numeric:tabular-nums; text-align:right; line-height:1; }
+  .crow .num small { display:block; font-size:12px; font-weight:500; color:var(--mute); letter-spacing:0; margin-top:4px; }
+  @keyframes grow { from { transform:scaleX(0); } }
+  .gapline { margin-top:22px; padding-top:18px; border-top:1px solid var(--line-2); display:flex; gap:10px; align-items:flex-start; color:var(--ink-2); font-size:14.5px; }
+  .gapline svg { color:var(--bad); margin-top:2px; }
+  .gapline b { color:var(--ink); }
+  @media (max-width:640px) { .verdict { padding:22px 18px; } .verdict h2 { font-size:21px; } .crow { grid-template-columns:1fr 64px; } .crow .who { grid-column:1 / -1; } }
+  /* 요약 수치 — 카드 반복 대신 한 줄 띠 */
+  .stats { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; }
+  .stat { padding:18px 22px; }
+  .stat + .stat { border-left:1px solid var(--line-2); }
+  .stat .k { font-size:12.5px; color:var(--mute); font-weight:600; }
+  .stat .v { font-size:26px; font-weight:800; letter-spacing:-.03em; margin-top:4px; font-variant-numeric:tabular-nums; line-height:1.2; }
+  .stat .v small { font-size:14px; font-weight:600; color:var(--mute); margin-left:3px; }
+  .stat .s { font-size:12.5px; color:var(--ink-2); margin-top:3px; }
+  @media (max-width:900px) { .stats { grid-auto-flow:row; grid-template-columns:1fr 1fr; } .stat + .stat { border-left:0; } .stat { border-top:1px solid var(--line-2); } .charts { grid-template-columns:1fr !important; } }
   .charts { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
   .chart { padding:18px 20px; }
   .chart h3 { margin:0 0 2px; font-size:14.5px; }
@@ -242,7 +278,7 @@
   .ptable { padding:4px 20px; margin-top:14px; }
   .prow { display:grid; grid-template-columns:170px 1fr 1fr; gap:18px; align-items:start; padding:14px 0; border-top:1px solid var(--line-2); }
   .prow:first-child { border-top:0; }
-  .prow.head { font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--mute); text-transform:uppercase; padding:12px 0 6px; }
+  .prow.head { font-size:12.5px; font-weight:600; color:var(--mute); padding:14px 0 8px; }
   .prow .id { display:flex; gap:10px; align-items:center; }
   .prow .id b { display:block; font-size:13.5px; line-height:1.2; }
   .prow .id span { font-size:12px; color:var(--mute); }
@@ -252,7 +288,7 @@
   .path .s { padding:2px 7px; border-radius:6px; background:var(--line-2); font-weight:600; }
   .path .s.end-ok { background:var(--ok-soft); color:var(--ok); }
   .path .s.end-bad { background:var(--bad-soft); color:var(--bad); }
-  .path .arr { color:var(--mute); }
+  .path .arr { color:var(--mute); width:13px; height:13px; }
   .score { display:inline-flex; gap:2px; }
   .score i { width:7px; height:7px; border-radius:50%; background:var(--line); }
   .score i.on { background:var(--ink); }
@@ -262,7 +298,7 @@
 </head>
 <body>
 <header>
-  <div class="logo"><i></i>PersonaLab</div>
+  <div class="logo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="7" fill="#16161a"/><circle cx="10" cy="10" r="4.3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16.2" cy="16.2" r="2.5" fill="#7b90ff"/></svg>PersonaLab</div>
   <nav class="stepper" id="stepper">
     <button data-v="product"><span>1</span><b>제품 기획</b></button>
     <button data-v="proto"><span>2</span><b>프로토타입</b></button>
@@ -275,14 +311,14 @@
 
 <!-- ① 제품 기획 (Ask 입력) -->
 <main class="view" data-view="product">
-  <div class="page-head"><div><div class="eyebrow">Step 1 · Ask 입력</div><h1>제품 기획</h1><p>기획서를 붙여넣거나 올리면 AI가 읽고 제품 정보를 정리한다. AI 패널은 정리된 내용을 읽고 쓸지 말지 답한다.</p></div></div>
+  <div class="page-head"><div><h1>제품 기획</h1><p>기획서를 붙여넣거나 올리면 AI가 읽고 제품 정보를 정리한다. AI 패널은 정리된 내용을 읽고 쓸지 말지 답한다.</p></div></div>
   <section class="card form" style="margin-bottom:18px">
     <div><label for="plan">기획서</label><textarea id="plan" rows="7" placeholder="기획서 내용을 붙여넣는다"></textarea></div>
     <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
       <button class="ghost" id="plan-file-btn">파일 올리기 (.txt .md .pdf)</button>
       <input id="plan-file" type="file" accept=".txt,.md,.pdf,text/plain,text/markdown,application/pdf" hidden>
       <span class="hint" id="plan-file-name" style="margin:0"></span>
-      <button class="primary-btn" id="extract" style="margin-left:auto">AI로 정리 →</button>
+      <button class="primary-btn" id="extract" style="margin-left:auto">AI로 정리<svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </div>
     <div class="figma-status" id="extract-status"></div>
   </section>
@@ -298,12 +334,12 @@
       <section class="card store" id="store"></section>
     </div>
   </div>
-  <div class="next-row"><button class="primary-btn" data-go="proto">다음: 프로토타입 →</button></div>
+  <div class="next-row"><button class="primary-btn" data-go="proto">다음: 프로토타입<svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
 </main>
 
 <!-- ② 프로토타입 (Act 입력) -->
 <main class="view off" data-view="proto">
-  <div class="page-head"><div><div class="eyebrow">Step 2 · Act 입력</div><h1>프로토타입</h1><p>피그마 링크를 붙이면 화면과 버튼 연결을 자동으로 읽는다. 안 되면 이미지를 올리고 연결을 직접 적는다.</p></div></div>
+  <div class="page-head"><div><h1>프로토타입</h1><p>피그마 링크를 붙이면 화면과 버튼 연결을 자동으로 읽는다. 안 되면 이미지를 올리고 연결을 직접 적는다.</p></div></div>
   <section class="card figma">
     <input id="figma-url" value="https://www.figma.com/proto/demo/일정메이트-온보딩" placeholder="https://www.figma.com/design/…  또는  /proto/…">
     <button class="primary-btn" id="figma-go">피그마에서 불러오기</button>
@@ -311,8 +347,8 @@
   </section>
   <div style="display:flex; gap:8px; margin-top:18px; flex-wrap:wrap; align-items:center">
     <b style="margin-right:auto">화면 <span id="screen-count"></span></b>
-    <button class="ghost" id="upload">＋ 이미지 여러 장</button>
-    <button class="ghost" id="add">＋ 빈 화면</button>
+    <button class="ghost" id="upload"><svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>이미지 여러 장</button>
+    <button class="ghost" id="add"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>빈 화면</button>
     <button class="ghost" id="sample">샘플(일정메이트)</button>
     <input id="files" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
   </div>
@@ -322,12 +358,12 @@
     <div><label for="task">과제 (AI와 실제 참가자에게 똑같이 제시)</label><input id="task"></div>
     <div><label for="goal">목표 화면</label><select id="goal"></select></div>
   </section>
-  <div class="next-row"><button class="ghost prev" data-go="product">← 이전: 제품 기획</button><button class="primary-btn" data-go="panel">다음: AI 패널 →</button></div>
+  <div class="next-row"><button class="ghost prev" data-go="product"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>이전: 제품 기획</button><button class="primary-btn" data-go="panel">다음: AI 패널<svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
 </main>
 
 <!-- ③ AI 패널 -->
 <main class="view off" data-view="panel">
-  <div class="page-head"><div><div class="eyebrow">Step 3 · 페르소나 샘플링</div><h1>AI 패널</h1><p>개인을 하나씩 만드는 게 아니라 분포를 고른다. 같은 패널이 Ask와 Act를 둘 다 한다.</p></div></div>
+  <div class="page-head"><div><h1>AI 패널</h1><p>개인을 하나씩 만드는 게 아니라 분포를 고른다. 같은 패널이 Ask와 Act를 둘 다 한다.</p></div></div>
   <div class="two" style="grid-template-columns:340px 1fr">
     <section class="card dist">
       <div class="row2">
@@ -345,7 +381,7 @@
       <p class="note">데모는 고른 범위 안에서 균등하게 뽑는다. 본 제품은 통계청·건보공단 시드 기반 공개 데이터의 분포에서 뽑는다(계획서 6-2). 학습이 아니라 <b>페르소나 샘플링</b>이다.</p>
     </div>
   </div>
-  <div class="next-row"><button class="ghost prev" data-go="proto">← 이전: 프로토타입</button><button class="primary-btn" data-go="run">다음: 실행 →</button></div>
+  <div class="next-row"><button class="ghost prev" data-go="proto"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>이전: 프로토타입</button><button class="primary-btn" data-go="run">다음: 실행<svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
 </main>
 
 <!-- ④ 실행 -->
@@ -355,9 +391,9 @@
       <section class="card run-card">
         <div class="eyebrow" style="display:flex;justify-content:space-between"><span>AI 패널</span><span id="panel-count"></span></div>
         <div class="plist" id="plist"></div>
-        <div class="phase"><div id="ph-ask">① Ask 기획서</div><div id="ph-act">② Act 프로토타입</div></div>
-        <button class="run-btn" id="run"><span class="dot"></span><span id="run-label">전체 실행 (Ask → Act)</span></button>
-        <button class="ghost prev" data-go="panel" style="width:100%; margin-top:8px">← 이전: AI 패널</button>
+        <div class="phase"><div id="ph-ask">Ask · 기획서</div><div id="ph-act">Act · 프로토타입</div></div>
+        <button class="run-btn" id="run"><span id="run-label">전체 실행 (Ask → Act)</span></button>
+        <button class="ghost prev" data-go="panel" style="width:100%; margin-top:8px; justify-content:center"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>이전: AI 패널</button>
       </section>
     </div>
     <div class="phone-col">
@@ -391,6 +427,14 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 const sid = (i) => "S" + String(i + 1).padStart(2, "0");
 const pct = (n, d) => (d ? Math.round((n / d) * 100) : 0);
 const won = (n) => (n ? `월 ${Number(n).toLocaleString("ko-KR")}원` : "안 냄");
+// 아이콘은 한 가지 선 굵기의 SVG 로 통일 (글자·이모지 대용 금지)
+const ICON = {
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  alert: '<path d="M10.3 3.9L2 18a2 2 0 001.7 3h16.6a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0zM12 9v4M12 17h.01"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', right: '<path d="M5 12h14M13 6l6 6-6 6"/>', retry: '<path d="M3 12a9 9 0 0115.5-6.3L21 8M21 3v5h-5M21 12a9 9 0 01-15.5 6.3L3 16M3 21v-5h5"/>',
+};
+const icon = (k) => `<svg class="i" viewBox="0 0 24 24">${ICON[k]}</svg>`;
+const STATUSBAR = `<div class="status"><span>9:41</span><svg viewBox="0 0 44 11" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1"/><rect x="24" y=".5" width="17" height="10" rx="3" fill="none" stroke="currentColor"/><rect x="26" y="2.5" width="12" height="6" rx="1.5"/><rect x="42" y="3.5" width="1.5" height="4" rx=".75"/></svg></div>`;
 async function api(path, body, method = "POST") {
   const res = await fetch(path, { method, headers: { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
   const data = await res.json().catch(() => ({}));
@@ -410,7 +454,9 @@ const TRAIT = {
   productivity_app_user: "생산성 앱 사용자", time_sensitive: "시간에 쫓김", early_adopter: "새 앱 먼저 써봄",
   privacy_conscious: "개인정보 민감", budget_tight: "용돈 빠듯", form_averse: "입력 귀찮아함",
 };
-const AVATAR = ["#ff8a5b,#f0508a", "#4f7cff,#8a5cf6", "#18a57a,#6bc76b", "#f5a524,#f06a3a", "#6b7280,#374151", "#e0508a,#8a5cf6", "#0ea5b7,#3553e0", "#84a83a,#18a57a", "#c2410c,#f5a524", "#475569,#0ea5b7"];
+// 아바타: 옅은 바탕 + 같은 계열의 진한 글자 [배경, 글자]
+const AVATAR = [["#fde4d7", "#9a3412"], ["#e0e6fd", "#2a41b3"], ["#dcf2e6", "#12704a"], ["#fbeac7", "#7c4a03"], ["#ece9f7", "#5b3fb0"],
+  ["#fbe0ea", "#9d174d"], ["#d9eff4", "#155e75"], ["#e8efd6", "#4d6310"], ["#efe7de", "#6b4423"], ["#e6e8ec", "#374151"]];
 
 // 시연용 기획서 (계획서 3장 ② 일정메이트)
 const SAMPLE_PLAN = `[서비스 기획서] 일정메이트
@@ -484,8 +530,8 @@ function readProduct() {
 function storeHTML(p, mini = false) {
   const feats = p.features.map((f) => `<li>${esc(f)}</li>`).join("");
   return mini
-    ? `<div class="status"><span>9:41</span><span>●●● ▮</span></div><div class="body store-mini"><div class="icon"></div><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><ul>${feats}</ul><div class="price">가격 · ${esc(p.price || "미정")}</div></div>`
-    : `<div class="top"><div class="icon"></div><div><h2>${esc(p.name || "제품명")}</h2><div class="price">${esc(p.price || "가격 미정")}</div></div></div><p>${esc(p.description)}</p><ul>${feats}</ul>`;
+    ? `${STATUSBAR}<div class="body store-mini"><div class="icon">${esc(p.name.slice(0, 1))}</div><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><ul>${feats}</ul><div class="price">가격 · ${esc(p.price || "미정")}</div></div>`
+    : `<div class="top"><div class="icon">${esc((p.name || "?").slice(0, 1))}</div><div><h2>${esc(p.name || "제품명")}</h2><div class="price">${esc(p.price || "가격 미정")}</div></div></div><p>${esc(p.description)}</p><ul>${feats}</ul>`;
 }
 const renderStore = () => ($("store").innerHTML = storeHTML(S.product));
 
@@ -515,9 +561,9 @@ $("extract").onclick = async () => {
     bindProduct(); refreshStepper();
     const missing = [!r.name && "제품명", !r.price && "가격"].filter(Boolean);
     st.className = "figma-status ok";
-    st.textContent = `✓ 정리 완료 — 기능 ${r.features.length}개를 찾았다.${missing.length ? ` 기획서에 ${missing.join("·")} 정보가 없어 비워 두었다.` : ""} 아래에서 확인하고 고친다.`;
+    st.innerHTML = `${icon("check")} 정리 완료 — 기능 ${r.features.length}개를 찾았다.${missing.length ? ` 기획서에 ${missing.join("·")} 정보가 없어 비워 두었다.` : ""} 아래에서 확인하고 고친다.`;
   } catch (err) {
-    st.className = "figma-status err"; st.textContent = `✕ ${err.message}`;
+    st.className = "figma-status err"; st.innerHTML = `${icon("alert")} ${esc(err.message)}`;
   } finally { $("extract").disabled = false; }
 };
 
@@ -541,9 +587,9 @@ function renderScreens() {
   $("screen-count").textContent = S.screens.length ? `${S.screens.length}개` : "";
   $("screens").innerHTML = S.screens.map((s, i) => `
     <div class="sc">
-      <div class="thumb" data-i="${i}" title="클릭해서 이미지 넣기">${s.image ? `<img src="${s.image}" alt="">` : "＋<br>이미지"}</div>
+      <div class="thumb" data-i="${i}" title="클릭해서 이미지 넣기">${s.image ? `<img src="${s.image}" alt="${esc(s.label)} 화면">` : `${icon("plus")}<br>이미지`}</div>
       <div>
-        <div class="head"><b>${s.id}</b><input data-i="${i}" data-k="label" value="${esc(s.label)}" placeholder="화면 이름"><button class="x" data-del="${i}" title="삭제">✕</button></div>
+        <div class="head"><b>${s.id}</b><input data-i="${i}" data-k="label" value="${esc(s.label)}" placeholder="화면 이름" aria-label="${s.id} 화면 이름"><button class="x" data-del="${i}" title="삭제" aria-label="${s.id} 삭제">${icon("x")}</button></div>
         <label>설명 (이미지가 있으면 생략 가능)</label>
         <input data-i="${i}" data-k="description" value="${esc(s.description)}">
         <label>버튼</label>
@@ -590,9 +636,9 @@ async function loadPrototype(mock) {
     renderScreens();
     const links = r.screens.reduce((n, s) => n + s.elements.length, 0);
     st.className = "figma-status ok";
-    st.textContent = `✓ "${r.name}" 연결됨 — 화면 ${r.screens.length}개, 버튼 연결 ${links}개 인식${r.mock ? " (피그마 토큰이 없어 샘플 프로토타입을 불러왔다)" : ""}. 과제와 목표 화면을 확인하세요.`;
+    st.innerHTML = `${icon("check")} "${esc(r.name)}" 연결됨 — 화면 ${r.screens.length}개, 버튼 연결 ${links}개 인식${r.mock ? " (피그마 토큰이 없어 샘플 프로토타입을 불러왔다)" : ""}. 과제와 목표 화면을 확인하세요.`;
   } catch (err) {
-    st.className = "figma-status err"; st.textContent = `✕ ${err.message}`;
+    st.className = "figma-status err"; st.innerHTML = `${icon("alert")} ${esc(err.message)}`;
   } finally { $("figma-go").disabled = $("sample").disabled = false; }
 }
 $("figma-go").onclick = () => loadPrototype(false);
@@ -606,7 +652,7 @@ $$(".seg").forEach((seg) => seg.addEventListener("click", (e) => {
   const k = seg.dataset.k, v = b.dataset.v;
   dist[k] = k === "count" ? +v : k === "occupation" ? v : v.split(",").map(Number);
 }));
-const avatar = (i, p, lg = false) => `<div class="av ${lg ? "lg" : ""}" style="background:linear-gradient(135deg,${AVATAR[i % AVATAR.length]})">${esc(String(p.persona_id ?? "P").slice(-2))}</div>`;
+const avatar = (i, p, lg = false) => { const [bg, fg] = AVATAR[i % AVATAR.length]; return `<div class="av ${lg ? "lg" : ""}" style="background:${bg};color:${fg}">${esc(String(p.persona_id ?? "P").slice(-2))}</div>`; };
 const pdesc = (p) => [p.age && `${p.age}세`, OCC[p.occupation] ?? p.occupation].filter(Boolean).join(" · ");
 const meters = (p) => `<div class="meters">${[["앱 사용 빈도", p.app_usage_freq], ["가격 민감도", p.price_sensitivity], ["디지털 수용도", p.digital_adoption]]
   .filter(([, v]) => typeof v === "number")
@@ -627,7 +673,7 @@ $("gen").onclick = async () => {
 };
 
 // ── ④ 실행 ───────────────────────────────
-const STATUS = { running: "Act…", complete: "✓ 완료", drop: "✕ 이탈", error: "Act 오류" };
+const STATUS = { running: "Act…", complete: `${icon("check")}완료`, drop: `${icon("x")}이탈`, error: "Act 오류" };
 function renderRun() {
   $("panel-count").textContent = `${S.panel.length}명`;
   $("plist").innerHTML = S.panel.map((p, i) => {
@@ -653,7 +699,7 @@ function appHTML(s) {
   if (s.image) {
     return `<img class="shot" src="${s.image}" alt="${esc(s.label)}"><div class="sheet">${btns.map((b) => `<button class="btn" data-t="${esc(b.text)}">${esc(b.text)}</button>`).join("")}</div>`;
   }
-  return `<div class="status"><span>9:41</span><span>●●● ▮</span></div><div class="body"><div class="sid">${s.id}</div><h3>${esc(s.label || s.id)}</h3><p>${esc(s.description)}</p>
+  return `${STATUSBAR}<div class="body"><div class="sid">${s.id}</div><h3>${esc(s.label || s.id)}</h3><p>${esc(s.description)}</p>
     <div class="fields">${'<div class="field"></div>'.repeat(s.fields ?? 0)}</div>
     <div class="actions">${btns.map((b, i) => `<button class="btn ${i === 0 ? "primary" : ""}" data-t="${esc(b.text)}">${esc(b.text)}</button>`).join("")}</div></div>`;
 }
@@ -706,8 +752,8 @@ function setResult(end, events = []) {
   const turns = events.filter((e) => e.type === "turn").length;
   r.className = `result show ${end.type === "error" ? "error" : end.result}`;
   r.innerHTML = end.type === "error" ? `<b>실행 오류</b><small>${esc(end.message)}</small>`
-    : end.result === "complete" ? `<b>✓ 과제 완료</b><small>${turns}턴 만에 ${where(end.screen)} 도달</small>`
-    : `<b>✕ ${where(end.screen)}에서 이탈</b><small><code>${esc(end.drop_reason)}</code> ${esc(DROP_LABEL[end.drop_reason] ?? "")}</small>`;
+    : end.result === "complete" ? `<b>${icon("check")} 과제 완료</b><small>${turns}턴 만에 ${where(end.screen)} 도달</small>`
+    : `<b>${icon("x")} ${where(end.screen)}에서 이탈</b><small><code>${esc(end.drop_reason)}</code> ${esc(DROP_LABEL[end.drop_reason] ?? "")}</small>`;
 }
 function setVeil(end) {
   const drop = end?.type === "end" && end.result === "drop";
@@ -806,10 +852,10 @@ $("run").onclick = async () => {
   S.ask = S.panel.map(() => undefined); S.act = S.panel.map(() => undefined);
   const phase = (k) => { $("ph-ask").className = k === "ask" ? "on" : "done"; $("ph-act").className = k === "act" ? "on" : k === "done" ? "done" : ""; };
 
-  phase("ask"); $("run-label").textContent = "① Ask 실행 중…";
+  phase("ask"); $("run-label").textContent = "Ask 실행 중…";
   for (let i = 0; i < S.panel.length; i++) await runAsk(i);   // 무료 티어 한도 때문에 한 명씩
 
-  phase("act"); $("run-label").textContent = "② Act 실행 중…";
+  phase("act"); $("run-label").textContent = "Act 실행 중…";
   const body = { task: S.task, goal: S.goal, screens: S.screens.map((s) => ({ id: s.id, label: s.label || s.id, description: s.description, image: s.image, elements: parseButtons(s.buttons) })) };
   for (let i = 0; i < S.panel.length; i++) await runAct(i, body);
 
@@ -824,13 +870,13 @@ const hbar = (label, frac, val, tip) =>
   `<div class="hbar" title="${esc(tip)}"><div class="lbl">${label}</div><div class="track"><div class="fill" style="width:${Math.round(frac * 100)}%"></div></div><div class="val">${val}</div></div>`;
 const countBy = (arr, key) => [...arr.reduce((m, x) => m.set(key(x), (m.get(key(x)) ?? 0) + 1), new Map())].sort((a, b) => b[1] - a[1]);
 const median = (xs) => { const s = [...xs].sort((a, b) => a - b); const m = s.length >> 1; return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2); };
-const kpi = (label, v, s) => `<div class="card kpi"><div class="eyebrow">${label}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+const kpi = (label, v, s) => `<div class="stat"><div class="k">${label}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
 
 function renderReport() {
   const P = S.panel.map((p, i) => ({ p, i, a: S.ask[i] && !S.ask[i].error ? S.ask[i] : null, r: S.act[i]?.end?.type === "end" ? S.act[i] : null }));
   const A = P.filter((x) => x.a), R = P.filter((x) => x.r), both = P.filter((x) => x.a && x.r);
   const nA = A.length, nR = R.length;
-  if (!nA && !nR) { $("report").innerHTML = `<div class="card kpi"><b>아직 결과가 없다</b><div class="s">④ 실행을 먼저 한다.</div></div>`; return; }
+  if (!nA && !nR) { $("report").innerHTML = `<div class="card stat"><b>아직 결과가 없다</b><div class="s">실행 단계를 먼저 진행한다.</div></div>`; return; }
 
   // 말 vs 행동 (계획서 11-4: Ask 긍정 비율 − Act 완료율)
   const positive = both.filter((x) => x.a.usage_intention >= 4);
@@ -851,31 +897,31 @@ function renderReport() {
   const excluded = P.length - both.length;
 
   $("report").innerHTML = `
-    <div class="page-head"><div><div class="eyebrow">Step 5 · 결과 리포트</div><h1>${esc(S.product.name)} — ${esc(S.task)}</h1>
-      <p>AI 페르소나 ${P.length}명 · Synthetic User 결과 (실제 사용자 데이터 아님)${excluded ? ` · 오류 ${excluded}명은 일부 집계에서 제외` : ""}</p></div>
+    <div class="page-head"><div><h1>${esc(S.product.name)} 결과 리포트</h1>
+      <p>과제 "${esc(S.task)}" · AI 페르소나 ${P.length}명 · Synthetic User 결과이며 실제 사용자 데이터가 아니다${excluded ? ` · 오류 ${excluded}명은 일부 집계에서 제외` : ""}</p></div>
       <button class="ghost" data-go="run">실행 화면으로</button></div>
 
     ${both.length ? `
-    <section class="rsec"><h2>말 vs 행동</h2><p>같은 사람에게 기획서를 보여주고 물었을 때(Ask)와, 직접 써보게 했을 때(Act)의 차이</p>
-      <div class="card hero">
-        <div><div class="n">${posRate}%</div><div class="l">"쓰겠다" (4~5점)<small>Ask · ${positive.length}/${both.length}명</small></div></div>
-        <div class="op">vs</div>
-        <div><div class="n">${doneRate}%</div><div class="l">과제 완료<small>Act · ${completed.length}/${both.length}명</small></div></div>
-        <div class="op">=</div>
-        <div class="gap"><div class="n">${gap > 0 ? "+" : ""}${gap}%p</div><div class="l">의향-행동 격차<small>${gap > 0 ? "말이 행동보다 낙관적" : gap < 0 ? "행동이 말보다 낫다" : "일치"}</small></div></div>
+    <section class="card verdict">
+      <h2>쓰겠다고 한 사람은 <em>${posRate}%</em>, 끝까지 해낸 사람은 <em class="${doneRate < posRate ? "lo" : ""}">${doneRate}%</em></h2>
+      <div class="compare" role="img" aria-label="Ask 긍정 ${posRate}%, Act 완료 ${doneRate}%">
+        <div class="crow"><div class="who"><b>말 · Ask</b>"쓰겠다" 4~5점</div><div class="track"><div class="fill" style="width:${posRate}%"></div></div><div class="num">${posRate}%<small>${positive.length}/${both.length}명</small></div></div>
+        <div class="crow act"><div class="who"><b>행동 · Act</b>과제 완료</div><div class="track"><div class="fill" style="width:${doneRate}%"></div></div><div class="num">${doneRate}%<small>${completed.length}/${both.length}명</small></div></div>
       </div>
-      ${saidButFailed.length ? `<div class="card hero-say">⚠ 쓰겠다고 답한 <b>${positive.length}명 중 ${saidButFailed.length}명</b>이 과제를 끝내지 못했다.</div>` : ""}
+      <div class="gapline">${gap > 0 ? icon("alert") : icon("check")}<div>의향-행동 격차 <b>${gap > 0 ? "+" : ""}${gap}%p</b> — ${gap > 0 ? "말이 행동보다 낙관적이다." : gap < 0 ? "행동이 말보다 낫다." : "말과 행동이 일치한다."}${saidButFailed.length ? ` 쓰겠다고 답한 <b>${positive.length}명 중 ${saidButFailed.length}명</b>이 과제를 끝내지 못했다.` : ""}</div></div>
+    </section>
+    <section class="rsec" style="margin-top:22px"><h2>사람별로 보면</h2><p>같은 사람이 기획서를 읽고 한 말과, 직접 써보며 한 행동</p>
       <div class="card ptable">
         <div class="prow head"><div>페르소나</div><div>Ask · 기획서를 읽고</div><div>Act · 직접 써보고</div></div>
         ${both.map(({ p, i, a, r }) => {
           const path = pathOf(r.events), ok = r.end.result === "complete";
           const last = r.events.filter((e) => e.type === "turn").at(-1);
-          const chipsP = path.map((id, k) => `<span class="s ${k === path.length - 1 ? (ok ? "end-ok" : "end-bad") : ""}">${where(id)}</span>`).join('<span class="arr">→</span>');
+          const chipsP = path.map((id, k) => `<span class="s ${k === path.length - 1 ? (ok ? "end-ok" : "end-bad") : ""}">${where(id)}</span>`).join('<svg class="i arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>');
           const mismatch = a.usage_intention >= 4 && !ok;
           return `<div class="prow">
             <div class="id">${avatar(i, p)}<div><b>${esc(p.persona_id)}</b><span>${esc(pdesc(p))}</span>${mismatch ? `<div style="margin-top:4px"><span class="st warn">말≠행동</span></div>` : ""}</div></div>
             <div><div class="line">${score(a.usage_intention)} <b>${a.usage_intention}/5</b> · ${won(a.willingness_to_pay)} · <code>${esc(a.concern)}</code></div>${quote(a.reason)}</div>
-            <div><div class="path">${chipsP}</div><div class="line" style="margin-top:6px"><span class="st ${r.end.result}">${ok ? "✓ 완료" : `✕ ${esc(r.end.drop_reason)}`}</span></div>${last ? quote(last.reason) : ""}</div>
+            <div><div class="path">${chipsP}</div><div class="line" style="margin-top:6px"><span class="st ${r.end.result}">${ok ? `${icon("check")}완료` : `${icon("x")}${esc(r.end.drop_reason)}`}</span></div>${last ? quote(last.reason) : ""}</div>
           </div>`;
         }).join("")}
       </div>
@@ -883,7 +929,7 @@ function renderReport() {
 
     ${nA ? `
     <section class="rsec"><h2><span class="tag-mode">Ask</span> 기획서 반응</h2><p>제품 설명·기능·가격만 보고 답한 결과 (${nA}명)</p>
-      <div class="kpis k3">
+      <div class="card stats">
         ${kpi("평균 사용 의향", `${avgIntent}<small>/ 5</small>`, `4~5점 ${A.filter((x) => x.a.usage_intention >= 4).length}명`)}
         ${kpi("지불 의향 (Q6) 중앙값", won(median(wtps)), `유료로 낼 사람 ${wtps.filter((w) => w > 0).length}명 · 최대 ${won(Math.max(...wtps))} · 금액 직접 응답`)}
         ${kpi("최다 우려", concerns[0] ? `<code style="font-size:17px">${esc(concerns[0][0])}</code>` : "-", concerns[0] ? `${esc(DROP_LABEL[concerns[0][0]] ?? "")} · ${concerns[0][1]}명` : "")}
@@ -902,7 +948,7 @@ function renderReport() {
 
     ${nR ? `
     <section class="rsec"><h2><span class="tag-mode">Act</span> 프로토타입 행동</h2><p>"${esc(S.task)}" 과제를 직접 수행한 결과 (${nR}명)</p>
-      <div class="kpis">
+      <div class="card stats">
         ${kpi("과제 완료율", `${pct(nR - drops.length, nR)}%`, `${nR}명 중 ${nR - drops.length}명 완료`)}
         ${kpi("최다 이탈 화면", dropScreens[0] ? where(dropScreens[0][0]) : "없음", dropScreens[0] ? `${dropScreens[0][1]}명 이탈` : "이탈 없음")}
         ${kpi("최다 이탈 이유", dropReasons[0] ? `<code style="font-size:17px">${esc(dropReasons[0][0])}</code>` : "없음", dropReasons[0] ? `${esc(DROP_LABEL[dropReasons[0][0]] ?? "")} · ${dropReasons[0][1]}명` : "-")}
