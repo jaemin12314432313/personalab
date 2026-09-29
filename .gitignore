@@ -47,3 +47,6 @@ Thumbs.db
 # 로그
 *.log
 logs/
+
+# 데모 결과 저장 (캐시 재생용)
+demo/snapshot.json

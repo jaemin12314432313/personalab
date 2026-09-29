@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PersonaLab Act 데모</title>
+<title>PersonaLab 데모</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
   :root {
     --bg:#f4f3ef; --panel:#fff; --line:#e6e4de; --line-2:#efede8;
     --ink:#16161a; --ink-2:#4a4a52; --mute:#8a8a92;
-    --acc:#3553e0; --acc-soft:#eaeefe; --ok:#16875a; --ok-soft:#e5f5ec; --bad:#cf3b2c; --bad-soft:#fdecea; --warn:#b77900;
+    --acc:#3553e0; --acc-soft:#eaeefe; --ok:#16875a; --ok-soft:#e5f5ec; --bad:#cf3b2c; --bad-soft:#fdecea; --warn:#b77900; --warn-soft:#fdf3dc;
     --r:14px; --shadow:0 1px 2px rgba(20,20,30,.04), 0 8px 24px rgba(20,20,30,.06);
   }
   * { box-sizing:border-box; }
@@ -17,57 +17,124 @@
   body { background:var(--bg); color:var(--ink); font:14px/1.55 "Pretendard Variable", Pretendard, system-ui, "Malgun Gothic", sans-serif; -webkit-font-smoothing:antialiased; }
   button { font:inherit; color:inherit; cursor:pointer; }
   input, textarea, select { font:inherit; color:inherit; }
+  code { font:600 12px ui-monospace, Consolas, monospace; background:rgba(0,0,0,.05); padding:1px 6px; border-radius:5px; }
+  .off { display:none !important; }
 
   /* ── 상단 ─────────────────────────────── */
-  header { display:flex; align-items:center; gap:14px; padding:14px 28px; border-bottom:1px solid var(--line); background:rgba(244,243,239,.85); backdrop-filter:blur(8px); position:sticky; top:0; z-index:5; }
-  .logo { font-weight:800; font-size:17px; letter-spacing:-.02em; display:flex; align-items:center; gap:8px; }
+  header { display:flex; align-items:center; gap:18px; padding:12px 28px; border-bottom:1px solid var(--line); background:rgba(244,243,239,.9); backdrop-filter:blur(8px); position:sticky; top:0; z-index:5; }
+  .logo { font-weight:800; font-size:17px; letter-spacing:-.02em; display:flex; align-items:center; gap:8px; white-space:nowrap; }
   .logo i { width:22px; height:22px; border-radius:7px; background:linear-gradient(135deg,#3553e0,#8a5cf6); display:inline-block; }
-  .pill { font-size:12px; font-weight:600; color:var(--acc); background:var(--acc-soft); padding:3px 9px; border-radius:99px; }
-  .tabs { margin-left:auto; display:flex; background:#e9e7e1; padding:3px; border-radius:10px; }
-  .tabs button { border:0; background:none; padding:6px 14px; border-radius:8px; font-weight:600; color:var(--ink-2); }
-  .tabs button.on { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .stepper { display:flex; gap:2px; margin:0 auto; background:#e9e7e1; padding:3px; border-radius:11px; }
+  .stepper button { border:0; background:none; padding:6px 13px; border-radius:8px; font-weight:600; color:var(--ink-2); display:flex; gap:7px; align-items:center; white-space:nowrap; }
+  .stepper button span { width:18px; height:18px; border-radius:50%; font-size:11px; display:grid; place-items:center; background:#d9d7d0; color:var(--ink-2); }
+  .stepper button.on { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .stepper button.on span { background:var(--ink); color:#fff; }
+  .stepper button.done span { background:var(--ok); color:#fff; }
+  .stepper button:disabled { opacity:.45; cursor:default; }
+  .ghost { border:1px solid var(--line); background:#fff; border-radius:9px; padding:7px 12px; font-weight:600; white-space:nowrap; }
+  .ghost:hover { border-color:#cfcdc6; }
+  .primary-btn { border:0; border-radius:11px; padding:11px 18px; font-weight:700; color:#fff; background:var(--ink); white-space:nowrap; }
+  .primary-btn:disabled { opacity:.5; cursor:default; }
+  @media (max-width:1100px) { .stepper button b { display:none; } }
 
-  /* ── 실행 화면 ────────────────────────── */
-  .stage { max-width:1320px; margin:0 auto; padding:20px 28px 28px; display:grid; grid-template-columns:300px 1fr 360px; gap:28px; align-items:start; }
-  @media (max-width:1100px) { .stage { grid-template-columns:1fr; } .phone-col { order:-1; } }
+  /* ── 공통 레이아웃 ────────────────────── */
+  .view { max-width:1240px; margin:0 auto; padding:26px 28px 60px; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); }
   .eyebrow { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--mute); }
-  .eyebrow-row { display:flex; justify-content:space-between; align-items:center; }
+  .page-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:18px; }
+  .page-head h1 { margin:4px 0 0; font-size:24px; letter-spacing:-.02em; }
+  .page-head p { margin:4px 0 0; color:var(--ink-2); }
+  .two { display:grid; grid-template-columns:1.2fr 1fr; gap:22px; align-items:start; }
+  @media (max-width:980px) { .two { grid-template-columns:1fr !important; } }
+  .form { padding:22px; display:grid; gap:14px; }
+  .form label { font-size:12.5px; font-weight:600; color:var(--ink-2); display:block; margin-bottom:5px; }
+  .form input, .form textarea, .form select { width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px; background:#fff; }
+  .form textarea { resize:vertical; }
+  .hint { color:var(--mute); font-size:12.5px; margin:4px 0 0; }
+  .next-row { display:flex; justify-content:flex-end; margin-top:18px; gap:8px; }
 
-  /* 페르소나 목록 */
-  .personas { padding:16px; }
-  .plist { display:grid; gap:6px; margin-top:12px; }
-  .pi { display:flex; gap:10px; align-items:center; width:100%; padding:6px 10px; border:1px solid var(--line); border-radius:12px; background:#fff; text-align:left; transition:border-color .2s, box-shadow .2s; }
-  .pi:hover { border-color:#cfcdc6; }
-  .pi.active { border-color:var(--ink); box-shadow:0 0 0 1px var(--ink); }
+  /* 페르소나 공통 */
   .av { width:34px; height:34px; border-radius:11px; display:grid; place-items:center; font-weight:800; font-size:13px; color:#fff; flex:none; }
-  .pi .meta { flex:1; min-width:0; }
-  .pi .meta b { font-size:13.5px; display:block; line-height:1.2; }
-  .pi .meta span { font-size:12px; color:var(--mute); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
-  .st { font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; color:var(--mute); background:var(--line-2); }
-  .st.running { color:var(--acc); background:var(--acc-soft); }
-  .st.complete { color:var(--ok); background:var(--ok-soft); }
-  .st.drop, .st.error { color:var(--bad); background:var(--bad-soft); }
-  .detail { margin-top:14px; padding-top:14px; border-top:1px solid var(--line-2); }
-  .meters { display:grid; gap:9px; }
+  .av.lg { width:46px; height:46px; border-radius:14px; font-size:16px; }
+  .meters { display:grid; gap:8px; }
   .meter .top { display:flex; justify-content:space-between; font-size:12px; color:var(--ink-2); }
   .meter .top em { font-style:normal; font-variant-numeric:tabular-nums; color:var(--ink); font-weight:600; }
   .bar { height:5px; border-radius:5px; background:var(--line-2); margin-top:4px; overflow:hidden; }
   .bar > div { height:100%; border-radius:5px; background:var(--ink); }
-  .chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:12px; }
+  .chips { display:flex; flex-wrap:wrap; gap:5px; }
   .chip { font-size:11.5px; padding:2px 8px; border-radius:99px; background:var(--line-2); color:var(--ink-2); }
+  .st { font-size:11px; font-weight:700; padding:2px 7px; border-radius:99px; white-space:nowrap; color:var(--mute); background:var(--line-2); }
+  .st.running { color:var(--acc); background:var(--acc-soft); }
+  .st.complete, .st.ok { color:var(--ok); background:var(--ok-soft); }
+  .st.drop, .st.error { color:var(--bad); background:var(--bad-soft); }
+  .st.warn { color:var(--warn); background:var(--warn-soft); }
 
-  .task { padding:14px 20px; margin-top:12px; }
-  .task textarea { width:100%; border:0; resize:none; padding:0; margin-top:6px; font-size:16px; font-weight:600; line-height:1.4; background:none; outline:none; }
-  .goal-row { margin-top:6px; font-size:12.5px; color:var(--mute); display:flex; align-items:center; gap:6px; }
-  .goal-row select { border:1px solid var(--line); border-radius:8px; padding:3px 6px; background:#fff; font-size:12.5px; }
-  .run { width:100%; margin-top:12px; border:0; border-radius:12px; padding:14px; font-size:15px; font-weight:700; color:#fff; background:var(--ink); display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .12s, opacity .2s; }
-  .run:hover { transform:translateY(-1px); }
-  .run:disabled { opacity:.55; transform:none; cursor:default; }
-  .run .dot { width:8px; height:8px; border-radius:50%; background:#6ee7a8; }
+  /* ① 제품 — 스토어 카드 미리보기 */
+  .store { padding:22px; }
+  .store .top { display:flex; gap:14px; align-items:center; }
+  .store .icon { width:64px; height:64px; border-radius:18px; background:linear-gradient(135deg,#3553e0,#8a5cf6); flex:none; }
+  .store h2 { margin:0; font-size:20px; letter-spacing:-.02em; }
+  .store .price { color:var(--mute); font-size:13px; }
+  .store p { color:var(--ink-2); margin:14px 0; }
+  .store ul { margin:0; padding:0; list-style:none; display:grid; gap:6px; }
+  .store li { padding:9px 12px; background:#f7f6f3; border-radius:10px; font-weight:600; font-size:13.5px; }
 
-  /* 폰 */
-  .phone-col { display:flex; flex-direction:column; align-items:center; gap:16px; }
+  /* ② 프로토타입 */
+  .figma { padding:18px 22px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .figma input { flex:1; min-width:260px; border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+  .figma-status { font-size:13px; width:100%; }
+  .figma-status:empty { display:none; }
+  .figma-status.ok { color:var(--ok); } .figma-status.err { color:var(--bad); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(290px, 1fr)); gap:14px; margin-top:12px; }
+  .sc { border:1px solid var(--line); border-radius:12px; padding:12px; display:grid; grid-template-columns:78px 1fr; gap:12px; background:#fff; }
+  .thumb { width:78px; height:150px; border-radius:10px; border:1px dashed #d6d4cd; background:#faf9f7; display:grid; place-items:center; text-align:center; color:var(--mute); font-size:11px; cursor:pointer; overflow:hidden; }
+  .thumb img { width:100%; height:100%; object-fit:cover; object-position:top; }
+  .sc .head { display:flex; gap:6px; align-items:center; }
+  .sc .head b { font-size:12px; color:var(--mute); min-width:28px; }
+  .sc label { display:block; font-size:11.5px; color:var(--mute); margin:7px 0 3px; }
+  .sc input { width:100%; border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:13px; }
+  .sc .x { border:0; background:none; color:var(--mute); font-size:16px; padding:2px 6px; }
+  .mono { font-family:ui-monospace, Consolas, monospace !important; font-size:12px !important; }
+  .task-row { display:grid; grid-template-columns:1fr 220px; gap:14px; padding:18px 22px; margin-top:16px; }
+  .task-row input, .task-row select { width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 11px; background:#fff; }
+  .task-row label { font-size:12.5px; font-weight:600; color:var(--ink-2); display:block; margin-bottom:5px; }
+
+  /* ③ 패널 */
+  .dist { padding:22px; display:grid; gap:16px; }
+  .dist .row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .dist .eyebrow { margin-bottom:6px; }
+  .seg { display:flex; background:#efede8; padding:3px; border-radius:9px; }
+  .seg button { flex:1; border:0; background:none; padding:6px 0; border-radius:7px; font-size:12.5px; font-weight:600; color:var(--ink-2); }
+  .seg button.on { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .pcards { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px; }
+  .pcard { padding:16px; animation:rise .35s ease-out both; }
+  .pcard .who { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
+  .pcard .who b { display:block; font-size:15px; line-height:1.2; }
+  .pcard .who span { font-size:12px; color:var(--mute); }
+  .pcard .chips { margin-top:10px; }
+  .note { font-size:12.5px; color:var(--mute); background:#efede8; border-radius:10px; padding:10px 12px; margin-top:14px; }
+
+  /* ④ 실행 */
+  .stage { display:grid; grid-template-columns:290px 1fr 370px; gap:26px; align-items:start; }
+  @media (max-width:1150px) { .stage { grid-template-columns:1fr; } .phone-col { order:-1; } }
+  .plist { display:grid; gap:6px; margin-top:10px; }
+  .pi { display:flex; gap:10px; align-items:center; width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:12px; background:#fff; text-align:left; }
+  .pi:hover { border-color:#cfcdc6; }
+  .pi.active { border-color:var(--ink); box-shadow:0 0 0 1px var(--ink); }
+  .pi .meta { flex:1; min-width:0; }
+  .pi .meta b { font-size:13px; display:block; line-height:1.2; }
+  .pi .meta span { font-size:11.5px; color:var(--mute); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+  .pi .sts { display:grid; gap:3px; justify-items:end; }
+  .run-card { padding:16px; }
+  .run-btn { width:100%; margin-top:12px; border:0; border-radius:12px; padding:13px; font-size:15px; font-weight:700; color:#fff; background:var(--ink); display:flex; align-items:center; justify-content:center; gap:8px; }
+  .run-btn:disabled { opacity:.55; cursor:default; }
+  .run-btn .dot { width:8px; height:8px; border-radius:50%; background:#6ee7a8; }
+  .phase { display:flex; gap:6px; margin-top:12px; }
+  .phase div { flex:1; text-align:center; font-size:12px; font-weight:700; padding:6px; border-radius:8px; background:#efede8; color:var(--mute); }
+  .phase div.on { background:var(--acc-soft); color:var(--acc); }
+  .phase div.done { background:var(--ok-soft); color:var(--ok); }
+
+  .phone-col { display:flex; flex-direction:column; align-items:center; gap:14px; }
   .now-playing { font-size:13px; color:var(--ink-2); height:20px; }
   .now-playing b { color:var(--ink); }
   .phone { width:320px; height:660px; border-radius:46px; background:#101014; padding:11px; box-shadow:0 30px 60px -20px rgba(20,20,40,.35), 0 0 0 1px #2a2a30 inset; position:relative; }
@@ -89,6 +156,10 @@
   .app img.shot { width:100%; height:100%; object-fit:cover; object-position:top; }
   .app .sheet { position:absolute; left:0; right:0; bottom:0; padding:14px 16px 20px; background:linear-gradient(transparent, rgba(255,255,255,.95) 30%); display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
   .app .sheet .btn { height:38px; padding:0 14px; font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  .app .store-mini .icon { width:56px; height:56px; border-radius:16px; background:linear-gradient(135deg,#3553e0,#8a5cf6); margin-bottom:10px; }
+  .app .store-mini ul { padding:0; margin:14px 0 0; }
+  .app .store-mini li { list-style:none; padding:8px 10px; background:#f7f6f3; border-radius:9px; font-size:13px; font-weight:600; margin-top:6px; }
+  .app .store-mini .price { margin-top:12px; font-size:13px; color:var(--mute); }
   .btn.tap { transform:scale(.96); outline:3px solid #ffb020; outline-offset:3px; }
   .btn.tap::after { content:""; position:absolute; left:50%; top:50%; width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; background:rgba(255,176,32,.55); animation:ripple .8s ease-out; }
   @keyframes ripple { from { transform:scale(.3); opacity:1; } to { transform:scale(4); opacity:0; } }
@@ -110,17 +181,18 @@
   .step.fail { color:#fff; background:var(--bad); border-color:var(--bad); }
   .sep { width:6px; height:1px; background:#cfcdc6; }
 
-  /* 기록 */
-  .log-card { padding:20px; min-height:300px; }
-  .result { border-radius:12px; padding:14px 16px; margin-top:12px; display:none; }
+  .log-card { padding:18px; min-height:300px; }
+  .result { border-radius:12px; padding:13px 15px; margin-top:12px; display:none; }
   .result.show { display:block; animation:rise .4s ease-out; }
   .result.complete { background:var(--ok-soft); color:#0d5c3c; }
   .result.drop, .result.error { background:var(--bad-soft); color:#8c2419; }
   .result b { font-size:15px; display:block; }
   .result small { display:block; margin-top:3px; font-size:13px; opacity:.9; }
-  code { font:600 12px ui-monospace, Consolas, monospace; background:rgba(0,0,0,.05); padding:1px 6px; border-radius:5px; }
-  .timeline { list-style:none; margin:16px 0 0; padding:0; }
-  .timeline li { position:relative; padding:0 0 18px 26px; animation:rise .35s ease-out; }
+  .ask-box { margin-top:12px; border:1px solid var(--line); border-radius:12px; padding:12px 14px; animation:rise .35s ease-out; }
+  .ask-box .k { display:flex; gap:12px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-2); align-items:center; }
+  .ask-box .k b { color:var(--ink); }
+  .timeline { list-style:none; margin:14px 0 0; padding:0; }
+  .timeline li { position:relative; padding:0 0 16px 26px; animation:rise .35s ease-out; }
   .timeline li::before { content:""; position:absolute; left:6px; top:18px; bottom:0; width:1px; background:var(--line); }
   .timeline li:last-child::before { display:none; }
   .timeline .node { position:absolute; left:0; top:4px; width:13px; height:13px; border-radius:50%; border:2px solid var(--ink); background:#fff; }
@@ -131,148 +203,187 @@
   kbd { font:inherit; font-weight:700; background:var(--acc-soft); color:var(--acc); padding:1px 7px; border-radius:6px; }
   .quote { margin-top:8px; background:#f7f6f3; border-radius:4px 12px 12px 12px; padding:9px 12px; color:var(--ink-2); font-size:13.5px; }
   .quote .tag { display:block; font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--mute); text-transform:uppercase; margin-bottom:3px; }
-  .empty { color:var(--mute); font-size:13.5px; margin-top:14px; }
+  .empty { color:var(--mute); font-size:13.5px; margin-top:12px; }
   @keyframes rise { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 
-  /* ── 리포트 ───────────────────────────── */
-  .report { max-width:1320px; margin:0 auto; padding:0 28px 60px; display:none; }
-  .report.show { display:block; animation:rise .5s ease-out; }
-  .report-head { display:flex; align-items:baseline; gap:12px; margin:8px 0 16px; }
-  .report-head h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
-  .report-head span { color:var(--mute); font-size:13px; }
-  .kpis { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; }
-  @media (max-width:900px) { .kpis { grid-template-columns:repeat(2, 1fr); } .charts { grid-template-columns:1fr !important; } }
-  .kpi { padding:18px 20px; }
-  .kpi .v { font-size:30px; font-weight:800; letter-spacing:-.03em; margin-top:6px; font-variant-numeric:tabular-nums; line-height:1.1; }
-  .kpi .v small { font-size:15px; font-weight:600; color:var(--mute); margin-left:4px; }
+  /* ⑤ 리포트 */
+  .rsec { margin-top:30px; }
+  .rsec > h2 { margin:0 0 4px; font-size:19px; letter-spacing:-.02em; display:flex; gap:10px; align-items:center; }
+  .rsec > p { margin:0 0 14px; color:var(--mute); font-size:13px; }
+  .tag-mode { font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; background:var(--acc-soft); color:var(--acc); }
+  .hero { padding:26px; display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:10px; align-items:center; text-align:center; }
+  .hero .n { font-size:44px; font-weight:800; letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; }
+  .hero .l { font-size:13px; color:var(--ink-2); margin-top:8px; }
+  .hero .l small { display:block; color:var(--mute); }
+  .hero .op { font-size:22px; color:var(--mute); }
+  .hero .gap .n { color:var(--bad); }
+  .hero-say { padding:14px 20px; margin-top:12px; font-size:15px; }
+  .hero-say b { color:var(--bad); }
+  .kpis { display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; }
+  .kpis.k3 { grid-template-columns:repeat(3, 1fr); }
+  @media (max-width:900px) { .kpis, .kpis.k3 { grid-template-columns:repeat(2, 1fr); } .charts, .hero { grid-template-columns:1fr !important; } }
+  .kpi { padding:16px 18px; }
+  .kpi .v { font-size:28px; font-weight:800; letter-spacing:-.03em; margin-top:6px; font-variant-numeric:tabular-nums; line-height:1.15; }
+  .kpi .v small { font-size:14px; font-weight:600; color:var(--mute); margin-left:3px; }
   .kpi .s { font-size:12.5px; color:var(--ink-2); margin-top:4px; }
-  .charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
-  .chart { padding:20px; }
-  .chart h3 { margin:0 0 2px; font-size:15px; }
-  .chart .sub { font-size:12.5px; color:var(--mute); margin:0 0 16px; }
-  .hbar { display:grid; grid-template-columns:minmax(120px, 45%) 1fr 40px; align-items:center; gap:10px; padding:5px 0; }
+  .charts { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+  .chart { padding:18px 20px; }
+  .chart h3 { margin:0 0 2px; font-size:14.5px; }
+  .chart .sub { font-size:12.5px; color:var(--mute); margin:0 0 14px; }
+  .hbar { display:grid; grid-template-columns:minmax(110px, 42%) 1fr 48px; align-items:center; gap:10px; padding:4px 0; }
   .hbar .lbl { font-size:13px; color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .hbar .lbl code { font-size:11px; }
-  .hbar .track { height:18px; position:relative; }
-  .hbar .fill { position:absolute; left:0; top:0; bottom:0; background:var(--acc); border-radius:0 4px 4px 0; min-width:2px; transition:width .6s cubic-bezier(.2,.8,.2,1); }
+  .hbar .track { height:16px; position:relative; }
+  .hbar .fill { position:absolute; left:0; top:0; bottom:0; background:var(--acc); border-radius:0 4px 4px 0; min-width:2px; }
   .hbar .val { font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; text-align:right; }
   .hbar:hover .fill { filter:brightness(1.12); }
-  .people { margin-top:16px; padding:6px 20px; }
-  .prow { display:grid; grid-template-columns:170px 1fr 90px; gap:16px; align-items:start; padding:14px 0; border-top:1px solid var(--line-2); }
+  .ptable { padding:4px 20px; margin-top:14px; }
+  .prow { display:grid; grid-template-columns:170px 1fr 1fr; gap:18px; align-items:start; padding:14px 0; border-top:1px solid var(--line-2); }
   .prow:first-child { border-top:0; }
+  .prow.head { font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--mute); text-transform:uppercase; padding:12px 0 6px; }
   .prow .id { display:flex; gap:10px; align-items:center; }
   .prow .id b { display:block; font-size:13.5px; line-height:1.2; }
   .prow .id span { font-size:12px; color:var(--mute); }
+  .prow .line { display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:13px; }
+  .prow .quote { font-size:12.5px; }
   .path { display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:12px; }
   .path .s { padding:2px 7px; border-radius:6px; background:var(--line-2); font-weight:600; }
   .path .s.end-ok { background:var(--ok-soft); color:var(--ok); }
   .path .s.end-bad { background:var(--bad-soft); color:var(--bad); }
   .path .arr { color:var(--mute); }
-  .prow .quote { margin-top:8px; }
-  .prow .st { justify-self:end; }
-  @media (max-width:900px) { .prow { grid-template-columns:1fr; } .prow .st { justify-self:start; } }
-
-  /* ── 설정 화면 ────────────────────────── */
-  .setup { max-width:1000px; margin:0 auto; padding:28px; display:none; }
-  .setup.on { display:block; }
-  .off { display:none !important; }
-  .setup .card { padding:22px; margin-bottom:20px; }
-  .setup h2 { margin:0 0 4px; font-size:16px; }
-  .setup .hint { color:var(--mute); font-size:13px; margin:0 0 14px; }
-  .setup .hint code { font-weight:400; }
-  .row { display:flex; gap:8px; flex-wrap:wrap; }
-  .ghost { border:1px solid var(--line); background:#fff; border-radius:9px; padding:8px 13px; font-weight:600; }
-  .ghost:hover { border-color:#cfcdc6; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(290px, 1fr)); gap:14px; margin-top:16px; }
-  .sc { border:1px solid var(--line); border-radius:12px; padding:12px; display:grid; grid-template-columns:78px 1fr; gap:12px; background:#fff; }
-  .thumb { width:78px; height:140px; border-radius:10px; border:1px dashed #d6d4cd; background:#faf9f7; display:grid; place-items:center; text-align:center; color:var(--mute); font-size:11px; cursor:pointer; overflow:hidden; }
-  .thumb img { width:100%; height:100%; object-fit:cover; object-position:top; }
-  .sc .head { display:flex; gap:6px; align-items:center; }
-  .sc .head b { font-size:12px; color:var(--mute); min-width:28px; }
-  .sc label { display:block; font-size:11.5px; color:var(--mute); margin:8px 0 3px; }
-  .sc input { width:100%; border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:13px; }
-  .sc .x { border:0; background:none; color:var(--mute); font-size:16px; padding:2px 6px; }
-  .mono { font-family:ui-monospace, Consolas, monospace !important; font-size:12px !important; }
-  textarea.json { width:100%; border:1px solid var(--line); border-radius:10px; padding:12px; min-height:320px; resize:vertical; }
-  .err { color:var(--bad); font-size:12.5px; margin-top:6px; }
+  .score { display:inline-flex; gap:2px; }
+  .score i { width:7px; height:7px; border-radius:50%; background:var(--line); }
+  .score i.on { background:var(--ink); }
+  .trust { padding:18px 20px; margin-top:30px; border-style:dashed; background:transparent; box-shadow:none; color:var(--ink-2); }
+  @media (max-width:900px) { .prow { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
 <header>
   <div class="logo"><i></i>PersonaLab</div>
-  <span class="pill">Act 모드 데모</span>
-  <nav class="tabs">
-    <button id="tab-run" class="on">실행</button>
-    <button id="tab-setup">설정 <span id="count"></span></button>
+  <nav class="stepper" id="stepper">
+    <button data-v="product"><span>1</span><b>제품 기획</b></button>
+    <button data-v="proto"><span>2</span><b>프로토타입</b></button>
+    <button data-v="panel"><span>3</span><b>AI 패널</b></button>
+    <button data-v="run"><span>4</span><b>실행</b></button>
+    <button data-v="report"><span>5</span><b>리포트</b></button>
   </nav>
+  <button class="ghost" id="load-snap" title="마지막으로 저장된 실행 결과를 불러온다">저장된 결과</button>
 </header>
 
-<!-- 실행 -->
-<div id="run-view">
-<main class="stage">
-  <div>
-    <section class="card personas">
-      <div class="eyebrow-row"><span class="eyebrow">AI 패널</span><span class="eyebrow" id="panel-count"></span></div>
-      <div class="plist" id="plist"></div>
-      <div class="detail" id="detail"></div>
+<!-- ① 제품 기획 (Ask 입력) -->
+<main class="view" data-view="product">
+  <div class="page-head"><div><div class="eyebrow">Step 1 · Ask 입력</div><h1>제품 기획</h1><p>기획서에 있는 내용을 붙여넣는다. AI 패널이 이걸 읽고 쓸지 말지 답한다.</p></div></div>
+  <div class="two">
+    <section class="card form">
+      <div><label for="p-name">제품명</label><input id="p-name"></div>
+      <div><label for="p-desc">설명</label><textarea id="p-desc" rows="3"></textarea></div>
+      <div><label for="p-feat">기능 (한 줄에 하나)</label><textarea id="p-feat" rows="5"></textarea></div>
+      <div><label for="p-price">가격</label><input id="p-price"><p class="hint">Q6(지불 의향)은 금액을 제시하지 않고 직접 적게 한다 — 계획서 7-3 앵커링 방지</p></div>
     </section>
-    <section class="card task">
-      <div class="eyebrow">과제</div>
-      <textarea id="task" rows="1">회원가입을 완료하세요</textarea>
-      <div class="goal-row">목표 화면 <select id="goal"></select></div>
-    </section>
-    <button id="run" class="run"><span class="dot"></span><span id="run-label"></span></button>
+    <div>
+      <div class="eyebrow" style="margin-bottom:8px">AI 패널이 읽는 화면</div>
+      <section class="card store" id="store"></section>
+    </div>
   </div>
+  <div class="next-row"><button class="primary-btn" data-go="proto">다음: 프로토타입 →</button></div>
+</main>
 
-  <div class="phone-col">
-    <div class="now-playing" id="now-playing"></div>
-    <div class="phone">
-      <div class="screen-wrap" id="viewport">
-        <div class="veil" id="veil"></div>
-        <div class="thinking" id="thinking"><i></i><i></i><i></i><span>화면을 보는 중</span></div>
+<!-- ② 프로토타입 (Act 입력) -->
+<main class="view off" data-view="proto">
+  <div class="page-head"><div><div class="eyebrow">Step 2 · Act 입력</div><h1>프로토타입</h1><p>피그마 링크를 붙이면 화면과 버튼 연결을 자동으로 읽는다. 안 되면 이미지를 올리고 연결을 직접 적는다.</p></div></div>
+  <section class="card figma">
+    <input id="figma-url" placeholder="https://www.figma.com/design/…  또는  /proto/…">
+    <button class="primary-btn" id="figma-go">피그마에서 불러오기</button>
+    <div class="figma-status" id="figma-status"></div>
+  </section>
+  <div style="display:flex; gap:8px; margin-top:18px; flex-wrap:wrap; align-items:center">
+    <b style="margin-right:auto">화면 <span id="screen-count"></span></b>
+    <button class="ghost" id="upload">＋ 이미지 여러 장</button>
+    <button class="ghost" id="add">＋ 빈 화면</button>
+    <button class="ghost" id="sample">샘플(일정메이트)</button>
+    <input id="files" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+  </div>
+  <p class="hint">버튼 칸: <code>버튼글자&gt;이동할화면</code>을 쉼표로. 예: <code>다음&gt;S03, 뒤로&gt;S01</code></p>
+  <div class="grid" id="screens"></div>
+  <section class="card task-row">
+    <div><label for="task">과제 (AI와 실제 참가자에게 똑같이 제시)</label><input id="task"></div>
+    <div><label for="goal">목표 화면</label><select id="goal"></select></div>
+  </section>
+  <div class="next-row"><button class="primary-btn" data-go="panel">다음: AI 패널 →</button></div>
+</main>
+
+<!-- ③ AI 패널 -->
+<main class="view off" data-view="panel">
+  <div class="page-head"><div><div class="eyebrow">Step 3 · 페르소나 샘플링</div><h1>AI 패널</h1><p>개인을 하나씩 만드는 게 아니라 분포를 고른다. 같은 패널이 Ask와 Act를 둘 다 한다.</p></div></div>
+  <div class="two" style="grid-template-columns:340px 1fr">
+    <section class="card dist">
+      <div class="row2">
+        <div><div class="eyebrow">인원</div><div class="seg" data-k="count"><button data-v="3">3</button><button data-v="5" class="on">5</button><button data-v="10">10</button></div></div>
+        <div><div class="eyebrow">소속</div><div class="seg" data-k="occupation"><button data-v="university_student" class="on">대학생</button><button data-v="office_worker">직장인</button></div></div>
       </div>
+      <div><div class="eyebrow">연령</div><div class="seg" data-k="age"><button data-v="20,24">20~24</button><button data-v="20,29" class="on">20대</button><button data-v="25,34">25~34</button></div></div>
+      <div><div class="eyebrow">앱 사용 빈도</div><div class="seg" data-k="app_usage"><button data-v="0.1,0.5">낮음</button><button data-v="0.4,0.8">중간</button><button data-v="0.6,1">높음</button><button data-v="0.2,0.95" class="on">전체</button></div></div>
+      <div><div class="eyebrow">가격 민감도</div><div class="seg" data-k="price_sensitivity"><button data-v="0.1,0.5">낮음</button><button data-v="0.4,0.8">중간</button><button data-v="0.6,1" class="on">높음</button><button data-v="0.2,0.95">전체</button></div></div>
+      <div><div class="eyebrow">디지털 수용도</div><div class="seg" data-k="digital_adoption"><button data-v="0.1,0.5">낮음</button><button data-v="0.4,0.8">중간</button><button data-v="0.6,1">높음</button><button data-v="0.3,0.95" class="on">전체</button></div></div>
+      <button class="primary-btn" id="gen">패널 생성</button>
+    </section>
+    <div>
+      <div class="pcards" id="pcards"></div>
+      <p class="note">데모는 고른 범위 안에서 균등하게 뽑는다. 본 제품은 통계청·건보공단 시드 기반 공개 데이터의 분포에서 뽑는다(계획서 6-2). 학습이 아니라 <b>페르소나 샘플링</b>이다.</p>
     </div>
-    <div class="steps" id="steps"></div>
   </div>
-
-  <section class="card log-card">
-    <div class="eyebrow" id="log-title">행동 기록</div>
-    <div class="result" id="result"></div>
-    <ol class="timeline" id="timeline"></ol>
-    <p class="empty" id="empty">실행하면 페르소나가 한 명씩 화면을 보며 무엇을 누를지, 그만둘지 판단한다. 모두 끝나면 아래에 리포트가 나온다.</p>
-  </section>
+  <div class="next-row"><button class="primary-btn" data-go="run">다음: 실행 →</button></div>
 </main>
 
-<section class="report" id="report"></section>
-</div>
-
-<!-- 설정 -->
-<main class="setup" id="setup">
-  <section class="card">
-    <h2>앱 화면</h2>
-    <p class="hint">이미지는 파일 이름 순서대로 S01, S02…가 된다. 버튼 칸에는 <code>버튼글자&gt;이동할화면</code>을 쉼표로 적는다. 예: <code>다음&gt;S03, 뒤로&gt;S01</code></p>
-    <div class="row">
-      <button class="ghost" id="upload">＋ 이미지 여러 장 올리기</button>
-      <button class="ghost" id="add">＋ 빈 화면</button>
-      <button class="ghost" id="sample">샘플로 되돌리기</button>
-      <input id="files" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+<!-- ④ 실행 -->
+<main class="view off" data-view="run">
+  <div class="stage">
+    <div>
+      <section class="card run-card">
+        <div class="eyebrow" style="display:flex;justify-content:space-between"><span>AI 패널</span><span id="panel-count"></span></div>
+        <div class="plist" id="plist"></div>
+        <div class="phase"><div id="ph-ask">① Ask 기획서</div><div id="ph-act">② Act 프로토타입</div></div>
+        <button class="run-btn" id="run"><span class="dot"></span><span id="run-label">전체 실행 (Ask → Act)</span></button>
+      </section>
     </div>
-    <div class="grid" id="screens"></div>
-  </section>
-  <section class="card">
-    <h2>AI 패널 (페르소나 목록)</h2>
-    <p class="hint">계획서 6-3 스키마의 배열. 각 항목이 그대로 프롬프트에 들어간다. 데모용으로 손으로 만든 5명이며, 본 제품에서는 분포 샘플링(6-2)으로 생성한다.</p>
-    <textarea id="persona" class="json mono" spellcheck="false"></textarea>
-    <div class="err" id="persona-err"></div>
-  </section>
+    <div class="phone-col">
+      <div class="now-playing" id="now-playing"></div>
+      <div class="phone">
+        <div class="screen-wrap" id="viewport">
+          <div class="veil" id="veil"></div>
+          <div class="thinking" id="thinking"><i></i><i></i><i></i><span id="thinking-text">화면을 보는 중</span></div>
+        </div>
+      </div>
+      <div class="steps" id="steps"></div>
+    </div>
+    <section class="card log-card">
+      <div class="eyebrow" id="log-title">기록</div>
+      <div id="ask-slot"></div>
+      <div class="result" id="result"></div>
+      <ol class="timeline" id="timeline"></ol>
+      <p class="empty" id="empty">실행하면 패널이 먼저 기획서를 읽고 답한 뒤(Ask), 같은 사람들이 프로토타입을 직접 써본다(Act).</p>
+    </section>
+  </div>
 </main>
+
+<!-- ⑤ 리포트 -->
+<main class="view off" data-view="report" id="report"></main>
 
 <script>
 const $ = (id) => document.getElementById(id);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const sid = (i) => "S" + String(i + 1).padStart(2, "0");
 const pct = (n, d) => (d ? Math.round((n / d) * 100) : 0);
+const won = (n) => (n ? `월 ${Number(n).toLocaleString("ko-KR")}원` : "안 냄");
+async function api(path, body, method = "POST") {
+  const res = await fetch(path, { method, headers: { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : `${res.status}`);
+  return data;
+}
 
 // 계획서 8-5 (+ 8-2 강제 종료)
 const DROP_LABEL = {
@@ -280,144 +391,90 @@ const DROP_LABEL = {
   PRICE: "가격이 부담된다", TRUST: "믿기 어렵다", FEATURE_MISSING: "필요한 기능이 없다",
   SWITCHING_COST: "쓰던 것을 옮기기 번거롭다", NAVIGATION_LOST: "어디로 가야 할지 모르겠다", MAX_TURNS: "턴 상한 도달 (강제 종료)",
 };
-const OCCUPATION = { university_student: "대학생", graduate_student: "대학원생", office_worker: "직장인", freelancer: "프리랜서" };
+const OCC = { university_student: "대학생", graduate_student: "대학원생", office_worker: "직장인" };
 const TOOL = { google_calendar: "구글 캘린더", notion: "노션", naver_calendar: "네이버 캘린더", paper_planner: "종이 플래너", none: "없음" };
 const TRAIT = {
   productivity_app_user: "생산성 앱 사용자", time_sensitive: "시간에 쫓김", early_adopter: "새 앱 먼저 써봄",
-  privacy_conscious: "개인정보 민감", budget_tight: "용돈 빠듯", impatient: "참을성 적음", form_averse: "입력 귀찮아함",
+  privacy_conscious: "개인정보 민감", budget_tight: "용돈 빠듯", form_averse: "입력 귀찮아함",
 };
-const AVATAR = ["#ff8a5b,#f0508a", "#4f7cff,#8a5cf6", "#18a57a,#6bc76b", "#f5a524,#f06a3a", "#6b7280,#374151"];
+const AVATAR = ["#ff8a5b,#f0508a", "#4f7cff,#8a5cf6", "#18a57a,#6bc76b", "#f5a524,#f06a3a", "#6b7280,#374151", "#e0508a,#8a5cf6", "#0ea5b7,#3553e0", "#84a83a,#18a57a", "#c2410c,#f5a524", "#475569,#0ea5b7"];
 
-// 데모용 AI 패널 5명 (계획서 6-3 스키마). P023 은 계획서 예시 그대로
-$("persona").value = JSON.stringify([
-  { persona_id: "P023", age: 23, occupation: "university_student", app_usage_freq: 0.82, price_sensitivity: 0.76, digital_adoption: 0.88, existing_tool: "google_calendar", traits: ["productivity_app_user", "time_sensitive"] },
-  { persona_id: "P041", age: 21, occupation: "university_student", app_usage_freq: 0.91, price_sensitivity: 0.32, digital_adoption: 0.95, existing_tool: "notion", traits: ["early_adopter"] },
-  { persona_id: "P057", age: 24, occupation: "university_student", app_usage_freq: 0.48, price_sensitivity: 0.88, digital_adoption: 0.55, existing_tool: "paper_planner", traits: ["privacy_conscious", "budget_tight"] },
-  { persona_id: "P068", age: 22, occupation: "university_student", app_usage_freq: 0.74, price_sensitivity: 0.61, digital_adoption: 0.79, existing_tool: "google_calendar", traits: ["impatient", "form_averse"] },
-  { persona_id: "P092", age: 27, occupation: "graduate_student", app_usage_freq: 0.39, price_sensitivity: 0.52, digital_adoption: 0.42, existing_tool: "naver_calendar", traits: ["time_sensitive"] },
-], null, 2);
-
-// 계획서 3장 ③ / 8-1 예시. 마지막 숫자 = 이미지 없을 때 폰에 그릴 입력칸 수
-const SAMPLE = [
+// 계획서 3장 ② / ③ 예시
+const SAMPLE_PRODUCT = { name: "일정메이트", description: "일정을 자동 정리하고 우선순위를 추천해 주는 대학생용 일정 앱", features: ["자동 정리", "우선순위 추천", "캘린더 연동", "친구 공유", "알림 설정"], price: "무료 + 월 유료 전환" };
+const SAMPLE_SCREENS = [
   ["온보딩", "일정을 자동으로 정리하고 오늘 할 일의 우선순위를 추천해 드려요.", "시작하기>S02", 0],
   ["회원가입", "이메일, 비밀번호, 휴대폰 번호 인증이 필요해요.", "다음>S03, 뒤로>S01", 3],
   ["학교·학년", "학교명, 학년, 전공을 알려주세요.", "다음>S04, 건너뛰기>S04", 3],
   ["관심분야 선택", "관심분야를 5개 이상 골라주세요.", "완료>S05, 건너뛰기>S05", 4],
   ["홈", "오늘의 일정과 추천 우선순위", "", 2],
 ];
-let screens = [];
-let panel = [];            // 페르소나 배열
-let runs = [];             // panel 과 같은 순서: { status, events, end }
-let selected = 0;
+
+// 스터디 상태 — 저장/불러오기 단위
+let S = { product: { ...SAMPLE_PRODUCT }, screens: [], task: "회원가입을 완료하세요", goal: "", panel: [], ask: [], act: [] };
 let running = false;
+let selected = 0;
+let shown = null;
 
-// ── 페르소나 ──────────────────────────────
-function parsePanel() {
-  try {
-    const v = JSON.parse($("persona").value);
-    $("persona-err").textContent = "";
-    return Array.isArray(v) ? v : [v];
-  } catch { $("persona-err").textContent = "JSON 형식이 올바르지 않습니다."; return null; }
+// ── 단계 이동 ────────────────────────────
+function go(v) {
+  $$("[data-view]").forEach((el) => el.classList.toggle("off", el.dataset.view !== v));
+  $$("#stepper button").forEach((b) => b.classList.toggle("on", b.dataset.v === v));
+  if (v === "run") renderRun();
+  if (v === "report") renderReport();
+  refreshStepper();
+  scrollTo({ top: 0 });
 }
-const pname = (p) => esc(p.persona_id ?? "페르소나");
-const pdesc = (p) => [p.age && `${p.age}세`, OCCUPATION[p.occupation] ?? p.occupation].filter(Boolean).join(" · ");
-const avatar = (i, p) => `<div class="av" style="background:linear-gradient(135deg,${AVATAR[i % AVATAR.length]})">${esc(String(p.persona_id ?? "P").slice(-2))}</div>`;
-const STATUS = { idle: "대기", running: "실행 중", complete: "✓ 완료", drop: "✕ 이탈", error: "오류" };
-
-function renderPanel() {
-  $("panel-count").textContent = `${panel.length}명`;
-  $("run-label").textContent = running ? $("run-label").textContent : (runs.some((r) => r.end) ? "다시 실행" : `${panel.length}명 모두 실행`);
-  $("plist").innerHTML = panel.map((p, i) => `
-    <button class="pi ${i === selected ? "active" : ""}" data-p="${i}">
-      ${avatar(i, p)}
-      <div class="meta"><b>${pname(p)}</b><span>${esc(pdesc(p))}${typeof p.price_sensitivity === "number" ? ` · 가격민감 ${p.price_sensitivity.toFixed(2)}` : ""}</span></div>
-      <span class="st ${runs[i]?.status ?? "idle"}">${STATUS[runs[i]?.status ?? "idle"]}</span>
-    </button>`).join("");
-  const p = panel[selected];
-  if (!p) return ($("detail").innerHTML = "");
-  const meters = [["앱 사용 빈도", p.app_usage_freq], ["가격 민감도", p.price_sensitivity], ["디지털 수용도", p.digital_adoption]]
-    .filter(([, v]) => typeof v === "number")
-    .map(([k, v]) => `<div class="meter"><div class="top">${k}<em>${v.toFixed(2)}</em></div><div class="bar"><div style="width:${Math.round(v * 100)}%"></div></div></div>`).join("");
-  const chips = [p.existing_tool && `지금 쓰는 것 · ${TOOL[p.existing_tool] ?? p.existing_tool}`, ...(p.traits ?? []).map((t) => TRAIT[t] ?? t)]
-    .filter(Boolean).map((c) => `<span class="chip">${esc(c)}</span>`).join("");
-  $("detail").innerHTML = `<div class="meters">${meters}</div><div class="chips">${chips}</div>`;
+const hasResults = () => S.ask.some((a) => a && !a.error) || S.act.some((r) => r?.end);
+function refreshStepper() {
+  const done = { product: !!S.product.name, proto: S.screens.length > 0, panel: S.panel.length > 0, run: hasResults(), report: false };
+  $$("#stepper button").forEach((b) => {
+    b.classList.toggle("done", !!done[b.dataset.v] && !b.classList.contains("on"));
+    b.disabled = running || (b.dataset.v === "report" && !hasResults());
+  });
+  $("load-snap").disabled = running;
 }
-$("plist").addEventListener("click", (e) => {
-  const b = e.target.closest("[data-p]");
-  if (!b || running) return;
-  selected = +b.dataset.p;
-  renderPanel();
-  replay(selected);
-});
-$("persona").addEventListener("input", () => {
-  const v = parsePanel();
-  if (!v) return;
-  panel = v; runs = panel.map(() => ({ status: "idle", events: [], end: null }));
-  selected = Math.min(selected, panel.length - 1);
-  renderPanel(); $("report").classList.remove("show");
-});
+$("stepper").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b && !b.disabled) go(b.dataset.v); });
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-go]"); if (b && !running) go(b.dataset.go); });
 
-// ── 화면 ──────────────────────────────────
+// ── ① 제품 ───────────────────────────────
+function bindProduct() {
+  $("p-name").value = S.product.name; $("p-desc").value = S.product.description;
+  $("p-feat").value = S.product.features.join("\n"); $("p-price").value = S.product.price;
+  renderStore();
+}
+function readProduct() {
+  S.product = { name: $("p-name").value.trim(), description: $("p-desc").value.trim(),
+    features: $("p-feat").value.split("\n").map((s) => s.trim()).filter(Boolean), price: $("p-price").value.trim() };
+  renderStore();
+}
+["p-name", "p-desc", "p-feat", "p-price"].forEach((id) => $(id).addEventListener("input", readProduct));
+function storeHTML(p, mini = false) {
+  const feats = p.features.map((f) => `<li>${esc(f)}</li>`).join("");
+  return mini
+    ? `<div class="status"><span>9:41</span><span>●●● ▮</span></div><div class="body store-mini"><div class="icon"></div><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><ul>${feats}</ul><div class="price">가격 · ${esc(p.price || "미정")}</div></div>`
+    : `<div class="top"><div class="icon"></div><div><h2>${esc(p.name || "제품명")}</h2><div class="price">${esc(p.price || "가격 미정")}</div></div></div><p>${esc(p.description)}</p><ul>${feats}</ul>`;
+}
+const renderStore = () => ($("store").innerHTML = storeHTML(S.product));
+
+// ── ② 프로토타입 ─────────────────────────
 function parseButtons(str) {
-  return String(str).split(",").map((p) => p.trim()).filter((p) => p.includes(">")).map((p) => {
+  return String(str ?? "").split(",").map((p) => p.trim()).filter((p) => p.includes(">")).map((p) => {
     const at = p.lastIndexOf(">");
     return { text: p.slice(0, at).trim(), to: p.slice(at + 1).trim().toUpperCase() };
   });
 }
-const byId = (id) => screens.find((s) => s.id === id);
+const byId = (id) => S.screens.find((s) => s.id === id);
 const where = (id) => `${id} ${esc(byId(id)?.label ?? "")}`;
-
-function appHTML(s) {
-  const btns = parseButtons(s.buttons);
-  if (s.image) {
-    return `<img class="shot" src="${s.image}" alt="${esc(s.label)}">
-      <div class="sheet">${btns.map((b) => `<button class="btn" data-t="${esc(b.text)}">${esc(b.text)}</button>`).join("")}</div>`;
-  }
-  return `<div class="status"><span>9:41</span><span>●●● ▮</span></div>
-    <div class="body">
-      <div class="sid">${s.id}</div>
-      <h3>${esc(s.label || s.id)}</h3>
-      <p>${esc(s.description)}</p>
-      <div class="fields">${'<div class="field"></div>'.repeat(s.fields ?? 0)}</div>
-      <div class="actions">${btns.map((b, i) => `<button class="btn ${i === 0 ? "primary" : ""}" data-t="${esc(b.text)}">${esc(b.text)}</button>`).join("")}</div>
-    </div>`;
-}
-
-let shown = null;
-async function show(id, animate = true) {
-  const s = byId(id);
-  if (!s) return;
-  const vp = $("viewport");
-  const next = document.createElement("div");
-  next.className = "app" + (animate ? " enter" : "");
-  next.innerHTML = appHTML(s);
-  const prev = vp.querySelector(".app");
-  vp.prepend(next);
-  if (animate) {
-    prev?.classList.add("leave");
-    requestAnimationFrame(() => requestAnimationFrame(() => next.classList.remove("enter")));
-    await sleep(450);
-  }
-  prev?.remove();
-  shown = id;
-}
-
-function renderSteps(st = {}) {
-  const goal = $("goal").value;
-  $("steps").innerHTML = screens.map((s, i) => {
-    const cls = ["step", s.id === goal && "is-goal", st.seen?.has(s.id) && "seen", st.now === s.id && "now",
-      st.done === s.id && "done", st.fail === s.id && "fail"].filter(Boolean).join(" ");
-    return (i ? '<span class="sep"></span>' : "") + `<span class="${cls}">${s.id} ${esc(s.label)}</span>`;
-  }).join("");
-}
 function renderGoal() {
-  const prev = $("goal").value;
-  $("goal").innerHTML = screens.map((s) => `<option value="${s.id}">${s.id} ${esc(s.label)}</option>`).join("");
-  $("goal").value = screens.some((s) => s.id === prev) ? prev : (screens.at(-1)?.id ?? "");
+  const prev = S.goal;
+  $("goal").innerHTML = S.screens.map((s) => `<option value="${s.id}">${s.id} ${esc(s.label)}</option>`).join("");
+  S.goal = S.screens.some((s) => s.id === prev) ? prev : (S.screens.at(-1)?.id ?? "");
+  $("goal").value = S.goal;
 }
-function renderSetup() {
-  $("count").textContent = screens.length ? `· 화면 ${screens.length}` : "";
-  $("screens").innerHTML = screens.map((s, i) => `
+function renderScreens() {
+  S.screens.forEach((s, i) => (s.id = sid(i)));
+  $("screen-count").textContent = S.screens.length ? `${S.screens.length}개` : "";
+  $("screens").innerHTML = S.screens.map((s, i) => `
     <div class="sc">
       <div class="thumb" data-i="${i}" title="클릭해서 이미지 넣기">${s.image ? `<img src="${s.image}" alt="">` : "＋<br>이미지"}</div>
       <div>
@@ -428,146 +485,239 @@ function renderSetup() {
         <input class="mono" data-i="${i}" data-k="buttons" value="${esc(s.buttons)}" placeholder="다음>S03, 뒤로>S01">
       </div>
     </div>`).join("");
+  renderGoal(); refreshStepper();
 }
-function renderAll() {
-  screens.forEach((s, i) => (s.id = sid(i)));
-  renderSetup(); renderGoal(); renderSteps();
-  if (screens.length) show(screens[0].id, false); else $("viewport").querySelector(".app")?.remove();
-}
-
 const readAsDataURL = (f) => new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(f); });
 $("screens").addEventListener("input", (e) => {
   const { i, k } = e.target.dataset;
   if (!k) return;
-  screens[i][k] = e.target.value;
-  if (k === "label") { renderGoal(); renderSteps(); }
-  if (screens[i].id === shown) show(shown, false);
+  S.screens[i][k] = e.target.value;
+  if (k === "label") renderGoal();
 });
 $("screens").addEventListener("click", (e) => {
   const del = e.target.closest("[data-del]");
-  if (del) { screens.splice(+del.dataset.del, 1); return renderAll(); }
+  if (del) { S.screens.splice(+del.dataset.del, 1); return renderScreens(); }
   const th = e.target.closest(".thumb");
   if (!th) return;
   const inp = Object.assign(document.createElement("input"), { type: "file", accept: $("files").accept });
-  inp.onchange = async () => { if (inp.files[0]) { screens[th.dataset.i].image = await readAsDataURL(inp.files[0]); renderAll(); } };
+  inp.onchange = async () => { if (inp.files[0]) { S.screens[th.dataset.i].image = await readAsDataURL(inp.files[0]); renderScreens(); } };
   inp.click();
 });
 $("upload").onclick = () => $("files").click();
 $("files").onchange = async () => {
   const files = [...$("files").files].sort((a, b) => a.name.localeCompare(b.name, "ko", { numeric: true }));
-  for (const f of files) screens.push({ label: f.name.replace(/\.[^.]+$/, ""), description: "", buttons: "", image: await readAsDataURL(f) });
+  for (const f of files) S.screens.push({ label: f.name.replace(/\.[^.]+$/, ""), description: "", buttons: "", image: await readAsDataURL(f) });
   $("files").value = "";
-  renderAll();
+  renderScreens();
 };
-$("add").onclick = () => { screens.push({ label: "", description: "", buttons: "", image: null }); renderAll(); };
-$("sample").onclick = () => { screens = SAMPLE.map(([label, description, buttons, fields]) => ({ label, description, buttons, fields, image: null })); renderAll(); };
-$("goal").onchange = () => renderSteps();
+$("add").onclick = () => { S.screens.push({ label: "", description: "", buttons: "", image: null }); renderScreens(); };
+$("sample").onclick = () => {
+  S.screens = SAMPLE_SCREENS.map(([label, description, buttons, fields]) => ({ label, description, buttons, fields, image: null }));
+  S.task = "회원가입을 완료하세요"; $("task").value = S.task;
+  renderScreens();
+};
+$("goal").onchange = () => (S.goal = $("goal").value);
+$("task").oninput = () => (S.task = $("task").value);
+$("figma-go").onclick = async () => {
+  const st = $("figma-status");
+  st.className = "figma-status"; st.textContent = "피그마에서 화면과 연결을 읽는 중… (화면이 많으면 30초쯤 걸린다)";
+  $("figma-go").disabled = true;
+  try {
+    const r = await api("/figma/import", { url: $("figma-url").value.trim() });
+    S.screens = r.screens.map((s) => ({ label: s.label, description: "", image: s.image, buttons: s.elements.map((e) => `${e.text}>${e.to}`).join(", ") }));
+    renderScreens();
+    const links = r.screens.reduce((n, s) => n + s.elements.length, 0);
+    st.className = "figma-status ok"; st.textContent = `✓ "${r.name}" 연결됨 — 화면 ${r.screens.length}개, 버튼 연결 ${links}개 인식. 과제와 목표 화면을 확인하세요.`;
+  } catch (err) {
+    st.className = "figma-status err"; st.textContent = `✕ ${err.message}`;
+  } finally { $("figma-go").disabled = false; }
+};
 
-function tab(setup) {
-  $("tab-run").classList.toggle("on", !setup); $("tab-setup").classList.toggle("on", setup);
-  $("run-view").classList.toggle("off", setup); $("setup").classList.toggle("on", setup);
+// ── ③ AI 패널 ────────────────────────────
+const dist = { count: 5, occupation: "university_student", age: [20, 29], app_usage: [0.2, 0.95], price_sensitivity: [0.6, 1], digital_adoption: [0.3, 0.95] };
+$$(".seg").forEach((seg) => seg.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  $$("button", seg).forEach((x) => x.classList.toggle("on", x === b));
+  const k = seg.dataset.k, v = b.dataset.v;
+  dist[k] = k === "count" ? +v : k === "occupation" ? v : v.split(",").map(Number);
+}));
+const avatar = (i, p, lg = false) => `<div class="av ${lg ? "lg" : ""}" style="background:linear-gradient(135deg,${AVATAR[i % AVATAR.length]})">${esc(String(p.persona_id ?? "P").slice(-2))}</div>`;
+const pdesc = (p) => [p.age && `${p.age}세`, OCC[p.occupation] ?? p.occupation].filter(Boolean).join(" · ");
+const meters = (p) => `<div class="meters">${[["앱 사용 빈도", p.app_usage_freq], ["가격 민감도", p.price_sensitivity], ["디지털 수용도", p.digital_adoption]]
+  .filter(([, v]) => typeof v === "number")
+  .map(([k, v]) => `<div class="meter"><div class="top">${k}<em>${v.toFixed(2)}</em></div><div class="bar"><div style="width:${Math.round(v * 100)}%"></div></div></div>`).join("")}</div>`;
+const chips = (p) => `<div class="chips">${[TOOL[p.existing_tool] && `지금 쓰는 것 · ${TOOL[p.existing_tool]}`, ...(p.traits ?? []).map((t) => TRAIT[t] ?? t)].filter(Boolean).map((c) => `<span class="chip">${esc(c)}</span>`).join("")}</div>`;
+function renderPcards() {
+  $("pcards").innerHTML = S.panel.length
+    ? S.panel.map((p, i) => `<div class="card pcard" style="animation-delay:${i * 60}ms"><div class="who">${avatar(i, p, true)}<div><b>${esc(p.persona_id)}</b><span>${esc(pdesc(p))}</span></div></div>${meters(p)}${chips(p)}</div>`).join("")
+    : `<div class="card pcard"><p class="empty" style="margin:0">왼쪽에서 분포를 고르고 <b>패널 생성</b>을 누른다.</p></div>`;
 }
-$("tab-run").onclick = () => tab(false);
-$("tab-setup").onclick = () => tab(true);
+$("gen").onclick = async () => {
+  $("gen").disabled = true;
+  try {
+    const r = await api("/panel/generate", { count: dist.count, occupation: dist.occupation, age: dist.age, app_usage: dist.app_usage, price_sensitivity: dist.price_sensitivity, digital_adoption: dist.digital_adoption });
+    S.panel = r.personas; S.ask = []; S.act = []; selected = 0;
+    renderPcards(); refreshStepper();
+  } catch (err) { alert(err.message); } finally { $("gen").disabled = false; }
+};
 
-// ── 기록 ──────────────────────────────────
+// ── ④ 실행 ───────────────────────────────
+const STATUS = { running: "Act…", complete: "✓ 완료", drop: "✕ 이탈", error: "Act 오류" };
+function renderRun() {
+  $("panel-count").textContent = `${S.panel.length}명`;
+  $("plist").innerHTML = S.panel.map((p, i) => {
+    const a = S.ask[i], r = S.act[i];
+    const askSt = a === null ? `<span class="st running">Ask…</span>` : a?.error ? `<span class="st error">Ask 오류</span>` : a ? `<span class="st ${a.usage_intention >= 4 ? "ok" : ""}">Ask ${a.usage_intention}/5</span>` : "";
+    const actSt = r?.status ? `<span class="st ${r.status}">${STATUS[r.status]}</span>` : "";
+    return `<button class="pi ${i === selected ? "active" : ""}" data-p="${i}">${avatar(i, p)}
+      <div class="meta"><b>${esc(p.persona_id)}</b><span>${esc(pdesc(p))} · 가격민감 ${p.price_sensitivity?.toFixed(2) ?? "-"}</span></div>
+      <div class="sts">${askSt}${actSt}</div></button>`;
+  }).join("") || `<p class="empty">③ AI 패널에서 먼저 패널을 만든다.</p>`;
+  $("run").disabled = running || !S.panel.length || !S.screens.length;
+  if (!running && !shown) showStore(false);
+  if (!running) renderSteps();
+}
+$("plist").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-p]");
+  if (!b || running) return;
+  selected = +b.dataset.p; renderRun(); replay(selected);
+});
+
+function appHTML(s) {
+  const btns = parseButtons(s.buttons);
+  if (s.image) {
+    return `<img class="shot" src="${s.image}" alt="${esc(s.label)}"><div class="sheet">${btns.map((b) => `<button class="btn" data-t="${esc(b.text)}">${esc(b.text)}</button>`).join("")}</div>`;
+  }
+  return `<div class="status"><span>9:41</span><span>●●● ▮</span></div><div class="body"><div class="sid">${s.id}</div><h3>${esc(s.label || s.id)}</h3><p>${esc(s.description)}</p>
+    <div class="fields">${'<div class="field"></div>'.repeat(s.fields ?? 0)}</div>
+    <div class="actions">${btns.map((b, i) => `<button class="btn ${i === 0 ? "primary" : ""}" data-t="${esc(b.text)}">${esc(b.text)}</button>`).join("")}</div></div>`;
+}
+async function paint(html, key, animate = true) {
+  const vp = $("viewport");
+  const next = document.createElement("div");
+  next.className = "app" + (animate ? " enter" : "");
+  next.innerHTML = html;
+  const prev = vp.querySelector(".app");
+  vp.prepend(next);
+  if (animate) {
+    prev?.classList.add("leave");
+    requestAnimationFrame(() => requestAnimationFrame(() => next.classList.remove("enter")));
+    await sleep(450);
+  }
+  prev?.remove();
+  shown = key;
+}
+const show = (id, animate = true) => (byId(id) ? paint(appHTML(byId(id)), id, animate) : null);
+const showStore = (animate = true) => paint(storeHTML(S.product, true), "store", animate);
+
+function renderSteps(st = {}) {
+  $("steps").innerHTML = S.screens.map((s, i) => {
+    const cls = ["step", s.id === S.goal && "is-goal", st.seen?.has(s.id) && "seen", st.now === s.id && "now", st.done === s.id && "done", st.fail === s.id && "fail"].filter(Boolean).join(" ");
+    return (i ? '<span class="sep"></span>' : "") + `<span class="${cls}">${s.id} ${esc(s.label)}</span>`;
+  }).join("");
+}
+const thinking = (on, text) => { $("thinking").classList.toggle("show", on); if (text) $("thinking-text").textContent = text; };
 const quote = (text) => `<div class="quote"><span class="tag">Synthetic User Response</span>${esc(text)}</div>`;
+const score = (n) => `<span class="score">${[1, 2, 3, 4, 5].map((k) => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>`;
+function askHTML(a) {
+  if (!a) return "";
+  if (a.error) return `<div class="ask-box"><div class="eyebrow">Ask · 기획서 반응</div><div class="k" style="color:var(--bad);margin-top:6px">오류: ${esc(a.error)}</div></div>`;
+  return `<div class="ask-box"><div class="eyebrow">Ask · 기획서 반응</div>
+    <div class="k" style="margin-top:6px"><span>사용 의향 ${score(a.usage_intention)} <b>${a.usage_intention}/5</b></span><span>지불 의향 <b>${won(a.willingness_to_pay)}</b></span><span>우려 <code>${esc(a.concern)}</code></span></div>
+    ${quote(a.reason)}</div>`;
+}
 function logHTML(ev) {
   if (ev.type === "turn") {
-    const head = `<div class="where">턴 ${ev.turn + 1} · ${where(ev.screen)}</div>`;
-    return ev.continue
-      ? `<li><span class="node"></span>${head}<div class="what"><kbd>${esc(ev.target)}</kbd> 누름</div>${quote(ev.reason)}</li>`
-      : `<li class="drop"><span class="node"></span>${head}<div class="what">그만둠</div>${quote(ev.reason)}</li>`;
+    const head = `<span class="node"></span><div class="where">턴 ${ev.turn + 1} · ${where(ev.screen)}</div>`;
+    return ev.continue ? `<li>${head}<div class="what"><kbd>${esc(ev.target)}</kbd> 누름</div>${quote(ev.reason)}</li>`
+      : `<li class="drop">${head}<div class="what">그만둠</div>${quote(ev.reason)}</li>`;
   }
   if (ev.type === "invalid") return `<li class="warn"><span class="node"></span><div class="where">턴 ${ev.turn + 1}</div><div class="what">목록에 없는 "${esc(ev.target)}" 선택 → 다시 묻는다</div></li>`;
   return "";
 }
-function resultHTML(end, events) {
-  if (!end) return "";
-  if (end.type === "error") return `<b>실행 오류</b><small>${esc(end.message)}</small>`;
-  const turns = events.filter((e) => e.type === "turn").length;
-  return end.result === "complete"
-    ? `<b>✓ 과제 완료</b><small>${turns}턴 만에 ${where(end.screen)} 도달</small>`
-    : `<b>✕ ${where(end.screen)}에서 이탈</b><small><code>${esc(end.drop_reason)}</code> ${esc(DROP_LABEL[end.drop_reason] ?? "")}</small>`;
-}
-function setResult(end, events) {
+function setResult(end, events = []) {
   const r = $("result");
-  r.className = end ? `result show ${end.type === "error" ? "error" : end.result}` : "result";
-  r.innerHTML = resultHTML(end, events);
+  if (!end) { r.className = "result"; r.innerHTML = ""; return; }
+  const turns = events.filter((e) => e.type === "turn").length;
+  r.className = `result show ${end.type === "error" ? "error" : end.result}`;
+  r.innerHTML = end.type === "error" ? `<b>실행 오류</b><small>${esc(end.message)}</small>`
+    : end.result === "complete" ? `<b>✓ 과제 완료</b><small>${turns}턴 만에 ${where(end.screen)} 도달</small>`
+    : `<b>✕ ${where(end.screen)}에서 이탈</b><small><code>${esc(end.drop_reason)}</code> ${esc(DROP_LABEL[end.drop_reason] ?? "")}</small>`;
 }
 function setVeil(end) {
   const drop = end?.type === "end" && end.result === "drop";
   if (drop) $("veil").innerHTML = `<div><b>이탈</b><span>${esc(DROP_LABEL[end.drop_reason] ?? end.drop_reason)}</span></div>`;
   $("veil").classList.toggle("show", drop);
 }
-const thinking = (on) => $("thinking").classList.toggle("show", on);
-const pathOf = (events, start) => [start, ...events.filter((e) => e.type === "move").map((e) => e.to)];
+const pathOf = (events) => [S.screens[0]?.id, ...events.filter((e) => e.type === "move").map((e) => e.to)];
 function stepsFor(run) {
-  const path = pathOf(run.events, screens[0]?.id);
+  const path = pathOf(run.events);
   const end = run.end?.type === "end" ? run.end : null;
   return { seen: new Set(path), now: end ? null : path.at(-1), done: end?.result === "complete" ? end.screen : null, fail: end?.result === "drop" ? end.screen : null };
 }
-
-// 끝난 페르소나를 클릭하면 애니메이션 없이 기록을 다시 보여준다
+function logFor(i, title) {
+  $("log-title").textContent = `기록 · ${S.panel[i]?.persona_id ?? ""}`;
+  $("ask-slot").innerHTML = askHTML(S.ask[i]);
+  $("empty").style.display = "none";
+  $("now-playing").innerHTML = title;
+}
 function replay(i) {
-  const run = runs[i];
-  const p = panel[i];
-  $("log-title").textContent = `행동 기록 · ${p?.persona_id ?? ""}`;
-  $("timeline").innerHTML = run.events.map(logHTML).join("");
-  $("empty").style.display = run.events.length || run.end ? "none" : "";
-  setResult(run.end, run.events);
-  const last = run.end?.screen ?? pathOf(run.events, screens[0]?.id).at(-1);
-  if (last) show(last, false);
-  setVeil(run.end);
-  renderSteps(run.end || run.events.length ? stepsFor(run) : {});
-  $("now-playing").innerHTML = run.end ? `<b>${pname(p)}</b>의 기록` : "";
+  const run = S.act[i];
+  logFor(i, `<b>${esc(S.panel[i].persona_id)}</b>의 기록`);
+  $("timeline").innerHTML = (run?.events ?? []).map(logHTML).join("");
+  setResult(run?.end, run?.events);
+  if (run?.end) { show(run.end.screen ?? pathOf(run.events).at(-1), false); setVeil(run.end); renderSteps(stepsFor(run)); }
+  else { setVeil(null); showStore(false); renderSteps(); }
 }
 
-// ── 실행 ──────────────────────────────────
-async function handle(i, ev) {
-  const run = runs[i];
+async function runAsk(i) {
+  selected = i; S.ask[i] = null; renderRun();
+  logFor(i, `<b>${esc(S.panel[i].persona_id)}</b> 기획서 읽는 중 · ${i + 1} / ${S.panel.length}`);
+  $("timeline").innerHTML = ""; setResult(null); setVeil(null);
+  if (shown !== "store") await showStore();
+  thinking(true, "기획서를 읽는 중");
+  try { S.ask[i] = await api("/ask", { persona: S.panel[i], product: S.product }); }
+  catch (err) { S.ask[i] = { error: err.message }; }
+  thinking(false);
+  $("ask-slot").innerHTML = askHTML(S.ask[i]);
+  renderRun();
+  await sleep(900);
+}
+
+async function handleAct(i, ev) {
+  const run = S.act[i];
   if (ev.type === "turn") {
     thinking(false);
     run.events.push(ev);
     $("timeline").insertAdjacentHTML("beforeend", logHTML(ev));
     if (ev.continue) {
-      [...$("viewport").querySelectorAll(".app .btn")].find((b) => b.dataset.t === ev.target)?.classList.add("tap");
+      $$(".app .btn", $("viewport")).find((b) => b.dataset.t === ev.target)?.classList.add("tap");
       await sleep(700);
-      const to = parseButtons(byId(ev.screen)?.buttons ?? "").find((b) => b.text === ev.target)?.to;
+      const to = parseButtons(byId(ev.screen)?.buttons).find((b) => b.text === ev.target)?.to;
       if (byId(to)) { run.events.push({ type: "move", to }); renderSteps(stepsFor(run)); await show(to); }
     }
-    thinking(true);
+    thinking(true, "화면을 보는 중");
   } else if (ev.type === "invalid") {
     run.events.push(ev);
     $("timeline").insertAdjacentHTML("beforeend", logHTML(ev));
   } else if (ev.type === "end" || ev.type === "error") {
     thinking(false);
-    run.end = ev;
-    run.status = ev.type === "error" ? "error" : ev.result;
-    setResult(ev, run.events);
-    setVeil(ev);
-    renderSteps(stepsFor(run));
-    renderPanel();
-    await sleep(1400);   // 결과를 잠깐 보여주고 다음 사람으로
+    run.end = ev; run.status = ev.type === "error" ? "error" : ev.result;
+    setResult(ev, run.events); setVeil(ev); renderSteps(stepsFor(run)); renderRun();
+    await sleep(1400);
   }
 }
-
-async function runOne(i, body) {
-  selected = i;
-  runs[i] = { status: "running", events: [], end: null };
-  renderPanel();
-  $("log-title").textContent = `행동 기록 · ${panel[i].persona_id ?? ""}`;
-  $("now-playing").innerHTML = `<b>${pname(panel[i])}</b> 실행 중 · ${i + 1} / ${panel.length}`;
-  $("run-label").textContent = `${i + 1} / ${panel.length} 실행 중…`;
-  $("timeline").innerHTML = ""; $("empty").style.display = "none"; setResult(null); setVeil(null);
-  renderSteps(stepsFor(runs[i]));
-  await show(screens[0].id, shown !== screens[0].id);
-  thinking(true);
-
+async function runAct(i, body) {
+  selected = i; S.act[i] = { status: "running", events: [], end: null }; renderRun();
+  logFor(i, `<b>${esc(S.panel[i].persona_id)}</b> 프로토타입 사용 중 · ${i + 1} / ${S.panel.length}`);
+  $("timeline").innerHTML = ""; setResult(null); setVeil(null);
+  renderSteps(stepsFor(S.act[i]));
+  await show(S.screens[0].id, shown !== S.screens[0].id);
+  thinking(true, "화면을 보는 중");
   let chain = Promise.resolve();
-  const enqueue = (ev) => (chain = chain.then(() => handle(i, ev)));
+  const enqueue = (ev) => (chain = chain.then(() => handleAct(i, ev)));
   try {
-    const res = await fetch("/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...body, persona: panel[i] }) });
+    const res = await fetch("/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...body, persona: S.panel[i] }) });
     if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
     const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
     let buf = "";
@@ -575,104 +725,149 @@ async function runOne(i, body) {
       const { value, done } = await reader.read();
       if (done) break;
       buf += value;
-      const lines = buf.split("\n");
-      buf = lines.pop();
+      const lines = buf.split("\n"); buf = lines.pop();
       lines.filter(Boolean).forEach((l) => enqueue(JSON.parse(l)));
     }
-  } catch (err) {
-    enqueue({ type: "error", message: err.message });
-  }
+  } catch (err) { enqueue({ type: "error", message: err.message }); }
   await chain;
-  if (!runs[i].end) await handle(i, { type: "error", message: "응답이 중간에 끊겼다" });
+  if (!S.act[i].end) await handleAct(i, { type: "error", message: "응답이 중간에 끊겼다" });
 }
 
 $("run").onclick = async () => {
-  const v = parsePanel();
-  if (!v || !screens.length) return tab(true);
-  panel = v;
-  const body = {
-    task: $("task").value, goal: $("goal").value,
-    screens: screens.map((s) => ({ id: s.id, label: s.label || s.id, description: s.description, image: s.image, elements: parseButtons(s.buttons) })),
-  };
-  running = true; $("run").disabled = true;
-  runs = panel.map(() => ({ status: "idle", events: [], end: null }));
-  $("report").classList.remove("show");
-  for (let i = 0; i < panel.length; i++) await runOne(i, body);   // 무료 티어 한도 때문에 한 명씩
-  thinking(false);
-  running = false; $("run").disabled = false;
-  renderPanel(); renderReport();
-  $("now-playing").innerHTML = "왼쪽에서 페르소나를 누르면 그 사람의 기록을 다시 본다";
-  $("report").scrollIntoView({ behavior: "smooth", block: "start" });
+  readProduct();
+  if (!S.goal || !S.screens.length) return go("proto");
+  running = true; refreshStepper(); $("run").disabled = true;
+  S.ask = S.panel.map(() => undefined); S.act = S.panel.map(() => undefined);
+  const phase = (k) => { $("ph-ask").className = k === "ask" ? "on" : "done"; $("ph-act").className = k === "act" ? "on" : k === "done" ? "done" : ""; };
+
+  phase("ask"); $("run-label").textContent = "① Ask 실행 중…";
+  for (let i = 0; i < S.panel.length; i++) await runAsk(i);   // 무료 티어 한도 때문에 한 명씩
+
+  phase("act"); $("run-label").textContent = "② Act 실행 중…";
+  const body = { task: S.task, goal: S.goal, screens: S.screens.map((s) => ({ id: s.id, label: s.label || s.id, description: s.description, image: s.image, elements: parseButtons(s.buttons) })) };
+  for (let i = 0; i < S.panel.length; i++) await runAct(i, body);
+
+  phase("done"); thinking(false);
+  running = false; $("run-label").textContent = "다시 실행";
+  try { await api("/snapshot", S, "PUT"); } catch { /* 저장 실패해도 리포트는 본다 */ }
+  renderRun(); go("report");
 };
 
-// ── 리포트 (셀 수 있는 것만. 계획서 5-2) ──
-function hbars(rows, total) {
-  return rows.map(([label, n, tip]) => `
-    <div class="hbar" title="${esc(tip)}">
-      <div class="lbl">${label}</div>
-      <div class="track"><div class="fill" style="width:${pct(n, total)}%"></div></div>
-      <div class="val">${n}명</div>
-    </div>`).join("");
-}
-function renderReport() {
-  const done = runs.map((r, i) => ({ ...r, p: panel[i], i })).filter((r) => r.end?.type === "end");
-  const N = done.length;
-  const errors = runs.filter((r) => r.status === "error").length;
-  if (!N) {
-    $("report").innerHTML = `<div class="card kpi"><b>리포트를 만들 수 없다</b><div class="s">완주한 실행이 없다 (오류 ${errors}명). 행동 기록의 오류 메시지를 확인할 것.</div></div>`;
-    return $("report").classList.add("show");
-  }
-  const completed = done.filter((r) => r.end.result === "complete");
-  const drops = done.filter((r) => r.end.result === "drop");
-  const count = (arr, key) => arr.reduce((m, x) => m.set(key(x), (m.get(key(x)) ?? 0) + 1), new Map());
-  const byScreen = [...count(drops, (r) => r.end.screen)].sort((a, b) => b[1] - a[1]);
-  const byReason = [...count(drops, (r) => r.end.drop_reason)].sort((a, b) => b[1] - a[1]);
-  const turns = done.map((r) => r.events.filter((e) => e.type === "turn").length);
-  const avgTurns = (turns.reduce((a, b) => a + b, 0) / N).toFixed(1);
-  const reached = screens.map((s) => [s, done.filter((r) => pathOf(r.events, screens[0].id).includes(s.id)).length]);
+// ── ⑤ 리포트 (셀 수 있는 것만 · 계획서 5-2) ──
+const hbar = (label, frac, val, tip) =>
+  `<div class="hbar" title="${esc(tip)}"><div class="lbl">${label}</div><div class="track"><div class="fill" style="width:${Math.round(frac * 100)}%"></div></div><div class="val">${val}</div></div>`;
+const countBy = (arr, key) => [...arr.reduce((m, x) => m.set(key(x), (m.get(key(x)) ?? 0) + 1), new Map())].sort((a, b) => b[1] - a[1]);
+const median = (xs) => { const s = [...xs].sort((a, b) => a - b); const m = s.length >> 1; return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2); };
+const kpi = (label, v, s) => `<div class="card kpi"><div class="eyebrow">${label}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
 
-  const kpi = (label, v, s) => `<div class="card kpi"><div class="eyebrow">${label}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
-  const topScreen = byScreen[0];
-  const topReason = byReason[0];
+function renderReport() {
+  const P = S.panel.map((p, i) => ({ p, i, a: S.ask[i] && !S.ask[i].error ? S.ask[i] : null, r: S.act[i]?.end?.type === "end" ? S.act[i] : null }));
+  const A = P.filter((x) => x.a), R = P.filter((x) => x.r), both = P.filter((x) => x.a && x.r);
+  const nA = A.length, nR = R.length;
+  if (!nA && !nR) { $("report").innerHTML = `<div class="card kpi"><b>아직 결과가 없다</b><div class="s">④ 실행을 먼저 한다.</div></div>`; return; }
+
+  // 말 vs 행동 (계획서 11-4: Ask 긍정 비율 − Act 완료율)
+  const positive = both.filter((x) => x.a.usage_intention >= 4);
+  const completed = both.filter((x) => x.r.end.result === "complete");
+  const posRate = pct(positive.length, both.length), doneRate = pct(completed.length, both.length), gap = posRate - doneRate;
+  const saidButFailed = positive.filter((x) => x.r.end.result !== "complete");
+
+  const avgIntent = nA ? (A.reduce((s, x) => s + x.a.usage_intention, 0) / nA).toFixed(1) : "-";
+  const wtps = A.map((x) => x.a.willingness_to_pay);
+  const feats = S.product.features;
+  const concerns = countBy(A, (x) => x.a.concern);
+
+  const drops = R.filter((x) => x.r.end.result === "drop");
+  const dropScreens = countBy(drops, (x) => x.r.end.screen);
+  const dropReasons = countBy(drops, (x) => x.r.end.drop_reason);
+  const turns = R.map((x) => x.r.events.filter((e) => e.type === "turn").length);
+  const reached = S.screens.map((s) => [s, R.filter((x) => pathOf(x.r.events).includes(s.id)).length]);
+  const excluded = P.length - both.length;
 
   $("report").innerHTML = `
-    <div class="report-head"><h2>결과 리포트</h2><span>AI 페르소나 ${N}명 · 과제 "${esc($("task").value)}" · Synthetic User 결과${errors ? ` · 오류 ${errors}명 제외` : ""}</span></div>
-    <div class="kpis">
-      ${kpi("과제 완료율", `${pct(completed.length, N)}%`, `${N}명 중 ${completed.length}명 완료`)}
-      ${kpi("최다 이탈 화면", topScreen ? where(topScreen[0]) : "없음", topScreen ? `${topScreen[1]}명 이탈` : "이탈한 사람이 없다")}
-      ${kpi("최다 이탈 이유", topReason ? `<code style="font-size:18px">${esc(topReason[0])}</code>` : "없음", topReason ? `${esc(DROP_LABEL[topReason[0]] ?? "")} · ${topReason[1]}명` : "—")}
-      ${kpi("평균 턴 수", `${avgTurns}<small>턴</small>`, `최소 ${Math.min(...turns)} · 최대 ${Math.max(...turns)}`)}
-    </div>
-    <div class="charts">
-      <div class="card chart">
-        <h3>화면별 도달</h3><p class="sub">각 화면까지 도달한 페르소나 수 (${N}명 기준)</p>
-        ${hbars(reached.map(([s, n]) => [`${s.id} ${esc(s.label)}`, n, `${s.id} ${s.label}: ${n}/${N}명 도달 (${pct(n, N)}%)`]), N)}
+    <div class="page-head"><div><div class="eyebrow">Step 5 · 결과 리포트</div><h1>${esc(S.product.name)} — ${esc(S.task)}</h1>
+      <p>AI 페르소나 ${P.length}명 · Synthetic User 결과 (실제 사용자 데이터 아님)${excluded ? ` · 오류 ${excluded}명은 일부 집계에서 제외` : ""}</p></div>
+      <button class="ghost" data-go="run">실행 화면으로</button></div>
+
+    ${both.length ? `
+    <section class="rsec"><h2>말 vs 행동</h2><p>같은 사람에게 기획서를 보여주고 물었을 때(Ask)와, 직접 써보게 했을 때(Act)의 차이</p>
+      <div class="card hero">
+        <div><div class="n">${posRate}%</div><div class="l">"쓰겠다" (4~5점)<small>Ask · ${positive.length}/${both.length}명</small></div></div>
+        <div class="op">vs</div>
+        <div><div class="n">${doneRate}%</div><div class="l">과제 완료<small>Act · ${completed.length}/${both.length}명</small></div></div>
+        <div class="op">=</div>
+        <div class="gap"><div class="n">${gap > 0 ? "+" : ""}${gap}%p</div><div class="l">의향-행동 격차<small>${gap > 0 ? "말이 행동보다 낙관적" : gap < 0 ? "행동이 말보다 낫다" : "일치"}</small></div></div>
       </div>
-      <div class="card chart">
-        <h3>이탈 이유</h3><p class="sub">이탈한 ${drops.length}명의 이유 (계획서 8-5 카테고리)</p>
-        ${byReason.length ? hbars(byReason.map(([k, n]) => [`<code>${esc(k)}</code> ${esc(DROP_LABEL[k] ?? "")}`, n, `${k} ${DROP_LABEL[k] ?? ""}: ${n}명`]), N) : '<p class="empty">이탈한 사람이 없다.</p>'}
+      ${saidButFailed.length ? `<div class="card hero-say">⚠ 쓰겠다고 답한 <b>${positive.length}명 중 ${saidButFailed.length}명</b>이 과제를 끝내지 못했다.</div>` : ""}
+      <div class="card ptable">
+        <div class="prow head"><div>페르소나</div><div>Ask · 기획서를 읽고</div><div>Act · 직접 써보고</div></div>
+        ${both.map(({ p, i, a, r }) => {
+          const path = pathOf(r.events), ok = r.end.result === "complete";
+          const last = r.events.filter((e) => e.type === "turn").at(-1);
+          const chipsP = path.map((id, k) => `<span class="s ${k === path.length - 1 ? (ok ? "end-ok" : "end-bad") : ""}">${where(id)}</span>`).join('<span class="arr">→</span>');
+          const mismatch = a.usage_intention >= 4 && !ok;
+          return `<div class="prow">
+            <div class="id">${avatar(i, p)}<div><b>${esc(p.persona_id)}</b><span>${esc(pdesc(p))}</span>${mismatch ? `<div style="margin-top:4px"><span class="st warn">말≠행동</span></div>` : ""}</div></div>
+            <div><div class="line">${score(a.usage_intention)} <b>${a.usage_intention}/5</b> · ${won(a.willingness_to_pay)} · <code>${esc(a.concern)}</code></div>${quote(a.reason)}</div>
+            <div><div class="path">${chipsP}</div><div class="line" style="margin-top:6px"><span class="st ${r.end.result}">${ok ? "✓ 완료" : `✕ ${esc(r.end.drop_reason)}`}</span></div>${last ? quote(last.reason) : ""}</div>
+          </div>`;
+        }).join("")}
       </div>
-    </div>
-    <div class="card people">
-      ${done.map((r) => {
-        const path = pathOf(r.events, screens[0].id);
-        const ok = r.end.result === "complete";
-        const last = r.events.filter((e) => e.type === "turn").at(-1);
-        const chips = path.map((id, k) => `<span class="s ${k === path.length - 1 ? (ok ? "end-ok" : "end-bad") : ""}">${where(id)}</span>`).join('<span class="arr">→</span>');
-        return `<div class="prow">
-          <div class="id">${avatar(r.i, r.p)}<div><b>${pname(r.p)}</b><span>${esc(pdesc(r.p))}</span></div></div>
-          <div><div class="path">${chips}</div>${last ? quote(last.reason) : ""}</div>
-          <span class="st ${r.end.result}">${ok ? "✓ 완료" : `✕ ${esc(r.end.drop_reason)}`}</span>
-        </div>`;
-      }).join("")}
-    </div>`;
-  $("report").classList.add("show");
+    </section>` : ""}
+
+    ${nA ? `
+    <section class="rsec"><h2><span class="tag-mode">Ask</span> 기획서 반응</h2><p>제품 설명·기능·가격만 보고 답한 결과 (${nA}명)</p>
+      <div class="kpis k3">
+        ${kpi("평균 사용 의향", `${avgIntent}<small>/ 5</small>`, `4~5점 ${A.filter((x) => x.a.usage_intention >= 4).length}명`)}
+        ${kpi("지불 의향 (Q6) 중앙값", won(median(wtps)), `유료로 낼 사람 ${wtps.filter((w) => w > 0).length}명 · 최대 ${won(Math.max(...wtps))} · 금액 직접 응답`)}
+        ${kpi("최다 우려", concerns[0] ? `<code style="font-size:17px">${esc(concerns[0][0])}</code>` : "-", concerns[0] ? `${esc(DROP_LABEL[concerns[0][0]] ?? "")} · ${concerns[0][1]}명` : "")}
+      </div>
+      <div class="charts">
+        <div class="card chart"><h3>필요한 기능</h3><p class="sub">필요하다고 고른 사람 수</p>
+          ${feats.map((f) => { const n = A.filter((x) => x.a.needed_features.includes(f)).length; return hbar(esc(f), n / nA, `${n}명`, `${f}: ${n}/${nA}명 (${pct(n, nA)}%)`); }).join("")}</div>
+        <div class="card chart"><h3>필요 없는 기능</h3><p class="sub">필요 없다고 고른 사람 수</p>
+          ${feats.map((f) => { const n = A.filter((x) => x.a.unneeded_features.includes(f)).length; return hbar(esc(f), n / nA, `${n}명`, `${f}: ${n}/${nA}명 (${pct(n, nA)}%)`); }).join("")}</div>
+        <div class="card chart"><h3>사용 의향 분포</h3><p class="sub">1 전혀 아니다 ~ 5 매우 그렇다</p>
+          ${[5, 4, 3, 2, 1].map((k) => { const n = A.filter((x) => x.a.usage_intention === k).length; return hbar(`${k}점`, n / nA, `${n}명`, `${k}점: ${n}명`); }).join("")}</div>
+        <div class="card chart"><h3>우려 요인</h3><p class="sub">쓰기를 망설이게 하는 가장 큰 이유 (계획서 8-5 카테고리)</p>
+          ${concerns.map(([k, n]) => hbar(`<code>${esc(k)}</code> ${esc(DROP_LABEL[k] ?? "")}`, n / nA, `${n}명`, `${k}: ${n}명`)).join("")}</div>
+      </div>
+    </section>` : ""}
+
+    ${nR ? `
+    <section class="rsec"><h2><span class="tag-mode">Act</span> 프로토타입 행동</h2><p>"${esc(S.task)}" 과제를 직접 수행한 결과 (${nR}명)</p>
+      <div class="kpis">
+        ${kpi("과제 완료율", `${pct(nR - drops.length, nR)}%`, `${nR}명 중 ${nR - drops.length}명 완료`)}
+        ${kpi("최다 이탈 화면", dropScreens[0] ? where(dropScreens[0][0]) : "없음", dropScreens[0] ? `${dropScreens[0][1]}명 이탈` : "이탈 없음")}
+        ${kpi("최다 이탈 이유", dropReasons[0] ? `<code style="font-size:17px">${esc(dropReasons[0][0])}</code>` : "없음", dropReasons[0] ? `${esc(DROP_LABEL[dropReasons[0][0]] ?? "")} · ${dropReasons[0][1]}명` : "-")}
+        ${kpi("평균 턴 수", `${(turns.reduce((a, b) => a + b, 0) / nR).toFixed(1)}<small>턴</small>`, `최소 ${Math.min(...turns)} · 최대 ${Math.max(...turns)}`)}
+      </div>
+      <div class="charts">
+        <div class="card chart"><h3>화면별 도달</h3><p class="sub">각 화면까지 온 사람 수 (${nR}명 기준)</p>
+          ${reached.map(([s, n]) => hbar(`${s.id} ${esc(s.label)}`, n / nR, `${n}명`, `${s.id} ${s.label}: ${n}/${nR}명 (${pct(n, nR)}%)`)).join("")}</div>
+        <div class="card chart"><h3>이탈 이유</h3><p class="sub">이탈한 ${drops.length}명의 이유 (계획서 8-5 카테고리)</p>
+          ${dropReasons.length ? dropReasons.map(([k, n]) => hbar(`<code>${esc(k)}</code> ${esc(DROP_LABEL[k] ?? "")}`, n / nR, `${n}명`, `${k}: ${n}명`)).join("") : '<p class="empty">이탈한 사람이 없다.</p>'}</div>
+      </div>
+    </section>` : ""}
+
+    <div class="card trust"><b>신뢰도 (본 제품)</b> — 같은 스터디에 실제 참가자 12~15명을 넣으면, 위 수치 옆에 "이 유형은 실측 대비 평균 ○%p 낙관적" 같은 <b>오차</b>가 붙는다. 데모에는 실제 참가자 데이터가 없어 비어 있다.</div>`;
 }
 
-panel = parsePanel();
-runs = panel.map(() => ({ status: "idle", events: [], end: null }));
-renderPanel();
+// ── 저장된 결과 ──────────────────────────
+$("load-snap").onclick = async () => {
+  if (running) return;
+  try {
+    S = await api("/snapshot", undefined, "GET");
+    bindProduct(); $("task").value = S.task; renderScreens(); renderPcards();
+    shown = null; go("report");
+  } catch (err) { alert(err.message); }
+};
+
+// ── 시작 ─────────────────────────────────
+bindProduct();
 $("sample").click();
+renderPcards();
+go("product");
 </script>
 </body>
 </html>
