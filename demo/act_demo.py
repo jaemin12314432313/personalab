@@ -25,8 +25,10 @@ from pydantic import BaseModel
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from app.core.config import DROP_REASON_MAX_TURNS, DROP_REASONS, settings  # noqa: E402
 
-DEFAULT_MODEL = "gemini-2.5-flash"  # 무료 티어. .env 의 LLM_MODEL 로 교체
-RATE_LIMIT_WAIT_SEC = 10  # 무료 티어 분당 한도(429)에 걸리면 쉬었다 재시도
+# 무료 티어. gemini-3.8-flash 는 하루 20회라 금방 막힌다. 한도는 https://aistudio.google.com/rate-limit
+DEFAULT_MODEL = "gemini-3.5-flash-lite"  # .env 의 LLM_MODEL 로 교체
+RATE_LIMIT_WAIT_SEC = 30  # 무료 티어는 분당 5회. 429 면 쉬었다 재시도 (재시도 2번 = 1분 창을 넘김)
+SERVER_BUSY_WAIT_SEC = 10
 IMAGE_TYPES = ("image/png", "image/jpeg", "image/webp", "image/gif")
 
 SYSTEM = (
@@ -125,8 +127,9 @@ def llm(req: RunRequest, screen: Screen, history: list[str]) -> dict:
             return out
         except json.JSONDecodeError:
             last_err = f"JSON 아님: {resp.text}"
-        except errors.ServerError as e:
+        except errors.ServerError as e:  # 503 과부하 등 — 잠깐 뒤 재시도
             last_err = str(e)
+            time.sleep(SERVER_BUSY_WAIT_SEC)
         except errors.ClientError as e:  # 400/403 등은 재시도해도 같다
             if e.code != 429:
                 raise RuntimeError(f"LLM 호출 오류: {e}") from e
