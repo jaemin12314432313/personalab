@@ -1,0 +1,2 @@
+-r ../backend/requirements.txt
+google-genai==2.25.0
