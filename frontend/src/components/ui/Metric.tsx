@@ -1,4 +1,5 @@
-import { TrendingUp, type LucideIcon } from "lucide-react";
+import { TrendingUp } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export default function Metric({ icon: I, label, value, sub, green }: { icon: LucideIcon; label: string; value: string | number; sub: string; green?: boolean }) {
   return (

@@ -1,57 +1,24 @@
-import { Activity, ChevronRight, Users } from "lucide-react";
+import { Activity, ChevronRight, Database, Settings } from "lucide-react";
 import Header from "../components/layout/Header";
 import Pill from "../components/ui/Pill";
 import { studies } from "../data/demoData";
-import type { Page } from "../types";
+import type { OpenReport, Page, Study } from "../types";
 
-export default function Generic({ type }: { type: Page }) {
-  const options: Partial<Record<Page, [string, string]>> = {
-    runs: ["실행 기록", "AI 패널 실행과 처리 상태를 확인하세요."],
-    participants: ["참가자", "실제 참가자의 초대와 진행 상태를 관리하세요."],
-    data: ["데이터 소스", "페르소나 생성에 사용하는 출처를 관리하세요."],
-    settings: ["설정", "워크스페이스와 팀 설정을 관리하세요."],
-  };
-  const c = options[type] ?? options.settings!;
-  return (
-    <>
-      <Header title={c[0]} subtitle={c[1]} />
-      <main className="page generic">
-        {type === "runs" ? (
-          studies.slice(0, 2).map((s, i) => (
-            <section className="card run" key={s.id}>
-              <i>
-                <Activity size={18} />
-              </i>
-              <div>
-                <span>
-                  <b>{s.name}</b>
-                  <Pill tone={i ? "purple" : "green"}>
-                    {i ? "running" : "succeeded"}
-                  </Pill>
-                </span>
-                <p>ACT · 100 personas · model-pl-02</p>
-              </div>
-              <section>
-                <i>
-                  <em style={{ width: i ? "72%" : "100%" }} />
-                </i>
-                <small>{i ? "72 / 100 처리" : "100 / 100 완료"}</small>
-              </section>
-              <b>₩{i ? "6,840" : "9,210"}</b>
-              <ChevronRight size={16} />
-            </section>
-          ))
-        ) : (
-          <section className="card empty">
-            <span>
-              <Users size={27} />
-            </span>
-            <h2>{c[0]} 관리 화면</h2>
-            <p>현재 데모에서는 대표 데이터만 표시합니다.</p>
-            <button className="primary">새 항목 추가</button>
-          </section>
-        )}
-      </main>
-    </>
-  );
+export default function Generic({ type, studyList = studies, goReport }: { type: Page; studyList?: Study[]; goReport: OpenReport }) {
+  const config = {
+    runs: ["실행 기록", "테스트별 AI 실행 상태와 분석 결과를 확인하세요."],
+    data: ["데이터 소스", "Persona 생성과 결과 해석에 사용하는 자료를 확인하세요."],
+    settings: ["설정", "워크스페이스 설정을 관리하세요."],
+  }[type as "runs" | "data" | "settings"] || ["준비 중", "현재 사용할 수 있는 화면이 없습니다."];
+  const completed = studyList.filter(s => s.integrated && s.run);
+  const ready = studyList.filter(s => s.integrated && !s.run);
+  return <>
+    <Header title={config[0]} subtitle={config[1]} />
+    <main className="page generic">
+      {type === "runs" ? <>
+        <div className="run-list-heading"><b>직접 만든 테스트</b><small>완료 {completed.length}개 · 실행 준비 {ready.length}개</small></div>
+        {studyList.filter(s => s.integrated).length ? studyList.filter(s => s.integrated).map(s => <button className="card run generic-run-button" key={s.id} onClick={() => goReport(s)}><i><Activity size={18} /></i><div><span><b>{s.name}</b><Pill tone={s.run ? "green" : "purple"}>{s.run ? "분석 완료" : "실행 준비"}</Pill></span><p>Ask → Act · AI Persona {s.personas?.length ?? 0}명 · {s.screens?.length ?? 0}개 화면</p></div><section><i><em style={{ width: s.run ? "100%" : "0%" }} /></i><small>{s.run ? "결과와 근거 확인 가능" : "실행 전"}</small></section><ChevronRight size={16} /></button>) : <section className="card empty"><span><Activity size={27} /></span><h2>아직 실행 기록이 없습니다</h2><p>새 테스트를 만들고 AI Persona를 실행하면 이곳에 표시됩니다.</p></section>}
+      </> : <section className="card empty"><span>{type === "data" ? <Database size={27} /> : <Settings size={27} />}</span><h2>{config[0]}</h2><p>현재 체험 버전에서는 연결된 설정 항목이 없습니다.</p></section>}
+    </main>
+  </>;
 }
