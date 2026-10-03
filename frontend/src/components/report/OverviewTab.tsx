@@ -1,7 +1,7 @@
 import { ArrowRight, Check, Sparkles } from "lucide-react";
 import CardHead from "../ui/CardHead";
 
-export default function Overview({ setTab }: { setTab: (tab: "report") => void }) {
+export default function Overview({ setTab }: { setTab: (tab: "report" | "participants" | "setup") => void }) {
   return (
     <div className="overview">
       <section className="card">
