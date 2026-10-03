@@ -4,4 +4,4 @@ scipy
 pyarrow
 pyreadstat
 openpyxl
-datasets
+huggingface_hub

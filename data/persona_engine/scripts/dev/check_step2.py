@@ -1,11 +1,11 @@
-"""Step 2: NVIDIA 로딩·변환 점검. 사용: python scripts/check_step2.py [--occ]
+"""Step 2: NVIDIA 로딩·변환 점검. 사용: python scripts/dev/check_step2.py [--occ]
   --occ  직업 상위 값 목록까지 출력 (키워드 사전 확장용)"""
 import sys
 from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from src import config as C                                   # noqa: E402
 from src.nvidia import STRUCT_COLS, TEXT_COLS, derive_nvidia, load_nvidia_struct, nvidia_dataset   # noqa: E402
 

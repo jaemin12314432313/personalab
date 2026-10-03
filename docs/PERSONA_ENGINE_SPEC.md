@@ -1,5 +1,7 @@
 # PersonaLab 페르소나 엔진 구현 명세 (Claude Code용)
 
+> **구현 완료 후 메모:** 이 문서는 구현 전 명세다. 실제 코드는 `data/persona_engine/`이 기준이고, 사용법은 `data/persona_engine/README.md`를 본다. 9장 참고 코드와 달라진 점(학력 3범주, KSCO 직업 사전, 등급 규칙, `datasets` 대신 parquet 직접 읽기 등)은 PR #6 본문에 정리했다.
+
 이 문서 하나로 작업을 시작할 수 있게 썼다. 0장 규칙을 읽고, 10장의 Step 0부터 순서대로 진행한다.
 
 ## 0. 진행 규칙

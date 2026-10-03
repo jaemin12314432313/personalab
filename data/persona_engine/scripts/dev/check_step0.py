@@ -1,8 +1,8 @@
-"""Step 0: 미디어패널 2024 개인 데이터의 행·열과 필수 변수 확인. 사용: python scripts/check_step0.py"""
+"""Step 0: 미디어패널 2024 개인 데이터의 행·열과 필수 변수 확인. 사용: python scripts/dev/check_step0.py"""
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from src import config as C                                   # noqa: E402
 from src.donor import RAW_COLS, load_donor                    # noqa: E402
 from src.utils import codebook_lookup                         # noqa: E402

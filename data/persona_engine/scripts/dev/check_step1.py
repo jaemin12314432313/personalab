@@ -1,4 +1,4 @@
-"""Step 1: donor 전처리·점수 검증. 사용: python scripts/check_step1.py
+"""Step 1: donor 전처리·점수 검증. 사용: python scripts/dev/check_step1.py
 1) 코드북 대조: 우리가 읽은 값의 가중 비율이 코드북의 2024 가중 %와 같은가 (읽기·가중치 검증)
 2) 범주 커버리지: 매칭 키가 NaN인 행
 3) 타깃 프리셋별: donor 수, 작은 칸, 등급 비율 (허용 범위 config.GRADE_SHARE_RANGE)
@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from src import config as C                                   # noqa: E402
 from src.donor import compute_scores, derive_donor, load_donor   # noqa: E402
 from src.engine import _filter                                # noqa: E402
