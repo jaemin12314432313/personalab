@@ -1,0 +1,43 @@
+/* PersonaLab visual tokens. Legacy aliases keep existing components compatible. */
+:root {
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --surface-raised: #fbfcfe;
+  --surface-soft: #eef2f8;
+  --text: #172033;
+  --text-secondary: #3c4a62;
+  --muted: #69768b;
+  --line: #dce3ed;
+  --line-strong: #c8d2e0;
+  --primary: #3459d6;
+  --primary-hover: #2747b5;
+  --primary-soft: #eaf0ff;
+  --accent: #087f85;
+  --accent-soft: #e5f5f3;
+  --success: #23805f;
+  --success-soft: #e7f5ee;
+  --warning: #a96925;
+  --warning-soft: #fff3df;
+  --danger: #bd4057;
+  --danger-soft: #fdecef;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow: 0 1px 2px rgb(24 39 66 / 3%), 0 10px 32px rgb(24 39 66 / 4%);
+  --purple: var(--primary);
+  --purple-soft: var(--primary-soft);
+  --green: var(--success);
+  --green-soft: var(--success-soft);
+  --orange: var(--primary);
+  --orange-soft: var(--primary-soft);
+  --cream: var(--primary-soft);
+  --peach: var(--warning-soft);
+}
+
+body { background: var(--bg); color: var(--text); }
+button, input, textarea, select { font-family: inherit; }
+button { transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease, transform .16s ease; }
+button:disabled { cursor: not-allowed; opacity: .55; }
+:focus-visible { outline: 3px solid rgb(52 89 214 / 35%); outline-offset: 2px; }
+::selection { background: #d9e5ff; color: var(--text); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }

@@ -1,0 +1,164 @@
+<!--HEAD-->
+<title>PersonaLab 카드 뷰어</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --ink: #1c2024; --muted: #60656c; --line: #e3e5e8;
+    --accent: #3b5bdb; --accent-soft: #e7ecff;
+    --low: #2f9e44; --low-soft: #e6f6ea; --mid: #b7791f; --mid-soft: #fdf3e1; --high: #d6336c; --high-soft: #fde8ef;
+    --warn: #c92a2a; --warn-soft: #fff0f0; --story: #f1f3f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141619; --panel: #1d2024; --ink: #e9ecef; --muted: #9aa0a6; --line: #2e3238;
+      --accent: #91a7ff; --accent-soft: #252c48;
+      --low: #69db7c; --low-soft: #1f3326; --mid: #ffc078; --mid-soft: #3a2f1c; --high: #f783ac; --high-soft: #3d2130;
+      --warn: #ff8787; --warn-soft: #3b2020; --story: #25282d;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+      --bg: #141619; --panel: #1d2024; --ink: #e9ecef; --muted: #9aa0a6; --line: #2e3238;
+      --accent: #91a7ff; --accent-soft: #252c48;
+      --low: #69db7c; --low-soft: #1f3326; --mid: #ffc078; --mid-soft: #3a2f1c; --high: #f783ac; --high-soft: #3d2130;
+      --warn: #ff8787; --warn-soft: #3b2020; --story: #25282d;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 14px/1.6 "IBM Plex Sans KR", "Pretendard", "Malgun Gothic", system-ui, sans-serif; }
+  header { padding: 20px 24px 8px; }
+  h1 { margin: 0 0 4px; font-size: 20px; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .sticky { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--bg);
+            border-bottom: 1px solid var(--line); }
+  .bar { padding: 8px 24px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .tab { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 12px;
+         border-radius: 999px; cursor: pointer; font: inherit; }
+  .tab:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .tab.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  select, input[type=search] { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px;
+         background: var(--panel); color: var(--ink); }
+  label.chk { color: var(--muted); display: flex; gap: 4px; align-items: center; }
+  .spacer { flex: 1; }
+  .summary { margin: 14px 24px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .stat b { display: block; font-size: 18px; }
+  .stat span { color: var(--muted); font-size: 12px; }
+  .target { margin: 10px 24px 0; color: var(--muted); font-size: 13px; }
+  .grid { padding: 16px 24px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+          display: flex; flex-direction: column; gap: 10px; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .pid { font-weight: 700; color: var(--accent); }
+  .meta { color: var(--muted); font-size: 12px; text-align: right; }
+  .who { font-weight: 600; font-size: 15px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--story); color: var(--muted); }
+  .chip.낮음 { background: var(--low-soft); color: var(--low); }
+  .chip.중간 { background: var(--mid-soft); color: var(--mid); }
+  .chip.높음 { background: var(--high-soft); color: var(--high); }
+  .chip.flag { background: var(--warn-soft); color: var(--warn); font-weight: 600; }
+  .sec h4 { margin: 0 0 4px; font-size: 11px; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+  .story { background: var(--story); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+  .story p, .beh p { margin: 0 0 4px; }
+  .beh p { padding-left: 10px; border-left: 3px solid var(--accent); }
+  .foot { color: var(--muted); font-size: 12px; border-top: 1px dashed var(--line); padding-top: 6px; }
+  .empty { padding: 40px 24px; color: var(--muted); }
+  @media (max-width: 600px) {
+    header, .bar, .grid { padding-left: 16px; padding-right: 16px; }
+    .summary, .target { margin-left: 16px; margin-right: 16px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+<!--/HEAD-->
+<header>
+  <h1>페르소나 카드 뷰어</h1>
+  <div class="sub">NVIDIA Nemotron-Personas-Korea(누구인가) + 한국미디어패널 2024(돈과 앱을 어떻게 쓰는가) · 분포 기반 페르소나 샘플링 결과 · NVIDIA 데이터 CC BY 4.0</div>
+</header>
+<div class="sticky">
+<div class="bar" id="tabs"></div>
+<div class="bar">
+  가격 민감 <select id="fPs" aria-label="가격 민감 등급"><option value="">전체</option><option>낮음</option><option>중간</option><option>높음</option></select>
+  디지털 <select id="fDa" aria-label="디지털 등급"><option value="">전체</option><option>낮음</option><option>중간</option><option>높음</option></select>
+  OTT <select id="fOtt" aria-label="OTT 결제"><option value="">전체</option><option>단독</option><option>친구와 나눔</option><option>가족</option><option>미이용</option></select>
+  <label class="chk"><input type="checkbox" id="fFlag"> 점검 표시만</label>
+  <span class="spacer"></span>
+  <input type="search" id="fQ" aria-label="검색" placeholder="직업·지역·문장 검색">
+</div>
+</div>
+<div class="summary" id="summary"></div>
+<div class="target" id="target"></div>
+<div class="grid" id="grid"></div>
+<script>
+const DATA = /*__DATA__*/null;
+const LABEL = { univ: "20대 대학생", "30s_office": "30대 사무·관리", "40s_all": "40대 전체", "60plus": "60세 이상" };
+const order = Object.keys(LABEL);
+const key = n => n.replace(/^panel_/, "").replace(/_n\d+_seed\d+$/, "");
+const rank = n => { const i = order.indexOf(key(n)); return i < 0 ? order.length : i; };
+const names = Object.keys(DATA).sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+let cur = names[0];
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const short = n => { const k = n.replace(/^panel_/, "").replace(/_n\d+_seed\d+$/, ""); return LABEL[k] || k; };
+
+function tabs() {
+  $("tabs").innerHTML = names.map(n =>
+    `<button class="tab ${n === cur ? "on" : ""}" data-n="${n}">${esc(short(n))}</button>`).join("");
+  $("tabs").querySelectorAll(".tab").forEach(b => b.onclick = () => { cur = b.dataset.n; render(); });
+}
+
+function summary(d) {
+  const m = d.match, tot = d.n, lv3 = (m["3"] || 0) + (m["4"] || 0);
+  const okAll = Object.values(d.checks).every(Boolean);
+  const minP = Math.min(...Object.values(d.dist_p));
+  const stats = [
+    [tot, "생성 인원" + (Object.keys(d.shortfall).length ? " (부족 있음)" : "")],
+    [d.donor_n.toLocaleString(), "donor(실제 응답자) 수"],
+    [Math.round((m["1"] || 0) / tot * 100) + "%", "완전 일치 매칭 (level 1)"],
+    [Math.round(lv3 / tot * 100) + "%", "조건 크게 완화 (level 3+)"],
+    [d.donors_used + " / 최대 " + d.max_reuse + "회", "사용 donor / 재사용"],
+    [okAll ? "통과" : "확인 필요", "자동 점검 · 분포 p≥" + minP.toFixed(2)],
+  ];
+  $("summary").innerHTML = stats.map(([b, s]) => `<div class="stat"><b>${esc(b)}</b><span>${esc(s)}</span></div>`).join("");
+  const t = Object.entries(d.target).map(([k, v]) => `${k}=${Array.isArray(v) ? v.join("~") : v}`).join(", ") || "전체";
+  $("target").innerHTML = `타깃: ${esc(t)} · 점수 버전 ${esc(d.scoring)}` +
+    (d.warnings.length ? ` · <span style="color:var(--warn)">등급 경고: ${esc(d.warnings.join(", "))}</span>` : "");
+}
+
+function card(r) {
+  const g = (lab, v) => `<span class="chip ${esc(v)}">${lab} ${esc(v)}</span>`;
+  const chips = [g("가격민감", r.ps_grade), g("디지털", r.da_grade),
+                 r.ns_grade === "높음" ? `<span class="chip">새것선호 높음</span>` : "",
+                 `<span class="chip">개인정보 우려 ${r.privacy_concern}/5</span>`,
+                 `<span class="chip">OTT ${esc(r.ott_payment)}</span>`,
+                 ...r.flags.map(f => `<span class="chip flag">⚠ ${esc(f)}</span>`)].join("");
+  const ps = arr => arr.map(x => `<p>${esc(x)}</p>`).join("");
+  return `<article class="card">
+    <div class="top"><span class="pid">${esc(r.persona_id)}</span>
+      <span class="meta">${esc(r.education_level)} · ${esc(r.job_group)}${r.student_inferred ? " (추정)" : ""}</span></div>
+    <div class="who">${ps(r.card.head)}</div>
+    <div class="chips">${chips}</div>
+    <div class="sec"><h4>NVIDIA 서술</h4><div class="story">${ps(r.card.story) || "<p>-</p>"}</div></div>
+    <div class="sec beh"><h4>행동 문장 (미디어패널 응답자 기반)</h4>${ps(r.card.behavior)}</div>
+    <div class="foot">매칭 level ${r.match_level} · 후보 ${r.pool_size}명${r.over_cap ? " · 재사용 상한 초과" : ""}</div>
+  </article>`;
+}
+
+function render() {
+  tabs();
+  const d = DATA[cur];
+  summary(d);
+  const ps = $("fPs").value, da = $("fDa").value, ott = $("fOtt").value, fl = $("fFlag").checked;
+  const q = $("fQ").value.trim();
+  const rows = d.rows.filter(r =>
+    (!ps || r.ps_grade === ps) && (!da || r.da_grade === da) && (!ott || r.ott_payment === ott) &&
+    (!fl || r.flags.length) &&
+    (!q || [r.occupation, r.province, ...r.card.head, ...r.card.story, ...r.card.behavior].join(" ").includes(q)));
+  $("grid").innerHTML = rows.length ? rows.map(card).join("") : `<div class="empty">조건에 맞는 카드가 없습니다.</div>`;
+}
+
+["fPs", "fDa", "fOtt", "fFlag"].forEach(id => $(id).onchange = render);
+$("fQ").oninput = render;
+render();
+</script>
