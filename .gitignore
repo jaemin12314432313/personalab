@@ -49,6 +49,9 @@ Thumbs.db
 *.log
 logs/
 
+# 데모 결과 저장 (캐시 재생용)
+demo/snapshot.json
+
 # Persona Engine 중간·산출물 (원시데이터는 위 data/raw/)
 data/interim/
 data/persona_engine/outputs/
