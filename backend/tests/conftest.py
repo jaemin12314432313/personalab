@@ -16,7 +16,10 @@ async def session() -> AsyncIterator[AsyncSession]:
     engine = create_async_engine(settings.database_url)
     async with engine.connect() as conn:
         trans = await conn.begin()
-        async with AsyncSession(bind=conn, join_transaction_mode="create_savepoint") as s:
+        # expire_on_commit=False 는 앱 세션(core/db.py SessionLocal)과 맞춘 것
+        async with AsyncSession(
+            bind=conn, join_transaction_mode="create_savepoint", expire_on_commit=False
+        ) as s:
             yield s
         await trans.rollback()
     await engine.dispose()
