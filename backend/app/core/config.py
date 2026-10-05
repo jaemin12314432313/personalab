@@ -60,4 +60,21 @@ BENCHMARK_GROUPS: tuple[str, ...] = ("calib", "eval")
 
 STUDY_STATUS_DEFAULT = "draft"
 RUN_STATUS_DEFAULT = "pending"
+RUN_STATUS_RUNNING = "running"
+RUN_STATUS_DONE = "done"
+RUN_STATUS_FAILED = "failed"
 INVITE_STATUS_DEFAULT = "pending"
+
+# ── Ask 응답 범위 (계획서 7-2) ───────────────────────────────
+USAGE_INTENTION_RANGE = (1, 5)
+MAX_WTP = 1_000_000  # Q6 월 지불 의향 상한 (원). 이상치 차단용
+
+# ── act_logs.action 값 ────────────────────────────────────────
+# click / abandon 은 LLM 응답, complete / stop 은 Agent Loop 가 남기는 종료 기록
+ACT_CLICK = "click"
+ACT_ABANDON = "abandon"
+ACT_COMPLETE = "complete"
+ACT_STOP = "stop"
+
+# ponytail: 인증 미정이라 모든 요청을 개발용 사용자 한 명으로 처리. 로그인 방식이 정해지면 교체
+DEV_USER_EMAIL = "dev@personalab.local"
