@@ -69,6 +69,13 @@ INVITE_STATUS_DEFAULT = "pending"
 USAGE_INTENTION_RANGE = (1, 5)
 MAX_WTP = 1_000_000  # Q6 월 지불 의향 상한 (원). 이상치 차단용
 
+# ── LLM 호출 (services/llm.py) ─────────────────────────────────
+# 무료 티어 모델. 한도는 https://aistudio.google.com/rate-limit. .env 의 LLM_MODEL 로 교체
+LLM_DEFAULT_MODEL = "gemini-3.5-flash-lite"
+LLM_RATE_LIMIT_WAIT_SEC = 30  # 429 면 쉬었다 재시도. 재시도 2번이면 분당 한도 창을 넘긴다
+LLM_SERVER_BUSY_WAIT_SEC = 10  # 503 과부하 등 서버 쪽 오류
+LLM_IMAGE_TYPES: tuple[str, ...] = ("image/png", "image/jpeg", "image/webp", "image/gif")
+
 # ── act_logs.action 값 ────────────────────────────────────────
 # click / abandon 은 LLM 응답, complete / stop 은 Agent Loop 가 남기는 종료 기록
 ACT_CLICK = "click"
