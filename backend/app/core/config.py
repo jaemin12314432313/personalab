@@ -56,6 +56,7 @@ BENCHMARK_CATEGORIES: tuple[str, ...] = (*DROP_REASONS, LABEL_OTHER)
 # ── 열거값 ────────────────────────────────────────────────────
 RUN_MODES: tuple[str, ...] = ("ask", "act")
 PARTICIPANT_TYPES: tuple[str, ...] = ("ai", "real")
+PARTICIPANT_AI = PARTICIPANT_TYPES[0]
 BENCHMARK_GROUPS: tuple[str, ...] = ("calib", "eval")
 
 STUDY_STATUS_DEFAULT = "draft"
@@ -75,6 +76,13 @@ LLM_DEFAULT_MODEL = "gemini-3.5-flash-lite"
 LLM_RATE_LIMIT_WAIT_SEC = 30  # 429 면 쉬었다 재시도. 재시도 2번이면 분당 한도 창을 넘긴다
 LLM_SERVER_BUSY_WAIT_SEC = 10  # 503 과부하 등 서버 쪽 오류
 LLM_IMAGE_TYPES: tuple[str, ...] = ("image/png", "image/jpeg", "image/webp", "image/gif")
+
+# ── 리포트 표기 (services/report.py) ───────────────────────────
+# 페르소나 표시 ID. 페르소나 데이터에 persona_id 가 없으면 DB 번호로 만든다 (P007)
+PERSONA_ID_PREFIX = "P"
+PERSONA_ID_WIDTH = 3
+# act_logs.turn 은 0부터, 사람이 읽는 턴 번호는 1부터
+TURN_NUMBER_OFFSET = 1
 
 # ── act_logs.action 값 ────────────────────────────────────────
 # click / abandon 은 LLM 응답, complete / stop 은 Agent Loop 가 남기는 종료 기록

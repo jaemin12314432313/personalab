@@ -69,6 +69,27 @@ async def test_full_flow(client, session):
     # 임시 decide 는 첫 버튼만 눌러 목표에 닿는다
     assert [r.action for r in logs].count("complete") == 3
 
+    # 리포트: 두 실행의 결과가 페르소나별로 묶여 나온다
+    report = (await client.get(f"/studies/{sid}/report")).json()
+    assert (report["ask_run_id"], report["act_run_id"]) == (ask_run, act_run)
+    assert len(report["results"]) == 3
+    first = report["results"][0]
+    assert first["ask"] is not None and first["persona_id"].startswith("P")
+    assert first["act"]["path"] == ["S01", "S02", "S03"]
+    assert first["act"]["end"]["result"] == "complete"
+
+
+async def test_report_before_any_run_has_empty_sides(client):
+    sid = await make_study(client)
+    await client.post(f"/studies/{sid}/panel/generate", json={"n": 2})
+    report = (await client.get(f"/studies/{sid}/report")).json()
+    assert report["ask_run_id"] is None and report["act_run_id"] is None
+    assert [(r["ask"], r["act"]) for r in report["results"]] == [(None, None), (None, None)]
+
+
+async def test_report_of_unknown_study_is_404(client):
+    assert (await client.get("/studies/999999/report")).status_code == 404
+
 
 async def test_run_needs_inputs(client):
     sid = await make_study(client)

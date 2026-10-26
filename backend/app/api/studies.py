@@ -8,6 +8,7 @@ from app.core.db import get_session
 from app.models import Study
 from app.repositories import run as run_repo
 from app.repositories import study as study_repo
+from app.schemas.report import ReportOut
 from app.schemas.run import RunCreate, RunOut
 from app.schemas.study import (
     PanelGenerateIn,
@@ -25,6 +26,7 @@ from app.schemas.study import (
 )
 from app.services import runner
 from app.services.persona.sample import sample_personas
+from app.services.report import build_results
 
 router = APIRouter(prefix="/studies", tags=["studies"])
 
@@ -150,6 +152,24 @@ async def start_run(
     run = await run_repo.create_run(session, study.id, body.mode)
     background.add_task(launch, run.id)
     return run
+
+
+@router.get("/{study_id}/report", response_model=ReportOut)
+async def get_report(
+    study: Study = Depends(owned_study), session: AsyncSession = Depends(get_session)
+):
+    """가장 최근에 끝난 Ask·Act 실행을 페르소나별로 묶어 돌려준다. 실행이 없으면 빈 칸(None)."""
+    ask_run = await run_repo.latest_done_run(session, study.id, "ask")
+    act_run = await run_repo.latest_done_run(session, study.id, "act")
+    personas = await study_repo.list_personas(session, study.id)
+    ask_rows = await run_repo.list_ask_responses(session, ask_run.id) if ask_run else []
+    act_rows = await run_repo.list_act_logs(session, act_run.id) if act_run else []
+    return ReportOut(
+        study_id=study.id,
+        ask_run_id=ask_run.id if ask_run else None,
+        act_run_id=act_run.id if act_run else None,
+        results=build_results(personas, ask_rows, act_rows),
+    )
 
 
 async def _missing_inputs(session: AsyncSession, study_id: int, mode: str) -> list[str]:
