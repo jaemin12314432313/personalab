@@ -12,6 +12,7 @@ from app.repositories import run as run_repo
 from app.repositories import study as study_repo
 from app.services.act.loop import agent_loop
 from app.services.ask.answer import ask_persona, check_ask
+from app.services.llm import LLMError
 
 log = logging.getLogger(__name__)
 
@@ -50,25 +51,32 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
             screens = {s["id"]: s for s in proto.screens_json}
             start = proto.screens_json[0]["id"]
 
+        failed = 0
         for i, persona in enumerate(personas, 1):
             # LLM 호출은 동기라 스레드로 넘긴다. 이벤트 루프를 막지 않게
             attrs = persona.attributes_json
-            if run.mode == "ask":
-                out = await asyncio.to_thread(_ask_with_retries, attrs, product, questions)
-                if out is not None:
-                    await run_repo.add_ask_response(session, run.id, persona.id, out)
-            else:
-                rows = await asyncio.to_thread(
-                    agent_loop,
-                    attrs,
-                    task.description,
-                    screens,
-                    start,
-                    task.goal_screen_id,
-                    settings.max_turns,
-                )
-                await run_repo.add_ai_act_logs(session, run.id, persona.id, rows)
+            try:
+                if run.mode == "ask":
+                    out = await asyncio.to_thread(_ask_with_retries, attrs, product, questions)
+                    if out is not None:
+                        await run_repo.add_ask_response(session, run.id, persona.id, out)
+                else:
+                    rows = await asyncio.to_thread(
+                        agent_loop,
+                        attrs,
+                        task.description,
+                        screens,
+                        start,
+                        task.goal_screen_id,
+                        settings.max_turns,
+                    )
+                    await run_repo.add_ai_act_logs(session, run.id, persona.id, rows)
+            except LLMError as error:  # 이 페르소나만 빠진다. 나머지는 계속 돈다
+                failed += 1
+                log.warning("페르소나 %s LLM 실패, 집계에서 제외: %s", persona.id, error)
             await run_repo.set_run_state(session, run, progress=i / len(personas))
+        if personas and failed == len(personas):  # 키 오류처럼 전원이 실패하면 실행 실패로 본다
+            raise LLMError("모든 페르소나의 LLM 호출이 실패했습니다")
         await run_repo.set_run_state(session, run, status=RUN_STATUS_DONE)
     except Exception:
         log.exception("실행 실패 run_id=%s", run_id)
