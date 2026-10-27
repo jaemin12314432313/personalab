@@ -1,0 +1,202 @@
+{
+  "name": "signup",
+  "task": "Plani에 회원가입을 완료한다",
+  "goal": "S05",
+  "screens": [
+    {
+      "id": "S01",
+      "label": "시작",
+      "texts": [
+        "Plani",
+        "시간표와 과제 마감을 한곳에서 관리하는 대학생 일정 앱",
+        "강의 시간표를 불러오면 과제·시험 일정이 자동으로 정리됩니다."
+      ],
+      "fields": [],
+      "elements": [
+        {
+          "text": "시작하기",
+          "to": "S02"
+        },
+        {
+          "text": "이미 계정이 있어요",
+          "to": null
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "label": "약관 동의",
+      "texts": [
+        "약관에 동의해 주세요"
+      ],
+      "fields": [
+        {
+          "label": "전체 동의",
+          "type": "checkbox",
+          "required": null,
+          "hint": null
+        },
+        {
+          "label": "서비스 이용약관 (필수)",
+          "type": "checkbox",
+          "required": true,
+          "hint": null
+        },
+        {
+          "label": "개인정보 수집·이용 (필수)",
+          "type": "checkbox",
+          "required": true,
+          "hint": null
+        },
+        {
+          "label": "위치정보 이용",
+          "type": "checkbox",
+          "required": null,
+          "hint": null
+        },
+        {
+          "label": "마케팅 정보 수신 (선택)",
+          "type": "checkbox",
+          "required": false,
+          "hint": null
+        }
+      ],
+      "elements": [
+        {
+          "text": "뒤로",
+          "to": "S01"
+        },
+        {
+          "text": "다음",
+          "to": "S03"
+        }
+      ]
+    },
+    {
+      "id": "S03",
+      "label": "정보 입력",
+      "texts": [
+        "회원 정보를 입력해 주세요"
+      ],
+      "fields": [
+        {
+          "label": "이름 *",
+          "type": "text",
+          "required": true,
+          "hint": null
+        },
+        {
+          "label": "학교 이메일 *",
+          "type": "email",
+          "required": true,
+          "hint": "example@univ.ac.kr"
+        },
+        {
+          "label": "비밀번호 *",
+          "type": "password",
+          "required": true,
+          "hint": null
+        },
+        {
+          "label": "비밀번호 확인 *",
+          "type": "password",
+          "required": true,
+          "hint": null
+        },
+        {
+          "label": "학교",
+          "type": "text",
+          "required": null,
+          "hint": null
+        },
+        {
+          "label": "학번",
+          "type": "text",
+          "required": null,
+          "hint": null
+        },
+        {
+          "label": "전공",
+          "type": "text",
+          "required": null,
+          "hint": null
+        },
+        {
+          "label": "휴대폰 번호 *",
+          "type": "tel",
+          "required": true,
+          "hint": null
+        },
+        {
+          "label": "생년월일",
+          "type": "date",
+          "required": null,
+          "hint": null
+        },
+        {
+          "label": "주소",
+          "type": "text",
+          "required": null,
+          "hint": null
+        },
+        {
+          "label": null,
+          "type": "text",
+          "required": null,
+          "hint": "추천인 코드"
+        }
+      ],
+      "elements": [
+        {
+          "text": "인증하기",
+          "to": "S04"
+        }
+      ]
+    },
+    {
+      "id": "S04",
+      "label": "학교 인증",
+      "texts": [
+        "학교 이메일 인증",
+        "입력한 학교 이메일로 6자리 인증 코드를 보냈습니다."
+      ],
+      "fields": [
+        {
+          "label": "인증 코드",
+          "type": "text",
+          "required": true,
+          "hint": null
+        }
+      ],
+      "elements": [
+        {
+          "text": "이전",
+          "to": "S03"
+        },
+        {
+          "text": "코드 다시 받기",
+          "to": null
+        },
+        {
+          "text": "확인",
+          "to": "S05"
+        }
+      ]
+    },
+    {
+      "id": "S05",
+      "label": "가입 완료",
+      "texts": [
+        "가입이 완료되었습니다",
+        "이제 시간표를 불러와 일정을 정리해 보세요."
+      ],
+      "fields": [],
+      "elements": [
+        {
+          "text": "시간표 불러오기",
+          "to": null
+        }
+      ]
+    }
+  ]
+}
