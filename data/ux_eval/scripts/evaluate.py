@@ -34,9 +34,12 @@ def mock_llm(flow: dict, seed: int):
                     "importance": rng.choice(C.IMPORTANCE), "importance_reason": "(가짜 응답)"}
                 for k in C.CRITERIA}
         done = rng.random() < 0.6
-        out = {"criteria": crit, "complete": "예" if done else "아니오", "complete_reason": "(가짜 응답)",
+        out = {"criteria": crit, "complete": "예" if done else "아니오", "complete_reason": "(가짜 응답) 끝까지 해 볼게요.",
                "drop_screen": "" if done else rng.choice(flow["screens"])["id"],
-               "drop_reason": "" if done else rng.choice(C.DROP_REASONS)}
+               "drop_reason": "" if done else rng.choice(C.DROP_REASONS),
+               "opinions": {"screen_comments": [{"screen": first["id"], "comment": "(가짜 응답) 한마디"}],
+                            "liked": "(가짜 응답) 좋았던 점", "disliked": "(가짜 응답) 불편한 점",
+                            "suggestion": "(가짜 응답) 개선 제안"}}
         problem = check(out) if check else None
         assert problem is None, problem
         return out

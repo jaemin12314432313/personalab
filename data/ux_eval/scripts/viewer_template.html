@@ -119,6 +119,9 @@
   .meter span { display: block; height: 100%; background: var(--good); }
   .quote { margin: 0 0 6px; border-left: 3px solid var(--accent); padding: 1px 0 1px 9px; font-size: 12.5px; }
   .quote cite { display: block; font-style: normal; color: var(--muted); font-size: 11px; }
+  .ops { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; font-size: 12.5px; }
+  .ops dt { color: var(--muted); font-weight: 600; }
+  .ops dd { margin: 0; }
   .filter { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; margin: 0 0 8px; }
   .filter button { font: inherit; font-size: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
                    border-radius: 999px; padding: 1px 10px; cursor: pointer; }
@@ -151,6 +154,12 @@
     <h2>화면 흐름</h2>
     <div class="hint">AI가 받은 화면 정보입니다. 회색 점선 버튼은 이동할 곳이 없는 버튼, 주황 표시는 필수/선택 표시가 없는 입력칸입니다. 빨간 테두리는 페르소나가 그만둔 화면입니다.</div>
     <div class="strip"><div class="flow" id="flow"></div></div>
+  </section>
+
+  <section class="card" id="commentsec">
+    <h2>화면별 한마디</h2>
+    <div class="hint">페르소나가 화면마다 남긴 의견입니다. 그룹 카드를 고르면 그 그룹의 의견만 보입니다.</div>
+    <div class="segs" id="comments"></div>
   </section>
 
   <section class="card">
@@ -210,6 +219,8 @@ function segmentCards(r, label) {
       <div><div class="k">주로 그만둔 화면</div>${topScr ? `${esc(topScr[0])} ${esc(label[topScr[0]])} (${topScr[1]}명) · ${esc(why)}` : none}</div>
       <div><div class="k">중요하게 본 기준</div><div class="facts">${imp.length ? imp.map(x => `<span class="badge">${esc(x.name)} ${pct(x.share)}</span>`).join("") : none}</div></div>
       <div><div class="k">의견</div>${quotes.join("") || none}</div>
+      ${ok.some(p => p.eval.opinions) ? `<div><div class="k">개선 제안</div>${ok.filter(p => p.eval.opinions).slice(0, 2).map(p =>
+        `<blockquote class="quote">"${esc(p.eval.opinions.suggestion)}"<cite>${esc(p.persona_id)}</cite></blockquote>`).join("")}</div>` : ""}
     </div>`;
   }).join("");
 }
@@ -293,6 +304,16 @@ function render() {
     el.onkeydown = ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pick(); } };
   });
 
+  const pool = (group == null ? ok : ok.filter(p => p.seg[axis] === group)).filter(p => p.eval.opinions);
+  $("commentsec").hidden = !pool.length;
+  $("comments").innerHTML = f.screens.map(s => {
+    const cs = pool.flatMap(p => p.eval.opinions.screen_comments.filter(c => c.screen === s.id).map(c => ({ p, c })));
+    if (!cs.length) return "";
+    return `<div class="seg" style="cursor:default"><h3>${esc(s.id)} ${esc(s.label)} <small>${cs.length}개</small></h3>
+      ${cs.slice(0, 4).map(({ p, c }) => `<blockquote class="quote">"${esc(c.comment)}"<cite>${esc(p.persona_id)} · ${esc((p.profile || "").replace(/ 지역에 산다\.$/, ""))}</cite></blockquote>`).join("")}
+      ${cs.length > 4 ? `<span class="note">… ${cs.length - 4}개 더 (아래 페르소나 카드에서 볼 수 있음)</span>` : ""}</div>`;
+  }).join("");
+
   $("legend").innerHTML = META.labels.map(l => `<span><i style="background:${COLOR[l]}"></i>${l}</span>`).join("");
   $("crit").innerHTML = `<div class="hd">기준</div><div class="hd opt">라벨 분포 (${ok.length}명)</div><div class="hd">대표 라벨 · 일치도</div><div class="hd">중요도 높음</div>` +
     stats.map(c => `
@@ -317,7 +338,8 @@ function render() {
       const x = e.criteria[c.key];
       return `<span>${esc(c.name)}</span><span class="lab ${x.label}">${x.label}</span><span class="imp">중요도 ${x.importance}</span>`;
     }).join("");
-    const detail = META.criteria.map(c => {
+    const sc = e.opinions ? e.opinions.screen_comments.map(c => `<dt>화면 ${esc(c.screen)} ${esc(label[c.screen] || "")}</dt><dd>${esc(c.comment)}</dd>`).join("") : "";
+    const detail = sc + META.criteria.map(c => {
       const x = e.criteria[c.key];
       return `<dt>${esc(c.name)} · ${x.label}</dt><dd>근거: ${esc(x.evidence)}</dd><dd>중요도 ${x.importance}: ${esc(x.importance_reason)}</dd>`;
     }).join("");
@@ -325,6 +347,10 @@ function render() {
       <div class="who">${esc(p.persona_id)} · ${esc(p.profile || `${p.age}세`)}</div>
       <div class="facts"><span class="badge">가격 민감 ${esc(p.ps_grade)}</span><span class="badge">디지털 ${esc(p.da_grade)}</span></div>
       <div class="verdict ${yes ? "yes" : "no"}">${verdict}"${esc(e.complete_reason)}"</div>
+      ${e.opinions ? `<dl class="ops">
+        <dt>좋았던 점</dt><dd>${esc(e.opinions.liked)}</dd>
+        <dt>불편했던 점</dt><dd>${esc(e.opinions.disliked)}</dd>
+        <dt>개선 제안</dt><dd>${esc(e.opinions.suggestion)}</dd></dl>` : ""}
       <div class="mini">${mini}</div>
       <details><summary>근거와 페르소나 카드 보기</summary><dl>${detail}<dt>페르소나 카드</dt><dd style="white-space:pre-line">${esc(p.card)}</dd></dl></details>
     </article>`;

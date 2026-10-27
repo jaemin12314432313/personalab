@@ -15,6 +15,8 @@ SYSTEM = f"""너는 아래 페르소나의 사용자로서, 과제를 수행하�
 마지막으로 이 페르소나 입장에서 과제를 끝까지 할 것인지 여부(예/아니오)와 그 이유를 페르소나의 말투로 한두 문장 쓴다(코드만 쓰지 않는다). 완주 여부는 평가 라벨과 따로 판단한다. 불편한 점이 있다는 것과 그만둔다는 것은 다르다. 이 페르소나는 과제를 하려고 이 흐름을 시작했다. 카드에 적힌 성향(새 앱 적응, 개인정보에 대한 태도, 돈을 쓰는 태도)으로 볼 때 정말 그만둘 정도인지 판단한다.
 '아니오'면 그만둘 화면의 id와 이탈 이유를 아래 8개 중 하나로 고른다. '예'면 두 칸을 빈 문자열로 둔다.
 
+끝으로 이 페르소나의 말투로 의견을 쓴다. 기억에 남는 화면 1~3개에 대한 한마디(화면 id 포함), 좋았던 점, 불편했던 점, 바꿨으면 하는 점이다. 화면에 있는 사실에 근거하고, 입력에 없는 기능이나 화면을 지어내지 않는다. 좋았던 점이 없으면 없다고 쓴다.
+
 평가 기준
 {_criteria}
 
@@ -42,8 +44,21 @@ SCHEMA = {
         "complete_reason": {"type": "string"},
         "drop_screen": {"type": "string"},
         "drop_reason": {"type": "string", "enum": ["", *C.DROP_REASONS]},
+        "opinions": {
+            "type": "object",
+            "properties": {
+                "screen_comments": {"type": "array", "items": {
+                    "type": "object",
+                    "properties": {"screen": {"type": "string"}, "comment": {"type": "string"}},
+                    "required": ["screen", "comment"]}},
+                "liked": {"type": "string"},
+                "disliked": {"type": "string"},
+                "suggestion": {"type": "string"},
+            },
+            "required": ["screen_comments", "liked", "disliked", "suggestion"],
+        },
     },
-    "required": ["criteria", "complete", "complete_reason", "drop_screen", "drop_reason"],
+    "required": ["criteria", "complete", "complete_reason", "drop_screen", "drop_reason", "opinions"],
 }
 
 
@@ -70,7 +85,8 @@ def check_eval(out: dict, flow: dict) -> str | None:
     if out.get("complete") not in C.COMPLETE:
         return "완주 여부가 없음"
     reason = str(out.get("complete_reason", "")).strip()
-    if len(reason) < C.MIN_REASON_CHARS or reason in C.DROP_REASONS or not re.search("[가-힣]", reason):
+    bare = re.sub("|".join([*C.DROP_REASONS, "이탈 이유", "완주 여부", r"[:：\s]"]), "", reason)   # 코드를 문장인 척 쓴 응답
+    if len(bare) < C.MIN_REASON_CHARS or not re.search("[가-힣]", bare):
         return "완주 이유가 문장이 아님 (코드나 한두 단어만 씀)"
     if out["complete"] == "아니오":
         if out.get("drop_screen") not in ids:
@@ -79,4 +95,13 @@ def check_eval(out: dict, flow: dict) -> str | None:
             return "이탈 이유가 8개 카테고리 밖"
     elif out.get("drop_screen") or out.get("drop_reason"):
         return "완주하는데 이탈 화면·이유가 채워짐"
+    op = out.get("opinions") or {}
+    sc = op.get("screen_comments") or []
+    lo, hi = C.SCREEN_COMMENTS
+    if not lo <= len(sc) <= hi:
+        return f"화면별 한마디가 {lo}~{hi}개가 아님"
+    if any(c.get("screen") not in ids or not re.search("[가-힣]", str(c.get("comment", ""))) for c in sc):
+        return "화면별 한마디의 화면 id가 흐름에 없거나 내용이 비어 있음"
+    if any(not re.search("[가-힣]", str(op.get(k, ""))) for k in ("liked", "disliked", "suggestion")):
+        return "좋았던 점·불편했던 점·개선 제안 중 비어 있는 칸이 있음"
     return None

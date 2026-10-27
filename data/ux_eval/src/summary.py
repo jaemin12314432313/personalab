@@ -17,6 +17,10 @@ def flatten(rows: list[dict]) -> pd.DataFrame:
             rec[f"{key}_evidence"] = c.get("evidence")
         for k in ("complete", "complete_reason", "drop_screen", "drop_reason"):
             rec[k] = out.get(k)
+        op = out.get("opinions") or {}
+        for k in ("liked", "disliked", "suggestion"):
+            rec[f"opinion_{k}"] = op.get(k)
+        rec["screen_comments"] = " / ".join(f"{c['screen']}: {c['comment']}" for c in op.get("screen_comments", []))
         recs.append(rec)
     return pd.DataFrame(recs)
 
@@ -63,6 +67,10 @@ def summarize(df: pd.DataFrame, flow: dict, meta: dict) -> str:
         L.append(f"- {title}: " + ", ".join(f"{k} {v:.0%}" for k, v in g.items()))
     L.append("")
 
+    if "opinion_suggestion" in ok and ok.opinion_suggestion.notna().any():
+        L += ["## 페르소나 의견 (개선 제안)", ""]
+        L += [f"- {r.persona_id}: {r.opinion_suggestion}" for r in ok.itertuples() if r.opinion_suggestion]
+        L.append("")
     L += ["## 대표 근거 (기준마다 대표 라벨을 고른 첫 응답)", ""]
     for key, (name, _) in C.CRITERIA.items():
         mode = ok[f"{key}_label"].value_counts().idxmax()

@@ -117,11 +117,17 @@ def sample_personas(conditions: dict, n: int, seed: int) -> list[dict]:
    "simplicity":  {"label": "나쁨", "evidence": "S03에 입력 필드 11개", "importance": "높음", "importance_reason": "..."},
    "feedback": {...}, "control": {...}, "clarity": {...}, "consistency": {...}, "error": {...}, "flexibility": {...}},
  "complete": "아니오", "complete_reason": "입력할 게 너무 많아서 그만둘래요.",
- "drop_screen": "S03", "drop_reason": "TOO_MANY_STEPS"}
+ "drop_screen": "S03", "drop_reason": "TOO_MANY_STEPS",
+ "opinions": {
+   "screen_comments": [{"screen": "S03", "comment": "학번이랑 주소는 왜 필요한지 모르겠어요."}],
+   "liked": "첫 화면에서 무슨 앱인지 바로 알겠어요.",
+   "disliked": "필수인지 아닌지 몰라서 다 채워야 할 것 같았어요.",
+   "suggestion": "학교 이메일 인증만 하고 나머지는 나중에 받으면 좋겠어요."}}
 ```
 
 - `label`: 좋음 / 보통 / 나쁨 / 판단불가. `importance`: 높음 / 중간 / 낮음
 - `drop_reason`은 **팀 공용 이탈 카테고리 8개**(`core/config.py` `DROP_REASONS`) 중 하나 → Act 모드·실제 참가자와 같은 축으로 비교 가능
+- `opinions`(프롬프트 v0.6): 화면별 한마디 1~3개(화면 id 포함), 좋았던 점, 불편했던 점, 개선 제안. 화면에 있는 사실에 근거하도록 지시·검증
 - 응답 검증(형식, 근거에 화면 id, 8개 카테고리 등)과 재시도는 `data/ux_eval/src/prompt.py`의 `check_eval`
 
 **연결할 때 정해야 할 것** (CLAUDE.md: DB 스키마는 계획서 9장 기준, 바꾸려면 팀 논의 먼저)
@@ -162,7 +168,8 @@ def sample_personas(conditions: dict, n: int, seed: int) -> list[dict]:
 | 고객 구분별 보기 | 디지털 수용도·가격 민감도·개인정보 우려·성별·연령대로 그룹을 나눠 그룹마다 완주율, 이탈 화면·이유, 중요하게 본 기준 TOP 3, 실제 의견 인용 | 그룹 = `traits`/`profile` 값. 중요 기준 = `importance=="높음"` 비율 |
 | 화면 흐름 | 화면을 휴대폰 모양으로 나열, 그만둔 화면 강조, 입력칸·뒤로가기 유무 | 화면 정보는 흐름 JSON, 그만둔 수는 `drop_screen` 집계 |
 | 기준별 평가 | 7개 기준의 라벨 분포 막대, 대표 라벨과 일치도, 근거 예 | 일치도 = 가장 많은 라벨 수 / 성공 응답 수 |
-| 페르소나별 응답 | 완주 여부·이유, 기준별 라벨, 근거 펼치기 | |
+| 화면별 한마디 | 화면마다 페르소나 의견 모음 (고른 그룹만 볼 수 있음) | `opinions.screen_comments`를 화면 id로 묶음 |
+| 페르소나별 응답 | 완주 여부·이유, 좋았던 점·불편했던 점·개선 제안, 기준별 라벨, 근거 펼치기 | |
 
 **지켜야 할 것** (CLAUDE.md)
 - AI 응답에는 **Synthetic User Response** 표시. 실제 참가자 결과와 섞지 않기
@@ -180,7 +187,7 @@ def sample_personas(conditions: dict, n: int, seed: int) -> list[dict]:
 | 양식 제출 화면은 열지 않음 | 예: AICOSS 가입 완료 화면은 실제 가입이 일어나서 "내용 확인 안 함"으로 둠 |
 | NVIDIA에 실제 대학생이 거의 없음 | 학생은 '서술에 구직 표현이 없는 20대 대졸 무직'으로 추정 (Persona Engine README 8장) |
 | LLM이 지시를 다 지키진 않음 | 검증에 걸리면 이유를 알려주고 다시 묻는다(최대 3회). 50명에 실패 2명 수준 |
-| 크레딧 | 테스트 계정 잔액 약 $0.40. 계속하려면 예산(예산 신청 문서 참고) 또는 gpt-4o-mini(단가 약 1/17, 품질 확인 필요) |
+| 크레딧 | 테스트 계정 잔액 약 $0.32. 계속하려면 예산(예산 신청 문서 참고) 또는 gpt-4o-mini(단가 약 1/17, 품질 확인 필요) |
 
 ## 6. 결정이 필요한 것 (모아보기)
 
@@ -188,7 +195,7 @@ def sample_personas(conditions: dict, n: int, seed: int) -> list[dict]:
 - [ ] LLM 공급자 하나로 통일 (Gemini vs OpenAI)
 - [ ] 계획서 6-3 Persona Schema(숫자 점수)와 카드 방식(숫자 없는 문장) 정리
 - [ ] 직업 매핑표 `data/persona_engine/occupation_map.csv` 검토
-- [ ] 페르소나 의견 항목 추가 여부 (화면별 한마디, 좋았던 점, 개선 제안 — 프롬프트 변경, 비용 30~50% 증가 예상)
+- [x] 페르소나 의견 항목 추가 — v0.6에서 추가 (화면별 한마디·좋았던 점·불편했던 점·개선 제안). 3명 테스트에서 1명당 비용 거의 그대로($0.028)
 
 ## 7. 파일 지도
 
@@ -214,4 +221,4 @@ data/ux_eval/                 UX 흐름 평가 (이번 PR)
 └─ samples/                   샘플 프로토타입, AICOSS 페이지 목록
 ```
 
-프롬프트 변경 이력: `data/ux_eval/src/config.py`의 `PROMPT_VERSION` 주석 (v0.1 → v0.5, 각 버전에서 무엇을 왜 바꿨는지).
+프롬프트 변경 이력: `data/ux_eval/src/config.py`의 `PROMPT_VERSION` 주석 (v0.1 → v0.6, 각 버전에서 무엇을 왜 바꿨는지).
