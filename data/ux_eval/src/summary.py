@@ -27,7 +27,8 @@ def summarize(df: pd.DataFrame, flow: dict, meta: dict) -> str:
     L = [f"# UX 흐름 평가 요약: {flow['name']}", "",
          f"- 과제: {flow['task']} (화면 {len(flow['screens'])}개, 목표 {flow['goal']})",
          f"- 페르소나: {meta['panel']} 중 {meta['n']}명 · 성공 {n}명 · 실패 {meta['n'] - n}명",
-         f"- 모델: {meta['model']} · 프롬프트 {C.PROMPT_VERSION}",
+         f"- 모델: {meta['model']} · 프롬프트 {C.PROMPT_VERSION}"
+         + (f" · 사용량 {meta['cost']}" if meta.get("cost") else ""),
          "- 이 문서의 평가는 AI 페르소나의 응답이다 (Synthetic User Response). 실제 사용자 결과와 섞지 않는다.", ""]
     if not n:
         return "\n".join(L + ["성공한 응답이 없습니다."])

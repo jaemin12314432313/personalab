@@ -14,6 +14,17 @@ from app.core.config import DROP_REASONS  # noqa: E402
 PROMPT_VERSION = "v0.1"        # 프롬프트·기준 문구를 바꾸면 올린다
 DEV_N = 20                     # 개발 중 기본 인원 (CLAUDE.md 비용 관리: 20명으로 먼저)
 MAX_CONSECUTIVE_FAILS = 3      # 연속 실패하면 실행 중단 (프롬프트 문제로 재시도 비용이 새는 것 방지)
+MAX_RUN_COST_USD = 0.50        # 한 번 실행에서 실제 비용이 이 금액을 넘으면 중단 (--max-cost로 변경)
+
+# 100만 토큰당 달러 (입력, 출력). 2026-10-27 OpenAI 공식 가격표 기준. 실제 사용 토큰으로 비용을 계산한다
+PRICE_PER_MTOK = {
+    "gpt-4o": (2.50, 10.00),
+    "gpt-4o-mini": (0.15, 0.60),
+    "gpt-4.1": (2.00, 8.00),
+    "gpt-4.1-mini": (0.40, 1.60),
+    "gpt-5-mini": (0.25, 2.00),
+    "gpt-5-nano": (0.05, 0.40),
+}
 
 LABELS = ["좋음", "보통", "나쁨", "판단불가"]
 IMPORTANCE = ["높음", "중간", "낮음"]
