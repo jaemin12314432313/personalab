@@ -89,6 +89,10 @@ def main():
             row["eval"], row["status"] = None, f"fail: {e}"
         rows.append(row)
         print(f"\r{i}/{len(panel)} 명 평가", end="", flush=True)
+        recent = [r["status"] for r in rows[-C.MAX_CONSECUTIVE_FAILS:]]
+        if len(recent) == C.MAX_CONSECUTIVE_FAILS and all(s != "ok" for s in recent):
+            print(f"\n연속 {C.MAX_CONSECUTIVE_FAILS}명 실패로 중단합니다 (크레딧 보호). 마지막 오류: {row['status']}")
+            break
     print(f" ({time.time() - t0:.0f}초)")
 
     out_dir = C.OUT / f"{flow['name']}_{panel_path.stem}_n{len(panel)}{'_mock' if a.mock else ''}"

@@ -13,6 +13,7 @@ from app.core.config import DROP_REASONS  # noqa: E402
 
 PROMPT_VERSION = "v0.1"        # 프롬프트·기준 문구를 바꾸면 올린다
 DEV_N = 20                     # 개발 중 기본 인원 (CLAUDE.md 비용 관리: 20명으로 먼저)
+MAX_CONSECUTIVE_FAILS = 3      # 연속 실패하면 실행 중단 (프롬프트 문제로 재시도 비용이 새는 것 방지)
 
 LABELS = ["좋음", "보통", "나쁨", "판단불가"]
 IMPORTANCE = ["높음", "중간", "낮음"]
