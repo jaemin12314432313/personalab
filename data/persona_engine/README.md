@@ -202,6 +202,7 @@ data/persona_engine/
 │  ├─ viewer_template.html 뷰어 디자인
 │  └─ check_step0~2.py     개발 중 데이터 검증용 (평소엔 안 씀)
 └─ src/                    엔진 내부 (고칠 일이 있을 때만)
+   ├─ api.py               백엔드용 입구: generate(조건, 인원, seed) -> personas.attributes_json 목록
    ├─ config.py            설정값: 경로, 가격 민감도 가중치, 등급 기준
    ├─ engine.py            핵심: 인원 배분 → NVIDIA에서 뽑기 → 실제 응답자 짝짓기
    ├─ donor.py             미디어패널 읽기, 점수 계산
