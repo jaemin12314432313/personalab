@@ -215,7 +215,7 @@ function segmentCards(r, label) {
 
 function tabs() {
   $("tabs").innerHTML = RUNS.map((r, i) =>
-    `<button class="tab ${i === cur ? "on" : ""}" data-i="${i}">${esc(r.flow.name)} · 프롬프트 ${esc(r.version)} · ${esc(r.model)}</button>`).join("");
+    `<button class="tab ${i === cur ? "on" : ""}" data-i="${i}">${esc(r.flow.name)} · 프롬프트 ${esc(r.version)} · ${r.people.length}명 · ${esc(r.model)}</button>`).join("");
   $("tabs").querySelectorAll(".tab").forEach(b => b.onclick = () => { cur = +b.dataset.i; group = null; render(); });
 }
 
