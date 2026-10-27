@@ -1,4 +1,6 @@
 """평가 프롬프트, 응답 JSON 스키마, 응답 검증."""
+import re
+
 from . import config as C
 
 _criteria = "\n".join(f"{i}. {name}: {desc}" for i, (name, desc) in enumerate(C.CRITERIA.values(), start=1))
@@ -6,7 +8,7 @@ _reasons = "\n".join(f"- {code}: {ko}" for code, ko in C.DROP_REASON_KO.items())
 
 SYSTEM = f"""너는 아래 페르소나의 사용자로서, 과제를 수행하는 화면 흐름을 평가한다. 입력은 화면 전체의 구조 요약(화면 이름, 문구, 입력 필드, 클릭 가능 요소, 화면 연결)이다.
 아래 기준마다 좋음/보통/나쁨/판단불가 중 하나의 라벨을 입력에서 확인되는 사실로만 판단하여 고르고, 근거 문장을 쓴다. 근거에는 해당 화면의 id(예: S02)를 적는다.
-흐름 전체에 관한 근거는 '전체 흐름'이라고 적고, 관련 화면 id가 있으면 함께 적는다.
+흐름 전체에 관한 근거는 '전체 흐름'이라고 적고, 관련 화면 id가 있으면 함께 적는다. 어느 화면에도 없는 요소를 근거로 들 때는 '모든 화면에 ○○이 없다'처럼 '모든 화면'이라고 쓴다.
 [자동 집계] 줄은 코드로 센 사실이다. 버튼 유무, 입력 필드 수, 단계 수는 이 줄을 그대로 따르고 다르게 말하지 않는다.
 있어야 할 요소가 입력에 분명히 없다면 '나쁨', 입력에 정보 자체가 없어서 알 수 없는 것(속도, 색, 글자 크기, 배치)은 추측하지 말고 '판단불가'로 쓴다.
 라벨과 별개로, 이 페르소나에게 그 기준이 얼마나 중요한지(높음/중간/낮음)와 이유를 페르소나의 특성에 근거해 쓴다.
@@ -62,12 +64,13 @@ def check_eval(out: dict, flow: dict) -> str | None:
             return f"{name}: 라벨 또는 중요도가 정해진 값이 아님"
         if not str(c.get("evidence", "")).strip() or not str(c.get("importance_reason", "")).strip():
             return f"{name}: 근거 또는 중요도 이유가 비어 있음"
-        if c["label"] != C.NOT_JUDGED and not any(x in c["evidence"] for x in ids | names | set(C.FLOW_REFS)):
+        absent = c["label"] == "나쁨" and re.search(C.ABSENCE_PATTERN, c["evidence"])   # '○○이 없다'는 화면을 못 짚는다
+        if c["label"] != C.NOT_JUDGED and not absent and not any(x in c["evidence"] for x in ids | names | set(C.FLOW_REFS)):
             return f"{name}: 근거에 화면 id나 화면 이름이 없음 (입력에서 확인한 사실인지 알 수 없음)"
     if out.get("complete") not in C.COMPLETE:
         return "완주 여부가 없음"
     reason = str(out.get("complete_reason", "")).strip()
-    if len(reason) < C.MIN_REASON_CHARS or reason in C.DROP_REASONS:
+    if len(reason) < C.MIN_REASON_CHARS or reason in C.DROP_REASONS or not re.search("[가-힣]", reason):
         return "완주 이유가 문장이 아님 (코드나 한두 단어만 씀)"
     if out["complete"] == "아니오":
         if out.get("drop_screen") not in ids:

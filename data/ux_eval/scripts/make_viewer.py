@@ -83,9 +83,10 @@ def load_runs() -> list[dict]:
             r["card"] = card
             r["seg"] = {k: segment_value(k, r, t) for k in SEGMENTS}
             people.append(r)
-        runs.append({"id": d.name, "model": info["model"], "version": info["version"], "cost": info["cost"],
+        runs.append({"id": d.name, "mtime": (d / "results.jsonl").stat().st_mtime,
+                     "model": info["model"], "version": info["version"], "cost": info["cost"],
                      "flow": flow, "flow_facts": flow_facts(flow), "people": people})
-    runs.sort(key=lambda r: (r["flow"]["name"], r["version"], r["model"]))
+    runs.sort(key=lambda r: (r["flow"]["name"], r["version"], len(r["people"])))
     return runs
 
 

@@ -32,6 +32,15 @@ set PYTHONUTF8=1
   ```
   파일 하나 = 화면 하나, 파일 이름 = 화면 id. 만들어진 `samples/signup_flow.json`을 열어 빠진 것만 고칩니다.
 - 또는 `samples/signup_flow.json` 형식으로 직접 작성 (Figma 화면을 옮길 때)
+- **실제 웹사이트**: 화면으로 쓸 페이지 주소를 설정 파일에 적고 변환 (예: `samples/aicoss_signup_pages.json`)
+  ```
+  python scripts/url_to_flow.py samples/aicoss_signup_pages.json
+  ```
+  - 페이지는 한 번만 받아 `outputs/cache/`에 저장(요청 사이 1초 대기). 결과는 `outputs/flows/<이름>_flow.json`
+  - 모든 페이지에 반복되는 상단·하단 메뉴와 문구는 "공통 메뉴"로 한 번만 넣는다 (비용 절감)
+  - 자바스크립트로 이동하는 버튼은 설정 파일 `patch`에 이동 대상을 적는다
+  - 양식 제출처럼 실제 동작이 일어나는 화면(예: 가입 완료)은 열지 않고 `extra_screens`에 "내용 확인 안 함"으로 둔다
+  - 서버가 완성된 HTML을 주는 사이트만 읽는다 (React 등으로 화면을 그리는 사이트는 안 됨)
 
 **2) 평가 실행**
 

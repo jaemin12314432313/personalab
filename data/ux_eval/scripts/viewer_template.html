@@ -174,7 +174,8 @@ const COLOR = { "좋음": "var(--good)", "보통": "var(--mid)", "나쁨": "var(
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const pct = x => Math.round(x * 100) + "%";
-let cur = RUNS.length - 1;
+const FLOW_NAME = { signup: "샘플 앱 회원가입", aicoss_signup: "AICOSS 사이트 회원가입" };
+let cur = RUNS.reduce((b, r, i) => r.mtime > RUNS[b].mtime ? i : b, 0);   // 가장 최근 실행부터 보여준다
 let axis = "da_grade", group = null;
 
 function segmentCards(r, label) {
@@ -215,7 +216,7 @@ function segmentCards(r, label) {
 
 function tabs() {
   $("tabs").innerHTML = RUNS.map((r, i) =>
-    `<button class="tab ${i === cur ? "on" : ""}" data-i="${i}">${esc(r.flow.name)} · 프롬프트 ${esc(r.version)} · ${r.people.length}명 · ${esc(r.model)}</button>`).join("");
+    `<button class="tab ${i === cur ? "on" : ""}" data-i="${i}">${esc(FLOW_NAME[r.flow.name] || r.flow.name)} · ${esc(r.version)} · ${r.people.length}명</button>`).join("");
   $("tabs").querySelectorAll(".tab").forEach(b => b.onclick = () => { cur = +b.dataset.i; group = null; render(); });
 }
 
@@ -244,7 +245,8 @@ function render() {
   const ff = r.flow_facts;
 
   $("task").innerHTML = `<b>과제</b> ${esc(f.task)} · 시작 ${esc(f.screens[0].id)} → 목표 ${esc(f.goal)} · 최소 ${ff.steps}번 이동 · 입력칸 ${ff.fields}개 · ` +
-    `소셜 로그인 ${ff.social ? "있음" : "없음"} · 도움말 ${ff.help ? "있음" : "없음"} · 진행 단계 표시 ${ff.progress ? "있음" : "없음"}`;
+    `소셜 로그인 ${ff.social ? "있음" : "없음"} · 도움말 ${ff.help ? "있음" : "없음"} · 진행 단계 표시 ${ff.progress ? "있음" : "없음"}` +
+    (f.common ? `<br><span class="note">모든 화면 공통 메뉴 ${f.common.menu.length}개(${esc(f.common.menu.slice(0, 6).join(", "))} 등)는 화면 그림에서 뺐습니다.</span>` : "");
   $("stats").innerHTML = [
     [`${pct(ok.length ? done / ok.length : 0)}`, `끝까지 하겠다 (${done}/${ok.length}명)`],
     [topDrop ? `${topDrop[0]} ${esc(label[topDrop[0]])}` : "-", topDrop ? `가장 많이 그만둔 화면 (${topDrop[1]}명)` : "그만둔 사람 없음"],
@@ -254,19 +256,24 @@ function render() {
 
   $("flow").innerHTML = f.screens.map((s, i) => {
     const fx = s.facts, d = drops[s.id] || 0, goal = s.id === f.goal;
-    const texts = (s.texts || []).map(t => `<p class="ph-text">${esc(t)}</p>`).join("");
+    const allTexts = s.texts || [];
+    const texts = allTexts.slice(0, 8).map(t => `<p class="ph-text">${esc(t)}</p>`).join("") +
+      (allTexts.length > 8 ? `<p class="ph-text note">… 문구 ${allTexts.length - 8}개 더</p>` : "");
+    const inFlow = (s.elements || []).filter(e => !e.outside), outside = (s.elements || []).length - inFlow.length;
     const fields = (s.fields || []).map(x => {
       const req = x.required === true ? "필수" : x.required === false ? "선택" : "표시 없음";
       const name = x.label ? `<span class="name">${esc(x.label)}</span>` : `<span class="name unnamed">(이름 없음) ${esc(x.hint || "")}</span>`;
       return `<div class="field">${name}<span class="req ${x.required == null ? "none" : ""}">${req}</span></div>`;
     }).join("");
-    const btns = (s.elements || []).map(e =>
+    const btns = inFlow.map(e =>
       `<span class="btn ${e.to ? "" : "dead"}" title="${e.to ? "→ " + esc(e.to) : "이동 없음"}">${esc(e.text)}${e.to ? " → " + esc(e.to) : ""}</span>`).join("");
     const chips = [
       `<span class="badge">입력칸 ${fx.fields}</span>`,
       fx.unmarked ? `<span class="badge warn">표시 없음 ${fx.unmarked}</span>` : "",
       fx.unnamed ? `<span class="badge warn">이름 없음 ${fx.unnamed}</span>` : "",
       `<span class="badge ${fx.exit.length ? "" : "warn"}">뒤로/취소 ${fx.exit.length ? "있음" : "없음"}</span>`,
+      s.chars ? `<span class="badge ${s.chars > 3000 ? "warn" : ""}">글자 ${s.chars.toLocaleString()}자</span>` : "",
+      outside ? `<span class="badge">다른 페이지 링크 ${outside}개</span>` : "",
       goal ? `<span class="badge good">목표 화면</span>` : "",
       d ? `<span class="badge bad">여기서 그만둠 ${d}명</span>` : "",
     ].join("");

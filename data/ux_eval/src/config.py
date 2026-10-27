@@ -11,16 +11,22 @@ PANEL_DIR = REPO / "data" / "persona_engine" / "outputs"   # Persona Engine 결�
 sys.path.insert(0, str(REPO / "backend"))
 from app.core.config import DROP_REASONS  # noqa: E402
 
-PROMPT_VERSION = "v0.4"        # 프롬프트·기준 문구를 바꾸면 올린다
+PROMPT_VERSION = "v0.5"        # 프롬프트·기준 문구를 바꾸면 올린다
 # v0.2: 화면 요약에 코드로 센 사실([자동 집계])을 붙이고, 이를 사실로 쓰라는 문장 추가
 # v0.3: 흐름 전체 근거는 '전체 흐름'으로 적게 허용, 완주 이유는 문장으로 (코드만 쓰지 않기)
 # v0.4: 완주 판단을 라벨과 분리 ('불편함 = 이탈'이 아님, 페르소나 성향으로 판단). v0.3까지 3명 모두 S03에서 이탈
+# v0.5: 없는 요소를 근거로 들 때 '모든 화면'으로 쓰게 함 (50명 실행에서 재시도 44회의 주원인)
 
 # [자동 집계]용 단어 목록. 버튼·문구에 이 단어가 들어 있으면 해당 요소가 '있다'고 센다
 EXIT_WORDS = ["뒤로", "이전", "취소", "닫기", "나가기", "돌아가기"]
 SKIP_WORDS = ["건너뛰기", "나중에", "다음에 하기", "skip"]
 SOCIAL_WORDS = ["카카오", "네이버", "구글", "Google", "애플", "Apple", "소셜", "간편 로그인", "간편가입"]
 HELP_WORDS = ["도움말", "문의", "고객센터", "FAQ", "help", "자주 묻는"]
+MAX_TEXT_CHARS = 100          # 화면 문구 하나의 최대 글자 수 (약관 원문 등은 잘라서 '전체 N자'로 표시)
+MAX_TEXTS = 12                # 화면 하나에 넣는 문구 수 상한 (메인 페이지 뉴스 목록 등)
+COMMON_SHARE = 0.75            # 페이지의 이 비율 이상에 나오면 공통 메뉴·문구로 묶는다
+SHOW_COMMON_MENU = 40          # 공통 메뉴 이름을 보여줄 최대 개수
+SHOW_OPTIONS = 5              # 드롭다운 선택지 중 이름을 보여줄 개수
 PROGRESS_PATTERN = r"\d+\s*/\s*\d+|\d+\s*단계|STEP\s*\d+"   # '2/4', '2단계', 'STEP 2' 같은 진행 표시
 DEV_N = 20                     # 개발 중 기본 인원 (CLAUDE.md 비용 관리: 20명으로 먼저)
 MAX_CONSECUTIVE_FAILS = 3      # 연속 실패하면 실행 중단 (프롬프트 문제로 재시도 비용이 새는 것 방지)
@@ -41,7 +47,8 @@ IMPORTANCE = ["높음", "중간", "낮음"]
 COMPLETE = ["예", "아니오"]
 NOT_JUDGED = "판단불가"
 FLOW_REFS = ["전체", "모든 화면", "어느 화면", "자동 집계"]   # 특정 화면이 아니라 흐름 전체를 근거로 댈 때 인정하는 표현
-MIN_REASON_CHARS = 15                  # 완주 이유 최소 길이 (코드 한 단어만 쓰는 응답 방지)
+ABSENCE_PATTERN = r"없|부족|않|모호|불명확"   # '나쁨'의 근거가 '없다'는 말이면 화면 id 없이도 인정 (재시도 비용 절감)
+MIN_REASON_CHARS = 8                   # 완주 이유 최소 글자 수. 코드만 쓴 응답은 한글 여부로 따로 거른다
 
 # 평가 기준 (ISO 9241-11 효과성·효율성·만족도 뼈대 + 닐슨 휴리스틱 항목). 키는 결과 열 이름
 CRITERIA = {
@@ -67,3 +74,8 @@ DROP_REASON_KO = {
     "NAVIGATION_LOST": "어디로 가야 할지 모르겠다",
 }
 assert tuple(DROP_REASON_KO) == DROP_REASONS, "백엔드 DROP_REASONS와 달라졌다"
+
+# 실제 사이트 수집 (url_to_flow.py)
+FETCH_USER_AGENT = "Mozilla/5.0 (PersonaLab UX test; read-only)"
+FETCH_TIMEOUT_SEC = 20
+FETCH_DELAY_SEC = 1.0          # 요청 사이 대기 (사이트 부담 줄이기)
