@@ -38,13 +38,63 @@ def validate_flow(flow: dict) -> None:
         raise ValueError(f"없는 화면으로 연결됩니다 (화면, 버튼, 대상): {broken}")
 
 
+def _has(words, texts) -> bool:
+    return any(w.lower() in t.lower() for w in words for t in texts)
+
+
+def shortest_steps(flow: dict) -> int | None:
+    """시작 화면에서 목표 화면까지 최소 몇 번 눌러야 하는지 (도달 불가면 None)."""
+    nxt = {s["id"]: [e["to"] for e in s.get("elements", []) if e.get("to")] for s in flow["screens"]}
+    start, goal = flow["screens"][0]["id"], flow["goal"]
+    seen, frontier, steps = {start}, [start], 0
+    while frontier:
+        if goal in frontier:
+            return steps
+        frontier = [t for f in frontier for t in nxt[f] if t not in seen]
+        seen.update(frontier)
+        steps += 1
+    return None
+
+
+def screen_facts(s: dict) -> dict:
+    """코드로 센 화면 사실. LLM이 구조를 잘못 읽지 않게 요약에 함께 넣는다."""
+    from . import config as C
+    fields = s.get("fields", [])
+    buttons = [e["text"] for e in s.get("elements", [])]
+    return {"fields": len(fields),
+            "required": sum(f.get("required") is True for f in fields),
+            "optional": sum(f.get("required") is False for f in fields),
+            "unmarked": sum(f.get("required") is None for f in fields),
+            "unnamed": sum(not f.get("label") for f in fields),
+            "exit": [b for b in buttons if _has(C.EXIT_WORDS, [b])],
+            "skip": [b for b in buttons if _has(C.SKIP_WORDS, [b])]}
+
+
+def flow_facts(flow: dict) -> dict:
+    import re
+
+    from . import config as C
+    all_text = [t for s in flow["screens"] for t in s.get("texts", []) + [e["text"] for e in s.get("elements", [])]]
+    return {"steps": shortest_steps(flow),
+            "fields": sum(len(s.get("fields", [])) for s in flow["screens"]),
+            "social": _has(C.SOCIAL_WORDS, all_text),
+            "help": _has(C.HELP_WORDS, all_text),
+            "progress": any(re.search(C.PROGRESS_PATTERN, t) for t in all_text)}
+
+
 def render_flow(flow: dict) -> str:
-    """프롬프트에 넣는 '화면 전체의 구조 요약'. 입력에 있는 사실만 옮긴다."""
+    """프롬프트에 넣는 '화면 전체의 구조 요약'. 입력에 있는 사실만 옮기고, 코드로 센 사실([자동 집계])을 붙인다."""
     label = {s["id"]: s["label"] for s in flow["screens"]}
     start = flow["screens"][0]["id"]
+    ff = flow_facts(flow)
+    yn = lambda b: "있음" if b else "없음"
+    steps = f"{ff['steps']}번" if ff["steps"] is not None else "도달할 수 없음"
     L = [f"과제: {flow['task']}",
          f"시작 화면: {start} {label[start]} / 목표 화면: {flow['goal']} {label[flow['goal']]}",
-         f"화면 수: {len(flow['screens'])}", ""]
+         f"화면 수: {len(flow['screens'])}",
+         f"[자동 집계] 시작에서 목표까지 최소 이동 {steps} · 전체 입력 필드 {ff['fields']}개 · "
+         f"소셜/간편 로그인 버튼 {yn(ff['social'])} · 도움말/문의 {yn(ff['help'])} · 진행 단계 표시(예: 2/4) {yn(ff['progress'])}",
+         ""]
     for s in flow["screens"]:
         L.append(f"[{s['id']}] {s['label']}")
         for t in s.get("texts", []):
@@ -58,6 +108,11 @@ def render_flow(flow: dict) -> str:
             L.append(f"  - 클릭 가능: [{e['text']}]{to}")
         if not s.get("elements"):
             L.append("  - 클릭 가능한 요소 없음")
+        sf = screen_facts(s)
+        exit_ = f"있음({', '.join(sf['exit'])})" if sf["exit"] else "없음"
+        skip = f"있음({', '.join(sf['skip'])})" if sf["skip"] else "없음"
+        L.append(f"  - [자동 집계] 입력 필드 {sf['fields']}개 (필수 {sf['required']} · 선택 {sf['optional']} · "
+                 f"표시 없음 {sf['unmarked']} · 이름 없음 {sf['unnamed']}) · 뒤로/이전/취소 버튼 {exit_} · 건너뛰기 버튼 {skip}")
         L.append("")
     return "\n".join(L).rstrip()
 

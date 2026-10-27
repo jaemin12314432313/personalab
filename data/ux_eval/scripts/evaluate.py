@@ -125,7 +125,7 @@ def main():
             from collections import Counter
             print("재시도 원인:", dict(Counter(usage["retry_reasons"])))
 
-    tag = "mock" if a.mock else model
+    tag = ("mock" if a.mock else model) + f"_{C.PROMPT_VERSION}"
     out_dir = C.OUT / f"{flow['name']}_{panel_path.stem}_n{len(rows)}_{tag}"
     out_dir.mkdir(parents=True, exist_ok=True)
     with open(out_dir / "results.jsonl", "w", encoding="utf-8") as f:
@@ -137,6 +137,11 @@ def main():
             "cost": (f"호출 {usage['calls']}회, 입력 {usage['input']:,} · 출력 {usage['output']:,} 토큰, "
                      f"${cost():.4f}") if usage else None}
     (out_dir / "summary.md").write_text(summarize(df, flow, meta), encoding="utf-8")
+    run = {"flow": str(Path(a.flow).resolve()), "panel": str(panel_path.resolve()), "model": model,
+           "prompt_version": C.PROMPT_VERSION, "n": len(rows),
+           "usage": {k: v for k, v in usage.items() if k != "retry_reasons"} if usage else None,
+           "cost_usd": round(cost(), 4) if usage else None}
+    (out_dir / "run.json").write_text(json.dumps(run, ensure_ascii=False, indent=2), encoding="utf-8")   # 뷰어용
     fails = int((df.status != "ok").sum())
     print(f"-> {out_dir.relative_to(C.ROOT)}/ (summary.md, results.csv, results.jsonl)"
           + (f" · 실패 {fails}명" if fails else ""))

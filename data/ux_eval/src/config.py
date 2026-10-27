@@ -11,7 +11,16 @@ PANEL_DIR = REPO / "data" / "persona_engine" / "outputs"   # Persona Engine 결�
 sys.path.insert(0, str(REPO / "backend"))
 from app.core.config import DROP_REASONS  # noqa: E402
 
-PROMPT_VERSION = "v0.1"        # 프롬프트·기준 문구를 바꾸면 올린다
+PROMPT_VERSION = "v0.3"        # 프롬프트·기준 문구를 바꾸면 올린다
+# v0.2: 화면 요약에 코드로 센 사실([자동 집계])을 붙이고, 이를 사실로 쓰라는 문장 추가
+# v0.3: 흐름 전체 근거는 '전체 흐름'으로 적게 허용, 완주 이유는 문장으로 (코드만 쓰지 않기)
+
+# [자동 집계]용 단어 목록. 버튼·문구에 이 단어가 들어 있으면 해당 요소가 '있다'고 센다
+EXIT_WORDS = ["뒤로", "이전", "취소", "닫기", "나가기", "돌아가기"]
+SKIP_WORDS = ["건너뛰기", "나중에", "다음에 하기", "skip"]
+SOCIAL_WORDS = ["카카오", "네이버", "구글", "Google", "애플", "Apple", "소셜", "간편 로그인", "간편가입"]
+HELP_WORDS = ["도움말", "문의", "고객센터", "FAQ", "help", "자주 묻는"]
+PROGRESS_PATTERN = r"\d+\s*/\s*\d+|\d+\s*단계|STEP\s*\d+"   # '2/4', '2단계', 'STEP 2' 같은 진행 표시
 DEV_N = 20                     # 개발 중 기본 인원 (CLAUDE.md 비용 관리: 20명으로 먼저)
 MAX_CONSECUTIVE_FAILS = 3      # 연속 실패하면 실행 중단 (프롬프트 문제로 재시도 비용이 새는 것 방지)
 MAX_RUN_COST_USD = 0.50        # 한 번 실행에서 실제 비용이 이 금액을 넘으면 중단 (--max-cost로 변경)
@@ -30,6 +39,8 @@ LABELS = ["좋음", "보통", "나쁨", "판단불가"]
 IMPORTANCE = ["높음", "중간", "낮음"]
 COMPLETE = ["예", "아니오"]
 NOT_JUDGED = "판단불가"
+FLOW_REFS = ["전체 흐름", "자동 집계"]   # 특정 화면이 아니라 흐름 전체를 근거로 댈 때 인정하는 표현
+MIN_REASON_CHARS = 15                  # 완주 이유 최소 길이 (코드 한 단어만 쓰는 응답 방지)
 
 # 평가 기준 (ISO 9241-11 효과성·효율성·만족도 뼈대 + 닐슨 휴리스틱 항목). 키는 결과 열 이름
 CRITERIA = {
