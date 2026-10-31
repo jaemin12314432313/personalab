@@ -3,6 +3,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import RUN_STATUS_DONE
 from app.models import ActLog, AskResponse, Run, Study
 
 
@@ -18,6 +19,17 @@ async def get_run(session: AsyncSession, run_id: int, user_id: int | None = None
     query = select(Run).where(Run.id == run_id)
     if user_id is not None:
         query = query.join(Study, Study.id == Run.study_id).where(Study.user_id == user_id)
+    return await session.scalar(query)
+
+
+async def latest_done_run(session: AsyncSession, study_id: int, mode: str) -> Run | None:
+    """리포트에 쓸 실행: 해당 모드에서 가장 최근에 끝난 것. 실패·진행 중인 실행은 건너뛴다."""
+    query = (
+        select(Run)
+        .where(Run.study_id == study_id, Run.mode == mode, Run.status == RUN_STATUS_DONE)
+        .order_by(Run.id.desc())
+        .limit(1)
+    )
     return await session.scalar(query)
 
 
