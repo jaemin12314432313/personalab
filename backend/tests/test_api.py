@@ -7,6 +7,8 @@ from app.api.studies import run_launcher
 from app.core.db import get_session
 from app.main import app
 from app.repositories import run as run_repo
+from app.services.act import decide
+from app.services.ask import answer
 from app.services.runner import execute_run
 
 SCREENS = [
@@ -16,8 +18,31 @@ SCREENS = [
 ]
 
 
+def fake_llm(system, contents, schema, check=None):
+    """AI 대신 정해진 답을 낸다. Ask 는 첫 기능을 필요하다고, Act 는 첫 버튼을 누른다."""
+    props = schema["properties"]
+    if "usage_intention" in props:
+        features = props["needed_features"]["items"].get("enum", [])
+        return {
+            "usage_intention": 3,
+            "needed_features": features[:1],
+            "unneeded_features": features[1:2],
+            "concern": "PRICE",
+            "willingness_to_pay": 0,
+            "reason": "테스트 응답",
+        }
+    return {
+        "action": "click",
+        "target": props["target"]["enum"][0],
+        "drop_reason": None,
+        "reason": "테스트",
+    }
+
+
 @pytest.fixture
-async def client(session):
+async def client(session, monkeypatch):
+    monkeypatch.setattr(answer, "call_llm", fake_llm)
+    monkeypatch.setattr(decide, "call_llm", fake_llm)
     started: list[int] = []
 
     async def record(run_id: int) -> None:
