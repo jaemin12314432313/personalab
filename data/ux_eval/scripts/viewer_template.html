@@ -1,0 +1,362 @@
+<!--HEAD-->
+<title>PersonaLab UX 평가</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<style>
+  /* 레이아웃: 위에서 아래로 흐름(휴대폰 화면 띠) -> 기준별 평가 -> 페르소나별 응답 */
+  :root {
+    --bg: #f5f6f8; --panel: #ffffff; --ink: #1b1f24; --muted: #5f6670; --line: #e1e4e8; --sunk: #eef0f3;
+    --accent: #3b5bdb; --accent-soft: #e7ecff;
+    --good: #2b8a3e; --good-soft: #e3f5e8; --mid: #b26b00; --mid-soft: #fdf1dc;
+    --bad: #c92a2a; --bad-soft: #fde8e8; --na: #868e96; --na-soft: #eceef0;
+    --font: "IBM Plex Sans KR", "Pretendard", "Malgun Gothic", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131518; --panel: #1c1f23; --ink: #e8eaed; --muted: #9aa1a9; --line: #2d3137; --sunk: #24282d;
+      --accent: #91a7ff; --accent-soft: #252c48;
+      --good: #69db7c; --good-soft: #1d3324; --mid: #ffc078; --mid-soft: #3a2e1a;
+      --bad: #ff8787; --bad-soft: #3b2020; --na: #adb5bd; --na-soft: #2a2e33;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131518; --panel: #1c1f23; --ink: #e8eaed; --muted: #9aa1a9; --line: #2d3137; --sunk: #24282d;
+    --accent: #91a7ff; --accent-soft: #252c48;
+    --good: #69db7c; --good-soft: #1d3324; --mid: #ffc078; --mid-soft: #3a2e1a;
+    --bad: #ff8787; --bad-soft: #3b2020; --na: #adb5bd; --na-soft: #2a2e33;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.6 var(--font); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-inline: 24px; padding-block: 20px 48px; display: flex; flex-direction: column; gap: 22px; }
+  h1 { margin: 0; font-size: 21px; text-wrap: balance; }
+  h2 { margin: 0 0 4px; font-size: 16px; }
+  .sub, .hint { color: var(--muted); font-size: 13px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tab { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 12px;
+         border-radius: 999px; cursor: pointer; font: inherit; font-size: 13px; }
+  .tab.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .tab:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .stat b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 12px; }
+  .task { background: var(--accent-soft); border-radius: 10px; padding: 10px 14px; }
+
+  /* 화면 흐름 띠 */
+  .strip { overflow-x: auto; padding-bottom: 6px; }
+  .flow { display: flex; align-items: stretch; gap: 0; min-width: max-content; }
+  .arrow { align-self: center; color: var(--muted); padding: 0 6px; font-size: 18px; }
+  .screen { width: 214px; display: flex; flex-direction: column; gap: 8px; }
+  .phone { background: var(--panel); border: 1.5px solid var(--line); border-radius: 22px; padding: 12px 12px 14px;
+           min-height: 330px; display: flex; flex-direction: column; gap: 6px; }
+  .phone.goal { border-color: var(--good); }
+  .phone.dropped { border-color: var(--bad); }
+  .ph-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; color: var(--muted);
+             border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+  .ph-head b { color: var(--ink); font-size: 13px; }
+  .ph-text { font-size: 12px; margin: 0; }
+  .field { display: flex; justify-content: space-between; gap: 6px; font-size: 11.5px; background: var(--sunk);
+           border-radius: 6px; padding: 4px 7px; }
+  .field .name { min-width: 0; overflow-wrap: anywhere; }
+  .field .unnamed { color: var(--bad); font-style: italic; }
+  .req { flex: none; font-size: 10.5px; color: var(--muted); }
+  .req.none { color: var(--mid); }
+  .btns { margin-top: auto; display: flex; flex-wrap: wrap; gap: 5px; padding-top: 6px; }
+  .btn { font-size: 11.5px; border: 1px solid var(--accent); color: var(--accent); border-radius: 6px; padding: 2px 7px; }
+  .btn.dead { border-style: dashed; color: var(--muted); border-color: var(--line); }
+  .facts { display: flex; flex-wrap: wrap; gap: 4px; }
+  .badge { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--na-soft); color: var(--muted); }
+  .badge.warn { background: var(--mid-soft); color: var(--mid); }
+  .badge.bad { background: var(--bad-soft); color: var(--bad); font-weight: 600; }
+  .badge.good { background: var(--good-soft); color: var(--good); font-weight: 600; }
+
+  /* 기준별 평가 */
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .crit { display: grid; grid-template-columns: 150px minmax(0, 1fr) 120px 90px; gap: 6px 14px; align-items: center; }
+  .crit .hd { font-size: 12px; color: var(--muted); }
+  .crit .row-ev { grid-column: 2 / -1; font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+  .bar { display: flex; height: 16px; border-radius: 4px; overflow: hidden; background: var(--sunk); }
+  .bar span { display: block; height: 100%; }
+  .num { font-variant-numeric: tabular-nums; }
+  .lab { font-size: 12px; padding: 1px 8px; border-radius: 999px; font-weight: 600; }
+  .lab.좋음 { background: var(--good-soft); color: var(--good); }
+  .lab.보통 { background: var(--mid-soft); color: var(--mid); }
+  .lab.나쁨 { background: var(--bad-soft); color: var(--bad); }
+  .lab.판단불가 { background: var(--na-soft); color: var(--na); }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+
+  /* 페르소나 */
+  .people { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  .person { display: flex; flex-direction: column; gap: 8px; }
+  .person .who { font-weight: 600; }
+  .verdict { border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+  .verdict.yes { background: var(--good-soft); }
+  .verdict.no { background: var(--bad-soft); }
+  .verdict b { display: block; }
+  .mini { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 8px; font-size: 12.5px; align-items: center; }
+  .imp { font-size: 11px; color: var(--muted); }
+  details { font-size: 12.5px; }
+  summary { cursor: pointer; color: var(--accent); }
+  details dl { margin: 6px 0 0; }
+  details dt { font-weight: 600; margin-top: 6px; }
+  details dd { margin: 0; color: var(--muted); }
+  .note { font-size: 12px; color: var(--muted); }
+
+  /* 고객 구분별 보기 */
+  .segs { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-top: 12px; }
+  .seg { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--bg); cursor: pointer;
+         display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+  .seg:hover { border-color: var(--accent); }
+  .seg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .seg.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+  .seg h3 { margin: 0; font-size: 15px; display: flex; justify-content: space-between; gap: 8px; }
+  .seg h3 small { font-weight: 400; color: var(--muted); font-size: 12px; }
+  .seg .desc { font-size: 12.5px; color: var(--muted); margin: -4px 0 0; }
+  .seg .k { font-size: 11px; color: var(--muted); letter-spacing: .02em; margin-bottom: 2px; }
+  .meter { height: 8px; background: var(--bad-soft); border-radius: 4px; overflow: hidden; }
+  .meter span { display: block; height: 100%; background: var(--good); }
+  .quote { margin: 0 0 6px; border-left: 3px solid var(--accent); padding: 1px 0 1px 9px; font-size: 12.5px; }
+  .quote cite { display: block; font-style: normal; color: var(--muted); font-size: 11px; }
+  .ops { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; font-size: 12.5px; }
+  .ops dt { color: var(--muted); font-weight: 600; }
+  .ops dd { margin: 0; }
+  .filter { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; margin: 0 0 8px; }
+  .filter button { font: inherit; font-size: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+                   border-radius: 999px; padding: 1px 10px; cursor: pointer; }
+  @media (max-width: 760px) {
+    .wrap { padding-inline: 16px; }
+    .crit { grid-template-columns: minmax(0, 1fr) auto; }
+    .crit .bar, .crit .hd.opt, .crit .opt { grid-column: 1 / -1; }
+    .crit .row-ev { grid-column: 1 / -1; }
+  }
+</style>
+<!--/HEAD-->
+<div class="wrap">
+  <header>
+    <h1>PersonaLab UX 흐름 평가</h1>
+    <div class="sub">AI 페르소나가 화면 흐름을 7개 사용성 기준(ISO 9241-11 · 닐슨 휴리스틱)으로 평가하고 끝까지 할지 판단한 결과입니다.
+      모든 평가는 Synthetic User Response이며 실제 사용자 응답이 아닙니다.</div>
+  </header>
+  <nav class="tabs" id="tabs" aria-label="평가 실행 선택"></nav>
+  <div class="task" id="task"></div>
+  <section class="stats" id="stats"></section>
+
+  <section class="card">
+    <h2>고객 구분별 보기</h2>
+    <div class="hint">기준을 고르면 페르소나를 그룹으로 나눠 완주율, 그만둔 화면, 중요하게 본 기준, 실제 의견을 보여줍니다. 그룹 카드를 누르면 아래 페르소나 목록이 그 그룹만 남습니다.</div>
+    <div class="tabs" id="segaxis" style="margin-top:10px" aria-label="고객 구분 기준"></div>
+    <div class="segs" id="segs"></div>
+  </section>
+
+  <section>
+    <h2>화면 흐름</h2>
+    <div class="hint">AI가 받은 화면 정보입니다. 회색 점선 버튼은 이동할 곳이 없는 버튼, 주황 표시는 필수/선택 표시가 없는 입력칸입니다. 빨간 테두리는 페르소나가 그만둔 화면입니다.</div>
+    <div class="strip"><div class="flow" id="flow"></div></div>
+  </section>
+
+  <section class="card" id="commentsec">
+    <h2>화면별 한마디</h2>
+    <div class="hint">페르소나가 화면마다 남긴 의견입니다. 그룹 카드를 고르면 그 그룹의 의견만 보입니다.</div>
+    <div class="segs" id="comments"></div>
+  </section>
+
+  <section class="card">
+    <h2>기준별 평가</h2>
+    <div class="hint">라벨은 화면에 있는 사실이라 페르소나가 달라도 같아야 합니다. 일치도가 낮으면 프롬프트나 화면 정보가 모호하다는 뜻입니다.</div>
+    <div class="legend" id="legend"></div>
+    <div class="crit" id="crit"></div>
+  </section>
+
+  <section>
+    <h2>페르소나별 응답</h2>
+    <div class="filter" id="pfilter"></div>
+    <div class="people" id="people"></div>
+  </section>
+  <p class="note" id="foot"></p>
+</div>
+<script>
+const RUNS = /*__RUNS__*/null;
+const META = /*__META__*/null;
+const COLOR = { "좋음": "var(--good)", "보통": "var(--mid)", "나쁨": "var(--bad)", "판단불가": "var(--na)" };
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pct = x => Math.round(x * 100) + "%";
+const FLOW_NAME = { signup: "샘플 앱 회원가입", aicoss_signup: "AICOSS 사이트 회원가입" };
+let cur = RUNS.reduce((b, r, i) => r.mtime > RUNS[b].mtime ? i : b, 0);   // 가장 최근 실행부터 보여준다
+let axis = "da_grade", group = null;
+
+function segmentCards(r, label) {
+  const seg = META.segments.find(s => s.key === axis);
+  const present = [...new Set(r.people.map(p => p.seg[axis]).filter(v => v != null))];
+  const groups = [...seg.order.filter(g => present.includes(g)), ...present.filter(g => !seg.order.includes(g))];
+  if (!groups.length) return `<p class="note">이 기준의 값이 없습니다.</p>`;
+  return groups.map(g => {
+    const mem = r.people.filter(p => p.seg[axis] === g), ok = mem.filter(p => p.status === "ok");
+    const done = ok.filter(p => p.eval.complete === "예").length;
+    const dropScr = {}, dropWhy = {};
+    ok.filter(p => p.eval.complete === "아니오").forEach(p => {
+      dropScr[p.eval.drop_screen] = (dropScr[p.eval.drop_screen] || 0) + 1;
+      dropWhy[p.eval.drop_reason] = (dropWhy[p.eval.drop_reason] || 0) + 1; });
+    const topScr = Object.entries(dropScr).sort((a, b) => b[1] - a[1])[0];
+    const why = Object.entries(dropWhy).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${META.drop_ko[k]} ${n}명`).join(", ");
+    const imp = META.criteria.map(c => ({ name: c.name, key: c.key,
+      share: ok.length ? ok.filter(p => p.eval.criteria[c.key].importance === "높음").length / ok.length : 0 }))
+      .sort((a, b) => b.share - a.share).slice(0, 3).filter(x => x.share > 0);
+    const who = p => `${esc(p.persona_id)} · ${esc((p.profile || "").replace(/ 지역에 산다\.$/, ""))}`;
+    const quotes = ok.slice(0, 2).map(p => `<blockquote class="quote">"${esc(p.eval.complete_reason)}"<cite>${who(p)}</cite></blockquote>`);
+    if (imp.length) {
+      const p = ok.find(q => q.eval.criteria[imp[0].key].importance === "높음");
+      if (p) quotes.push(`<blockquote class="quote">"${esc(p.eval.criteria[imp[0].key].importance_reason)}"<cite>${esc(p.persona_id)} · ${esc(imp[0].name)}이(가) 중요한 이유</cite></blockquote>`);
+    }
+    const none = '<span class="note">없음</span>';
+    return `<div class="seg ${group === g ? "on" : ""}" role="button" tabindex="0" data-g="${esc(g)}" aria-pressed="${group === g}">
+      <h3>${esc(seg.name)} ${esc(g)} <small>${mem.length}명${mem.length > ok.length ? ` (실패 ${mem.length - ok.length})` : ""}</small></h3>
+      ${seg.desc[g] ? `<p class="desc">${esc(seg.desc[g])}</p>` : ""}
+      <div><div class="k">끝까지 하겠다 ${done}/${ok.length}명 (${pct(ok.length ? done / ok.length : 0)})</div>
+        <div class="meter"><span style="width:${ok.length ? done / ok.length * 100 : 0}%"></span></div></div>
+      <div><div class="k">주로 그만둔 화면</div>${topScr ? `${esc(topScr[0])} ${esc(label[topScr[0]])} (${topScr[1]}명) · ${esc(why)}` : none}</div>
+      <div><div class="k">중요하게 본 기준</div><div class="facts">${imp.length ? imp.map(x => `<span class="badge">${esc(x.name)} ${pct(x.share)}</span>`).join("") : none}</div></div>
+      <div><div class="k">의견</div>${quotes.join("") || none}</div>
+      ${ok.some(p => p.eval.opinions) ? `<div><div class="k">개선 제안</div>${ok.filter(p => p.eval.opinions).slice(0, 2).map(p =>
+        `<blockquote class="quote">"${esc(p.eval.opinions.suggestion)}"<cite>${esc(p.persona_id)}</cite></blockquote>`).join("")}</div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function tabs() {
+  $("tabs").innerHTML = RUNS.map((r, i) =>
+    `<button class="tab ${i === cur ? "on" : ""}" data-i="${i}">${esc(FLOW_NAME[r.flow.name] || r.flow.name)} · ${esc(r.version)} · ${r.people.length}명</button>`).join("");
+  $("tabs").querySelectorAll(".tab").forEach(b => b.onclick = () => { cur = +b.dataset.i; group = null; render(); });
+}
+
+function labelStats(ok) {
+  return META.criteria.map(c => {
+    const counts = Object.fromEntries(META.labels.map(l => [l, 0]));
+    ok.forEach(p => { const l = p.eval.criteria[c.key].label; counts[l] = (counts[l] || 0) + 1; });
+    const mode = META.labels.reduce((a, b) => counts[b] > counts[a] ? b : a, META.labels[0]);
+    const hi = ok.filter(p => p.eval.criteria[c.key].importance === "높음").length;
+    const ex = ok.find(p => p.eval.criteria[c.key].label === mode);
+    return { ...c, counts, mode, agree: ok.length ? counts[mode] / ok.length : 0,
+             hi: ok.length ? hi / ok.length : 0, ev: ex ? ex.eval.criteria[c.key].evidence : "" };
+  });
+}
+
+function render() {
+  tabs();
+  const r = RUNS[cur], f = r.flow, ok = r.people.filter(p => p.status === "ok");
+  const label = Object.fromEntries(f.screens.map(s => [s.id, s.label]));
+  const drops = {};
+  ok.filter(p => p.eval.complete === "아니오").forEach(p => drops[p.eval.drop_screen] = (drops[p.eval.drop_screen] || 0) + 1);
+  const stats = labelStats(ok);
+  const done = ok.filter(p => p.eval.complete === "예").length;
+  const topDrop = Object.entries(drops).sort((a, b) => b[1] - a[1])[0];
+  const agree = stats.length ? stats.reduce((s, c) => s + c.agree, 0) / stats.length : 0;
+  const ff = r.flow_facts;
+
+  $("task").innerHTML = `<b>과제</b> ${esc(f.task)} · 시작 ${esc(f.screens[0].id)} → 목표 ${esc(f.goal)} · 최소 ${ff.steps}번 이동 · 입력칸 ${ff.fields}개 · ` +
+    `소셜 로그인 ${ff.social ? "있음" : "없음"} · 도움말 ${ff.help ? "있음" : "없음"} · 진행 단계 표시 ${ff.progress ? "있음" : "없음"}` +
+    (f.common ? `<br><span class="note">모든 화면 공통 메뉴 ${f.common.menu.length}개(${esc(f.common.menu.slice(0, 6).join(", "))} 등)는 화면 그림에서 뺐습니다.</span>` : "");
+  $("stats").innerHTML = [
+    [`${pct(ok.length ? done / ok.length : 0)}`, `끝까지 하겠다 (${done}/${ok.length}명)`],
+    [topDrop ? `${topDrop[0]} ${esc(label[topDrop[0]])}` : "-", topDrop ? `가장 많이 그만둔 화면 (${topDrop[1]}명)` : "그만둔 사람 없음"],
+    [pct(agree), "평균 라벨 일치도"],
+    [r.cost != null ? `$${r.cost.toFixed(3)}` : "-", `실행 비용 · 응답 실패 ${r.people.length - ok.length}명`],
+  ].map(([b, s]) => `<div class="stat"><b>${b}</b><span>${s}</span></div>`).join("");
+
+  $("flow").innerHTML = f.screens.map((s, i) => {
+    const fx = s.facts, d = drops[s.id] || 0, goal = s.id === f.goal;
+    const allTexts = s.texts || [];
+    const texts = allTexts.slice(0, 8).map(t => `<p class="ph-text">${esc(t)}</p>`).join("") +
+      (allTexts.length > 8 ? `<p class="ph-text note">… 문구 ${allTexts.length - 8}개 더</p>` : "");
+    const inFlow = (s.elements || []).filter(e => !e.outside), outside = (s.elements || []).length - inFlow.length;
+    const fields = (s.fields || []).map(x => {
+      const req = x.required === true ? "필수" : x.required === false ? "선택" : "표시 없음";
+      const name = x.label ? `<span class="name">${esc(x.label)}</span>` : `<span class="name unnamed">(이름 없음) ${esc(x.hint || "")}</span>`;
+      return `<div class="field">${name}<span class="req ${x.required == null ? "none" : ""}">${req}</span></div>`;
+    }).join("");
+    const btns = inFlow.map(e =>
+      `<span class="btn ${e.to ? "" : "dead"}" title="${e.to ? "→ " + esc(e.to) : "이동 없음"}">${esc(e.text)}${e.to ? " → " + esc(e.to) : ""}</span>`).join("");
+    const chips = [
+      `<span class="badge">입력칸 ${fx.fields}</span>`,
+      fx.unmarked ? `<span class="badge warn">표시 없음 ${fx.unmarked}</span>` : "",
+      fx.unnamed ? `<span class="badge warn">이름 없음 ${fx.unnamed}</span>` : "",
+      `<span class="badge ${fx.exit.length ? "" : "warn"}">뒤로/취소 ${fx.exit.length ? "있음" : "없음"}</span>`,
+      s.chars ? `<span class="badge ${s.chars > 3000 ? "warn" : ""}">글자 ${s.chars.toLocaleString()}자</span>` : "",
+      outside ? `<span class="badge">다른 페이지 링크 ${outside}개</span>` : "",
+      goal ? `<span class="badge good">목표 화면</span>` : "",
+      d ? `<span class="badge bad">여기서 그만둠 ${d}명</span>` : "",
+    ].join("");
+    const arrow = i < f.screens.length - 1 ? `<div class="arrow" aria-hidden="true">→</div>` : "";
+    return `<div class="screen"><div class="phone ${goal ? "goal" : ""} ${d ? "dropped" : ""}">
+      <div class="ph-head"><b>${esc(s.label)}</b><span>${esc(s.id)}</span></div>${texts}${fields}<div class="btns">${btns}</div>
+      </div><div class="facts">${chips}</div></div>${arrow}`;
+  }).join("");
+
+  $("segaxis").innerHTML = META.segments.filter(s => r.people.some(p => p.seg[s.key] != null)).map(s =>
+    `<button class="tab ${s.key === axis ? "on" : ""}" data-a="${s.key}">${esc(s.name)}</button>`).join("");
+  $("segaxis").querySelectorAll(".tab").forEach(b => b.onclick = () => { axis = b.dataset.a; group = null; render(); });
+  $("segs").innerHTML = segmentCards(r, label);
+  $("segs").querySelectorAll(".seg").forEach(el => {
+    const pick = () => { group = group === el.dataset.g ? null : el.dataset.g; render(); };
+    el.onclick = pick;
+    el.onkeydown = ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pick(); } };
+  });
+
+  const pool = (group == null ? ok : ok.filter(p => p.seg[axis] === group)).filter(p => p.eval.opinions);
+  $("commentsec").hidden = !pool.length;
+  $("comments").innerHTML = f.screens.map(s => {
+    const cs = pool.flatMap(p => p.eval.opinions.screen_comments.filter(c => c.screen === s.id).map(c => ({ p, c })));
+    if (!cs.length) return "";
+    return `<div class="seg" style="cursor:default"><h3>${esc(s.id)} ${esc(s.label)} <small>${cs.length}개</small></h3>
+      ${cs.slice(0, 4).map(({ p, c }) => `<blockquote class="quote">"${esc(c.comment)}"<cite>${esc(p.persona_id)} · ${esc((p.profile || "").replace(/ 지역에 산다\.$/, ""))}</cite></blockquote>`).join("")}
+      ${cs.length > 4 ? `<span class="note">… ${cs.length - 4}개 더 (아래 페르소나 카드에서 볼 수 있음)</span>` : ""}</div>`;
+  }).join("");
+
+  $("legend").innerHTML = META.labels.map(l => `<span><i style="background:${COLOR[l]}"></i>${l}</span>`).join("");
+  $("crit").innerHTML = `<div class="hd">기준</div><div class="hd opt">라벨 분포 (${ok.length}명)</div><div class="hd">대표 라벨 · 일치도</div><div class="hd">중요도 높음</div>` +
+    stats.map(c => `
+      <div><b>${esc(c.name)}</b></div>
+      <div class="bar" title="${META.labels.map(l => l + " " + c.counts[l]).join(", ")}">${META.labels.map(l =>
+        c.counts[l] ? `<span style="width:${c.counts[l] / ok.length * 100}%;background:${COLOR[l]}"></span>` : "").join("")}</div>
+      <div><span class="lab ${c.mode}">${c.mode}</span> <span class="num">${pct(c.agree)}</span></div>
+      <div class="num opt">${pct(c.hi)}</div>
+      <div class="row-ev">${esc(c.desc)}<br>근거 예: ${esc(c.ev)}</div>`).join("");
+
+  const segName = (META.segments.find(s => s.key === axis) || {}).name;
+  const shown = group == null ? r.people : r.people.filter(p => p.seg[axis] === group);
+  $("pfilter").innerHTML = group == null ? `전체 ${r.people.length}명` :
+    `${esc(segName)} ${esc(group)} · ${shown.length}명만 보는 중 <button id="clearf">전체 보기</button>`;
+  if (group != null) $("clearf").onclick = () => { group = null; render(); };
+  $("people").innerHTML = shown.map(p => {
+    if (p.status !== "ok") return `<article class="card person"><div class="who">${esc(p.persona_id)} · 응답 실패</div><div class="note">${esc(p.status).slice(0, 220)}</div></article>`;
+    const e = p.eval, yes = e.complete === "예";
+    const verdict = yes ? `<b>끝까지 한다</b>` :
+      `<b>${esc(e.drop_screen)} ${esc(label[e.drop_screen])}에서 그만둔다 · ${esc(e.drop_reason)} (${esc(META.drop_ko[e.drop_reason])})</b>`;
+    const mini = META.criteria.map(c => {
+      const x = e.criteria[c.key];
+      return `<span>${esc(c.name)}</span><span class="lab ${x.label}">${x.label}</span><span class="imp">중요도 ${x.importance}</span>`;
+    }).join("");
+    const sc = e.opinions ? e.opinions.screen_comments.map(c => `<dt>화면 ${esc(c.screen)} ${esc(label[c.screen] || "")}</dt><dd>${esc(c.comment)}</dd>`).join("") : "";
+    const detail = sc + META.criteria.map(c => {
+      const x = e.criteria[c.key];
+      return `<dt>${esc(c.name)} · ${x.label}</dt><dd>근거: ${esc(x.evidence)}</dd><dd>중요도 ${x.importance}: ${esc(x.importance_reason)}</dd>`;
+    }).join("");
+    return `<article class="card person">
+      <div class="who">${esc(p.persona_id)} · ${esc(p.profile || `${p.age}세`)}</div>
+      <div class="facts"><span class="badge">가격 민감 ${esc(p.ps_grade)}</span><span class="badge">디지털 ${esc(p.da_grade)}</span></div>
+      <div class="verdict ${yes ? "yes" : "no"}">${verdict}"${esc(e.complete_reason)}"</div>
+      ${e.opinions ? `<dl class="ops">
+        <dt>좋았던 점</dt><dd>${esc(e.opinions.liked)}</dd>
+        <dt>불편했던 점</dt><dd>${esc(e.opinions.disliked)}</dd>
+        <dt>개선 제안</dt><dd>${esc(e.opinions.suggestion)}</dd></dl>` : ""}
+      <div class="mini">${mini}</div>
+      <details><summary>근거와 페르소나 카드 보기</summary><dl>${detail}<dt>페르소나 카드</dt><dd style="white-space:pre-line">${esc(p.card)}</dd></dl></details>
+    </article>`;
+  }).join("");
+
+  $("foot").textContent = `실행 ${r.id} · 페르소나 ${r.people.length}명 · Persona Engine 카드 + ${r.model}. 화면은 글(구조 요약)로만 전달되어 색·배치·속도는 평가하지 않습니다.`;
+}
+render();
+</script>

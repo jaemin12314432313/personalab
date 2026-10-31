@@ -1,0 +1,5 @@
+pandas>=2.0
+beautifulsoup4
+# 백엔드 LLM 공용 함수(backend/app/services/llm.py)를 그대로 쓴다 -> 백엔드와 같은 버전
+google-genai==2.25.0
+pydantic-settings==2.9.1

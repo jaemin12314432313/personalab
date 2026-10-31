@@ -1,0 +1,20 @@
+{
+  "name": "aicoss_signup",
+  "task": "전남대학교 인공지능혁신융합대학사업단 홈페이지에 학생으로 회원가입한다",
+  "goal": "J04",
+  "pages": [
+    {"id": "H01", "url": "https://www.aicoss.kr/www/", "label": "메인"},
+    {"id": "J01", "url": "https://www.aicoss.kr/www/member/join_before", "label": "가입유형 선택"},
+    {"id": "J02", "url": "https://www.aicoss.kr/www/member/join_agree?d=1", "label": "약관동의 (STEP 01)"},
+    {"id": "J03", "url": "https://www.aicoss.kr/www/member/join?d=1", "label": "회원정보 입력 (STEP 02)"}
+  ],
+  "extra_screens": [
+    {"id": "J04", "label": "회원가입 완료 (STEP 03)",
+     "texts": ["(내용 확인 안 함: 이 화면을 열려면 실제로 가입해야 해서 열지 않았다. 앞 화면의 진행 표시에 'STEP 03 회원가입 완료'로 나온다)"],
+     "fields": [], "elements": []}
+  ],
+  "patch": [
+    {"screen": "J02", "text": "확인", "to": "J03", "why": "moveJoin()이 필수 약관 2개 동의 후 /www/member/join?d=1로 이동"},
+    {"screen": "J03", "text": "확인", "to": "J04", "why": "양식 제출(POST /www/member/save). 실제 가입이 일어나므로 열지 않고 완료 화면으로 연결"}
+  ]
+}

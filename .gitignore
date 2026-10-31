@@ -55,3 +55,6 @@ demo/snapshot.json
 # Persona Engine 중간·산출물 (원시데이터는 위 data/raw/)
 data/interim/
 data/persona_engine/outputs/
+
+# UX 흐름 평가 결과
+data/ux_eval/outputs/

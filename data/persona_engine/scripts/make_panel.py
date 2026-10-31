@@ -17,40 +17,7 @@ from src.checks import run_checks                             # noqa: E402
 from src.donor import derive_donor, load_donor                # noqa: E402
 from src.engine import build_panel                            # noqa: E402
 from src.nvidia import derive_nvidia, fetch_text, load_nvidia_struct   # noqa: E402
-
-PRESETS = {
-    "univ": {"age": (19, 29), "job": ["학생"], "school": ["대졸"]},   # 20대 대학(재학·휴학)생
-    "30s_office": {"age": (30, 39), "job": ["사무·관리"]},
-    "40s_all": {"age": (40, 49)},
-    "60plus": {"age": (60, 120)},
-}
-# 옵션 -> (타깃 키, 고를 수 있는 값)
-LIST_OPTS = {"job": ("job", C.JOB_GROUPS), "school": ("school", C.SCHOOLS), "region": ("region", C.REGIONS),
-             "marital": ("marital", C.MARITALS), "price": ("price_sensitivity", C.GRADE_LABELS)}
-
-
-def parse_age(s: str) -> tuple:
-    """'20-39' / '60-' / '25' -> (최소, 최대)"""
-    lo, _, hi = s.partition("-")
-    try:
-        lo = int(lo)
-        hi = int(hi) if hi else (120 if "-" in s else lo)
-    except ValueError:
-        sys.exit(f"--age 형식 오류: '{s}'. 예: 20-39, 60-, 25")
-    if lo < 19 or hi < lo:
-        sys.exit(f"--age 범위 오류: '{s}'. 만 19세 이상, 최소 <= 최대")
-    return lo, hi
-
-
-def parse_list(opt: str, s: str) -> list:
-    allowed = LIST_OPTS[opt][1]
-    key = lambda v: v.replace("·", "").replace("/", "").replace(" ", "")   # '사무관리'도 '사무·관리'로 받는다
-    lookup = {key(x): x for x in allowed}
-    vals = [v.strip() for v in s.split(",") if v.strip()]
-    bad = [v for v in vals if key(v) not in lookup]
-    if bad:
-        sys.exit(f"--{opt} 값 오류: {bad}. 고를 수 있는 값: {', '.join(allowed)}")
-    return [lookup[key(v)] for v in vals]
+from src.api import LIST_OPTS, PRESETS, parse_conditions     # noqa: E402  조건 해석은 백엔드와 같은 함수
 
 
 def main():
@@ -70,20 +37,13 @@ def main():
     a = ap.parse_args()
 
     custom = any(getattr(a, k) for k in ["age", "sex", *LIST_OPTS])
-    if a.preset:                                              # 프리셋 (+ 조건을 더할 수 있음)
-        target, label = dict(PRESETS[a.preset]), a.preset + ("_custom" if custom else "")
-    elif custom:                                              # 조건만
-        target, label = {}, "custom"
-    else:                                                     # 아무것도 안 주면 기본 프리셋
-        target, label = dict(PRESETS["univ"]), "univ"
-    label = a.name or label
-    if a.age:
-        target["age"] = parse_age(a.age)
-    if a.sex:
-        target["sex"] = a.sex
-    for opt, (key, _) in LIST_OPTS.items():
-        if getattr(a, opt):
-            target[key] = parse_list(opt, getattr(a, opt))
+    preset = a.preset or (None if custom else "univ")         # 아무것도 안 주면 기본 프리셋
+    label = a.name or ((preset or "custom") + ("_custom" if preset and custom else ""))
+    cond = {k: getattr(a, k) for k in ["age", "sex", *LIST_OPTS] if getattr(a, k)}
+    try:
+        target = parse_conditions({**cond, **({"preset": preset} if preset else {})})
+    except ValueError as e:
+        sys.exit(f"--{e}")
     print("타깃:", target or "전체 (19세 이상)")
 
     donor = derive_donor(load_donor())
