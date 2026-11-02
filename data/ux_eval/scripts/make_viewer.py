@@ -52,7 +52,8 @@ def run_info(d: Path) -> dict | None:
     """run.json이 있으면 그것을, 없으면(초기 실행) 폴더 이름에서 흐름·패널·모델을 읽는다."""
     if (d / "run.json").exists():
         r = json.loads((d / "run.json").read_text(encoding="utf-8"))
-        return {"flow": Path(r["flow"]), "panel": Path(r["panel"]), "model": r["model"],
+        here = lambda p: Path(p) if Path(p).is_absolute() else C.REPO / p   # 예전 실행은 절대 경로
+        return {"flow": here(r["flow"]), "panel": here(r["panel"]), "model": r["model"],
                 "version": r["prompt_version"], "cost": r.get("cost_usd")}
     m = RUN_NAME.match(d.name)
     if not m:

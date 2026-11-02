@@ -4,7 +4,7 @@
 
 **한 줄 요약**: AI 페르소나를 만드는 엔진(Persona Engine)과, 그 페르소나가 서비스 화면 흐름을 평가하는 에이전트(UX 흐름 평가)가 동작합니다. 둘 다 지금은 `data/` 아래의 독립 도구이고, 백엔드 API에는 아직 연결되지 않았습니다.
 
-- 결과 화면 미리보기: [UX 평가 뷰어](https://claude.ai/artifact/Jk2QXRRP2AXt34XdR1radm) (공유받은 사람만 열림) 또는 `data/ux_eval/outputs/viewer.html`
+- 결과 화면 미리보기: [UX 평가 뷰어](https://claude.ai/artifact/Jk2QXRRP2AXt34XdR1radm) (링크가 있으면 누구나 열림) 또는 저장소의 `data/ux_eval/outputs/viewer.html`(더블클릭). 실행 결과 원본도 `data/ux_eval/outputs/`, 페르소나 패널은 `data/persona_engine/outputs/`에 있음
 - 상세 사용법: [`data/persona_engine/README.md`](../data/persona_engine/README.md), [`data/ux_eval/README.md`](../data/ux_eval/README.md)
 
 ---
@@ -30,7 +30,7 @@
 
 ## 2. 바로 써보기 (터미널)
 
-준비: 각 폴더 README의 "처음 한 번만 준비"를 따릅니다. 원본 데이터 zip 2개를 `data/raw/`에 풀어야 하고(팀 공유 폴더), UX 평가를 실제로 돌리려면 저장소 루트 `.env`에 `LLM_API_KEY`가 필요합니다.
+준비: 각 폴더 README의 "처음 한 번만 준비"를 따릅니다. 저장소의 `data/raw/`에 있는 원본 데이터 zip 2개를 같은 폴더에 풀어야 하고, UX 평가를 실제로 돌리려면 저장소 루트 `.env`에 `LLM_API_KEY`가 필요합니다.
 
 ```
 # 1) 페르소나 만들기 (data/persona_engine)

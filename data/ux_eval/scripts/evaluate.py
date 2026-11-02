@@ -7,6 +7,7 @@
 페르소나는 Persona Engine 결과 CSV(card_text 열)를 읽는다. 기본은 20대 대학생 패널."""
 import argparse
 import json
+import os
 import random
 import sys
 import time
@@ -140,7 +141,8 @@ def main():
             "cost": (f"호출 {usage['calls']}회, 입력 {usage['input']:,} · 출력 {usage['output']:,} 토큰, "
                      f"${cost():.4f}") if usage else None}
     (out_dir / "summary.md").write_text(summarize(df, flow, meta), encoding="utf-8")
-    run = {"flow": str(Path(a.flow).resolve()), "panel": str(panel_path.resolve()), "model": model,
+    rel = lambda p: Path(os.path.relpath(Path(p).resolve(), C.REPO)).as_posix()   # 다른 PC에서도 열리게 저장소 기준 경로
+    run = {"flow": rel(a.flow), "panel": rel(panel_path), "model": model,
            "prompt_version": C.PROMPT_VERSION, "n": len(rows),
            "usage": {k: v for k, v in usage.items() if k != "retry_reasons"} if usage else None,
            "cost_usd": round(cost(), 4) if usage else None}
