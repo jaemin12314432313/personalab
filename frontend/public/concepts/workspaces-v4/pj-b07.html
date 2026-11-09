@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · B07 Sage</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;800&display=swap">
+<link rel="stylesheet" href="./pj.css"><link rel="stylesheet" href="./pj2.css">
+<style>
+/* B07 · Sage — 세이지 베이지. 둥근 이끼색 히어로 아래에 상태별 미니 보드. */
+
+:root{--serif:"Noto Serif KR","Nanum Myeongjo",serif;
+ --bg:#f5f0e6;--surface:#fffdf8;--surface-2:#f1eadd;--bar-bg:#f5f0e6e8;
+ --fg:#1f1a15;--fg-2:#4d443a;--fg-3:#857a6a;--line:#e6dccb;--line-2:#d6c9b2;
+ --accent:#1f1a15;--btn-bg:#1f1a15;--btn-fg:#fffdf8;--btn-line:#1f1a15;--btn-hover:#3a3128;
+ --c-setup:#857a6a;--c-ready:#b86e0a;--c-run:#2f5fd0;--c-done:#2f7d4f;--danger:#c8452f;--danger-soft:#f9e4de;
+ --radius:14px;--radius-sm:9px;--shadow:0 16px 44px #4a3a2a26;--grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .13  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.ul{position:relative;display:inline-block;white-space:nowrap}
+.ul svg{position:absolute;left:-1%;bottom:-.14em;width:102%;height:.22em;overflow:visible;fill:none;stroke:#d06d5b;stroke-width:2.6;stroke-linecap:round;pointer-events:none}
+body::after{content:"";position:fixed;inset:0;background:var(--grain);opacity:.55;mix-blend-mode:multiply;pointer-events:none;z-index:3}
+.head h1{font:800 36px/1.4 var(--serif);letter-spacing:-.04em}
+.eyebrow{color:var(--fg-3)}
+.search,.sort,.ws,.acct>button{background:var(--surface);border-color:var(--line-2)}
+.btn.solid{box-shadow:0 6px 16px #1f1a1526}
+.dlg{background:var(--surface)}.dlg input{background:var(--surface-2)}
+.me{background:var(--surface-2)}
+.tabs a[aria-current=page]::after{background:var(--accent)}
+.kbd{background:var(--surface-2)}
+
+:root{--bg:#edefe2;--surface:#fbfcf6;--surface-2:#e6ead6;--bar-bg:#edefe2e8;--fg:#1b2316;--fg-2:#424c39;--fg-3:#7a8468;--line:#d9dfc7;--line-2:#c6cfae;--accent:#2d4a2b;--btn-bg:#1b2a17;--btn-fg:#fbfcf6;--btn-line:#1b2a17;--btn-hover:#33472e;
+ --c-setup:#7a8468;--c-ready:#b4811f;--c-run:#3d6b45;--c-done:#5b8a5f;--shadow:0 16px 44px #2a3a2226;
+ --h-bg:radial-gradient(260px 200px at 92% 6%,#b6cd94,transparent 70%),radial-gradient(300px 240px at 2% 100%,#cde0b2,transparent 70%),linear-gradient(135deg,#dfe8cb,#cbdbae);
+ --h-fg:#1b2a17;--h-fg2:#3a4a32;--h-fg3:#66745a;--h-line:#ffffff90;--h-chip:#ffffffa8;--h-chip-fg:#2f5d34;--h-done:#2f6a3d;--h-ready:#8a5f10;--h-setup:#5d6a50;
+ --h-btn-bg:#1b2a17;--h-btn-fg:#fbfcf6;--h-btn-hover:#33472e;--h-btn-shadow:0 8px 20px #1b2a1733;--h-track:#ffffff88;--h-ring:#2f5d34;--h-ring-glow:transparent;--h-ev:#ffffff80;--h-ev-line:#ffffffcc;--h-ev-fg:#3a4a32;--h-ev-b:#1b2a17;
+ --h-shadow:0 20px 50px #3a5a2a2a;--h-spot:0;--h-radius:30px;--h-title-font:var(--serif);--h-title-weight:800;--h-title:46px}
+.ev li:first-child i{background:#d06d5b}
+.h-insight{background:#ffffff8c;border-color:#fff}
+.colm[data-st=setup]{--cc:#8a917a}.colm[data-st=ready]{--cc:#c58b2a}.colm[data-st=run]{--cc:#3d6b45}.colm[data-st=done]{--cc:#5b8a5f}
+.colm .row,.col-h .stt{background:#fbfcf6}
+.search,.sort,.ws,.acct>button{background:#fbfcf6}
+
+</style></head>
+<body><div id="app"></div>
+<script>window.PL=Object.assign({"layout":"focus","rest":"board","title":"<span class=\"ul\">프로젝트<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path pathLength=\"1\" d=\"M3 11 Q85 1 153 8 T296 6\"/></svg></span>"},{searchHint:'/',newHint:'N',keys:"<span class=\"kbd\">/</span> 검색 · <span class=\"kbd\">N</span> 새 프로젝트"});</script>
+<script src="./pj.js"></script>
+</body></html>

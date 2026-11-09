@@ -8,3 +8,6 @@
 | 2 | 2026-09-28 | 8-2 의사코드가 강제 종료 시 `drop_reason="MAX_TURNS"`로 기록하나 카테고리가 아님 | **`MAX_TURNS`를 시스템 코드로 허용.** 이탈 이유 분포 집계에서는 제외하고 별도로 센다 | `core/config.py` `DROP_REASON_MAX_TURNS`, DB CHECK |
 | 3 | 2026-09-28 | `act_logs.participant_id`가 personas(ai)와 invites(real)를 모두 가리킴 | **FK 없이 정수 + `participant_type`.** 무결성은 `repositories/`에서 검사 | `models/run.py` `ActLog` |
 | 4 | 2026-09-28 | 실제 참가자의 Q5·Q6 응답 저장 위치가 9장에 없음. 실제 참가자 `act_logs.run_id`도 미정 | **6단계(참가자 뷰) 전에 팀 결정.** 계획서 9장 수정 후 마이그레이션 추가 | 미정 |
+| 5 | 2026-11-02 | 사용자 요청으로 UI·UX만 다루고 동일 페르소나의 후속 인터뷰를 목표로 함 | 기획 의견·사용 의향·지불 의향을 새 흐름에서 제외. 전반 탐색을 기본, 집중 확인을 선택으로 설계. 현재 구현과 계획을 구분 | `UX_WORKFLOW.md`, `DEVELOPMENT_PLAN.md` 상단, README, 랜딩 |
+| 6 | 2026-11-02 | 카드뷰어와 서비스 DB의 상태를 혼동할 수 있음 | 기존 패널 데이터 확보·검증·가져오기를 우선. DB 0명은 카드 자산 부재를 뜻하지 않음. 원본 패널/데이터 포함 HTML 확보 필요 | `UX_WORKFLOW.md` 2·5장 |
+| 7 | 2026-11-02 | 사용자 요청으로 공개 화면의 ‘준비 중’ 안내 제거 | 랜딩·공개 샘플은 목표 제품 경험으로 설명. 구현 현황은 내부 문서에서 유지. 첫 화면에 프로토타입 예시와 저장된 페르소나 탐색 기록을 함께 표시 | `Marketing.ts`, `marketing.css`, `UX_WORKFLOW.md` |

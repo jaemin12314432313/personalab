@@ -28,7 +28,7 @@ export default function Overview({ setTab }: { setTab: (tab: "report" | "partici
         </div>
       </section>
       <section className="card config">
-        <CardHead title="스터디 조건" sub="고정된 실행 설정" />
+        <CardHead title="테스트 조건" sub="고정된 실행 설정" />
         <dl>
           {[
             ["AI 패널", "대학생 100명"],

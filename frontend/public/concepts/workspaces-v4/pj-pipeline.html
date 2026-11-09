@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · Pipeline</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="./pj.css">
+<style>
+/* D · Pipeline — 프로젝트 상태가 곧 구조. 설정 중 → 실행 전 → 실행 중 → 완료 */
+:root{
+  --bg:#f3f4f8;--surface:#fff;--surface-2:#f3f4f8;--bar-bg:#f3f4f8d9;
+  --fg:#12131a;--fg-2:#454859;--fg-3:#7b7e90;
+  --line:#e4e6ee;--line-2:#d3d6e2;
+  --accent:#4f46e5;--btn-bg:#12131a;--btn-fg:#fff;--btn-line:#12131a;--btn-hover:#2a2c3a;
+  --radius:14px;--radius-sm:10px;
+  --c-setup:#6b6f85;--c-ready:#c0710a;--c-run:#4f46e5;--c-done:#0e9f6e;--shadow:0 16px 44px #1b1f4a26;
+}
+.wrap{max-width:1280px}
+.head{padding:52px 0 26px}
+.head h1{font-size:34px;letter-spacing:-.05em}
+.sum{display:none}
+.search,.sort{background:#fff}
+.btn.solid{box-shadow:0 6px 16px #12131a29}
+.cols,.count{display:none}
+/* 보드 */
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:start;padding-bottom:70px}
+.colm{border-radius:18px;padding:12px;min-height:200px;background:color-mix(in srgb,var(--cc) 7%,#eef0f6);border:1px solid color-mix(in srgb,var(--cc) 14%,#e4e6ee);position:relative}
+.colm[data-st=setup]{--cc:#6b6f85}.colm[data-st=ready]{--cc:#f59e0b}.colm[data-st=run]{--cc:#4f46e5}.colm[data-st=done]{--cc:#10b981}
+.col-h{display:flex;align-items:center;justify-content:space-between;padding:6px 6px 14px}
+.col-h .stt{font-size:13.5px;padding:5px 12px 5px 10px;border-radius:99px;background:#fff;box-shadow:0 1px 2px #1b1f4a14}
+.col-h em{font:600 12.5px var(--font);font-style:normal;color:var(--fg-3);background:#ffffffb0;border-radius:99px;min-width:26px;text-align:center;padding:1px 8px}
+.col-empty{border:1.5px dashed color-mix(in srgb,var(--cc) 30%,#d3d6e2);border-radius:12px;padding:22px 10px;text-align:center;font-size:13px;color:var(--fg-3)}
+.colm .row{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name more" "last last" "date act";gap:12px 8px;align-items:center;padding:16px 16px 14px;margin-bottom:10px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px #1b1f4a0d;overflow:visible}
+.colm .row:hover{transform:translateY(-3px);box-shadow:0 14px 30px #1b1f4a1f;border-color:#cfd0f5}
+.colm .row .stt{display:none}
+.colm .p-name b{font-size:16.5px}
+.colm .p-last{padding:9px 11px;border-radius:10px;background:var(--surface-2);font-size:13.5px}
+.colm .p-date{align-self:center;font-size:12.5px}
+.colm .act{height:34px;padding:0 12px;font-size:13px}
+.colm .act:not(.solid){background:#fff}
+.colm[data-st=run] .row{border-color:#d9d6fb;box-shadow:0 0 0 3px #4f46e514,0 1px 2px #1b1f4a0d}
+.prog{max-width:none;background:#e1e2ee}.prog i{background:linear-gradient(90deg,#4f46e5,#8b5cf6)}
+.colm .menu{top:44px;right:10px}
+.first h2{font-size:36px}
+@media(max-width:1100px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.board{grid-template-columns:1fr}}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL={layout:'board',searchHint:'/',newHint:'N',keys:'<span class="kbd">/</span> 검색 · <span class="kbd">N</span> 새 프로젝트'};</script>
+<script src="./pj.js"></script>
+</body></html>

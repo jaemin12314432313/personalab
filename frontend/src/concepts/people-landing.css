@@ -1,0 +1,40 @@
+/* 기존 랜딩에 인물 사진과 넓은 FAQ 배치만 추가한 비교 시안. */
+.people-variant .lp-centered-hero{max-width:1240px;padding-bottom:15px;overflow:hidden}
+.people-strip{position:relative;margin:36px -16px 0}
+.people-connection{position:absolute;left:-12%;width:124%;top:15px;height:260px;fill:none;stroke:#ddd9d1;stroke-width:1.2;opacity:.7;pointer-events:none}
+.people-connection>path+path{stroke:#ece7df;stroke-width:1.5}
+.people-portraits{position:relative;display:flex;justify-content:center;align-items:flex-start;gap:25px;padding:26px 0 53px;isolation:isolate}
+.people-card{--scale:1;width:163px;flex:0 0 163px;border:0;padding:0;background:none;text-align:left;cursor:pointer;transform:translateY(var(--lift)) rotate(var(--turn)) scale(var(--scale));transition:transform .65s var(--ease),filter .5s;filter:saturate(.63);position:relative;z-index:1}
+.people-card-float{display:block;border:1px solid #e2ded8;border-radius:9px;background:#fff;padding:5px;box-shadow:0 9px 23px #342d2410;overflow:hidden}
+.people-photo{display:block;width:100%;aspect-ratio:3/5;background-image:url('/concepts/people/assets/personas-strip.png');background-size:500% 100%;background-position:var(--position) 50%;background-repeat:no-repeat;border-radius:5px}
+.people-card-info{padding:11px 8px 8px;display:block}
+.people-card-info>strong{display:block;font-size:13px;font-weight:550;color:#3d393f}
+.people-card-info>span{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#9a9298;letter-spacing:.2px;margin-top:4px}
+.people-card-info i{font-style:normal;font-size:13px}
+.people-card.is-active{--scale:1.055;transform:translateY(calc(var(--lift) - 10px)) rotate(0deg) scale(var(--scale));filter:saturate(.9);z-index:3}
+.people-card.is-active .people-card-float{border-color:#aaa098;box-shadow:0 17px 32px #342d2418}
+.people-strip-caption{position:relative;max-width:925px;margin:0 auto;padding:15px 0 21px;display:flex;align-items:center;justify-content:space-between;text-align:left;font-size:12px;color:#837c83;gap:20px}
+.people-strip-caption>span:last-child{font-size:10px;color:#91868d;display:flex;align-items:center;gap:12px}
+#people-motion{height:25px;width:25px;display:grid;place-items:center;font-size:11px;border:1px solid #e9e5e7;background:#fff;color:#8f858d;border-radius:4px;cursor:pointer;padding:0}
+.people-variant .people-wide-faq{display:block;padding-top:48px;padding-bottom:20px}
+.people-faq-heading{margin-bottom:27px}
+.people-faq-heading .lp-eyebrow{font-size:12px;margin-bottom:12px}
+.people-faq-heading h2{font:800 30px/1.55 var(--serif);letter-spacing:-.8px;margin:0}
+.people-wide-faq .lp-faq-list{display:block;width:100%}
+.people-variant .people-wide-faq details{padding:0;border-bottom:1px solid #e3e4e9}
+.people-variant .people-wide-faq details:first-child{border-top:1px solid #e3e4e9}
+.people-variant .people-wide-faq summary{display:block;font:500 20px/1.7 var(--sans);letter-spacing:-.35px;padding:24px 54px 24px 0;position:relative;cursor:pointer;color:#36343d}
+.people-variant .people-wide-faq summary:after{content:'+';position:absolute;right:3px;top:50%;transform:translateY(-50%);display:block;width:24px;height:26px;line-height:26px;font:400 25px/26px var(--sans);text-align:center;background:none;border:0;border-radius:0;box-shadow:none;color:#77737f}
+.people-variant .people-wide-faq details[open]>summary:after{content:'−'}
+.people-variant .people-wide-faq details>p{font-size:15px;line-height:1.95;color:#74707e;max-width:900px;margin:0;padding:0 48px 24px 0}
+.people-wide-faq>.lp-start-copy{text-align:center;margin-top:46px;padding:33px 20px 29px}
+.people-wide-faq>.lp-start-copy h2{font-size:30px;line-height:1.6}
+.people-wide-faq>.lp-start-copy>.lp-start-sample{display:inline-flex;margin-left:17px;margin-top:0}
+@keyframes people-appear{from{opacity:0}to{opacity:1}}
+@keyframes people-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@media(prefers-reduced-motion:no-preference){.people-portraits{animation:lp-rise-in 1.05s var(--ease) .55s both}.people-card{animation:people-appear .85s ease calc(.55s + var(--delay)) both}.people-card-float{animation:people-float 7s ease-in-out calc(var(--delay) * -8) infinite}.people-card:nth-child(2n) .people-card-float{animation-duration:8.3s}.people-card:nth-child(3) .people-card-float{animation-duration:9.2s}.is-paused .people-card-float{animation-play-state:paused}}
+@media(hover:hover) and (pointer:fine){.people-card:hover{transform:translateY(calc(var(--lift) - 15px)) rotate(0deg) scale(1.055);filter:saturate(.9);z-index:4}}
+@media(max-width:1100px){.people-portraits{gap:18px}.people-card{width:147px;flex-basis:147px}}
+@media(max-width:900px){.people-portraits{gap:15px}.people-card{width:129px;flex-basis:129px}.people-card-info{padding-left:6px;padding-right:6px}.people-card-info>strong{font-size:12px}.people-strip-caption{max-width:745px}}
+@media(max-width:700px){.people-strip{margin:28px -25px 0}.people-connection{top:35px;height:180px;width:160%;left:-30%}.people-portraits{justify-content:flex-start;gap:18px;padding:27px 25px 53px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding:25px}.people-portraits::-webkit-scrollbar{display:none}.people-card{width:135px;flex-basis:135px;scroll-snap-align:center}.people-card.is-active{--scale:1.025}.people-strip-caption{margin:0 25px;padding:12px 0 18px;font-size:10px;gap:15px}.people-strip-caption>span:last-child{font-size:9px;gap:9px}.people-variant .people-wide-faq{padding-top:34px;padding-bottom:18px}.people-faq-heading{margin-bottom:21px}.people-faq-heading h2{font-size:25px}.people-variant .people-wide-faq summary{font-size:17px;padding:21px 38px 21px 0}.people-variant .people-wide-faq summary:after{right:0;font-size:23px}.people-variant .people-wide-faq details>p{font-size:14px;padding-right:30px;padding-bottom:21px}.people-wide-faq>.lp-start-copy{margin-top:26px;padding-left:0;padding-right:0}.people-wide-faq>.lp-start-copy h2{font-size:26px}.people-wide-faq>.lp-start-copy>.lp-start-sample{display:flex;margin:17px auto 0}}
+@media(prefers-reduced-motion:reduce){#people-motion{display:none}}

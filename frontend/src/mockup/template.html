@@ -1,0 +1,197 @@
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="m14 5 5 5L9 20H4v-5z"/></symbol>
+</svg>
+
+<!-- ================= 공개 소개와 데모 ================= -->
+<section class="view marketing" id="v-landing" aria-label="PersonaLab 소개"></section>
+<section class="view" id="v-sample" aria-label="공개 AI 데모 결과"></section><section class="view" id="v-demo" aria-label="전체 흐름 체험용 데모"></section>
+
+<!-- ================= 로그인 ================= -->
+<section class="view" id="v-login" aria-labelledby="authTitle">
+  <header class="topbar"><a class="logo" href="#landing">{{PERSONALAB_BRAND}}</a><div class="spacer"></div><a class="btn quiet sm" href="#landing" aria-label="이전 · 랜딩 페이지로 돌아가기">← 이전</a></header>
+  <main class="auth-page"><aside class="auth-story"><span class="studio-overline">A DIFFERENT POINT OF VIEW</span><h2>화면 너머의<br>이유를 만나다.</h2><p>다른 시선으로 탐색하고,<br>근거를 살펴보고, 대화로 더 깊이.</p><div class="auth-story-path"><span>화면</span><i>→</i><span>발견</span><i>→</i><span>인터뷰</span></div><a href="#demo">로그인 없이 데모 둘러보기 ↗</a><small>AI 페르소나의 응답과 실제 사용자 결과를 구분합니다.</small></aside><div class="auth-card"><span class="auth-eyebrow" id="authEyebrow">SIGN IN</span><h1 id="authTitle">로그인</h1><p id="authDescription">로그인하고 내 테스트를 이어서 살펴보세요.</p>
+    <form id="authForm" novalidate aria-busy="false">
+      <label class="label" for="authEmail">이메일</label><input class="input" id="authEmail" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" placeholder="name@company.com" required maxlength="254" aria-describedby="authEmailError"><span class="auth-field-error" id="authEmailError" hidden></span>
+      <label class="label" for="authPassword">비밀번호</label><div class="auth-password-wrap"><input class="input" id="authPassword" name="password" type="password" autocomplete="current-password" minlength="4" maxlength="128" required aria-describedby="authPasswordHint authPasswordError authCapsLock"><button type="button" id="authPasswordToggle" data-auth-toggle="authPassword" aria-controls="authPassword" aria-label="비밀번호 표시" aria-pressed="false">보기</button></div>
+      <span class="hint" id="authPasswordHint">비밀번호는 4자 이상입니다.</span><span class="auth-field-error" id="authPasswordError" hidden></span>
+      <div id="authConfirmField" hidden><label class="label" for="authConfirm">비밀번호 확인</label><div class="auth-password-wrap"><input class="input" id="authConfirm" name="password-confirm" type="password" autocomplete="new-password" minlength="4" maxlength="128" aria-describedby="authConfirmError authCapsLock"><button type="button" data-auth-toggle="authConfirm" aria-controls="authConfirm" aria-label="확인 비밀번호 표시" aria-pressed="false">보기</button></div><span class="auth-field-error" id="authConfirmError" hidden></span></div>
+      <span id="authCapsLock" class="auth-caps" role="status" hidden>Caps Lock이 켜져 있어요.</span>
+      <p id="authError" class="auth-error" role="alert" hidden></p><div class="auth-error-actions"><button type="button" id="authRetry" hidden>연결 다시 확인</button><a id="authExistingLogin" href="#login" hidden>이 이메일로 로그인하기 →</a></div>
+      <button class="btn solid" id="authSubmit" type="submit">로그인</button><span class="auth-sr" id="authProgress" role="status"></span>
+    </form><div class="auth-switch"><span id="authSwitchLabel">아직 계정이 없으신가요?</span><a id="authSwitch" href="#register">이메일로 가입하기 →</a></div>
+  </div><p class="auth-footer">내 제품을 이해하는 또 하나의 시선.</p></main>
+</section>
+<section class="view" id="v-auth-loading"><div class="auth-loading" role="status">로그인 상태를 확인하고 있습니다.</div></section>
+<section class="view workspace-view" id="v-workspace" aria-labelledby="workspace-title">
+  <button type="button" class="ws-sidebar-backdrop" data-ws-close aria-label="메뉴 닫기" hidden></button>
+  <aside class="ws-sidebar" id="workspaceSidebar" aria-label="워크스페이스 메뉴">
+    <a class="logo ws-brand" href="#workspace" data-workspace-home aria-label="PersonaLab 워크스페이스 홈으로"><svg class="brand-symbol" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" d="M5 3h12c7 0 11 4 11 10S24 23 17 23h-6v6H5V3Zm6 6v8h6c3.3 0 5-1.3 5-4s-1.7-4-5-4h-6Z"/></svg><span class="brand-wordmark">Persona<span>Lab</span></span></a>
+    <nav class="ws-navigation" aria-label="워크스페이스" hidden>
+      <button type="button" data-ws-page="tests" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V4h6l3 3h9v13H3zM8 11v5M12 10v6M16 12v4"/></svg>내 테스트</button>
+      <button type="button" data-ws-page="library"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v17H5zM9 2h6v4H9zM9 18v-1a3 3 0 0 1 6 0v1"/><circle cx="12" cy="11" r="2.5"/></svg>페르소나 보관함</button>
+    </nav>
+    <div class="ws-side-tests"><div class="ws-side-sec"><span>내 앱·웹 <span class="ws-nav-count" id="workspaceNavCount">0</span></span><span class="ws-side-tools"><details class="ws-filter-pop"><summary aria-label="필터·정렬" title="필터·정렬"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg></summary><div class="ws-filter-box"><label><span class="ws-sr">진행 상태 필터</span><select id="workspaceFilter"><option value="all">모든 상태</option><option value="draft">작성·준비 중</option><option value="running">실행 중</option><option value="done">완료</option><option value="failed">확인 필요</option></select></label><label class="ws-sort"><span class="ws-sr">테스트 정렬</span><select id="workspaceSort"><option value="status">진행 상태순</option><option value="name">이름순</option></select></label><button class="btn quiet sm" type="button" data-wm-refresh>새로고침 ↻</button></div></details></span></div><label class="workspace-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input type="search" id="workspaceSearch" placeholder="앱·웹·테스트 검색" aria-label="앱·웹·테스트 검색"><kbd>/</kbd></label><div class="wm-filters"><button type="button" class="ws-empty-trash" id="emptyTrashBtn" hidden>휴지통 비우기</button><div class="wm-views" role="group" aria-label="테스트 보기"><button type="button" data-wm-view="active" aria-pressed="true">전체</button><button type="button" data-wm-view="archived" aria-pressed="false">보관</button><button type="button" data-wm-view="trash" aria-pressed="false">휴지통</button></div></div><div id="workspaceSideList" role="list"></div></div><div class="ws-sidebar-bottom"><button type="button" class="ws-side-new" data-create-study data-new-product>＋ 새 앱·웹</button><button type="button" class="ws-side-link" data-ws-page="history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 5v6h6M12 7v6l4 2"/></svg>전체 실행 기록</button>
+      <details class="c10-account"><summary aria-label="내 계정 메뉴"><span class="ws-user-mark" aria-hidden="true">나</span><span class="ws-user-copy"><strong>내 계정</strong><span data-auth-user></span></span><span class="ws-user-chevron" aria-hidden="true">⌃</span></summary><div class="c10-account-menu"><a href="#how" class="ws-guide" data-open-guide>이용 가이드 <span aria-hidden="true">↗</span></a><button type="button" class="ws-connection" data-workspace-connection>연결 상태 확인</button><button type="button" data-auth-logout>로그아웃</button></div></details>
+    </div>
+  </aside>
+  <div class="ws-content"><main class="workspace-main">
+    <header class="topbar workspace-topbar"><button type="button" class="ws-menu-button" data-ws-toggle aria-label="워크스페이스 메뉴 열기" aria-controls="workspaceSidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><div class="ws-page-heading"><div class="ws-breadcrumb">워크스페이스 <span aria-hidden="true">/</span> <span id="workspaceBreadcrumb">내 테스트</span></div><h1 id="workspace-title" tabindex="-1">진행 중인 UX 리서치</h1><p id="workspaceDescription" hidden></p></div><div class="spacer"></div><button class="btn solid ws-create" type="button" aria-label="새 테스트 만들기" data-create-study><span aria-hidden="true">＋</span> 새 테스트 만들기</button></header>
+      <section id="workspaceTestsPanel" aria-labelledby="workspace-title"><div class="ws-tabbar"><span class="ws-total ws-sr">테스트 <b id="workspaceCount">0</b></span><div class="ws-tabs" role="tablist" aria-label="보기"><button type="button" role="tab" data-ws-tab="overview" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg>개요</button><button type="button" role="tab" data-ws-tab="rounds" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5"/></svg>회차</button><button type="button" role="tab" data-ws-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>캘린더</button></div><div class="ws-tools"></div></div><div id="workspaceStudies" aria-live="polite"></div><div id="workspaceDraft" hidden></div></section>
+      <section id="workspaceLibraryPanel" aria-labelledby="workspace-title" hidden><div id="workspaceLibraryContents" aria-live="polite"></div></section>
+      <section id="workspaceHistoryPanel" aria-labelledby="workspace-title" hidden><div id="workspaceHistoryContents" aria-live="polite"></div></section>
+      <footer class="workspace-footer"><a href="#workspace" data-workspace-home>PersonaLab</a><span>다른 시선으로, 더 나은 경험을.</span></footer>
+    </main>
+  </div>
+  <dialog id="emptyTrashDialog" class="wm-dialog" aria-labelledby="emptyTrashTitle"><form id="emptyTrashForm" method="dialog" novalidate><span class="wm-eyebrow">TRASH</span><h2 id="emptyTrashTitle">휴지통 비우기</h2><p id="emptyTrashLead"></p><label class="label" for="emptyTrashInput">확인을 위해 <b>휴지통 비우기</b>라고 입력하세요</label><input id="emptyTrashInput" class="input" autocomplete="off" placeholder="휴지통 비우기"><p class="new-test-error" id="emptyTrashError" role="alert"></p><div class="new-test-actions"><button type="button" class="btn" id="emptyTrashCancel">취소</button><button type="submit" class="btn solid wm-danger" id="emptyTrashSubmit">모두 영구 삭제</button></div></form></dialog>
+  <dialog id="workspaceManageDialog" class="wm-dialog" aria-labelledby="workspaceManageTitle" aria-describedby="workspaceManageDescription"></dialog>
+  <dialog id="workspacePersonaDialog" aria-labelledby="workspacePersonaTitle"><div id="workspacePersonaContents"></div><button class="btn" type="button" data-ws-person-close>닫기</button></dialog>
+</section>
+
+<!-- ================= 앱 ================= -->
+<dialog id="newTestDialog" class="new-test-dialog" aria-labelledby="newTestTitle"><form id="newTestForm" method="dialog" novalidate><h2 id="newTestTitle">새 테스트</h2><p id="newTestLead">앱·웹을 고르거나 새로 추가하세요. 이름만 있으면 시작할 수 있어요.</p><div id="newTestProductField" class="new-test-field" hidden><label for="newTestProduct">앱·웹</label><select id="newTestProduct" class="select"></select></div><div id="newTestNameField" class="new-test-field"><label for="newTestName">앱·웹 이름</label><input id="newTestName" class="input" maxlength="120" placeholder="예: 일정메이트" autocomplete="off"></div><div id="newTestTitleField" class="new-test-field"><label for="newTestTestTitle">테스트 이름 <span>같은 앱·웹의 다른 테스트와 구분해요</span></label><input id="newTestTestTitle" class="input" maxlength="120" placeholder="예: 전반 탐색, 가입 흐름" autocomplete="off"></div><div id="newTestNoteField" class="new-test-field" hidden><label for="newTestNote">이번 회차 상세 <span>선택</span></label><input id="newTestNote" class="input" maxlength="200" placeholder="예: 온보딩 v3 · 회원가입 흐름 점검" autocomplete="off"><button type="button" class="new-test-reuse" id="newTestNoteReuse" hidden></button></div><div class="new-test-error" id="newTestError" role="alert"></div><div class="new-test-actions"><button type="button" class="btn" id="newTestCancel">취소</button><button type="submit" class="btn solid" id="newTestSubmit">만들기</button></div></form></dialog>
+<dialog id="connectionDetails"><button type="button" class="btn sm" id="closeConnection">닫기</button><h2>실행 연결 상태</h2><div id="connectionContents"></div><button type="button" class="btn sm" id="retryConnection">다시 확인</button></dialog>
+<div id="appNotifications" class="app-notifications"><div id="liveNotice" class="live-notice" role="status" hidden></div><div id="workspaceToast" class="wm-toast" role="status" hidden></div></div>
+<header class="apphead studio-topbar" id="apphead" hidden>
+  <a class="studio-brand" href="#workspace" data-workspace-home aria-label="PersonaLab 워크스페이스 홈으로"><svg class="brand-symbol" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" d="M5 3h12c7 0 11 4 11 10S24 23 17 23h-6v6H5V3Zm6 6v8h6c3.3 0 5-1.3 5-4s-1.7-4-5-4h-6Z"/></svg><span class="brand-wordmark">Persona<span>Lab</span></span></a>
+  <p id="carryNote" class="wf-carry" hidden></p>
+  <div id="studioContext" class="studio-context" hidden><div><a href="#workspace">워크스페이스</a><span>/</span><strong id="studioContextName">새 테스트</strong></div><span id="studioSaveState" role="status">임시 저장</span></div>
+  <nav class="stepper" id="stepper" aria-label="테스트 작업공간" hidden>
+    <a href="#product"><span class="q">▦</span><span>테스트 설정</span><small data-stage-status></small></a>
+    <a href="#run"><span class="q">▷</span><span>실행</span><small data-stage-status></small></a>
+    <a href="#report"><span class="q">≡</span><span>리포트</span><small data-stage-status></small></a>
+    <a href="#interview"><span class="q">↗</span><span>1대1 인터뷰</span><small data-stage-status></small></a>
+  </nav>
+  <button class="studio-revision" type="button" id="newConnectedStudy" hidden>＋ 수정 회차 만들기</button>
+  <details class="studio-account"><summary aria-label="내 계정 메뉴"><span class="studio-account-mark" aria-hidden="true">나</span><span class="studio-account-copy"><strong>내 계정</strong><span data-auth-user></span></span><span class="studio-account-chevron" aria-hidden="true">⌃</span></summary><div class="studio-account-menu"><span data-auth-user></span><a href="#workspace">내 워크스페이스</a><button class="tag" id="engineStatus" type="button">서버 확인 중</button><a href="#how" data-open-guide>이용 가이드 ↗</a><button type="button" data-auth-logout>로그아웃</button></div></details>
+  <div hidden aria-hidden="true"><a class="studio-back" href="#workspace">← <span>내 테스트</span></a><div class="studio-test-label">현재 테스트</div><div class="studio-test-name" id="studioTestName">새 테스트</div><a class="wf-sidebar-settings" href="#product" hidden>테스트 설정 ↗</a></div>
+</header>
+<nav id="workflowProgress" class="wf-progress" aria-label="새 테스트 설정 단계" hidden></nav>
+<div id="studioReadonly" class="studio-readonly" hidden>이 실행의 화면과 페르소나는 보관됩니다. 변경하려면 <button type="button" data-create-revision>수정 회차 만들기 →</button></div>
+
+<section class="view studio-view" id="v-overview" aria-label="테스트 개요"><div class="page" id="workflowOverview"></div></section>
+<section class="view studio-view" id="v-product" aria-label="대상 연결">
+<div class="page"><div class="qhead"><div><div class="qno">01 / CONNECT YOUR PRODUCT</div><h1 class="qtitle">살펴볼 화면을 연결하세요.</h1><p class="qdesc">화면을 연결하고, 제대로 읽혔는지 확인한 뒤 다음으로 넘어가세요.</p></div></div>
+<div class="wf-setup-layout"><section class="wf-source-panel"><div class="wf-test-details"><label class="label" for="pname">앱·웹 이름</label><input class="input" id="pname" maxlength="120" placeholder="예: 일정메이트"><label class="label" for="pdesc">어떤 앱·웹인가요? <span class="hint">선택</span></label><textarea class="textarea" id="pdesc" rows="3" maxlength="6000" placeholder="예: 대학생이 일정과 과제를 한곳에서 정리하는 앱. 가입 뒤 첫 화면에서 오늘 할 일을 보여줘요."></textarea><p class="hint wf-desc-hint">테스트 개요에 표시돼요. 직접 쓰거나 소개 파일(.txt·.md)을 올려 주세요. <button type="button" class="btn sm wf-desc-file" data-text-file="pdesc">소개 파일 올리기</button></p><input type="hidden" id="roundNote"><details class="wf-optional-context" hidden><summary>주요 기능·기존 소개 붙여넣기 <span>선택</span></summary><label class="label" for="pfeat">주요 기능</label><textarea class="textarea" id="pfeat" rows="2" placeholder="추가로 알려줄 기능이 있다면 적어주세요"></textarea><input type="hidden" id="pprice" value=""><label class="label" for="plan">기존 소개</label><textarea class="textarea" id="plan" rows="3" placeholder="작성해 둔 소개를 붙여넣으세요"></textarea><button type="button" class="btn sm" data-import-context="text">내용 가져오기</button><button type="button" class="btn sm" data-import-context="file">소개 파일</button></details></div>{{WORKFLOW_SOURCE}}</section><aside class="wf-recognition-panel" id="sourceRecognition" aria-label="연결한 시작 화면"><div id="sourcePreview" aria-live="polite" aria-atomic="false"></div></aside></div>
+<nav class="nextrow wf-step-actions" aria-label="대상 연결 단계 이동"><a class="btn" href="#workspace" data-step-back>← 이전 · 내 테스트</a><div class="wf-action-status"><strong>1 / 6 · 화면 연결</strong><span class="hint" id="sourceContinueHint">화면을 연결하면 다음 단계로 이동할 수 있어요.</span></div><a class="btn solid" href="#source-review" data-step-next aria-describedby="sourceContinueHint">다음 · 화면 확인 →</a></nav></div></section>
+<section class="view studio-view" id="v-source-review" aria-labelledby="sourceReviewTitle"><div class="page">
+ <div class="qhead"><div><div class="qno">02 / REVIEW SCREENS</div><h1 class="qtitle" id="sourceReviewTitle" tabindex="-1">수집한 화면을 확인하세요.</h1><p class="qdesc">연결된 페이지의 이미지와 구조를 확인한 뒤 대상 사용자를 정하세요.</p></div></div>
+ <section id="sourceDetails" class="sr-review" aria-label="연결 범위와 확인할 부분" hidden></section>
+ <nav class="nextrow wf-step-actions" aria-label="화면 확인 단계 이동"><a class="btn" href="#product" data-step-back>← 이전 · 화면 연결</a><div class="wf-action-status"><strong>2 / 6 · 화면 확인</strong><span id="sourceReviewContinueHint">수집한 이미지와 연결 범위를 확인하세요.</span></div><a class="btn solid" href="#panel" id="sourceReviewContinue" data-step-next aria-describedby="sourceReviewContinueHint">다음 · 대상 사용자 →</a></nav>
+</div></section>
+<dialog id="sourceCaptureDialog" class="ri-capture-dialog" aria-labelledby="sourceCaptureTitle"><header><h2 id="sourceCaptureTitle">연결한 화면 캡처</h2><button type="button" class="btn" id="closeSourceCapture" aria-label="캡처 닫기">닫기 ×</button></header><img id="sourceCaptureImage" alt="연결 시점의 원본 캡처"></dialog>
+<section class="view studio-view" id="v-compare" aria-label="회차 비교"><div class="page"><div class="wf-heading"><div><span class="wf-eyebrow">COMPARE ITERATIONS</span><h1>수정 뒤, 무엇이 달라졌나요?</h1><p>같은 테스트의 실행 기록과 조건을 나란히 살펴보세요.</p></div><a class="btn" href="#overview">개요로 돌아가기</a></div><div id="comparisonControls" class="wf-comparison-controls"></div><div id="comparisonResult" aria-live="polite"></div></div></section>
+
+<section class="view studio-view" id="v-proto" aria-label="2. 프로토타입">
+  <div class="page">
+    <div class="qhead"><div><div class="qno">02 / PROTOTYPE</div><h1 class="qtitle">화면과 흐름을 연결하세요.</h1><p class="qdesc">화면과 버튼을 추가하고 이동할 화면을 연결하세요. 첫 번째 화면에서 탐색을 시작합니다.</p></div></div>
+    <div class="figma-row"><input class="input" aria-label="피그마 링크" placeholder="https://www.figma.com/design/…" value=""><button class="btn solid" type="button">피그마에서 불러오기</button></div><p class="hint">Figma에서는 화면 텍스트와 클릭 연결을 가져옵니다. 화면 이미지를 직접 추가할 수도 있어요. 설치 앱의 OS 동작이나 조건 분기는 재현하지 않습니다.</p>
+    <div class="ok-line" style="margin-top:14px" role="status"><svg class="i"><use href="#i-check"/></svg>화면을 선택해 문구와 버튼 연결을 편집할 수 있습니다.</div>
+    <details class="studio-screen-map"><summary>전체 화면 연결 한눈에 보기</summary><p id="prototypeSourceNote" class="hint" hidden></p><div class="screens" id="screens"></div></details><section id="screenEditor" class="card screen-editor" aria-label="화면과 버튼 편집"></section><details class="card" style="margin-top:20px"><summary>화면 JSON 편집</summary><textarea id="screenJson" class="textarea" rows="14" aria-label="화면 JSON"></textarea><button id="applyScreens" class="btn sm" type="button">화면에 적용</button></details>
+    <div class="studio-section-label"><span>탐색 범위</span><h2>이번에 확인할 흐름</h2><p>이 실행은 시작 화면부터 선택한 목표까지 살펴봅니다. 목적을 자연스럽게 적어주세요.</p></div><div class="task-row">
+      <div class="field"><label class="label" for="task">사용자의 목적</label><input class="input" id="task" value="회원가입을 완료하세요"></div>
+      <div class="field"><label class="label" for="goal">목표 화면</label><select class="select" id="goal"><option>S05 홈</option><option>S04 관심분야</option></select></div>
+    </div>
+    <nav class="nextrow wf-step-actions" aria-label="화면 편집 단계 이동"><a class="btn" href="#product" data-step-back>← 이전 · 대상 연결</a><div class="wf-action-status"><strong>1 / 6 · 화면 연결</strong><span>화면과 버튼의 연결을 확인하세요.</span></div><a class="btn solid" href="#source-review" data-step-next>다음 · 화면 확인 →</a></nav>
+  </div>
+</section>
+
+<section class="view studio-view" id="v-panel" aria-labelledby="panelPageTitle">
+  <div class="page">
+    <div class="qhead"><div><div class="qno" id="panelPageEyebrow">03 / YOUR AUDIENCE</div><h1 class="qtitle" id="panelPageTitle" tabindex="-1">어떤 사용자의 경험을 살펴볼까요?</h1><p class="qdesc" id="panelPageDescription">제품을 사용할 사람과 사용 상황을 알려주세요. 다음 화면에서 참여 조건과 구성을 정합니다.</p></div></div>
+
+    <div id="carryOffer" class="wf-carry-offer" hidden></div>
+    <div id="audienceBuilder" hidden></div>
+    <div id="legacyPanelSetup">
+    <div class="panel-grid">
+      <div class="dist card ink">
+        <div><label class="k" for="panelSource">페르소나 구성 방법</label><select class="select" id="panelSource"><option value="library">저장된 페르소나에서 선택</option><option value="engine">새 조건으로 샘플링</option></select></div>
+        <div id="libraryControls"><label class="k" for="libraryPanel">보관함 패널</label><select class="select" id="libraryPanel"><option value="">보관함을 불러오는 중입니다</option></select><p class="hint" id="libraryAvailability">저장된 패널을 확인하고 있습니다.</p></div>
+        <div id="engineControls" hidden><label class="k" for="panelPreset">대상 집단</label><select class="select" id="panelPreset"><option value="univ">20대 대학생</option><option value="30s_office">30대 사무·관리직</option><option value="40s_all">40대 전체</option><option value="60plus">60세 이상</option></select><select id="panelPrice" class="select" hidden aria-label="기존 데이터 조건"><option value="">전체 분포</option><option>낮음</option><option>중간</option><option>높음</option></select></div>
+        <div><label class="k" for="panelCount">이번 테스트에 참여할 인원</label><select class="select" id="panelCount"><option value="3">3명</option><option value="5">5명</option><option value="10">10명</option><option value="20">20명</option></select></div>
+        <button class="btn solid" id="samplePanel" type="button">선택한 페르소나 가져오기</button>
+        <p class="hint" id="panelMethodNote" style="margin:0">원본 카드와 특성을 유지해 이번 테스트의 패널로 저장합니다.</p>
+      </div>
+      <div><div class="tickets" id="tickets"></div><p class="more" id="panelSummary">선택한 페르소나가 여기에 표시됩니다.</p></div>
+    </div>
+    </div>
+    <section class="wf-scope-panel" id="workflowScope" tabindex="-1"></section><section id="personaPromptDetail" class="persona-prompt-detail" aria-label="원본 페르소나 실행 프롬프트" hidden></section>
+    <nav class="panel-actionbar wf-step-actions" aria-label="대상 사용자 단계 이동"><a class="btn" href="#source-review" id="panelBackLink" data-step-back>← 이전 · 화면 확인</a><div class="wf-action-status"><strong id="panelActionSelection">3 / 6 · 대상 사용자</strong><span id="panelActionState" role="status">사용자 설명과 탐색 범위를 확인해 주세요.</span></div><button class="btn solid" type="button" id="panelContinue" data-step-next aria-describedby="panelActionState">다음 · 실행 →</button></nav>
+  </div>
+</section>
+
+<section class="view studio-view" id="v-run" aria-label="4. 실행">
+  <div class="page">
+    <div class="qhead"><div><div class="qno">06 / REVIEW &amp; RUN</div><h1 class="qtitle" id="runTitle">탐색할 준비가 됐나요?</h1><p class="qdesc" id="runDescription">대상 화면, 페르소나와 범위를 확인하세요. 실행하면 관찰한 화면과 선택의 이유가 기록됩니다.</p></div><div id="runHeaderActions" style="display:flex;gap:8px"><button class="btn" type="button" id="cancelRun" hidden>실행 취소</button><button class="btn" type="button" id="pauseBtn">화면 일시정지</button></div></div>
+    <div id="runStateChip" class="run-state" role="status" hidden></div><section id="runPreparation" class="studio-run-preparation" aria-label="실행 전 확인"></section><p id="transmissionStatus" class="live-notice" role="status" hidden></p><label id="llmNotice" class="live-notice engine-notice llm-notice" hidden><input type="checkbox" id="llmConsent"> <span>이번 실행은 AI(LLM)를 사용해요. <b>페르소나 카드와 화면 캡처가 OpenAI로 전송</b>되고 토큰이 사용돼요. 이 점을 확인했어요.</span></label><p id="engineNotice" class="live-notice engine-notice" role="note" hidden>이번 탐색은 AI 호출 없이 규칙으로 진행해요. 비용이 들지 않고, 결과는 &ldquo;규칙 기반 체험 기록&rdquo;으로 표시돼요. 실제 AI 페르소나의 판단이 아닙니다.</p>
+    <section id="browserExecution" class="wf-browser-execution" hidden><div class="wf-browser-toolbar"><span id="browserEvidenceLabel">관찰된 화면</span><span>실제 브라우저 캡처</span></div><img id="browserEvidenceImage" alt="선택한 페르소나가 관찰한 화면"><div id="browserEvidenceSteps" class="wf-evidence-steps"></div></section>
+    <div class="run">
+      <div>
+        <div class="phase"><span class="tag" id="askTag" hidden>이전 실행</span><span class="tag" id="actTag">탐색 대기</span></div>
+        <div class="progress" role="progressbar" aria-label="Act 진행률" aria-valuemin="0" aria-valuemax="100" id="runBar"><i></i></div>
+        <div class="roster" id="roster" aria-label="페르소나 목록"></div>
+      </div>
+      <div class="phone-col">
+        <div class="now-who" id="nowWho" aria-live="polite"></div>
+        <div class="run-carousel" id="runCarousel" data-state="go">
+    <div class="prototype-stage" id="prototypeStage" role="group" aria-label="현재 페르소나의 프로토타입 화면">
+      <div class="prototype-stage-glow" aria-hidden="true"></div>
+      <div class="prototype-phones" id="prototypePhones" aria-hidden="true">
+        <article class="prototype-phone" data-scene="0">
+          <div class="prototype-phone-bezel"><div class="prototype-phone-status"><span>9:41</span><i></i><span>▰</span></div><header class="prototype-phone-header"><strong>일정메이트</strong><span>S01 · 온보딩</span></header>
+          <div class="prototype-phone-body phone-onboarding"><span class="phone-product-kicker">오늘을 조금 더 가볍게</span><h3>흩어진 일정,<br>한곳에 모으세요.</h3><p>수업부터 해야 할 일까지.<br>중요한 일에 집중할 수 있도록.</p><div class="phone-calendar"><header><strong>이번 주</strong><span>10월</span></header><div class="phone-calendar-days"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div><div class="phone-calendar-dates"><span>12</span><b>13</b><span>14</span><span>15</span><span>16</span></div><div class="phone-calendar-task"><i></i><span>팀 프로젝트 회의<small>오후 2:00 · 1시간</small></span></div><div class="phone-calendar-task"><i></i><span>이번 주 과제 정리<small>오늘 안에 완료하기</small></span></div></div><span class="phone-button">시작하기 <b>→</b></span><small class="phone-bottom-note">일정 관리가 쉬워지는 첫걸음</small></div><div class="prototype-home-indicator"></div></div>
+        </article>
+        <article class="prototype-phone" data-scene="1">
+          <div class="prototype-phone-bezel"><div class="prototype-phone-status"><span>9:41</span><i></i><span>▰</span></div><header class="prototype-phone-header"><strong>일정메이트</strong><span>S02 · 회원가입</span></header>
+          <div class="prototype-phone-body"><span class="phone-product-kicker">나만의 일정 시작하기</span><h3>반가워요.<br>함께 시작해 볼까요?</h3><p>계정을 만들고 일정을 연결하세요.</p><div class="phone-form"><label>이메일<span>hello@example.com</span></label><label>비밀번호<span>8자 이상 입력해 주세요</span></label><label>휴대폰 번호<span>010-0000-0000 <b>인증</b></span></label></div><div class="phone-consent"><span>✓</span> 이용약관 및 개인정보 처리방침 동의</div><span class="phone-button">다음으로 <b>→</b></span></div><div class="prototype-home-indicator"></div></div>
+        </article>
+        <article class="prototype-phone" data-scene="2">
+          <div class="prototype-phone-bezel"><div class="prototype-phone-status"><span>9:41</span><i></i><span>▰</span></div><header class="prototype-phone-header"><strong>일정메이트</strong><span>S03 · 학교·학년</span></header>
+          <div class="prototype-phone-body"><span class="phone-product-kicker">내 생활에 맞는 일정</span><h3>어떤 일상을<br>보내고 있나요?</h3><p>학교 정보를 바탕으로<br>맞춤 일정을 준비해 드릴게요.</p><div class="phone-form"><label>학교<span>학교를 선택해 주세요 <b>⌄</b></span></label><label>학년<span>학년을 선택해 주세요 <b>⌄</b></span></label><label>전공<span>전공을 입력해 주세요</span></label></div><span class="phone-button">다음으로 <b>→</b></span><small class="phone-bottom-note">나중에 설정할게요</small></div><div class="prototype-home-indicator"></div></div>
+        </article>
+        <article class="prototype-phone" data-scene="3">
+          <div class="prototype-phone-bezel"><div class="prototype-phone-status"><span>9:41</span><i></i><span>▰</span></div><header class="prototype-phone-header"><strong>일정메이트</strong><span>S04 · 관심분야</span></header>
+          <div class="prototype-phone-body"><span class="phone-product-kicker">나에게 필요한 소식만</span><h3>요즘 무엇에<br>관심이 있나요?</h3><p>관심분야를 5개 이상 골라 주세요.</p><div class="phone-interests"><span class="chosen">디자인 ✓</span><span>개발</span><span>마케팅</span><span class="chosen">창업 ✓</span><span>외국어</span><span class="chosen">취업 ✓</span><span>독서</span><span class="chosen">운동 ✓</span><span>음악</span><span>여행</span><span class="chosen">자기계발 ✓</span><span>영상</span></div><div class="phone-interest-count">5개 선택했어요</div><span class="phone-button">설정 완료 <b>→</b></span><small class="phone-bottom-note">나중에 설정할게요</small></div><div class="prototype-home-indicator"></div></div>
+        </article>
+        <article class="prototype-phone" data-scene="4">
+          <div class="prototype-phone-bezel"><div class="prototype-phone-status"><span>9:41</span><i></i><span>▰</span></div><header class="prototype-phone-header"><strong>일정메이트</strong><span>S05 · 홈</span></header>
+          <div class="prototype-phone-body phone-home"><span class="phone-product-kicker">10월 13일 화요일</span><h3>오늘도,<br>내 속도대로.</h3><p>지금 중요한 일부터 시작해 보세요.</p><div class="phone-today-summary"><span>오늘의 일정<strong>3<span>개</span></strong></span><span>완료한 일<strong>1<span>개</span></strong></span></div><div class="phone-schedule-item"><time>10:00</time><span>디자인 수업<small>인문관 302호</small></span><b>완료</b></div><div class="phone-schedule-item"><time>14:00</time><span>팀 프로젝트 회의<small>학생회관 2층</small></span></div><div class="phone-schedule-item"><time>18:00</time><span>과제 제출<small>온라인 강의실</small></span></div><span class="phone-button">오늘 일정 확인하기 <b>→</b></span></div><div class="prototype-home-indicator"></div></div>
+        </article>
+      </div>
+    </div>
+          <div class="run-scene-label"><span id="prototypeSceneCode">S01</span><strong id="prototypeSceneName">온보딩</strong><small>현재 탐색 화면</small></div>
+        </div>
+        <div class="think" id="think" aria-live="polite"></div>
+        <div class="steps-dots" id="stepDots" aria-hidden="true"></div>
+      </div>
+      <div>
+        <div class="label" style="margin-bottom:10px">기록</div>
+        <ol class="log" id="log"></ol>
+      </div>
+    </div>
+    <nav class="nextrow wf-step-actions" aria-label="실행 단계 이동"><a class="btn" href="#scope" id="runBackLink" data-step-back>← 이전 · 탐색 범위</a><div class="wf-action-status"><strong id="runActionTitle">6 / 6 · 실행</strong><span id="runActionState" role="status">설정을 확인하고 탐색을 시작하세요.</span></div><div class="wf-action-buttons"><button class="btn solid" type="button" id="startRun" aria-describedby="runActionState">실행하기 →</button><a class="btn solid" href="#report" id="runResultLink" data-step-next hidden>리포트 열기 →</a></div></nav>
+  </div>
+</section>
+
+<section class="view studio-view" id="v-report" aria-label="탐색 결과"><div class="rv-live-page"><div id="liveReport"></div></div><nav class="report-document-actions" aria-label="리포트 작업"><a class="btn" href="#run" data-step-back>실행 기록 보기</a><div class="wf-action-status"><strong>탐색 리포트</strong><span>관찰한 이유를 같은 페르소나에게 더 물어보세요.</span></div><span class="ra-right"><a class="btn" href="#workspace">내 테스트로 돌아가기</a><a class="btn solid" href="#interview" data-step-next>페르소나 인터뷰 →</a></span></nav></section>
+
+<div class="tip" id="tip" role="tooltip"></div>
+
+<section class="view studio-view" id="v-interview" aria-label="1대1 인터뷰"><div class="rv-live-page" id="interviewReportSlot"></div><nav class="report-document-actions" aria-label="인터뷰 작업"><a class="btn" href="#report" data-step-back>← 이전 · 보고서</a><div class="wf-action-status"><strong>1대1 인터뷰</strong><span>탐색 기록과 대화를 다시 살펴볼 수 있어요.</span></div><a class="btn solid" href="#workspace">내 테스트로 돌아가기 →</a></nav></section>
+
+<dialog id="workflowGuide" class="wf-guide" aria-labelledby="workflowGuideTitle">
+  <header><span class="wf-eyebrow">QUICK GUIDE</span><button type="button" class="btn quiet sm" data-close-guide aria-label="이용 가이드 닫기">닫기 ×</button></header>
+  <h2 id="workflowGuideTitle">화면 연결부터, 선택의 이유까지.</h2>
+  <p>지금 작성하는 내용은 그대로 두고 이용 흐름을 확인하세요.</p>
+  <ol><li><strong>화면 연결</strong><p>웹 링크·HTML 파일 또는 Figma·시안을 등록하고, 인식한 화면과 버튼을 확인해요.</p></li>
+  <li><strong>화면 확인</strong><p>연결 결과 페이지에서 탐색 진행·페이지·화면 전환을 확인해요. 탐색 완료 또는 확인한 범위 선택 후 다음으로 이동하세요.</p></li><li><strong>대상 사용자</strong><p>제품을 사용할 사람과 사용 상황을 설명하세요.</p></li><li><strong>참여 구성</strong><p>조건과 인원으로 추천받고 필요한 사람을 교체하거나 제외하세요.</p></li><li><strong>탐색 범위</strong><p>사이트 전반을 살펴보거나 특정 흐름을 정하고 핵심 확인 항목을 추가하세요.</p></li>
+  <li><strong>실행</strong><p>화면과 선택 인원, 실행 가능 상태를 확인하고 탐색을 시작해요. 화면을 닫아도 서버 실행은 계속됩니다.</p></li>
+  <li><strong>보고서와 인터뷰</strong><p>탐색 기록이 쌓이면 문제 지점과 원문을 살펴보고, 기록을 남긴 페르소나에게 질문할 수 있어요.</p></li>
+  <li><strong>수정 회차</strong><p>실행한 설정은 보관됩니다. 수정 회차에서 화면을 바꾸고 다시 실행한 뒤, 완료된 회차끼리 비교하세요.</p></li></ol>
+  <footer><span>AI 페르소나의 탐색 기록이며 실제 사용자 조사와 구분합니다.</span><button type="button" class="btn solid" data-close-guide>이어서 작업하기 →</button></footer>
+</dialog>

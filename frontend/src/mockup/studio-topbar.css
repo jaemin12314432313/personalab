@@ -1,0 +1,155 @@
+/* 테스트 작업 화면: 왼쪽 사이드바를 없애고 상단 바 하나로 합친다. 마지막에 로드해 이전 규칙을 덮는다.
+   색은 확정한 홈(Greige)과 맞춘다: 검은 버튼·검은 강조, 코랄은 밑줄·작은 포인트에만. */
+.studio-view,#apphead,.studio-readonly,.wf-progress,.panel-actionbar,#v-compare{
+  --pl-bg:#f4f1ec;--pl-sb:#f4f1ec;--pl-ln:#dedad2;--pl-ln2:#cdc8be;--pl-ink:#17161a;--pl-mu:#5f584d;--pl-ac:#17161a;--pl-acs:#e7e4de}
+
+/* ---------- 상단 바 ---------- */
+#apphead.studio-topbar{position:sticky;top:0;inset:auto;z-index:40;width:auto;height:60px;padding:0 32px;display:flex;flex-direction:row;align-items:center;gap:20px;overflow:visible;background:#f4f1ece6;backdrop-filter:blur(10px);border:0;border-bottom:1px solid var(--pl-ln)}
+#apphead.studio-topbar .studio-brand{flex:none}
+#apphead.studio-topbar .studio-context{margin:0;min-height:0;padding:0;border:0;background:none;flex:1;min-width:0;display:flex;align-items:center;gap:16px;font-size:13px}
+#apphead.studio-topbar .studio-context[hidden]{display:none}
+#apphead.studio-topbar .studio-context>div{min-width:0}
+#apphead.studio-topbar .studio-context strong{font-weight:700;color:var(--pl-ink)}
+#apphead.studio-topbar .studio-context>span{margin-left:auto;font-size:12px;color:var(--pl-mu)}
+#apphead.studio-topbar .stepper{display:flex;gap:2px;width:auto;margin:0}
+#apphead.studio-topbar .stepper[hidden]{display:none}
+#apphead.studio-topbar .stepper a{height:36px;border-radius:99px;padding:0 14px;gap:6px;font-size:13px;white-space:nowrap}
+#apphead.studio-topbar .stepper a .q{display:none}
+#apphead.studio-topbar .stepper a[aria-current]{background:var(--pl-ink);color:#fff}
+#apphead.studio-topbar .stepper a[aria-current] small{background:#ffffff26;color:#fff}
+#apphead.studio-topbar .studio-revision{flex:none;height:36px;padding:0 14px;border-radius:99px;font-size:12.5px;white-space:nowrap}
+#apphead.studio-topbar .studio-revision[hidden]{display:none}
+#apphead.studio-topbar .studio-account{position:relative;flex:none;border:0;margin:0;padding:0}
+#apphead.studio-topbar .studio-account summary{padding:4px;gap:8px;border-radius:99px;list-style:none}
+#apphead.studio-topbar .studio-account-copy,#apphead.studio-topbar .studio-account-chevron{display:none}
+#apphead.studio-topbar .studio-account-menu{position:absolute;top:calc(100% + 10px);right:0;bottom:auto;left:auto;width:260px;z-index:50;display:grid;gap:4px;padding:14px}
+#apphead.studio-topbar .studio-account-menu #engineStatus{justify-self:start}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- 사이드바가 없어졌으니 왼쪽 여백을 모두 걷는다 ---------- */
+.studio-view,.studio-readonly,.studio-active>#liveNotice:not([hidden]){margin-left:0!important}
+.studio-view{min-height:calc(100vh - 60px)}
+.studio-view .wf-step-actions,.panel-actionbar{left:0!important}
+.studio-active .wf-progress{margin:0 32px 8px!important;max-width:1320px;margin-left:auto!important;margin-right:auto!important;padding:14px 32px}
+.studio-view>.page{margin-left:auto;margin-right:auto}
+
+/* ---------- 연결 화면 ---------- */
+/* 단계 번호는 진행 막대가 이미 보여 주므로 영문 소제목은 숨긴다 */
+.studio-view .qno{display:none}
+/* 주 버튼은 검정, 포커스는 에러처럼 보이지 않는 어두운 링 */
+.studio-view .btn.solid,.rv-root .btn.solid{background:var(--pl-ink);border-color:var(--pl-ink);color:#fff}
+.studio-view .btn.solid:hover:not(:disabled),.rv-root .btn.solid:hover:not(:disabled){background:#2f2e33;border-color:#2f2e33}
+.studio-view .input:focus,.studio-view .select:focus,.studio-view textarea:focus{border-color:var(--pl-ink);box-shadow:0 0 0 3px #17161a1f}
+.studio-view .btn:disabled,.studio-view .btn[aria-disabled=true]{background:#e7e4de;border-color:#e7e4de;color:#5f584d}
+.wf-progress a[aria-current=step] b,.wf-progress a[aria-current=page] b{background:var(--pl-ink);border-color:var(--pl-ink)}
+/* 연결 방식: 상자 대신 가는 밑줄 탭 */
+#v-product .wf-source-tabs{background:none;padding:0;border-radius:0;gap:22px;border-bottom:1px solid var(--pl-ln);margin-bottom:18px}
+#v-product .wf-source-tabs button{flex:none;min-height:40px;padding:0 2px;border:0;border-bottom:2px solid transparent;border-radius:0;background:none;box-shadow:none;font-size:14px;font-weight:600;color:var(--pl-mu)}
+#v-product .wf-source-tabs button[aria-pressed=true]{color:var(--pl-ink);border-bottom-color:#d06d5b}
+/* 화면 크기는 주소 바로 아래 한 줄 */
+#v-product .wf-device{margin:6px 0 4px;font-size:13px;color:var(--pl-mu)}
+#v-product .wf-more{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--pl-ln)}
+#v-product .wf-more>summary{font-size:13px;font-weight:600;cursor:pointer}
+#v-product .wf-more .wf-platform{margin:12px 0 8px;border:0;padding:0}
+#v-product .wf-more .wf-package-guide{margin:8px 0 0;padding:0;border:0}
+/* 작은 보조 글씨는 읽을 수 있게 */
+.studio-view .hint,#v-product .wf-source-input p,#v-product .wf-platform small,#v-product .wf-platform-note,#v-product .wf-package-guide p{color:var(--pl-mu);font-size:13px}
+/* 비어 있는 오른쪽 미리보기는 낮게 */
+#v-product .wf-empty-source{min-height:0;padding:36px 24px}
+
+@media(max-width:900px){
+  #apphead.studio-topbar{height:auto;min-height:56px;padding:8px 16px;flex-wrap:wrap;gap:8px 12px}
+  #apphead.studio-topbar .studio-context{order:5;flex-basis:100%}
+  #apphead.studio-topbar .stepper{order:6;flex-basis:100%;overflow-x:auto}
+  #apphead.studio-topbar .studio-brand{margin-right:auto}
+  .studio-active .wf-progress{margin:0 16px 8px!important;padding:10px 0}
+}
+.studio-active,.studio-active .wf-progress{background:#f4f1ec}
+
+/* ---------- 새 테스트 이름 입력 ---------- */
+.new-test-dialog{border:1px solid var(--pl-ln);border-radius:20px;padding:0;width:min(440px,calc(100vw - 32px));background:#fffdf9;color:var(--pl-ink);box-shadow:0 24px 60px #17161a33}
+.new-test-dialog::backdrop{background:#17161a59}
+.new-test-dialog form{display:grid;gap:10px;padding:26px}
+.new-test-dialog h2{margin:0;font:800 22px/1.3 var(--pl-f,inherit);letter-spacing:-.04em}
+.new-test-dialog p{margin:0 0 6px;font-size:14px;color:var(--pl-mu)}
+.new-test-dialog label{font-weight:700;font-size:13px}
+.new-test-error{min-height:18px;font-size:13px;color:#b03a2e}
+.new-test-actions{display:flex;justify-content:flex-end;gap:8px}
+.new-test-dialog h2{font-size:22px!important;font-weight:800!important;color:var(--pl-ink)}
+.new-test-field{display:grid;gap:6px}.new-test-field[hidden]{display:none}
+.new-test-field label span{font-weight:500;color:var(--pl-mu);font-size:12px;margin-left:4px}
+#v-product .wf-test-details .label{display:flex;align-items:baseline;gap:8px;margin:0 0 8px}
+#v-product .wf-test-details .input+.label{margin-top:16px}
+#v-product .wf-test-details .label .hint{font-weight:500;font-size:12px}
+
+/* ---------- 1단계: 앱 정보 먼저, 그 다음 화면 연결 ---------- */
+#v-product .wf-test-details{padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--pl-ln)}
+#v-product .wf-test-details .textarea{min-height:84px}
+#v-product .wf-desc-hint{margin:6px 0 0}
+#v-product .wf-optional-context{margin-top:14px}
+#v-product .wf-connect-title{margin:0 0 14px;font:800 18px/1.3 var(--pl-f);letter-spacing:-.03em}
+/* 다른 연결 방식은 주소 아래의 작은 선택지로 */
+#v-product .wf-source-tabs{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0 0;padding:0;border:0;background:none;border-radius:0}
+#v-product .wf-source-tabs>span{font-size:12.5px;color:var(--pl-mu);margin-right:4px}
+#v-product .wf-source-tabs button{flex:none;min-height:30px;padding:0 12px;border:1px solid var(--pl-ln2);border-radius:99px;background:#fff;font-size:12.5px;font-weight:600;color:var(--pl-mu)}
+#v-product .wf-source-tabs button[aria-pressed=true]{background:var(--pl-ink);border-color:var(--pl-ink);color:#fff}
+#v-product .wf-more-lead{margin:12px 0 6px;font-size:13px;color:var(--pl-mu)}
+
+/* ---------- 1단계: 앱 정보 먼저, 그 다음 화면 연결 ---------- */
+#v-product .wf-test-details{padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--pl-ln)}
+#v-product .wf-test-details .textarea{min-height:84px}
+#v-product .wf-desc-hint{margin:6px 0 0}
+#v-product .wf-optional-context{margin-top:14px}
+#v-product .wf-connect-title{margin:0 0 14px;font:800 18px/1.3 var(--pl-f);letter-spacing:-.03em}
+/* 다른 연결 방식은 주소 아래의 작은 선택지로 */
+#v-product .wf-source-tabs{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0 0;padding:0;border:0;background:none;border-radius:0}
+#v-product .wf-source-tabs>span{font-size:12.5px;color:var(--pl-mu);margin-right:4px}
+#v-product .wf-source-tabs button{flex:none;min-height:30px;padding:0 12px;border:1px solid var(--pl-ln2);border-radius:99px;background:#fff;font-size:12.5px;font-weight:600;color:var(--pl-mu)}
+#v-product .wf-source-tabs button[aria-pressed=true]{background:var(--pl-ink);border-color:var(--pl-ink);color:#fff}
+#v-product .wf-more-lead{margin:12px 0 6px;font-size:13px;color:var(--pl-mu)}
+#v-product .wf-test-details{border-top:0;padding-top:0;margin-top:0}
+
+/* ================= 단계 표시줄: 번호 원 + 이어진 선, 끝난 단계는 체크 ================= */
+.studio-active #workflowProgress{display:flex;align-items:center;gap:0;max-width:1320px;margin:0 auto!important;padding:20px 32px 4px!important;border:0!important;background:transparent;overflow-x:auto;scrollbar-width:none}
+.studio-active #workflowProgress::-webkit-scrollbar{display:none}
+.studio-active #workflowProgress a{display:inline-flex;align-items:center;gap:9px;flex:none;min-height:0;padding:4px 2px;font:600 13.5px/1.2 var(--pl-f);color:#7d766a;text-decoration:none;white-space:nowrap}
+.studio-active #workflowProgress a b{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid #cdc8be;background:#fff;color:#7d766a;font:700 12px/1 var(--pl-f)}
+.studio-active #workflowProgress a:not(:last-child)::after{content:'';display:block;flex:none;width:clamp(18px,3.2vw,48px);height:2px;margin:0 14px;border-radius:2px;background:#dedad2}
+.studio-active #workflowProgress a.done{color:var(--pl-ink)}
+.studio-active #workflowProgress a.done b{background:var(--pl-ink);border-color:var(--pl-ink);color:#fff}
+.studio-active #workflowProgress a.done:not(:last-child)::after{background:var(--pl-ink)}
+.studio-active #workflowProgress a[aria-current=step]{color:var(--pl-ink);font-weight:800}
+.studio-active #workflowProgress a[aria-current=step] b{background:var(--pl-ink);border-color:var(--pl-ink);color:#fff;box-shadow:0 0 0 4px #17161a1f}
+.studio-active #workflowProgress a[aria-disabled=true]:not([aria-current]):not(.done){color:#a39e94}
+.studio-active #workflowProgress a[aria-disabled=true]:not([aria-current]):not(.done) b{border-style:dashed;background:transparent;color:#a39e94}
+.studio-active #workflowProgress a:hover:not([aria-disabled=true]):not([aria-current]) b{border-color:var(--pl-ink)}
+@media(max-width:900px){.studio-active #workflowProgress{padding:14px 16px 2px!important}.studio-active #workflowProgress a:not(:last-child)::after{width:14px;margin:0 8px}}
+
+/* ================= 탐색 범위: 꼭 확인할 것·추가로 알려줄 내용 ================= */
+.scope-text{display:grid;gap:8px;margin:20px 0 0}
+.scope-text-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.scope-text-head .label{margin:0}
+.scope-text-head .label span{font-weight:500;color:var(--pl-mu);font-size:12px;margin-left:4px}
+.scope-text-head .btn.sm{height:30px;min-height:30px;padding:0 12px;font-size:12px}
+.scope-text .textarea{width:100%;min-height:110px;line-height:1.6}
+.scope-text .hint{margin:0}
+
+.wf-sample{margin-top:10px}
+
+/* 알림이 상단 바·안내 띠를 가리지 않도록 스튜디오에서는 바 아래에 띄운다 */
+body:has(#apphead.studio-topbar:not([hidden])) .app-notifications{top:72px}
+
+/* 리포트 ↔ 인터뷰 연결 */
+.rv-ask-finding{margin-top:12px;width:100%}
+.rv-from-finding{display:grid;gap:4px;margin:12px 0;padding:12px 14px;border:1px solid #e6dfd2;border-radius:10px;background:#faf8f3}
+.rv-from-finding strong{font-size:14px;line-height:1.4}
+.rv-from-finding .rv-text-link{justify-self:start}
+
+/* 사이드바: 새 앱·웹은 아래 고정, 목록이 위에서부터 */
+#v-workspace .ws-sidebar-bottom{display:grid;gap:8px}
+#v-workspace .ws-sidebar-bottom .ws-side-new{height:40px;width:100%;border-radius:12px;border:0;background:#1d1b18;color:#fff;font-size:13.5px;letter-spacing:-.01em;transition:transform .15s,background .15s}
+#v-workspace .ws-sidebar-bottom .ws-side-new:hover{background:#000;transform:translateY(-1px)}
+
+/* 실행 화면: 캡처가 들어오기 전과 후의 높이가 같도록 자리를 미리 잡아 둔다 */
+#v-run #browserExecution{min-height:645px}
+#v-run .ls-follow-controls{min-height:42px}

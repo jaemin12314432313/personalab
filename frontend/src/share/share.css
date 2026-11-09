@@ -1,0 +1,4 @@
+/* 공유용 페이지에서는 체험과 결과에 집중한다. */
+#v-landing .lp-topbar [data-landing-login]{display:none!important}
+#v-demo .dm-banner>a{white-space:nowrap}
+@media(max-width:600px){#v-landing .lp-topbar .topnav{display:none}}

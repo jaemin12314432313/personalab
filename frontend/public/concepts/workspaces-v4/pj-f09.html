@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · F09 Mono Focus</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="./pj.css"><link rel="stylesheet" href="./pj2.css">
+<style>
+/* F09 · Mono Focus — 흑백 + 점 격자. 히어로에 굵은 테두리와 하드 섀도. */
+:root{--bg:#fff;--surface:#fff;--surface-2:#fafafa;--bar-bg:#ffffffd9;--fg:#0a0a0a;--fg-2:#404040;--fg-3:#737373;--line:#e5e5e5;--line-2:#d4d4d4;--accent:#0a0a0a;--btn-bg:#0a0a0a;--btn-hover:#262626;--c-run:#5b4bf0;--c-done:#0e9f6e;--radius:8px;--radius-sm:6px;
+ --h-bg:#fff;--h-fg:#0a0a0a;--h-fg2:#404040;--h-fg3:#737373;--h-line:#0a0a0a;--h-chip:#fff;--h-chip-fg:#0a0a0a;--h-done:#0b7a52;--h-ready:#a05a00;--h-setup:#525252;--h-btn-bg:#0a0a0a;--h-btn-fg:#fff;--h-btn-hover:#262626;--h-btn-shadow:none;
+ --h-track:#e5e5e5;--h-ring:#5b4bf0;--h-ring-glow:transparent;--h-ev:#fafafa;--h-ev-line:#e5e5e5;--h-ev-fg:#404040;--h-ev-b:#0a0a0a;--h-shadow:8px 8px 0 #0a0a0a;--h-radius:10px;--h-spot:0;--h-title:44px;--h-pad:34px 36px}
+body{background:radial-gradient(#d4d4d4 1px,transparent 1.2px) 0 0/22px 22px,#fff}
+body::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,#fff 100%);pointer-events:none}
+.bar{border-bottom-color:#0a0a0a}
+.row.hero{border:1.5px solid #0a0a0a}
+.hero .stt{border-color:#0a0a0a;font-family:var(--mono);font-size:12px}
+.ring{font-family:var(--mono)}.ring b{font-weight:500}
+.ev li{font-family:var(--font);border-radius:6px}.ev time,.h-meta{font-family:var(--mono);font-size:12px}
+.eyebrow,.slot-t{font:500 12px var(--mono);letter-spacing:.05em;text-transform:uppercase}
+.slot-t::before{border-radius:0}
+.rest.as-list{border:1px solid #0a0a0a;border-radius:0;position:relative;background:#fff}
+.rest.as-list::before,.rest.as-list::after{content:"+";position:absolute;font:400 16px/1 var(--mono);background:#fff;width:18px;text-align:center;z-index:2}
+.rest.as-list::before{left:-9px;top:-9px}.rest.as-list::after{right:-9px;bottom:-9px}
+.stt{font-family:var(--mono);font-size:12px}.p-date,.p-last small{font-family:var(--mono);font-size:12px}
+.btn,.search,.sort{border-radius:6px}.hero{--ease:linear}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL=Object.assign({"layout":"focus","tiles":true,"rest":"list","searchHint":"/","newHint":"N"},{keys:"<span class=\"kbd\">/</span> 검색 · <span class=\"kbd\">N</span> 새 프로젝트"});</script>
+<script src="./pj.js"></script>
+</body></html>

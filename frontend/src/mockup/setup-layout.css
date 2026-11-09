@@ -1,0 +1,291 @@
+/* 설정 화면: 읽을 수 있는 크기를 유지하며 중복 높이와 긴 세로 흐름을 줄인다. */
+.studio-active #v-product>.page,.studio-active #v-panel>.page{max-width:1320px;padding:22px 32px 120px}
+#v-product .qhead,#v-panel .qhead{margin-bottom:18px;padding-bottom:16px}
+#v-product .qtitle,#v-panel .qtitle{font-size:28px;line-height:1.4;margin:5px 0 0}
+#v-product .qdesc,#v-panel .qdesc{font-size:14px;line-height:1.7;margin:8px 0 0;max-width:none}
+#v-panel .panel-section-nav{margin-bottom:20px;padding:4px 0}
+#v-panel .panel-section-nav button{padding:9px 14px;align-items:center}
+#v-panel .panel-section-nav button small{margin-top:3px}
+#v-panel .panel-actionbar{padding:12px 32px}
+
+/* 연결: 핵심 입력과 시작 화면을 비슷한 높이로 둔다. */
+#v-product .wf-setup-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+#v-product .wf-source-panel{padding:22px;border-radius:18px}
+#v-product .wf-platform{margin-bottom:12px}
+#v-product .wf-platform legend{font-size:14px;margin-bottom:10px}
+#v-product .wf-platform>div{gap:8px}
+#v-product .wf-platform label{padding:10px;align-items:center;border-radius:9px}
+#v-product .wf-platform strong{font-size:13px}
+#v-product .wf-platform small{font-size:11px;line-height:1.5;margin-top:2px}
+#v-product .wf-platform-note{font-size:12px;line-height:1.6;margin:0 0 16px}
+#v-product .wf-source-tabs{margin-bottom:16px;padding:4px}
+#v-product .wf-source-tabs button{min-height:36px;font-size:13px}
+#v-product .wf-source-input>label{margin-bottom:8px}
+#v-product .wf-source-input p{font-size:12px;line-height:1.6;margin:8px 0}
+#v-product .wf-device{margin:14px 0;gap:12px}
+#v-product .wf-package-guide{margin:12px 0;padding-top:12px}
+#v-product .wf-test-details{margin-top:14px;padding-top:14px}
+#v-product .wf-test-details>.label{font-size:13px;margin-bottom:8px}
+#v-product .wf-optional-context{margin-top:8px}
+#v-product .wf-optional-context>summary{padding:8px 0}
+#v-product .wf-recognition-panel{border-radius:18px}
+#v-product .wf-recognition-panel .ri-heading{padding:17px 20px}
+#v-product .ri-heading .wf-eyebrow{display:none}
+#v-product .ri-heading h2{font-size:19px}
+#v-product .ri-source{padding:13px 20px}
+#v-product .ri-source h3{font-size:16px;margin-bottom:3px}
+#v-product .ri-capture{margin:0 18px}
+#v-product .ri-capture img{height:250px}
+#v-product .ri-capture figcaption{padding:8px 11px;font-size:11px}
+#v-product .ri-refresh-capture{margin:0 18px 10px;padding:6px 10px}
+#v-product .ri-review-brief{margin:14px 18px 18px;padding-top:12px;gap:12px}
+#v-product .ri-review-brief p{margin-top:4px;font-size:12px;line-height:1.7}
+#v-product .ri-review-brief strong{font-size:13px}
+#v-product .ri-empty{min-height:300px;padding:26px 22px;align-items:center;text-align:center}
+#v-product .ri-wireframe{width:200px;height:85px;padding:15px 18px}
+#v-product .ri-wireframe i{margin-bottom:12px}
+#v-product .ri-empty h3{font-size:19px;line-height:1.6;margin:16px 0 6px}
+#v-product .ri-empty>p{margin:0;line-height:1.7}
+#v-product .ri-loading{min-height:320px;padding:30px 22px}
+#v-product .sr-review{margin-top:20px;border-radius:18px}
+#v-product .sr-heading{padding:18px 22px 16px}
+#v-product .sr-heading h2{font-size:21px;margin:5px 0}
+#v-product .sr-heading p{font-size:13px;line-height:1.7}
+#v-product .sr-heading .wf-eyebrow{margin-bottom:6px}
+#v-product .sr-tabs{padding:0 22px}
+#v-product .sr-tabs button{min-height:43px}
+#v-product .sr-panel{padding:4px 22px 16px}
+#v-product .sr-page-row{min-height:56px;padding:8px 0}
+#v-product .sr-footer{padding:14px 22px;font-size:12px;line-height:1.7}
+#v-product .ex-job{padding:18px 20px;margin-bottom:16px;border-radius:14px}
+#v-product .ex-job h3{font-size:20px;margin:5px 0 7px}
+#v-product .ex-job .wf-eyebrow{margin-bottom:6px}
+#v-product .ex-job p{font-size:13px;line-height:1.7}
+#v-product .ex-job dl{margin:14px 0;padding:12px 0;gap:14px}
+#v-product .ex-job dd{font-size:21px;margin-top:6px}
+#v-product .ex-progress{margin-top:14px}
+#v-product .ex-progress-track{margin:8px 0}
+#v-product .ex-review-scope{margin:12px 0;padding-top:12px}
+#v-product .pf-summary{padding:15px 0 12px}
+#v-product .pf-route,#v-product .pf-menu-review{padding:14px 16px;margin-bottom:16px}
+#v-product .pf-state-grid{gap:14px}
+#v-product .pf-thumb{height:140px}
+#v-product .pf-state-card>div:last-child{padding:12px}
+#v-product .pf-state-card h3{font-size:14px;margin:5px 0}
+
+/* 사용자 설명도 두 입력을 병렬로 확인한다. */
+#audienceBuilder[data-page=people] .ab-layout{max-width:100%;margin:0}
+#audienceBuilder[data-page=people] .ab-definition{padding:24px;border-radius:18px}
+.ab-description-fields{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+#v-panel .ab-definition h2{font-size:20px;margin:0 0 8px}
+#v-panel .ab-description-fields .label{margin:8px 0 0;font-size:14px}
+#v-panel .ab-description-fields .textarea{min-height:110px;margin-top:8px}
+
+/* 참여 구성: 조건과 추천 결과가 하나의 긴 열이 되지 않게 한다. */
+#audienceBuilder[data-page=personas] .ab-layout{display:block}
+#audienceBuilder[data-page=personas] .ab-persona-browser{display:grid;grid-template-columns:minmax(300px,.82fr) minmax(0,1.18fr);gap:24px;align-items:start}
+#v-panel .ab-compose{padding:22px;border-radius:18px;position:sticky;top:18px}
+#v-panel .ab-compose-heading{margin-bottom:8px}
+#v-panel .ab-compose-heading h2{font-size:20px;line-height:1.5;margin:0}
+#v-panel .ab-compose .ab-source-label{margin:0;font-size:11px;padding:4px 7px}
+#v-panel .ab-compose .ab-context{font-size:14px;line-height:1.7;overflow-wrap:anywhere}
+#v-panel .ab-compose .ab-note{margin:7px 0 0!important;font-size:12px!important;line-height:1.65!important}
+#audienceBuilder .ab-compose .ab-conditions{margin:16px 0 0;padding:0;border:0}
+#v-panel .ab-conditions>legend.sr-only{float:none;width:1px}
+#v-panel .ab-criteria-state{display:none}
+#v-panel .ab-condition-basics{grid-template-columns:minmax(0,1fr) 100px;gap:18px;margin:0 0 14px}
+#v-panel .ab-age{gap:8px}
+#v-panel .ab-age>span{padding-bottom:12px}
+#v-panel .ab-condition-basics label{font-size:13px;line-height:1.5}
+#v-panel .ab-condition-basics .input{height:42px;padding:8px 10px;margin-top:7px;font-size:14px}
+#v-panel .ab-count-field .input{width:70px}
+#v-panel .ab-condition-facets{grid-template-columns:1fr 1fr;gap:14px;margin-top:0}
+#v-panel .ab-condition-facets .ab-facet{margin:0;padding:0;border:0;min-width:0}
+#v-panel .ab-filter-select{position:relative}
+#v-panel .ab-filter-select>summary{display:grid;gap:3px;padding:9px 30px 9px 11px;border:1px solid #deddd6;border-radius:9px;position:relative;cursor:pointer;list-style:none;background:#fff}
+#v-panel .ab-filter-select>summary::-webkit-details-marker{display:none}
+#v-panel .ab-filter-select>summary:after{content:'⌄';position:absolute;right:11px;top:24px;font-size:16px;color:#887b6b;line-height:1}
+#v-panel .ab-filter-select[open]>summary{border-color:#8a7c68}
+#v-panel .ab-filter-select[open]>summary:after{transform:rotate(180deg)}
+#v-panel .ab-filter-name{font-size:12px;color:#8a7c6b}
+#v-panel .ab-filter-value{font-size:14px;line-height:1.5;color:#433a2e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;float:none;margin:0}
+#v-panel .ab-condition-facets .ab-filter-select>div{position:absolute;top:calc(100% + 5px);left:0;z-index:35;display:flex;flex-direction:column;gap:2px;min-width:100%;width:max-content;max-width:min(300px,75vw);max-height:245px;overflow:auto;padding:8px;background:#fff;border:1px solid #ded7cc;border-radius:10px;box-shadow:0 8px 24px #30251b12}
+#v-panel .ab-filter-select:nth-child(2)>div{left:auto;right:0}
+#v-panel .ab-condition-facets .ab-filter-select label{font-size:13px;background:#fff;padding:7px 9px;white-space:normal;border-radius:6px}
+#v-panel .ab-condition-facets .ab-filter-select label:has(:checked){background:#f0ebe2}
+#v-panel .ab-facet-inline{grid-column:1/-1}
+#v-panel .ab-facet-inline>legend{font-size:13px;line-height:1.5}
+#v-panel .ab-facet-inline>div{padding-top:9px;gap:8px}
+#v-panel .ab-facet-inline label{padding:6px 12px;font-size:13px;border:1px solid #e6e0d6;border-radius:8px}
+#v-panel .ab-compose .label{margin:16px 0 0;font-size:13px}
+#v-panel .ab-compose .label>.input{height:42px;margin-top:7px;font-size:14px;padding:8px 11px}
+#v-panel .ab-compose-footer{margin-top:16px;padding-top:15px;gap:12px}
+#v-panel .ab-compose-footer .btn{min-height:42px;font-size:13px;padding:9px 16px}
+#v-panel .ab-results-column{min-width:0}
+#v-panel .ab-review{margin:0;scroll-margin-top:24px}
+#v-panel .ab-review .ab-results-heading{display:flex;flex-direction:row;align-items:baseline;margin:0 0 12px;gap:12px}
+#v-panel .ab-review .ab-results-heading h2{font-size:21px;line-height:1.5}
+#v-panel .ab-selection{position:static;top:auto;border:0;border-bottom:1px solid #e6e0d6;border-radius:0;padding:0 0 14px;margin-bottom:14px;background:transparent;display:grid;grid-template-columns:1fr auto;gap:8px 14px}
+#v-panel .ab-group-count{font-size:13px;line-height:1.8;color:#887969}
+#v-panel .ab-group-count b{font-size:16px;font-weight:600;color:#2c2721;margin:0 3px}
+#v-panel #audienceComposition{grid-column:1/-1;grid-row:2}
+#v-panel .ab-composition-stats{display:flex;gap:18px;border:0;margin:0;padding:0}
+#v-panel .ab-composition-stats>div{display:flex;align-items:baseline;gap:7px;padding:0;border:0}
+#v-panel .ab-composition-stats dt{font-size:12px}
+#v-panel .ab-composition-stats dd{font-size:14px;margin:0}
+#v-panel .ab-digital-breakdown{display:flex;flex-wrap:wrap;gap:7px 12px;padding:8px 0 0;border:0;align-items:center}
+#v-panel .ab-digital-breakdown>span{font-size:12px}
+#v-panel .ab-digital-breakdown p{display:flex;gap:5px;margin:0;font-size:12px}
+#v-panel .ab-selection .ab-note{margin:8px 0 0!important;font-size:12px!important;line-height:1.6!important}
+#v-panel .ab-save-state{grid-column:1/-1;margin:0!important;text-align:left;font-size:12px!important;line-height:1.6}
+#v-panel .ab-selection .ab-clear{grid-row:1;grid-column:2;padding:0;font-size:12px;justify-self:end}
+#v-panel #audienceStatus:empty{display:none}
+#v-panel #audienceStatus{font-size:12px;line-height:1.7;margin:0 0 12px}
+#v-panel .ab-review-grid{grid-template-columns:1fr;gap:10px}
+#v-panel .ab-review-person.ab-selected-person{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 16px;padding:14px 16px;border-radius:12px}
+#v-panel .ab-review-profile{grid-column:1;grid-row:1;gap:11px}
+#v-panel .ab-review-profile .ab-portrait{width:38px;min-width:38px;flex-basis:38px;height:46px;border-radius:7px}
+#v-panel .ab-review-profile strong{font-size:14px;line-height:1.6}
+#v-panel .ab-review-profile small{font-size:12px;line-height:1.6}
+#v-panel .ab-review-traits{grid-column:1;grid-row:2;display:flex;flex-wrap:wrap;gap:5px 14px;margin:0;padding-left:49px}
+#v-panel .ab-review-traits>span{font-size:12px;gap:5px;justify-content:flex-start}
+#v-panel .ab-review-person>details{grid-column:1/-1;grid-row:3;border:0;padding:0 0 0 49px;margin:0}
+#v-panel .ab-review-person summary{font-size:12px;line-height:1.7}
+#v-panel .ab-review-person details p{margin:8px 0 0;line-height:1.8}
+#v-panel .ab-review-controls{grid-column:2;grid-row:1/3;display:flex;align-items:center;gap:12px;margin:0}
+#v-panel .ab-review-controls>button{font-size:12px;min-height:36px}
+#v-panel .ab-recommend-empty{padding:32px 18px;min-height:190px;display:flex;flex-direction:column;justify-content:center;background:transparent;border-style:dashed}
+#v-panel .ab-recommend-empty strong{font-size:20px;line-height:1.6}
+#v-panel .ab-recommend-empty p{font-size:14px;line-height:1.8;margin-top:12px}
+#v-panel .ab-manual{margin-top:20px;padding-top:20px}
+#v-panel .ab-manual-heading{gap:12px;margin-bottom:14px}
+#v-panel .ab-manual h3{font-size:19px}
+#v-panel .ab-manual .ab-candidate-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#v-panel .ab-manual .ab-person{padding:15px;border-radius:12px}
+#v-panel .ab-source-notice{font-size:11px;line-height:1.75;margin-top:20px}
+#v-panel .ab-filter-select>summary:focus-visible{outline:2px solid #8d7057;outline-offset:3px}
+
+/* 범위: 이미 위에서 설명한 제목과 과도한 카드 높이를 반복하지 않는다. */
+#v-panel #workflowScope{max-width:none}
+#v-panel #workflowScope>.wf-section-heading{margin-bottom:14px}
+#v-panel #workflowScope .wf-section-heading h2{font-size:20px}
+#v-panel #workflowScope .site-mode-options{gap:12px;margin-bottom:16px}
+#v-panel #workflowScope .site-mode-options label{padding:14px 16px;gap:10px}
+#v-panel #workflowScope .site-mode-options strong{font-size:14px}
+#v-panel #workflowScope .site-mode-options small{margin-top:4px}
+#v-panel #workflowScope .site-coverage{margin:14px 0;padding:16px}
+#v-panel #workflowScope .site-coverage h3{font-size:18px;margin:5px 0 12px}
+#v-panel #workflowScope .site-coverage-counts{padding:10px 0}
+#v-panel #workflowScope .site-coverage-counts strong{font-size:21px}
+#v-panel #workflowScope .site-coverage-note,#v-panel #workflowScope .site-coverage footer{font-size:12px;line-height:1.7}
+#v-panel #workflowScope .label{display:block;margin:16px 0 8px}
+#v-panel #workflowScope .hint{margin:7px 0;line-height:1.7}
+#v-panel #workflowScope .site-extra-context{margin:14px 0}
+#v-panel #workflowScope .site-extra-context summary{padding:7px 0}
+
+@media(max-width:1100px){
+ #audienceBuilder[data-page=personas] .ab-persona-browser{grid-template-columns:300px minmax(0,1fr);gap:18px}
+ #v-panel .ab-compose{padding:18px}
+ #v-panel .ab-review .ab-results-heading{flex-wrap:wrap;gap:6px}
+ #v-panel .ab-review-controls{flex-direction:column;align-items:flex-end;gap:0}
+ #v-panel .ab-condition-basics{grid-template-columns:minmax(0,1fr) 84px;gap:12px}
+}
+@media(max-width:1000px){
+ #v-product .wf-setup-layout{grid-template-columns:1fr}
+ #audienceBuilder[data-page=personas] .ab-persona-browser{grid-template-columns:1fr}
+ #v-panel .ab-compose{position:static}
+ #v-panel .ab-condition-facets{grid-template-columns:1fr 1fr}
+ #v-panel .ab-conditions .label{max-width:none}
+ #v-panel .ab-review-controls{flex-direction:row;align-items:center;gap:12px}
+}
+@media(max-width:760px){
+ .studio-active #v-product>.page,.studio-active #v-panel>.page{padding:18px 20px 185px}
+ #v-product .qtitle,#v-panel .qtitle{font-size:25px}
+ #v-panel .panel-actionbar{padding:10px 20px}
+ #v-panel .panel-section-nav button{padding:8px;gap:7px}
+ #v-panel .panel-section-nav button small{font-size:11px;line-height:1.5}
+ #v-panel .panel-section-nav button strong{font-size:12px}
+ #v-panel .panel-section-nav{margin-bottom:18px}
+ #v-product .wf-platform>div{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #v-product .wf-platform label{padding:9px 7px;align-items:center;gap:5px}
+ #v-product .wf-platform label>span{display:block}
+ #v-product .wf-platform strong{font-size:12px}
+ #v-product .wf-platform small{display:none}
+ #v-product .wf-source-panel{padding:18px}
+ #v-product .ri-capture img{height:240px}
+ #v-product .ri-empty{min-height:250px}
+ #v-product .ex-job{padding:16px}
+ #v-product .ex-job-top{flex-direction:row;gap:12px}
+ #v-product .ex-job footer{gap:8px}
+ #v-product .ex-job dl{grid-template-columns:repeat(2,1fr);gap:12px}
+ #v-product .sr-heading{padding:17px 18px}
+ #v-product .sr-panel{padding:4px 18px 16px}
+ #v-product .pf-thumb{height:150px}
+ .ab-description-fields{grid-template-columns:1fr;gap:16px}
+ #audienceBuilder[data-page=people] .ab-definition{padding:20px}
+ #v-panel .ab-review-traits{padding-left:0}
+ #v-panel .ab-review-person>details{padding-left:0}
+ #v-panel .ab-results-heading h2{font-size:20px}
+ #v-panel .ab-recommend-empty p br{display:none}
+}
+@media(max-width:420px){
+ #v-panel .ab-condition-facets{gap:12px}
+ #v-panel .ab-review-controls{flex-direction:column;align-items:flex-end;gap:0}
+ #v-panel .ab-compose-footer{flex-direction:column-reverse;align-items:stretch}
+ #v-panel .ab-compose-footer>.ab-text-button{align-self:flex-start}
+ #v-product .ex-job-top{flex-direction:column}
+}
+
+
+/* 각 설정을 별도 페이지로 나눈 여섯 단계. */
+.studio-active .wf-progress{margin:0 32px 18px 320px;padding:13px 0;gap:18px;overflow-x:auto;scrollbar-width:thin}
+.studio-active .wf-progress a{flex-shrink:0;gap:8px;font-size:13px;white-space:nowrap;min-height:32px}
+.studio-active .wf-progress a b{width:25px;height:25px;flex:none}
+.studio-active #v-source-review>.page{max-width:1320px;padding:22px 32px 120px}
+#v-source-review .qhead{margin-bottom:18px;padding-bottom:16px}
+#v-source-review .qtitle{font-size:28px;line-height:1.4;margin:5px 0 0}
+#v-source-review .qdesc{font-size:14px;line-height:1.7;margin:8px 0 0;max-width:none}
+#v-source-review .sr-review{margin-top:0;border-radius:18px}
+#v-source-review .sr-heading{padding:18px 22px 16px;align-items:center}
+#v-source-review .sr-heading .wf-eyebrow,#v-source-review .sr-heading h2{display:none}
+#v-source-review .sr-heading p{font-size:14px;line-height:1.8;margin:0}
+#v-source-review .sr-tabs{padding:0 22px}
+#v-source-review .sr-tabs button{min-height:45px}
+#v-source-review .sr-panel{padding:6px 22px 20px}
+#v-source-review .sr-footer{padding:16px 22px;font-size:12px;line-height:1.8}
+#v-source-review .ex-job{margin-bottom:18px;border-radius:16px;padding:22px}
+#v-source-review .ex-job h3{font-size:22px;margin:7px 0}
+#v-source-review .ex-job dl{margin:18px 0;padding:15px 0}
+#v-source-review .ex-job dd{font-size:23px;margin-top:7px}
+#v-source-review .ex-progress{margin-top:16px}
+#v-source-review .sr-page-row{min-height:60px;padding:10px 0}
+#v-source-review .pf-state-grid{gap:16px}
+#v-source-review .pf-thumb{height:155px}
+#v-source-review .pf-state-card>div:last-child{padding:13px}
+#v-source-review .pf-menu-review,#v-source-review .pf-route{padding:16px 18px;margin-bottom:18px}
+@media(max-width:1020px){.studio-active .wf-progress{margin-left:262px;gap:14px}}
+@media(max-width:760px){
+ .studio-active .wf-progress{margin:0 20px 16px;padding:10px 0;gap:14px}
+ .studio-active #v-source-review>.page{padding:18px 20px 185px}
+ #v-source-review .qtitle{font-size:25px}
+ #v-source-review .sr-heading{padding:16px 18px;align-items:flex-start}
+ #v-source-review .sr-tabs{padding:0 18px}
+ #v-source-review .sr-panel{padding:4px 18px 18px}
+ #v-source-review .ex-job{padding:18px}
+}
+
+/* 연결 단계는 캡처를 먼저 보여주고 실제 조작 경로는 실행에 둔다. */
+.snapshot-image{display:block;width:100%;padding:0;border:0;position:relative;background:#f5f3ee;cursor:zoom-in;text-align:center;overflow:hidden}.snapshot-image img{width:100%;height:100%;object-fit:contain;display:block}.snapshot-image>span{font:12px/1.7 var(--sans);color:#7e7568}.snapshot-image:not(:disabled)>span{position:absolute;right:9px;bottom:9px;background:#fffef9;border:1px solid #e5dfd4;border-radius:6px;padding:4px 8px}.snapshot-image:disabled{cursor:default}.snapshot-image:focus-visible{outline:2px solid #9c8161;outline-offset:-3px}.snapshot-grid{padding-top:20px}.snapshot-grid code{display:block;font:12px/1.7 var(--sans);color:#918577;overflow-wrap:anywhere;margin-top:6px}.snapshot-job dl{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+/* 전체 지역명을 잘라내지 않는 지역 선택창. */
+#audienceBuilder .ab-condition-facets .ab-filter-select[data-audience-facet="regions"]>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:row;width:360px;max-width:calc(100vw - 56px);max-height:330px;gap:2px 6px;left:auto;right:0}
+#audienceBuilder .ab-condition-facets .ab-filter-select[data-audience-facet="regions"] label{display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:0}
+#audienceBuilder .ab-condition-facets .ab-filter-select[data-audience-facet="regions"] label span{white-space:nowrap;overflow:visible;text-overflow:clip}
+@media(max-width:420px){#audienceBuilder .ab-condition-facets .ab-filter-select[data-audience-facet="regions"]>div{grid-template-columns:1fr;width:230px}}
+
+/* 테스트 작업 메뉴는 설정부터 결과 확인까지 같은 위치를 유지한다. */
+#stepper a{display:flex;align-items:center;gap:12px}#stepper a>small{margin-left:auto;font:10px/1.5 var(--sans);white-space:nowrap;color:#978c7c}#stepper a.is-current{background:#171715;color:#fff;border-radius:14px}#stepper a.is-current>small{color:#d8d2c7}#stepper a[aria-disabled="true"]{color:#aaa398;cursor:not-allowed}#stepper a[aria-disabled="true"] .q{opacity:.5}#stepper a:focus-visible{outline:2px solid #a88965;outline-offset:3px}#runResultLink[aria-disabled="true"]{background:#e6e2db;color:#91887a;cursor:not-allowed;border-color:#e6e2db}.studio-revision:disabled{opacity:.45;cursor:not-allowed}.rv-completion{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;margin:4px 0 18px;border-bottom:1px solid #e8e2d8;font-size:13px;color:#7c715f}.rv-completion strong{font-weight:500;color:#625947}.rv-completion.is-partial{padding:13px 16px;background:#f4eee3;border:1px solid #e8dfcf;border-radius:10px}.rv-collection-note{font-size:12px;line-height:1.8;color:#968873;margin:12px 0 20px}.rv-tabs[hidden]{display:none!important}#v-report .rv-live-page,#v-interview .rv-live-page{max-width:1180px;margin:0 auto}#v-report .rv-heading h1{font-size:30px;line-height:1.6}@media(max-width:760px){.rv-completion{align-items:flex-start;flex-direction:column;gap:5px}#v-report .rv-heading h1{font-size:25px}}
+
+.report-document-actions{display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:1180px;margin:24px auto 70px;padding:22px 0;border-top:1px solid #e6dfd4}.report-document-actions .wf-action-status{text-align:center;font-size:12px;color:#8f8270;line-height:1.8}.report-document-actions .wf-action-status strong{display:block;color:#5e5547;font-weight:500}@media(max-width:760px){.report-document-actions{margin:20px 20px 36px;flex-wrap:wrap;gap:12px}.report-document-actions .wf-action-status{display:none}#stepper{overflow-x:auto}#stepper a{flex-shrink:0}#stepper a>small{display:none}}
+
+.report-document-actions a[aria-disabled="true"]{background:#e6e2db;color:#91887a;border-color:#e6e2db;cursor:not-allowed}

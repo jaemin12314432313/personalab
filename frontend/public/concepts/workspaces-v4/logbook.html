@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · D3 기록장</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="./base.css">
+<style>
+.wrap{max-width:900px;margin:0 auto;padding:0 clamp(16px,4vw,32px)}
+.top{padding:56px 0 26px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.top h1{font-size:clamp(30px,4.4vw,44px);letter-spacing:-.05em;line-height:1.25;font-weight:650;margin-top:12px}
+.top p{color:var(--ink-3);margin-top:8px}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;padding:3px;background:var(--warm);gap:2px;margin-bottom:26px}
+.seg button{border:0;background:transparent;height:30px;padding:0 14px;border-radius:7px;font-size:13.5px;color:var(--ink-3);font-weight:550}
+.seg button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 3px #0001}
+.week-h{font-size:12.5px;font-weight:650;color:var(--ink-3);margin:30px 0 14px 108px;display:flex;align-items:center;gap:10px}
+.week-h::after{content:"";flex:1;height:1px;background:var(--line)}
+.log{position:relative}
+.log::before{content:"";position:absolute;left:94px;top:8px;bottom:8px;width:1px;background:var(--line)}
+.entry{display:grid;grid-template-columns:78px 32px 1fr;margin-bottom:22px;position:relative}
+.date{text-align:right;font-size:13px;color:var(--ink-3);padding-top:7px;line-height:1.4}
+.date b{display:block;font-size:20px;color:var(--ink);letter-spacing:-.04em;font-weight:650}
+.pin{width:11px;height:11px;border-radius:50%;border:2px solid var(--ink);background:#fff;margin:12px 0 0 10px;z-index:1}
+.pin.int{border-color:var(--blue);background:var(--blue)}.pin.now{border-color:var(--brown);background:var(--brown);box-shadow:0 0 0 5px #8c5d4922}
+.body{border:1px solid var(--line);border-radius:14px;padding:20px 22px;background:#fff;transition:border-color .2s,box-shadow .3s}
+.body:hover{border-color:var(--line-2);box-shadow:0 8px 28px #16161a0a}
+.kind{font-size:12px;color:var(--brown);font-weight:650;margin-bottom:4px;display:flex;gap:8px;align-items:center}
+.body h2{font-size:19px;letter-spacing:-.035em;font-weight:620;line-height:1.5}
+.body .sub{color:var(--ink-3);font-size:14px;margin-top:2px}
+/* 도트 경로: 페르소나가 어디서 끝났는지 점으로 */
+.lane{display:grid;grid-template-columns:repeat(5,1fr);margin:20px 0 6px;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.lane>div{min-height:92px;padding:8px 9px;border-left:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between;background:var(--warm)}
+.lane>div:first-child{border-left:0}
+.lane small{font-size:11px;color:var(--ink-3);line-height:1.3}
+.lane b{display:block;font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4}
+.dots{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;min-height:14px}
+.dots i{width:12px;height:12px;border-radius:50%;background:var(--stop);animation:dot .5s var(--ease) both;position:relative}
+.dots i.ok{background:var(--ok)}
+.dots i.sel{outline:2px solid var(--ink);outline-offset:2px}
+@keyframes dot{from{transform:scale(0)}}
+.lane .gone{opacity:.5;background:repeating-linear-gradient(135deg,#fff,#fff 5px,var(--warm) 5px,var(--warm) 10px)}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--ink-3);margin-bottom:2px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--stop);margin-right:6px}.legend i.ok{background:var(--ok)}
+/* 여백 메모 */
+.margin{margin-top:16px;padding:14px 16px;border-radius:10px;background:var(--brown-soft);border:1px solid var(--brown-line);font-size:15px;line-height:1.75;color:#5d4a3c;letter-spacing:-.02em;display:flex;gap:12px}
+.margin::before{content:"✎";color:var(--brown);font-size:17px;line-height:1.5}
+.delta{display:inline-flex;align-items:center;gap:6px;font-weight:650;color:var(--ok)}
+.chat{margin-top:16px;display:grid;gap:10px}
+.chat p{max-width:84%;padding:10px 14px;border-radius:12px;font-size:14.5px;line-height:1.7}
+.chat .q{background:var(--warm-2);justify-self:end;border-bottom-right-radius:3px}
+.chat .a{background:#eef3fb;border:1px solid #d5e1f5;border-bottom-left-radius:3px;color:#26426f}
+.chat small{display:block;font-size:11.5px;color:var(--ink-3);margin-bottom:1px}
+.acts{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.hide{display:none!important}
+.empty{text-align:center;color:var(--ink-3);padding:50px 0}
+.sticky-new{position:sticky;bottom:18px;display:flex;justify-content:center;margin-top:10px;pointer-events:none}
+.sticky-new .btn{pointer-events:auto;height:46px;padding:0 24px;border-radius:99px;box-shadow:0 12px 32px #16161a30}
+@media(max-width:640px){.entry{grid-template-columns:1fr}.date{text-align:left;display:flex;gap:8px;align-items:baseline;padding:0 0 6px 26px}.date b{font-size:16px}.pin{position:absolute;left:0;top:7px;margin:0}.log::before{left:5px}.week-h{margin-left:20px}.body{margin-left:20px}.lane small{display:none}.lane>div{min-height:70px}.crumb{display:none}.chat p{max-width:95%}}
+</style></head>
+<body>
+<header class="bar"><a class="logo" href="./index.html"><i></i>PersonaLab</a><span class="crumb"><b>일정메이트</b> 워크스페이스</span><span class="sp"></span><a class="btn sm quiet" href="#" data-toast="디자인 예시: 한 줄 검색이 열려요">검색</a><span class="me">나</span></header>
+
+<main class="wrap">
+  <section class="top">
+    <div><span class="eyebrow">일정메이트 · 기록장</span><h1>같은 사람들이 <span class="ul">어디까지 갔는지<svg viewBox="0 0 300 18" preserveAspectRatio="none"><path pathLength="1" d="M3 11 Q85 1 153 8 T296 6"/><path pathLength="1" d="M21 16 Q150 8 277 13"/></svg></span>,<br>버전마다 이어서 봐요.</h1><p>한 번 보고 끝나는 결과가 아니라, 고칠 때마다 쌓이는 탐색 일지예요.</p></div>
+  </section>
+
+  <div class="seg" role="group" aria-label="기록 종류"><button aria-pressed="true" data-k="all">전체</button><button aria-pressed="false" data-k="run">탐색</button><button aria-pressed="false" data-k="int">인터뷰</button></div>
+
+  <div class="log" id="log">
+    <div class="week-h">이번 주</div>
+
+    <article class="entry" data-kind="run">
+      <div class="date"><b>11/05</b>오늘</div><span class="pin now" style="margin-left:10px"></span>
+      <div class="body"><div class="kind">탐색 · 지금 진행 중 <span class="tag" style="font-weight:500;color:var(--blue);border-color:#c9d8f3">13 / 20명</span></div>
+        <h2>일정메이트 온보딩 v3 — 학교 입력을 선택 항목으로 바꿨어요</h2><div class="sub">v2에서 3명이 멈칫한 곳을 다시 확인하는 중</div>
+        <div class="lane" data-lane='[[0,0,0,0,0],[0,0,0,0,0]]'></div>
+        <div class="acts"><button class="btn sm" data-toast="디자인 예시: 실시간 탐색 화면이 열려요">실시간으로 보기</button></div>
+      </div>
+    </article>
+
+    <article class="entry" data-kind="int">
+      <div class="date"><b>11/05</b>오전 10:12</div><span class="pin int" style="margin-left:10px"></span>
+      <div class="body"><div class="kind" style="color:var(--blue)">1대1 인터뷰 · P563</div>
+        <h2>P563에게 “왜 학교 입력에서 멈췄나요?”</h2><div class="sub">34세 직장인 · 질문 2개</div>
+        <div class="chat"><p class="q"><small>나</small>학교랑 학년을 묻는 순간 어떤 생각이 들었어요?</p><p class="a"><small>P563 · AI 페르소나</small>“나 대학생 아닌데 하는 생각이요. 앱이 나를 대상으로 안 만든 것 같아서 그냥 닫으려 했어요.”</p></div>
+        <div class="margin">v1에서는 휴대폰 인증 때문에 멈췄던 P563이, 이번엔 ‘나를 위한 앱이 맞나’에서 멈췄어요. 이유가 바뀌었다는 건 앞 문제는 풀렸다는 뜻이에요.</div>
+        <div class="acts"><button class="btn sm" data-toast="디자인 예시: 대화가 이어져요">대화 이어가기</button></div>
+      </div>
+    </article>
+
+    <article class="entry" data-kind="run">
+      <div class="date"><b>11/04</b>화요일</div><span class="pin"></span>
+      <div class="body"><div class="kind">탐색 · 완료</div>
+        <h2>일정메이트 온보딩 v2 — 휴대폰 인증을 뺐어요</h2><div class="sub">같은 페르소나 5명 · v1 대비 <span class="delta">완주 0% → 40% ↑</span></div>
+        <div class="legend"><span><i></i>멈춤</span><span><i class="ok"></i>완주</span><span style="margin-left:auto">테두리 = P563</span></div>
+        <div class="lane" data-lane='[[0,0,0,0,0],[0,0,0,0,0]]' data-end='[[2,"P563"],[2,"P938"],[3,"P374"],[4,"P069"],[4,"P392"]]'></div>
+        <div class="margin"><span>P563은 v1에서 S02(회원가입)에서 멈췄고, 이번엔 한 칸 더 가서 <b>S03(학교·학년)</b>에서 멈췄어요. 가입 인증은 더 이상 이탈 이유가 아니에요.</span></div>
+        <div class="acts"><button class="btn sm" data-toast="디자인 예시: v2 전체 결과로 이동해요">전체 결과 보기</button><button class="btn sm" data-toast="디자인 예시: P563과 인터뷰가 열려요">P563에게 물어보기</button></div>
+      </div>
+    </article>
+
+    <div class="week-h">지난주</div>
+    <article class="entry" data-kind="run">
+      <div class="date"><b>10/28</b>화요일</div><span class="pin"></span>
+      <div class="body"><div class="kind">탐색 · 완료</div>
+        <h2>일정메이트 온보딩 v1 — 처음 돌려본 기록</h2><div class="sub">직장인 5명 · 5명 모두 같은 곳에서 멈춤</div>
+        <div class="legend"><span><i></i>멈춤</span><span><i class="ok"></i>완주</span><span style="margin-left:auto">테두리 = P563</span></div>
+        <div class="lane" data-lane='[[0,0,0,0,0],[0,0,0,0,0]]' data-end='[[1,"P563"],[1,"P938"],[1,"P374"],[1,"P069"],[1,"P392"]]'></div>
+        <div class="margin">5명 중 4명이 “개인정보를 왜 이렇게 많이 요구하지?”라고 답했어요. 첫 번째로 손볼 곳은 휴대폰 번호 인증.</div>
+        <div class="acts"><button class="btn sm" data-toast="디자인 예시: 공개 샘플 결과로 이동해요">전체 결과 보기</button></div>
+      </div>
+    </article>
+  </div>
+  <div class="empty hide" id="empty">이 종류의 기록이 아직 없어요.</div>
+  <div class="sticky-new"><button class="btn solid" data-toast="디자인 예시: 새 버전 탐색을 시작해요">+ 이번 수정본도 같은 사람들에게 보여주기</button></div>
+</main>
+<p class="foot-note" style="max-width:900px">디자인 비교용 예시입니다. 표시된 버전·수치·대화는 가상이며 실제 계정, 패널, DB, API, LLM과 연결되어 있지 않아요. 페르소나 ID와 v1의 이탈 이유는 공개 데모에서 가져왔어요.</p>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let t;const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(t);t=setTimeout(()=>e.classList.remove('on'),2600)};
+const SCREENS=[['S01','온보딩'],['S02','회원가입'],['S03','학교·학년'],['S04','관심분야'],['S05','홈']];
+$$('[data-lane]').forEach(l=>{
+  const end=l.dataset.end?JSON.parse(l.dataset.end):[];
+  l.innerHTML=SCREENS.map(([id,name],i)=>{
+    const here=end.filter(e=>e[0]===i);
+    const dots=here.map(e=>`<i class="${i===4?'ok':''} ${e[1]==='P563'?'sel':''}" title="${e[1]}" style="animation-delay:${i*90}ms"></i>`).join('');
+    const gone=end.length&&i>Math.max(...end.map(e=>e[0]))&&!end.some(e=>e[0]===i);
+    return `<div class="${gone?'gone':''}"><div><small>${id}</small><b>${name}</b></div><div class="dots">${dots}</div></div>`;
+  }).join('');
+});
+// 진행 중 항목은 점 대신 안내
+const live=$('[data-lane]:not([data-end])');if(live){live.innerHTML='<div style="grid-column:1/-1;min-height:68px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:13.5px;gap:10px"><span class="dot" style="width:9px;height:9px;border-radius:50%;background:var(--blue);animation:blink 1.4s infinite"></span>탐색이 끝나면 이곳에 점으로 쌓여요</div>';}
+$('.seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  $$('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  const k=b.dataset.k;let shown=0;
+  $$('.entry').forEach(en=>{const on=k==='all'||en.dataset.kind===k;en.classList.toggle('hide',!on);if(on)shown++});
+  $$('.week-h').forEach(h=>{let n=h.nextElementSibling,has=false;while(n&&!n.classList.contains('week-h')){if(n.classList.contains('entry')&&!n.classList.contains('hide'))has=true;n=n.nextElementSibling}h.classList.toggle('hide',!has)});
+  $('#empty').classList.toggle('hide',shown>0);
+});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-toast]');if(a){e.preventDefault();toast(a.dataset.toast)}});
+</script>
+</body></html>

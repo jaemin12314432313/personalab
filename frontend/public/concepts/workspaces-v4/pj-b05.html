@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · B05 Window · Sand</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;800&display=swap">
+<link rel="stylesheet" href="./pj.css"><link rel="stylesheet" href="./pj2.css">
+<style>
+/* B05 · Window · Sand — 랜딩의 제품 미리보기 창을 샌드·피치 프레임에. 왼쪽에서 고르면 오른쪽이 바뀌어요. */
+
+:root{--serif:"Noto Serif KR","Nanum Myeongjo",serif;
+ --bg:#f5f0e6;--surface:#fffdf8;--surface-2:#f1eadd;--bar-bg:#f5f0e6e8;
+ --fg:#1f1a15;--fg-2:#4d443a;--fg-3:#857a6a;--line:#e6dccb;--line-2:#d6c9b2;
+ --accent:#1f1a15;--btn-bg:#1f1a15;--btn-fg:#fffdf8;--btn-line:#1f1a15;--btn-hover:#3a3128;
+ --c-setup:#857a6a;--c-ready:#b86e0a;--c-run:#2f5fd0;--c-done:#2f7d4f;--danger:#c8452f;--danger-soft:#f9e4de;
+ --radius:14px;--radius-sm:9px;--shadow:0 16px 44px #4a3a2a26;--grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .13  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.ul{position:relative;display:inline-block;white-space:nowrap}
+.ul svg{position:absolute;left:-1%;bottom:-.14em;width:102%;height:.22em;overflow:visible;fill:none;stroke:#d06d5b;stroke-width:2.6;stroke-linecap:round;pointer-events:none}
+body::after{content:"";position:fixed;inset:0;background:var(--grain);opacity:.55;mix-blend-mode:multiply;pointer-events:none;z-index:3}
+.head h1{font:800 36px/1.4 var(--serif);letter-spacing:-.04em}
+.eyebrow{color:var(--fg-3)}
+.search,.sort,.ws,.acct>button{background:var(--surface);border-color:var(--line-2)}
+.btn.solid{box-shadow:0 6px 16px #1f1a1526}
+.dlg{background:var(--surface)}.dlg input{background:var(--surface-2)}
+.me{background:var(--surface-2)}
+.tabs a[aria-current=page]::after{background:var(--accent)}
+.kbd{background:var(--surface-2)}
+
+:root{--frame-bg:linear-gradient(120deg,#ecdcc2,#f1d8c4 55%,#efc6b4);
+ --h-bg:linear-gradient(120deg,#f7eddd,#fae9dc 60%,#f8e1d3);--h-fg:#1f1a15;--h-fg2:#4d443a;--h-fg3:#857a6a;--h-line:#e9dcc6;--h-chip:#fffdf8;--h-chip-fg:#2f5fd0;--h-done:#2f7d4f;--h-ready:#b86e0a;--h-setup:#857a6a;
+ --h-btn-bg:#1f1a15;--h-btn-fg:#fffdf8;--h-btn-hover:#3a3128;--h-btn-shadow:0 8px 20px #1f1a1530;--h-track:#eadcc6;--h-ring:#c4563e;--h-ring-glow:transparent;--h-ev:#fffdf8cc;--h-ev-line:#fff;--h-ev-fg:#4d443a;--h-ev-b:#1f1a15;
+ --h-shadow:none;--h-spot:0;--h-radius:16px;--h-title-font:var(--serif);--h-title-weight:800;--h-title:42px}
+.frame{box-shadow:0 1px 2px #4a3a2a10}
+.win{background:#fffdf8;border-color:#eadfcb;box-shadow:0 24px 60px #7a4a2a26;--fg:#1f1a15;--fg-2:#4d443a;--fg-3:#857a6a}
+.win-bar,.win-tabs,.win-side,.win-foot{border-color:#efe4d0}.win-tabs{background:#fbf7ee}.win-side{background:#fffdf8}.win-main{background:#faf5ea}
+.win-bar .demo{background:#fff6e4;border-color:#ead7b8;color:#8a6a3a}
+.win-item:hover{background:#f7efe0}.win-item.sel{background:#f1e3cf}
+.row.hero{border:1px solid #eee0c9}
+.h-insight{background:#fffdf8aa;border-color:#fff}
+
+</style></head>
+<body><div id="app"></div>
+<script>window.PL=Object.assign({"layout":"master","title":"<span class=\"ul\">프로젝트<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path pathLength=\"1\" d=\"M3 11 Q85 1 153 8 T296 6\"/></svg></span>"},{searchHint:'/',newHint:'N',keys:"<span class=\"kbd\">/</span> 검색 · <span class=\"kbd\">N</span> 새 프로젝트"});</script>
+<script src="./pj.js"></script>
+</body></html>

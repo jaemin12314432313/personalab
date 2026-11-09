@@ -27,6 +27,7 @@ class FakeClient:
 @pytest.fixture
 def fake(monkeypatch):
     """get_client 를 가짜로 바꾸고 대기 시간(sleep)을 기록만 한다."""
+    monkeypatch.setattr(llm.settings, "llm_provider", "gemini")
     slept = []
     monkeypatch.setattr(llm.time, "sleep", slept.append)
 

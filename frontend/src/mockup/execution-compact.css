@@ -1,0 +1,126 @@
+/* 실행·결과의 제한된 작업 영역 */
+#v-run.execution-started.wf-browser-mode>.page{max-width:1600px;padding:18px 28px 100px}
+#v-run.execution-started.wf-browser-mode .qhead,#v-run.execution-started.wf-browser-mode #runPreparation{display:none}
+.ls-reason-dialog,.rv-detail-dialog{color:#33352f;background:#fff;border:1px solid #dfd9cf;border-radius:14px;padding:24px;max-height:85dvh;overflow:auto;width:min(900px,calc(100vw - 48px));box-shadow:0 24px 100px #201a1222}
+.ls-reason-dialog::backdrop,.rv-detail-dialog::backdrop{background:#211f1a66;backdrop-filter:blur(2px)}
+.ls-reason-dialog>header,.rv-detail-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:20px}
+.ls-reason-dialog p{font:15px/1.9 var(--sans);white-space:pre-wrap;overflow-wrap:anywhere}.ls-reason-dialog small{color:#857a6a;font:12px/1.7 var(--sans)}
+/* 리포트: 요약 한 줄 / 선택 목록 / 근거. */
+#v-report .rv-live-page,#v-interview .rv-live-page{padding:22px 28px 0;max-width:1380px}
+#liveReport .rv-compact .rv-heading{margin:0 0 10px;align-items:center;gap:16px}
+#liveReport .rv-compact .rv-heading h1{font:600 30px/1.4 var(--serif);margin:4px 0 0;letter-spacing:-.04em;overflow-wrap:anywhere}
+#liveReport .rv-compact .rv-heading p{font-size:13px;margin:3px 0 0}
+#liveReport .rv-compact .rv-toolbar{padding:0;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+#liveReport .rv-compact .btn{min-height:34px;padding:7px 11px;font-size:12px;border-radius:6px}
+#liveReport .rv-compact .rv-eyebrow{font-size:12px;letter-spacing:.09em}
+#liveReport .rv-compact-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:#68685f;padding-bottom:12px}
+#liveReport .rv-compact-meta>span:first-child{color:#726951;background:#f0ede5;border-radius:4px;padding:2px 7px}
+#liveReport .rv-compact-meta details{position:relative;margin-left:auto}
+#liveReport .rv-compact-meta summary{cursor:pointer}
+#liveReport .rv-compact-meta details>p{position:absolute;right:0;top:calc(100% + 8px);width:min(360px,75vw);padding:15px;background:#fff;border:1px solid #e4ded4;border-radius:8px;box-shadow:0 8px 25px #29241a14;z-index:5;line-height:1.8}
+#liveReport .rv-summary-line{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 0;border-top:1px solid #e6e1d8;border-bottom:1px solid #e6e1d8;color:#68685f;font-size:12px}
+#liveReport .rv-summary-line>strong{color:#4e5845;font-weight:500}
+#liveReport .rv-summary-line>strong.is-partial,#liveReport .rv-summary-line .rv-missing{color:#ac6d49}
+#liveReport .rv-summary-line b{color:#35382f;font-weight:500}
+#liveReport .rv-compact .rv-tabs{margin:0 0 18px;gap:25px}
+#liveReport .rv-compact .rv-tabs>button{font-size:13px;padding:12px 0}
+#liveReport .rv-compact .rv-findings-layout{grid-template-columns:260px minmax(0,1fr);gap:24px;align-items:start}
+#liveReport .rv-compact .rv-section-heading{margin:0 0 12px;align-items:center;flex-direction:row}
+#liveReport .rv-compact .rv-section-heading h2{font:600 17px/1.5 var(--sans)}
+#liveReport .rv-compact .rv-section-heading p{font-size:12px}
+#liveReport .rv-compact .rv-issue-list{gap:6px;display:flex;flex-direction:column}
+#liveReport .rv-compact .rv-issue-list>button{padding:12px 13px;border-radius:8px;min-height:0;background:#fff}
+#liveReport .rv-compact .rv-issue-list>button[aria-pressed=true]{border-color:#a4957d;background:#f5f2eb;box-shadow:none}
+#liveReport .rv-compact .rv-issue-top{font-size:12px;display:flex;justify-content:space-between;gap:10px;color:#8b7d69;margin:0 0 4px;align-items:center}
+#liveReport .rv-compact .rv-issue-top small{white-space:nowrap}
+#liveReport .rv-compact .rv-issue-list>button>strong{font:500 15px/1.6 var(--sans);margin:0}
+#liveReport .rv-pager{display:flex;align-items:center;justify-content:flex-end;gap:5px;padding:12px 0;font-size:12px;color:#8f8474}
+#liveReport .rv-pager>span{margin-right:auto}
+#liveReport .rv-pager button{border:1px solid #e6e0d6;background:#fff;border-radius:5px;width:30px;height:28px;font-size:13px}
+#liveReport .rv-person-select{display:flex;flex-direction:column;gap:7px;font-size:12px;color:#8c7c66;margin:8px 0 14px}
+#liveReport .rv-person-select select,#liveReport .rv-compact .rv-filter select{max-width:100%;font:13px var(--sans);border:1px solid #e3dcd0;border-radius:7px;padding:9px;background:#fff;color:#34382e}
+#liveReport .rv-compact .rv-hypothesis{padding:13px 0 0;margin-top:10px;border-top:1px solid #e4dfd6;background:none;border-left:0}
+#liveReport .rv-compact .rv-hypothesis p{font-size:13px;line-height:1.8;margin:6px 0}
+#liveReport .rv-compact .rv-hypothesis small{font-size:12px}
+#liveReport .rv-selected-evidence{min-width:0;border:1px solid #e2ddd3;background:white;border-radius:12px;overflow:hidden}
+#liveReport .rv-selected-evidence>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-bottom:1px solid #e8e2d8}
+#liveReport .rv-selected-evidence h2{font:600 17px/1.5 var(--sans);margin:0;overflow-wrap:anywhere}
+#liveReport .rv-compact-capture{background:#f3f2ee;border-bottom:1px solid #e9e3d9;display:flex;justify-content:center;align-items:center;height:clamp(220px,calc(100dvh - 485px),440px)}
+#liveReport .rv-compact-capture img{height:100%;max-width:100%;object-fit:contain;display:block}
+#liveReport .rv-compact-screen{padding:20px 28px;width:100%}
+#liveReport .rv-compact-screen>span{font-size:12px;color:#8d826e}
+#liveReport .rv-compact-screen h3{font:500 21px/1.5 var(--serif);margin:8px 0}
+#liveReport .rv-compact-screen p{font-size:13px;line-height:1.8;color:#7d7568}
+#liveReport .rv-compact-quote{padding:14px 18px}
+#liveReport .rv-compact-quote .rv-identity{margin:0 0 8px;gap:9px}
+#liveReport .rv-compact-quote .rv-identity strong{font-size:12px}
+#liveReport .rv-compact-quote .rv-identity span:not(.rv-avatar){font-size:12px}
+#liveReport .rv-compact-quote .rv-identity>span.rv-excerpt-label{margin-left:auto;font-size:12px;color:#99896f}
+#liveReport .rv-compact-quote blockquote{font:400 15px/1.8 var(--sans);margin:0;color:#393a33;overflow-wrap:anywhere}
+#liveReport .rv-evidence-actions{display:flex;justify-content:space-between;gap:15px;margin-top:12px;padding-top:10px;border-top:1px solid #eee9e1}
+#liveReport .rv-compact .rv-text-link{font-size:12px}
+#liveReport .rv-compact .rv-badge{font-size:12px;white-space:nowrap}
+#liveReport .rv-compact .rv-empty-small{padding:20px 15px;font-size:13px;line-height:1.8;border-radius:8px}
+#liveReport .rv-compact .rv-empty-small p{margin-top:8px;color:#8e806c}
+#liveReport .rv-compact .rv-filter{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:10px}
+#liveReport .rv-person-records{display:flex;flex-direction:column;border-top:1px solid #e6e0d6}
+#liveReport .rv-person-records>button{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 10px;background:none;border:0;border-bottom:1px solid #e6e0d6;text-align:left}
+#liveReport .rv-person-records>button[aria-pressed=true]{background:#f0ece3;border-radius:6px}
+#liveReport .rv-person-records strong{display:block;font-size:13px}
+#liveReport .rv-person-records small{display:block;font-size:12px;color:#73746b;margin-top:3px}
+#liveReport .rv-compact-coverage .rv-record-table{border:1px solid #e4ded4;border-radius:10px;background:white}
+#liveReport .rv-compact-coverage table{width:100%;table-layout:fixed;min-width:0}
+#liveReport .rv-compact-coverage th:first-child{width:58%}
+#liveReport .rv-compact-coverage td,#liveReport .rv-compact-coverage th{padding:12px 16px;font-size:12px}
+#liveReport .rv-compact-coverage td strong{font-size:13px}
+#liveReport .rv-url{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#liveReport .rv-compact-coverage>.rv-muted{font-size:12px;margin:10px 0}
+#liveReport .rv-detail-dialog>.rv-evidence{border:0;box-shadow:none;border-radius:0}
+#liveReport .rv-detail-dialog .rv-evidence header h2{font-size:20px}
+#liveReport .rv-detail-dialog .rv-evidence-body{grid-template-columns:1fr}
+#liveReport .rv-detail-dialog .rv-browser-capture img{max-height:45dvh;width:100%;object-fit:contain}
+#liveReport .rv-detail-dialog .rv-quote-panel{padding:18px 0}
+#liveReport .rv-detail-dialog .rv-quote-panel blockquote{font:15px/1.9 var(--sans);overflow-wrap:anywhere}
+/* 인터뷰: 페이지가 아니라 대화만 스크롤한다. */
+#liveReport .rv-compact .rv-interview-layout{display:grid;grid-template-columns:245px minmax(0,1fr);border:1px solid #e4ded4;border-radius:12px;background:white;overflow:hidden}
+#liveReport .rv-compact .rv-interview-context{padding:20px;border-right:1px solid #e8e1d5;min-width:0;max-height:calc(100dvh - 290px);overflow:auto}
+#liveReport .rv-compact .rv-interview-context .rv-identity{margin:20px 0 14px;gap:10px}
+#liveReport .rv-compact .rv-interview-last{display:flex;flex-direction:column;gap:6px;margin:20px 0 10px;line-height:1.7}
+#liveReport .rv-compact .rv-interview-last>span,#liveReport .rv-compact .rv-interview-last small{font-size:12px;color:#73746b}
+#liveReport .rv-compact .rv-interview-last strong{font-size:13px;font-weight:500}
+#liveReport .rv-compact .rv-profile{font-size:12px;margin-top:20px}
+#liveReport .rv-compact .rv-profile p{font-size:12px;line-height:1.8}
+#liveReport .rv-compact .rv-conversation{padding:16px 20px;display:flex;flex-direction:column;gap:10px;height:clamp(400px,calc(100dvh - 290px),740px);min-height:0;min-width:0}
+#liveReport .rv-compact .rv-interview-controls{margin:0;flex:none}
+#liveReport .rv-compact .rv-interview-controls label{font-size:12px;display:flex;align-items:center;gap:10px}
+#liveReport .rv-compact .rv-interview-controls select{font-size:12px;padding:7px}
+#liveReport .rv-compact .rv-mode-note,#liveReport .rv-compact .rv-mode-warning{font-size:12px;line-height:1.7;margin:0;flex:none}
+#liveReport .rv-compact .rv-mode-warning{background:#f4f1e9;padding:7px 10px;color:#665b47;border-radius:5px}
+#liveReport .rv-compact .rv-messages{flex:1;min-height:0;max-height:none;overflow:auto;padding:12px 2px;scrollbar-width:thin}
+#liveReport .rv-compact .rv-messages article{padding:11px 14px;margin-bottom:12px;font-size:15px;line-height:1.85;overflow-wrap:anywhere}
+#liveReport .rv-compact .rv-messages article>span{font-size:12px}
+#liveReport .rv-compact .rv-chat-empty{padding:25px 0;min-height:0;display:grid;align-content:center;height:100%}
+#liveReport .rv-compact .rv-chat-empty strong{font:500 22px/1.6 var(--serif)}
+#liveReport .rv-compact .rv-chat-empty p{font-size:13px;margin-top:10px}
+#liveReport .rv-compact .rv-question-chips{margin:0;gap:6px;flex:none}
+#liveReport .rv-compact .rv-question-chips button{font-size:12px;padding:6px 10px}
+#liveReport .rv-compact .rv-conversation form{margin:0;padding-top:10px;border-top:1px solid #eae4da;display:flex;gap:10px;align-items:center;flex:none}
+#liveReport .rv-compact .rv-conversation textarea{min-height:55px;max-height:100px;font-size:15px;padding:10px 12px;line-height:1.6;resize:vertical;flex:1;min-width:0}
+#v-report .report-document-actions,#v-interview .report-document-actions{max-width:1324px;margin:18px 28px 30px;padding:12px 0;gap:12px}
+#v-report .report-document-actions .wf-action-status,#v-interview .report-document-actions .wf-action-status{display:none}
+#v-report .report-document-actions .btn,#v-interview .report-document-actions .btn{min-height:34px;font-size:12px;padding:8px 12px}
+@media(min-width:1650px){#liveReport .rv-compact .rv-findings-layout{grid-template-columns:280px minmax(0,1fr)}}
+@media(max-width:1000px){#liveReport .rv-compact .rv-findings-layout{grid-template-columns:220px minmax(0,1fr);gap:16px}#liveReport .rv-compact .rv-interview-layout{grid-template-columns:200px minmax(0,1fr)}}
+@media(max-width:760px){#v-run.execution-started.wf-browser-mode>.page{padding:15px 16px 105px}#v-report .rv-live-page,#v-interview .rv-live-page{padding:18px 16px 0}#liveReport .rv-compact .rv-heading{flex-wrap:wrap;gap:10px}#liveReport .rv-compact .rv-heading h1{font-size:23px}#liveReport .rv-compact .rv-heading .rv-toolbar{width:auto;justify-content:flex-start}#liveReport .rv-compact-meta{gap:7px}#liveReport .rv-compact .rv-findings-layout{grid-template-columns:1fr}#liveReport .rv-compact .rv-issue-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#liveReport .rv-compact .rv-issue-top{display:block}#liveReport .rv-compact .rv-issue-top small{display:block}#liveReport .rv-compact-capture{height:230px}#liveReport .rv-compact .rv-interview-layout{grid-template-columns:1fr}#liveReport .rv-compact .rv-interview-context{padding:14px;border-right:0;border-bottom:1px solid #e5ded3;max-height:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap}#liveReport .rv-compact .rv-interview-context .rv-person-select{flex:1;min-width:180px;margin:0}#liveReport .rv-compact .rv-interview-context .rv-identity,#liveReport .rv-compact .rv-interview-last,#liveReport .rv-compact .rv-interview-context .rv-profile{display:none}#liveReport .rv-compact .rv-conversation{height:clamp(420px,calc(100dvh - 350px),650px);padding:14px}#liveReport .rv-compact .rv-conversation form{flex-direction:row}#liveReport .rv-compact .rv-conversation textarea{width:auto}#liveReport .rv-compact .rv-conversation form .btn{align-self:center}#liveReport .rv-compact-coverage .rv-record-table{overflow:auto}#liveReport .rv-compact-coverage table{min-width:520px}#v-report .report-document-actions,#v-interview .report-document-actions{margin:14px 16px 25px}}
+
+#v-run.execution-started.wf-browser-mode .run{display:none!important}
+
+#v-run.execution-started #runActionTitle{display:none}
+
+#liveReport .rv-screen-open{position:relative;width:100%;padding:0;border:0;border-bottom:1px solid #e4e6de;cursor:zoom-in;border-radius:0;color:#363e2e;text-align:left;font-family:var(--sans)}
+#liveReport .rv-screen-zoom{position:absolute;right:12px;bottom:12px;padding:6px 9px;background:#ffffffed;border:1px solid #e2e5d9;border-radius:6px;font-size:12px}
+#liveReport .rv-screen-open:focus-visible,#liveReport .rv-interview-preview:focus-visible{outline:2px solid #7f8e69;outline-offset:-3px}
+#liveReport .rv-interview-preview{display:block;width:100%;padding:0;margin:18px 0 0;background:#f5f6f0;border:1px solid #e3e6dc;border-radius:9px;overflow:hidden;text-align:left;cursor:pointer;color:#737c66}
+#liveReport .rv-interview-preview img{display:block;width:100%;height:120px;object-fit:contain;background:#f5f6f0}
+#liveReport .rv-interview-preview span{display:block;border-top:1px solid #e3e6dc;padding:6px 10px;font:12px var(--sans)}
+@media(max-width:760px){#liveReport .rv-interview-preview{display:none}}

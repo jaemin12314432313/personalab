@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · C+ Plus</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="./pj.css">
+<style>
+/* C+ Plus — Mono 구조에 생기를 더한 버전. 프로젝트별 색 아이콘, 은은한 보라 포인트, 호버 스포트라이트 */
+:root{
+  --bg:#fff;--surface:#fff;--surface-2:#fafafa;--bar-bg:#ffffffd9;
+  --fg:#0a0a0a;--fg-2:#404040;--fg-3:#737373;
+  --line:#e8e8ec;--line-2:#d6d6dc;
+  --accent:#6d5df6;--btn-bg:#0a0a0a;--btn-fg:#fff;--btn-line:#0a0a0a;--btn-hover:#26262c;
+  --radius:8px;--radius-sm:8px;
+  --c-setup:#737373;--c-ready:#b45309;--c-run:#5b4bf0;--c-done:#0e9f6e;--shadow:0 14px 40px #1b134a24;
+}
+body{background:radial-gradient(820px 340px at 50% -120px,#6d5df624,transparent 70%),radial-gradient(#d9d9e0 1px,transparent 1.2px) 0 0/22px 22px,#fff}
+body::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,#fff 100%);pointer-events:none;z-index:0}
+.bar{border-bottom-color:var(--line)}
+.ws{border-radius:99px;font-weight:600}
+.ws i{background:linear-gradient(135deg,#7c6cff,#5b8cff)}
+.tabs a[aria-current=page]::after{background:linear-gradient(90deg,#6d5df6,#5b8cff)}
+.head{align-items:flex-end}
+.head .left{display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap}
+.head h1{font-size:36px;font-weight:700;letter-spacing:-.055em}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.05em;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.eyebrow::before{content:"";width:7px;height:7px;background:#10b981;border-radius:50%;box-shadow:0 0 0 3px #10b9812e}
+.sum{font-family:var(--mono);font-size:12px;gap:4px 16px}
+.sum span{color:var(--fg-3)}.sum b{color:var(--fg)}
+.count-big{font:300 84px/.85 var(--mono);letter-spacing:-.06em;display:flex;align-items:flex-start;gap:6px;background:linear-gradient(180deg,#0a0a0a 45%,#6d5df6);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:4px}
+.count-big small{font:500 11px/1.4 var(--mono);letter-spacing:.06em;color:var(--fg-3);-webkit-text-fill-color:var(--fg-3);margin-top:6px}
+.search,.sort{background:#fff}
+.sort{font-family:var(--mono);font-size:12.5px}
+.btn{font-weight:600}
+.btn.solid{box-shadow:inset 0 1px 0 #ffffff2e,0 6px 18px #6d5df633}
+.btn.solid:hover{box-shadow:inset 0 1px 0 #ffffff33,0 8px 22px #6d5df64d;transform:translateY(-1px)}
+.btn.solid .kbd{background:#ffffff1f;border-color:#ffffff40;color:#fff}
+/* 표 */
+#list{position:relative;border:1px solid var(--line-2);background:#fff;border-radius:10px;margin-top:6px;box-shadow:0 1px 2px #1b134a0a,0 12px 34px #1b134a0a}
+#list::before,#list::after{content:"+";position:absolute;font:400 16px/1 var(--mono);color:#6d5df6;background:#fff;width:18px;text-align:center}
+#list::before{left:-9px;top:-9px}#list::after{right:-9px;bottom:-9px}
+.cols{padding:12px 18px;font:500 11.5px var(--mono);text-transform:uppercase;letter-spacing:.05em;background:var(--surface-2);border-bottom:1px solid var(--line-2);border-radius:10px 10px 0 0}
+.row{padding:16px 18px;border-bottom:1px solid var(--line);overflow:hidden}
+.row:last-child{border-bottom:0}
+.row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#6d5df6,#5b8cff);transform:scaleY(0);transition:transform .35s var(--ease)}
+.row:hover::before{transform:scaleY(1)}
+.row::after{content:"";position:absolute;inset:0;background:radial-gradient(300px circle at var(--mx,50%) var(--my,50%),#6d5df617,transparent 70%);opacity:0;transition:opacity .3s;pointer-events:none}
+.row:hover::after{opacity:1}
+.row>*{position:relative;z-index:1}
+.p-name b{font-size:16px;letter-spacing:-.04em}
+.p-last small{font-family:var(--mono);font-size:11.5px}
+.stt{font:500 11.5px/1 var(--mono);padding:5px 9px 5px 8px;border:1px solid color-mix(in srgb,currentColor 30%,#fff);border-radius:99px;width:max-content;background:color-mix(in srgb,currentColor 8%,#fff)}
+.stt i{width:6px;height:6px}
+.stt.run i{box-shadow:0 0 0 3px #5b4bf033}
+.p-date{font:400 12px var(--mono)}
+.prog{height:3px;max-width:140px;background:#e6e6ee}.prog i{background:linear-gradient(90deg,#6d5df6,#5b8cff)}
+.act{height:34px;font-size:13px}
+.act:not(.solid){background:#fff}
+.count{font:400 12px var(--mono);padding:16px 18px 26px}
+.first{border:1px dashed var(--line-2);border-radius:12px;background:#ffffffd0;margin-top:40px;padding:80px 20px}
+.kbd{font-weight:500}
+.toast{font-family:var(--mono);font-size:12.5px}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL={tiles:true,searchHint:'/',newHint:'N',keys:'<span class="kbd">/</span> 검색 · <span class="kbd">N</span> 새 프로젝트'};</script>
+<script src="./pj.js"></script>
+<script>
+/* 큰 숫자: 프로젝트 개수 (상태별 개수의 합) */
+const h=document.querySelector('.head');
+if(h){const first=h.firstElementChild;const b=document.createElement('div');b.className='count-big';b.setAttribute('aria-hidden','true');b.innerHTML='<span></span><small>PROJECTS</small>';
+ const left=document.createElement('div');left.className='left';h.insertBefore(left,first);left.append(b,first);
+ const upd=()=>{b.firstChild.textContent=String([...document.querySelectorAll('#sum b')].reduce((a,x)=>a+ +x.textContent,0)).padStart(2,'0')};
+ upd();new MutationObserver(upd).observe(document.getElementById('sum'),{childList:true});}
+</script>
+</body></html>

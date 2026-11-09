@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · B08 Blush Carousel</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;800&display=swap">
+<link rel="stylesheet" href="./pj.css"><link rel="stylesheet" href="./pj2.css">
+<style>
+/* B08 · Blush Carousel — 살구빛 오로라 위의 유리 히어로. ← → 로 프로젝트를 넘겨 봐요. */
+
+:root{--serif:"Noto Serif KR","Nanum Myeongjo",serif;
+ --bg:#f5f0e6;--surface:#fffdf8;--surface-2:#f1eadd;--bar-bg:#f5f0e6e8;
+ --fg:#1f1a15;--fg-2:#4d443a;--fg-3:#857a6a;--line:#e6dccb;--line-2:#d6c9b2;
+ --accent:#1f1a15;--btn-bg:#1f1a15;--btn-fg:#fffdf8;--btn-line:#1f1a15;--btn-hover:#3a3128;
+ --c-setup:#857a6a;--c-ready:#b86e0a;--c-run:#2f5fd0;--c-done:#2f7d4f;--danger:#c8452f;--danger-soft:#f9e4de;
+ --radius:14px;--radius-sm:9px;--shadow:0 16px 44px #4a3a2a26;--grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .13  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.ul{position:relative;display:inline-block;white-space:nowrap}
+.ul svg{position:absolute;left:-1%;bottom:-.14em;width:102%;height:.22em;overflow:visible;fill:none;stroke:#d06d5b;stroke-width:2.6;stroke-linecap:round;pointer-events:none}
+body::after{content:"";position:fixed;inset:0;background:var(--grain);opacity:.55;mix-blend-mode:multiply;pointer-events:none;z-index:3}
+.head h1{font:800 36px/1.4 var(--serif);letter-spacing:-.04em}
+.eyebrow{color:var(--fg-3)}
+.search,.sort,.ws,.acct>button{background:var(--surface);border-color:var(--line-2)}
+.btn.solid{box-shadow:0 6px 16px #1f1a1526}
+.dlg{background:var(--surface)}.dlg input{background:var(--surface-2)}
+.me{background:var(--surface-2)}
+.tabs a[aria-current=page]::after{background:var(--accent)}
+.kbd{background:var(--surface-2)}
+
+:root{--bg:#f9ede5;--surface:#fffaf6;--surface-2:#f4e5da;--bar-bg:#f9ede5d9;--fg:#2a1b14;--fg-2:#5a443a;--fg-3:#94776a;--line:#ecd8ca;--line-2:#dfc4b2;--btn-bg:#2a1b14;--btn-fg:#fffaf6;--btn-line:#2a1b14;--btn-hover:#45302a;
+ --h-bg:linear-gradient(135deg,#fffaf6e0,#ffe9dc99);--h-fg:#2a1b14;--h-fg2:#5a443a;--h-fg3:#94776a;--h-line:#ffffffd0;--h-chip:#ffffffb8;--h-chip-fg:#c0472f;--h-done:#2f7d4f;--h-ready:#a05a00;--h-setup:#7a6256;
+ --h-btn-bg:#2a1b14;--h-btn-fg:#fffaf6;--h-btn-hover:#45302a;--h-btn-shadow:0 10px 24px #2a1b1433;--h-track:#f0d9ca;--h-ring:#e0654b;--h-ring-glow:#e0654b66;--h-ev:#ffffffb0;--h-ev-line:#fff;--h-ev-fg:#5a443a;--h-ev-b:#2a1b14;
+ --h-shadow:0 30px 70px #b5593a2a,inset 0 0 0 1px #ffffffd0;--h-spot:0;--h-radius:36px;--h-title-font:var(--serif);--h-title-weight:800;--h-title:52px;--h-pad:42px 46px}
+.row.hero{backdrop-filter:blur(18px)}
+.deco{position:absolute;height:640px}.deco i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.6;animation:drift 18s ease-in-out infinite alternate}
+.deco i:nth-child(1){width:500px;height:400px;left:-4%;top:-150px;background:#ffa88c}.deco i:nth-child(2){width:460px;height:360px;left:34%;top:-180px;background:#f6b3c0;animation-delay:-6s}.deco i:nth-child(3){width:440px;height:340px;right:-2%;top:-140px;background:#ffd49c;animation-delay:-11s}.deco i:nth-child(4){width:360px;height:280px;left:58%;top:-100px;background:#fff0c4;animation-delay:-3s}
+.deco::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,var(--bg) 100%)}
+@keyframes drift{to{transform:translate(40px,30px) scale(1.08)}}
+.h-nav button:hover{background:#2a1b14;color:#fff}
+.h-insight{background:#ffffffb0;border-color:#fff}
+.as-cards .row{box-shadow:0 1px 2px #8a4a2a0d,0 10px 30px #8a4a2a0a}.as-cards .row:hover{border-color:#efc3ae}
+
+@media(max-width:1000px){.rest.as-list .row,.rest.as-cards .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name more" "stt stt" "last last" "date date" "act act"}}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL=Object.assign({"layout":"focus","heroNav":true,"rest":"cards","title":"<span class=\"ul\">프로젝트<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path pathLength=\"1\" d=\"M3 11 Q85 1 153 8 T296 6\"/></svg></span>","deco":"<i></i><i></i><i></i><i></i>"},{searchHint:'/',newHint:'N',keys:"<span class=\"kbd\">/</span> 검색 · <span class=\"kbd\">N</span> 새 프로젝트"});</script>
+<script src="./pj.js"></script>
+</body></html>

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PersonaLab 워크스페이스 v7 · 앱 하나를 계속 고치는 홈</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@600;700;800&display=swap">
+<style>
+:root{--sans:'Geist','Noto Sans KR',system-ui,sans-serif;--kr:'Noto Sans KR','Geist',system-ui,sans-serif;--serif:'Noto Serif KR',Georgia,serif;--mono:'Geist Mono',ui-monospace,monospace;
+ --img:url('../frontend/public/concepts/people/assets/personas-strip.png')}
+*{box-sizing:border-box}
+body{margin:0;background:#18181b;color:#eee;font-family:var(--kr);line-height:1.5;padding:32px 20px 90px}
+.page{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+.intro h1{font-size:30px;margin:0 0 10px;letter-spacing:-.03em}
+.intro p{margin:0 0 8px;color:#a8a8ad;max-width:78ch}
+.intro nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.intro nav a{color:#ddd;border:1px solid #3a3a40;border-radius:99px;padding:5px 14px;font-size:13px;text-decoration:none}
+.intro nav a:hover{border-color:#fff}
+.vh{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.vh small{font:500 12px var(--mono);color:#ff8a6b;letter-spacing:.04em}
+.vh h2{margin:0;font-size:23px;letter-spacing:-.03em}
+.vh .ref{font:400 12px var(--mono);color:#7d7d86}
+.vh p{margin:0;color:#a8a8ad;font-size:14px;max-width:86ch}
+.fr{border-radius:16px;overflow-x:auto;border:1px solid #333}
+.sc{min-width:1060px;position:relative}
+.av{display:inline-block;flex:none;border-radius:50%;background-image:var(--img);background-size:900% auto;background-repeat:no-repeat;background-color:#d8d3ca}
+.ph{background-image:var(--img);background-size:500% 100%;background-repeat:no-repeat}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes ring{to{stroke-dashoffset:-60}}
+@keyframes ping{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.4);opacity:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- 앱 목업(공통) ---- */
+.pm{background:#fff;border-radius:26px;border:6px solid #1a1a1c;overflow:hidden;position:relative;display:flex;flex-direction:column;font-family:var(--kr);color:#222}
+.pm .sb{height:22px;display:flex;justify-content:space-between;align-items:center;padding:0 14px;font:600 9px var(--sans);color:#333}
+.pm .hd{padding:6px 14px 8px;font-weight:800;font-size:15px;letter-spacing:-.04em}
+.pm .sr{margin:0 12px 8px;height:26px;border-radius:8px;background:#f0efed;font-size:10px;color:#999;display:flex;align-items:center;padding:0 10px}
+.pm .st{margin:0 12px 8px;display:flex;gap:8px;align-items:center}
+.pm .st i{width:44px;height:44px;border-radius:10px;background:var(--c,#e8d9c8);flex:none}
+.pm .st b{display:block;font-size:11px}.pm .st span{font-size:9.5px;color:#999}
+.pm .cta{margin:auto 12px 12px;height:38px;border-radius:11px;background:#222;color:#fff;font-weight:700;font-size:12px;display:grid;place-items:center}
+.pm .cta.sm{height:24px;width:90px;margin:auto 12px 14px;background:#ececec;color:#777;font-size:10px;border-radius:8px}
+.pm .cta.hot{background:#e2523d;position:relative}
+.pm .hl{position:absolute;border:2px dashed #e2523d;border-radius:12px;pointer-events:none}
+
+/* ---- 공통 상단 ---- */
+.top{display:flex;align-items:center;gap:20px}
+.sw{display:inline-flex;align-items:center;gap:8px;border-radius:99px;padding:6px 14px 6px 8px;font-size:13px;font-weight:700}
+.sw i{width:22px;height:22px;border-radius:7px;display:block}
+
+/* ===== S1 ROUND TABLE (랜딩 톤) ===== */
+.s1{background:linear-gradient(#f7f5f1,#ebe8e2);color:#2d2a2e;font-family:var(--kr);padding:0 56px 44px;min-height:800px}
+.s1 .top{padding:20px 0;font-size:14px;color:#8a8389}
+.s1 .lg{font:800 21px var(--serif);letter-spacing:-.06em;color:#17161a}
+.s1 .sw{background:#fff;border:1px solid #e2ded8;color:#17161a}.s1 .sw i{background:#e8d9c8}
+.s1 .top .nb{margin-left:auto;background:#17161a;color:#fff;border-radius:99px;padding:9px 20px;font-weight:700;font-size:13px}
+.s1 .hero{display:grid;grid-template-columns:280px 1fr;gap:46px;align-items:center;padding:14px 0 8px}
+.s1 .pm{width:240px;height:440px;justify-self:center;transform:rotate(-2deg);box-shadow:0 22px 40px -14px #342d2455}
+.s1 .tabs{display:flex;gap:6px;margin-bottom:16px}
+.s1 .tabs span{font-size:12.5px;border:1px solid #d9d4cc;border-radius:99px;padding:4px 14px;color:#837c83;background:#fff}
+.s1 .tabs .on{background:#17161a;color:#fff;border-color:#17161a}
+.s1 h1{font:800 50px/1.25 var(--serif);letter-spacing:-.07em;margin:0}
+.s1 h1 u{text-decoration:none;background:linear-gradient(transparent 78%,#d06d5b 78%,#d06d5b 90%,transparent 90%)}
+.s1 .sub{color:#837c83;margin:12px 0 22px;font-size:15px}
+.s1 .acts{display:flex;gap:10px;align-items:center}
+.s1 .acts .p{background:#2f5fd0;color:#fff;border-radius:99px;padding:13px 28px;font-weight:700;font-size:15px}
+.s1 .acts .g{border:1px solid #17161a;border-radius:99px;padding:12px 22px;font-weight:700;font-size:14px}
+.s1 .bar{height:7px;border-radius:9px;background:#dcd7ce;margin-top:26px;max-width:460px;overflow:hidden}.s1 .bar i{display:block;width:40%;height:100%;background:#2f5fd0}
+.s1 .bl{font-size:12px;color:#9a9298;margin-top:7px}
+.s1 .row{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-top:20px}
+.s1 .pc{border:1px solid #e2ded8;border-radius:9px;background:#fff;padding:5px;box-shadow:0 9px 23px #342d2410;transform:rotate(var(--r));transition:transform .3s}
+.s1 .pc:nth-child(1){--r:-1.2deg}.s1 .pc:nth-child(2){--r:.8deg;margin-top:10px}.s1 .pc:nth-child(3){--r:-.4deg}.s1 .pc:nth-child(4){--r:1deg;margin-top:10px}.s1 .pc:nth-child(5){--r:-.9deg}
+.s1 .pc:hover{transform:rotate(0) translateY(-6px)}
+.s1 .pc .ph{height:118px;border-radius:5px;filter:saturate(.65)}
+.s1 .pc .t{padding:9px 7px 6px;display:flex;flex-direction:column;gap:5px}
+.s1 .pc .t b{font-size:12.5px}.s1 .pc .t b span{color:#9a9298;font-weight:400;font-size:11px}
+.s1 .pc .q{font:600 13px/1.5 var(--serif);letter-spacing:-.04em;color:#3d393f}
+.s1 .pc .s{font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
+.s1 .pc .s i{width:7px;height:7px;border-radius:50%;background:#bbb}
+.s1 .pc .s.r{color:#2f5fd0}.s1 .pc .s.r i{background:#2f5fd0;animation:pulse 1.6s infinite}.s1 .pc .s.d{color:#3d7a52}.s1 .pc .s.d i{background:#3d7a52}
+.s1 .pc .iv{font-size:11px;font-weight:700;border-bottom:1.5px solid #d06d5b;align-self:flex-start}
+.s1 .note{font-size:11.5px;color:#9a9298;margin-top:16px;text-align:center}
+
+/* ===== S2 FLIPBOOK DIFF ===== */
+.s2{background:#fff;color:#16151a;font-family:var(--sans);min-height:800px;display:grid;grid-template-columns:150px 1fr}
+.s2 .rail{background:#f4f3f6;border-right:1px solid #e9e7ee;padding:20px 16px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.s2 .rail .lg{font-weight:800;letter-spacing:-.04em;font-size:15px;align-self:flex-start}
+.s2 .film{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:10px;perspective:600px}
+.s2 .film .pm{width:84px;height:150px;border-width:3px;border-radius:14px;transform:rotateY(18deg);opacity:.6;transition:.2s}
+.s2 .film .pm.on{opacity:1;transform:rotateY(0);outline:2px solid #5b3df5;outline-offset:3px}
+.s2 .film small{font:500 10px var(--mono);color:#77747f;margin-top:-4px}
+.s2 .film .pm>*{zoom:.55}
+.s2 .main{padding:22px 40px 36px;display:flex;flex-direction:column;gap:20px}
+.s2 .top{font-size:13px;color:#77747f}
+.s2 .sw{background:#f4f3f6;color:#16151a}.s2 .sw i{background:#e8d9c8}
+.s2 .top .nb{margin-left:auto;background:#5b3df5;color:#fff;border-radius:10px;padding:9px 16px;font-weight:700}
+.s2 h1{font-size:34px;margin:0;letter-spacing:-.05em}
+.s2 h1 span{color:#5b3df5}
+.s2 .stage{display:grid;grid-template-columns:1fr 70px 1fr;gap:10px;align-items:center;background:linear-gradient(180deg,#f4f3f6,#fff);border-radius:22px;padding:24px 40px}
+.s2 .stage .c{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:12px;color:#77747f}
+.s2 .stage .pm{width:210px;height:380px}
+.s2 .stage .ar{font:700 30px var(--mono);color:#b9b6c4;text-align:center}
+.s2 .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.s2 .col{border:1px solid #e9e7ee;border-radius:16px;padding:16px 18px}
+.s2 .col b{font:800 32px var(--sans);letter-spacing:-.05em;display:block}
+.s2 .col span{font-size:13px;font-weight:700}.s2 .col p{margin:8px 0 0;color:#77747f;font-size:12.5px}
+.s2 .col.a b{color:#e2523d}.s2 .col.b b{color:#5b3df5}
+.s2 .warn{font-size:12px;color:#77747f}
+
+/* ===== S3 PRODUCT MAP (blueprint) ===== */
+.s3{background:#0b1a2b;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:32px 32px;color:#d6e6ff;font-family:var(--sans);height:800px;position:relative;overflow:hidden}
+.s3 .top{padding:18px 26px;font-size:13px;color:#7f9bc2;position:relative;z-index:2}
+.s3 .lg{font-weight:800;color:#fff;font-size:15px;letter-spacing:-.04em}
+.s3 .sw{background:#ffffff14;border:1px solid #ffffff22;color:#fff}.s3 .sw i{background:#6ac1ff}
+.s3 .top .nb{margin-left:auto;background:#fff;color:#0b1a2b;border-radius:10px;padding:8px 16px;font-weight:700}
+.s3 .ttl{position:absolute;left:34px;top:84px}
+.s3 .ttl small{font:500 11px var(--mono);letter-spacing:.1em;color:#6ac1ff}
+.s3 .ttl h1{margin:4px 0 0;font-size:30px;letter-spacing:-.05em;color:#fff}
+.s3 .node{position:absolute;width:128px;height:228px;border-radius:18px;border:5px solid #1c2f47;background:#fff;overflow:hidden;font-family:var(--kr)}
+.s3 .node.sel{outline:2px solid #6ac1ff;outline-offset:5px}
+.s3 .node .pm{width:100%;height:100%;border:0;border-radius:0}
+.s3 .node .pm>*{zoom:.62}
+.s3 .nl{position:absolute;font:500 11px var(--mono);color:#7f9bc2;letter-spacing:.04em;text-align:center;width:128px}
+.s3 .badge{position:absolute;min-width:30px;height:30px;border-radius:99px;background:#ff6b5e;color:#fff;font:700 13px var(--sans);display:grid;place-items:center;box-shadow:0 0 0 5px #ff6b5e33}
+.s3 svg{position:absolute;inset:0;pointer-events:none}
+.s3 .side{position:absolute;right:22px;top:84px;bottom:22px;width:300px;background:#ffffff0e;border:1px solid #ffffff1f;border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:12px;backdrop-filter:blur(8px)}
+.s3 .side small{font:500 11px var(--mono);letter-spacing:.08em;color:#6ac1ff}
+.s3 .side h3{margin:0;font-size:22px;letter-spacing:-.04em;color:#fff}
+.s3 .q{display:flex;gap:10px;font-size:12.5px;color:#b7cbea;align-items:flex-start}
+.s3 .q b{display:block;color:#fff;font-size:12.5px}
+.s3 .side .p{margin-top:auto;background:#6ac1ff;color:#06182b;border-radius:11px;padding:11px;text-align:center;font-weight:800}
+.s3 .side .g{border:1px solid #ffffff2e;border-radius:11px;padding:10px;text-align:center;font-weight:600;font-size:13px}
+.s3 .leg{position:absolute;left:34px;bottom:22px;display:flex;gap:18px;font:500 11px var(--mono);color:#7f9bc2}
+.s3 .leg i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+
+/* ===== S4 GROUP THREAD ===== */
+.s4{background:#eef1f5;color:#15171c;font-family:var(--sans);min-height:800px;display:grid;grid-template-columns:260px 1fr 280px}
+.s4 .l{background:#fff;border-right:1px solid #e1e5ec;padding:20px 18px;display:flex;flex-direction:column;gap:14px}
+.s4 .lg{font-weight:800;letter-spacing:-.04em;font-size:16px}
+.s4 .sw{background:#eef1f5;color:#15171c}.s4 .sw i{background:#e8d9c8}
+.s4 .nv{display:flex;flex-direction:column;gap:2px;font-size:13px;color:#6b7280}
+.s4 .nv span{padding:7px 10px;border-radius:8px}.s4 .nv .on{background:#eef1f5;color:#15171c;font-weight:600}
+.s4 .rd h4{margin:6px 0 8px;font:500 11px var(--mono);letter-spacing:.08em;color:#9aa1ad}
+.s4 .rd div{display:flex;justify-content:space-between;font-size:13px;padding:7px 10px;border-radius:8px;color:#4b5563}
+.s4 .rd .on{background:#e8efff;color:#1d4ed8;font-weight:700}
+.s4 .m{display:flex;flex-direction:column}
+.s4 .mh{padding:16px 28px;border-bottom:1px solid #e1e5ec;background:#fff;display:flex;align-items:center;gap:12px}
+.s4 .mh h2{margin:0;font-size:17px;letter-spacing:-.03em}.s4 .mh span{font-size:12.5px;color:#6b7280}
+.s4 .mh .stk{margin-left:auto;display:flex}.s4 .mh .stk .av{border:2px solid #fff;margin-left:-7px}
+.s4 .feed{flex:1;padding:20px 28px;display:flex;flex-direction:column;gap:14px}
+.s4 .day{align-self:center;font:500 11px var(--mono);color:#9aa1ad;letter-spacing:.06em}
+.s4 .sysm{align-self:center;background:#fff;border:1px solid #e1e5ec;border-radius:12px;padding:10px 16px;font-size:12.5px;color:#4b5563}
+.s4 .sysm b{color:#15171c}
+.s4 .msg{display:flex;gap:10px;align-items:flex-start;max-width:640px}
+.s4 .msg .bd{background:#fff;border:1px solid #e1e5ec;border-radius:4px 16px 16px 16px;padding:11px 14px;font-size:13.5px}
+.s4 .msg .nm{font:600 11.5px var(--sans);color:#6b7280;margin-bottom:3px}
+.s4 .msg .ev{margin-top:8px;display:inline-flex;gap:8px;align-items:center;font-size:12px;color:#1d4ed8;font-weight:600}
+.s4 .msg .ev i{width:46px;height:30px;border-radius:5px;background:#e8d9c8;display:block}
+.s4 .you{align-self:flex-end;background:#1d4ed8;color:#fff;border-radius:16px 16px 4px 16px;padding:10px 14px;font-size:13.5px;max-width:420px}
+.s4 .typ{font-size:12px;color:#9aa1ad;margin-left:46px}
+.s4 .cmp{padding:14px 28px 20px;background:#fff;border-top:1px solid #e1e5ec;display:flex;flex-direction:column;gap:10px}
+.s4 .cmp .to{display:flex;gap:8px;align-items:center;font-size:12px;color:#6b7280}
+.s4 .cmp .to .av{outline:2px solid #1d4ed8;outline-offset:1px}
+.s4 .cmp .in{border:1px solid #cfd5df;border-radius:12px;padding:12px 14px;color:#9aa1ad;font-size:14px;display:flex;justify-content:space-between}
+.s4 .cmp .in b{background:#1d4ed8;color:#fff;border-radius:8px;padding:2px 12px;font-size:12.5px}
+.s4 .cmp .md{display:flex;gap:6px;font-size:12px}.s4 .cmp .md span{border:1px solid #d9dee7;border-radius:99px;padding:3px 12px;color:#6b7280}.s4 .cmp .md .on{background:#15171c;color:#fff;border-color:#15171c}
+.s4 .r{background:#fff;border-left:1px solid #e1e5ec;padding:20px 18px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.s4 .r .pm{width:170px;height:310px}
+.s4 .r .p{align-self:stretch;background:#15171c;color:#fff;border-radius:10px;padding:10px;text-align:center;font-weight:700;font-size:13px}
+.s4 .r .g{align-self:stretch;border:1px solid #d9dee7;border-radius:10px;padding:9px;text-align:center;font-size:13px;color:#4b5563}
+
+/* ===== S5 TREE RINGS ===== */
+.s5{background:#e9ece7;color:#14201b;font-family:var(--sans);min-height:800px;display:grid;grid-template-columns:1fr 340px;position:relative}
+.s5 .cv{position:relative;padding:20px 30px}
+.s5 .top{font-size:13px;color:#5f6e66}
+.s5 .lg{font-weight:800;color:#14201b;font-size:15px;letter-spacing:-.04em}
+.s5 .sw{background:#fff;color:#14201b}.s5 .sw i{background:#e8d9c8}
+.s5 .ttl{position:absolute;left:34px;top:84px}
+.s5 .ttl h1{font:800 34px/1.2 var(--serif);letter-spacing:-.06em;margin:0}
+.s5 .ttl p{margin:6px 0 0;color:#5f6e66;font-size:13px;max-width:260px}
+.s5 svg{display:block;margin:0 auto;margin-top:6px}
+.s5 .side{background:#14201b;color:#e9ece7;padding:24px 24px;display:flex;flex-direction:column;gap:14px}
+.s5 .side small{font:500 11px var(--mono);letter-spacing:.1em;color:#ff7a4a}
+.s5 .side h3{margin:0;font:800 26px/1.25 var(--serif);letter-spacing:-.05em}
+.s5 .side .rw{display:flex;justify-content:space-between;font-size:13px;border-top:1px solid #ffffff1f;padding:9px 0;color:#b6c2ba}
+.s5 .side .rw b{color:#fff}
+.s5 .side .p{background:#ff6a3d;color:#14201b;border-radius:99px;padding:13px;text-align:center;font-weight:800;margin-top:auto}
+.s5 .side .g{border:1px solid #ffffff33;border-radius:99px;padding:11px;text-align:center;font-weight:600;font-size:13px}
+.s5 .side .tl{font-size:12px;color:#b6c2ba}
+.s5 .lgd{position:absolute;left:34px;bottom:22px;display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5f6e66}
+.s5 .lgd i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:-1px}
+</style></head><body>
+<div class="page">
+ <div class="intro">
+  <h1>PersonaLab 워크스페이스 v7 · 앱 하나를 계속 고치는 홈</h1>
+  <p>대부분의 사용자는 앱 하나를 계속 고칠 겁니다. 그래서 목록을 버리고, <b>그 앱 하나와 회차(수정 이력)</b>가 홈의 주인공이 되도록 다시 짰습니다. 여러 앱은 왼쪽 위 앱 전환 버튼으로 접었습니다.</p>
+  <p>다섯 시안은 같은 질문에 다른 답을 냅니다. "이 앱을 고칠 때 홈에서 무엇을 가장 먼저 보고 싶은가: 사람 / 회차 간 변화 / 어디서 막혔나 / 대화 / 쌓인 이력." 이름·수치·말풍선은 모두 예시입니다.</p>
+  <nav><a href="#s1">S1 Round Table</a><a href="#s2">S2 Flipbook</a><a href="#s3">S3 Product Map</a><a href="#s4">S4 Group Thread</a><a href="#s5">S5 Tree Rings</a></nav>
+ </div>
+ <div id="out" style="display:flex;flex-direction:column;gap:56px"></div>
+</div>
+<script>
+var POS=[5,27.5,50,72.5,95];
+function av(i,s){return '<span class="av" style="width:'+s+'px;height:'+s+'px;background-position:'+POS[i]+'% 28%"></span>'}
+function phone(r,sty){var cta=r>=3?'<div class="cta hot">예약하기</div>':'<div class="cta sm">예약하기</div>';
+ return '<div class="pm" style="'+(sty||'')+'"><div class="sb"><span>9:41</span><span>●●●</span></div><div class="hd">동네예약</div><div class="sr">⌕ 매장 검색</div><div class="st"><i style="--c:#e8d9c8"></i><span><b>모래 헤어</b>서교동 · 예약 가능</span></div><div class="st"><i style="--c:#cfdcc8"></i><span><b>초록 네일</b>연남동 · 예약 가능</span></div><div class="st"><i style="--c:#d8c8dc"></i><span><b>달빛 마사지</b>망원동 · 마감</span></div><div class="st"><i style="--c:#c8d4dc"></i><span><b>하루 필라테스</b>합정동</span></div>'+cta+'</div>'}
+var V=[];
+
+/* S1 */
+V.push({id:'s1',k:'S1 · ROUND TABLE',h:'앱 하나 + 그 앱을 써 본 사람들',ref:'랜딩 톤 유지 · 참고: PersonaLab 랜딩 인물 스트립',p:'홈의 첫 시선은 "동네예약 앱"의 현재 한 문장과 다음 행동 하나입니다. 아래에는 이번 회차 참여자가 사진 카드로 앉아 있고, 각자 마지막으로 한 행동이 한 줄씩 적혀 있습니다. 카드의 "이 사람에게 묻기"가 곧 인터뷰 입구입니다. 회차는 제목 위 탭으로 넘깁니다. 랜딩에서 이어지는 가장 자연스러운 안입니다.',
+ f:function(){var P=[['P-03','34세 · 자영업자','r','예약하기 버튼을 찾으려고 두 번 스크롤했어요',0],['P-07','27세 · 대학생','r','시간 선택에서 뒤로 가기를 눌렀어요',1],['P-11','41세 · 교사','r','매장 목록 필터가 무슨 뜻인지 멈췄어요',2],['P-02','52세 · 주부','d','예약 확인 화면에서 종료했어요',3],['P-09','30세 · 직장인','d','예약하기까지 도달했어요',4]];
+ var row=P.map(function(p){return '<div class="pc"><div class="ph" style="background-position:'+(p[4]*25)+'% 0"></div><div class="t"><b>'+p[0]+' <span>'+p[1]+'</span></b><span class="s '+p[2]+'"><i></i>'+(p[2]==='r'?'탐색 중':'종료')+'</span><div class="q">“'+p[3]+'”</div><span class="iv">'+(p[2]==='d'?'이 사람에게 묻기':'종료 후 인터뷰')+'</span></div></div>'}).join('');
+ return '<div class="s1"><div class="top"><span class="lg">PersonaLab</span><span class="sw"><i></i>동네예약 앱 ▾</span><span>페르소나 보관함</span><span>전체 실행 기록</span><span class="nb">+ 새 회차 만들기</span></div><div class="hero">'+phone(3)+'<div><div class="tabs"><span>회차 1</span><span>회차 2</span><span class="on">회차 3 · 지금</span></div><h1>5명 중 <u>2명</u>이<br>탐색을 마쳤어요</h1><p class="sub">마지막 기록 12분 전 · 예약하기 버튼이 눈에 띄는지 보는 회차예요.</p><div class="acts"><span class="p">실행 보기</span><span class="g">설정 요약</span><span class="g" style="border-color:#d9d4cc;color:#837c83">⋯</span></div><div class="bar"><i></i></div><div class="bl">종료 기록 기준 · 2 / 5명</div></div></div><div class="row">'+row+'</div><div class="note">AI 페르소나의 탐색 기록이며 실제 사용자 조사가 아닙니다. 문장은 예시입니다.</div></div>'}});
+
+/* S2 */
+V.push({id:'s2',k:'S2 · FLIPBOOK',h:'고친 곳이 눈에 보이는 회차 비교 홈',ref:'참고: Figma 버전 비교, Linear 변경 이력, GitHub diff',p:'홈 가운데에 바로 직전 회차와 지금 회차의 시작 화면이 나란히 놓이고, 바뀐 부분에 점선 표시가 붙습니다. 아래는 "반복해서 관찰 / 새로 관찰 / 이번에는 관찰되지 않음" 세 칸이고, 관찰되지 않음을 해결됨으로 부르지 않는다는 명세 규칙을 문구로 지킵니다. 앱 하나를 계속 고치는 루프를 가장 직접 돕는 안입니다.',
+ f:function(){var film=[1,2,3].map(function(r){return phone(r)+'<small>R'+r+'</small>'}).join('').replace(/class="pm"/g,function(m,o){return m});
+ var rail='<div class="rail"><span class="lg">PersonaLab</span><span style="font-size:11px;color:#77747f;align-self:flex-start">회차 이력</span><div class="film">'+phone(1)+'<small>R1 · 7건</small>'+phone(2)+'<small>R2 · 8건</small>'+phone(3).replace('class="pm"','class="pm on"')+'<small>R3 · 실행 중</small></div></div>';
+ var stage='<div class="stage"><div class="c">'+phone(2)+'회차 2 · 완료 · 6명</div><div class="ar">→</div><div class="c" style="position:relative">'+phone(3,'outline:3px solid #5b3df533')+'회차 3 · 실행 중 · 5명</div></div>';
+ return '<div class="s2">'+rail+'<div class="main"><div class="top"><span class="sw"><i></i>동네예약 앱 ▾</span><span>페르소나 보관함</span><span>전체 실행 기록</span><span class="nb">회차 4 만들기</span></div><h1>회차 2 → 3, <span>예약하기 버튼</span>을 바꿨어요</h1>'+stage+'<div class="cols"><div class="col a"><b>4</b><span>반복해서 관찰</span><p>시간 선택 화면에서 뒤로 가기 · 매장 필터 의미 불명확</p></div><div class="col b"><b>2</b><span>이번에 새로 관찰</span><p>예약하기 버튼 위치는 찾았지만 결제 안내 문구에서 멈춤</p></div><div class="col"><b>3</b><span>이번에는 관찰되지 않음</span><p>5명 중 2명 종료 기준 · 아직 진행 중이라 해결됨으로 볼 수 없어요</p></div></div><div class="warn">조건이 다른 실행을 개선률로 비교하지 않습니다. 근거 화면과 기록은 각 칸에서 열어요.</div></div></div>'}});
+
+/* S3 */
+V.push({id:'s3',k:'S3 · PRODUCT MAP',h:'우리 앱의 화면 지도 위에 사람들의 발자국',ref:'참고: Hotjar 여정 지도, Figma 프로토타입 플로우, 청사진',p:'앱의 화면들이 가로 흐름으로 놓이고, 페르소나 5명의 이동 경로가 색 선으로 그려집니다. 많이 멈춘 화면에 빨간 숫자가 붙고, 누르면 오른쪽에 그 화면에서의 행동 기록과 "이 사람에게 묻기"가 열립니다. 홈이 곧 "문제가 있는 곳" 지도가 되지만, 숫자는 점수가 아니라 멈춘 사람 수라는 점을 따로 밝혀야 합니다.',
+ f:function(){var X=[40,200,360,520,680],Y=210;var nodes=['홈','매장 목록','시간 선택','예약 확인','완료'].map(function(n,i){return '<div class="node'+(i===2?' sel':'')+'" style="left:'+X[i]+'px;top:'+Y+'px">'+phone(3)+'</div><div class="nl" style="left:'+X[i]+'px;top:'+(Y+238)+'px">'+n+'</div>'}).join('');
+ var cols=['#6ac1ff','#ffb454','#7ee8a8','#ff8fc8','#c3a6ff'];
+ var paths=[[0,1,2,3,4],[0,1,2,1,2],[0,1,1,2,3],[0,1,2,3,3],[0,1,2,3,4]];
+ var svg='<svg width="1060" height="800">';paths.forEach(function(p,k){var d='';for(var i=0;i<p.length-1;i++){var x1=X[p[i]]+64,x2=X[p[i+1]]+64,y=Y-12-k*9;d+='M'+x1+' '+Y+' C'+x1+' '+(y-34)+' '+x2+' '+(y-34)+' '+x2+' '+Y+' '}svg+='<path d="'+d+'" stroke="'+cols[k]+'" stroke-width="2" fill="none" opacity=".85" stroke-linecap="round"/>'});svg+='</svg>';
+ var bd=[[1,1],[2,3],[3,4],[4,2]].map(function(b){return '<div class="badge" style="left:'+(X[b[0]]+49)+'px;top:'+(Y+88)+'px">'+b[1]+'</div>'}).join('');
+ return '<div class="s3"><div class="top"><span class="lg">PersonaLab</span><span class="sw"><i></i>동네예약 앱 · 회차 3 ▾</span><span>페르소나 보관함</span><span>전체 실행 기록</span><span class="nb">+ 새 회차</span></div><div class="ttl"><small>PRODUCT MAP · 5명 중 2명 종료</small><h1>어디서 멈췄는지<br>화면 위에서 봐요</h1></div>'+svg+nodes+bd+'<div class="side"><small>시간 선택 · 4명 멈춤</small><h3>시간 선택에서<br>뒤로 가기를 반복했어요</h3><div class="q">'+av(1,30)+'<span><b>P-07 · 27세</b>“어느 시간이 비어 있는지 안 보여서 돌아갔어요”</span></div><div class="q">'+av(0,30)+'<span><b>P-03 · 34세</b>“예약하기가 아래 있어서 스크롤했어요”</span></div><div class="q">'+av(2,30)+'<span><b>P-11 · 41세</b>“필터가 무슨 뜻인지 몰라서 멈췄어요”</span></div><span class="p">근거 화면과 원문 보기</span><span class="g">P-07에게 묻기</span></div><div class="leg"><span><i style="background:#6ac1ff"></i>P-03</span><span><i style="background:#ffb454"></i>P-07</span><span><i style="background:#7ee8a8"></i>P-11</span><span><i style="background:#ff8fc8"></i>P-02</span><span><i style="background:#c3a6ff"></i>P-09</span><span style="color:#ff8f86">● 멈춘 사람 수</span></div></div>'}});
+
+/* S4 */
+V.push({id:'s4',k:'S4 · GROUP THREAD',h:'테스트 참여자들과 하는 단체 대화방',ref:'참고: Slack 스레드, iMessage, Intercom 인박스',p:'홈은 앱 하나의 활동 스레드입니다. 시스템이 회차 시작을 알리고, 페르소나가 관찰한 순간을 말풍선으로 남기며(근거 화면 첨부), 아래 입력창에서 바로 한 사람에게 묻습니다. "기록에서 답 찾기 / AI와 대화" 모드 구분도 입력창 위에 놓았습니다. 리포트와 인터뷰가 따로 놀지 않는다는 게 새로움이고, 대화에 익숙하지 않으면 낯설 수 있습니다.',
+ f:function(){function m(i,nm,t,ev){return '<div class="msg">'+av(i,36)+'<div><div class="nm">'+nm+'</div><div class="bd">'+t+(ev?'<div class="ev"><i></i>'+ev+' · 근거 화면 보기 →</div>':'')+'</div></div></div>'}
+ return '<div class="s4"><div class="l"><span class="lg">PersonaLab</span><span class="sw"><i></i>동네예약 앱 ▾</span><div class="nv"><span class="on">앱 활동</span><span>페르소나 보관함</span><span>전체 실행 기록</span></div><div class="rd"><h4>회차</h4><div class="on"><span>회차 3</span><span>실행 중</span></div><div><span>회차 2</span><span>완료</span></div><div><span>회차 1</span><span>완료</span></div></div></div><div class="m"><div class="mh"><h2>동네예약 앱 · 회차 3</h2><span>5명 탐색 중</span><span class="stk">'+[0,1,2,3,4].map(function(i){return av(i,28)}).join('')+'</span></div><div class="feed"><div class="day">오늘 · 11월 7일</div><div class="sysm"><b>회차 3</b> 시작 · 예약하기 버튼을 바꾼 버전으로 5명이 탐색해요</div>'+m(0,'P-03 · 34세 자영업자','예약하기 버튼을 찾으려고 두 번 스크롤했어요.','홈')+m(1,'P-07 · 27세 대학생','시간 선택에서 어느 시간이 비어 있는지 몰라서 뒤로 갔어요.','시간 선택')+m(3,'P-02 · 52세 주부','예약 확인까지 갔다가 종료했어요. 결제 안내는 읽지 않았어요.','예약 확인')+'<div class="sysm"><b>P-02</b> 종료 기록이 저장됐어요 · 2/5명 종료</div><div class="you">시간 선택에서 뭐가 제일 헷갈렸나요?</div>'+m(1,'P-07 · 27세 대학생 · 기록에서 답함','시간 선택 화면에서 비어 있는 시간과 마감된 시간의 색이 비슷해서 돌아갔다고 기록했어요.','시간 선택')+'<div class="typ">P-03이 탐색 중…</div></div><div class="cmp"><div class="to">받는 사람 '+av(1,22)+' P-07 · 종료 후에만 선택할 수 있어요</div><div class="md"><span class="on">기록에서 답 찾기</span><span>AI와 대화</span></div><div class="in"><span>이 사람에게 질문하기…</span><b>보내기</b></div></div></div><div class="r">'+phone(3)+'<span class="p">실행 보기</span><span class="g">회차 4 만들기</span></div></div>'}});
+
+/* S5 */
+V.push({id:'s5',k:'S5 · TREE RINGS',h:'나이테: 고칠수록 한 겹씩 쌓이는 앱의 기록',ref:'참고: 나이테, GitHub 기여 그래프, 레이더 차트 · 완전히 새로 그린 형태',p:'가운데가 우리 앱이고, 회차가 바깥으로 한 겹씩 늘어나는 고리입니다. 고리 위의 점은 그 회차에서 관찰된 발견이고, 주황은 새로 나온 것, 어두운 점은 이전 회차에서 이어진 것입니다. 지금 도는 회차는 점선이 돌아갑니다. 고리를 누르면 오른쪽에 그 회차의 요약이 열립니다. 가장 상징적이고 브랜드가 될 수 있지만, 정보 밀도는 낮아 정확한 숫자는 오른쪽 패널이 맡습니다.',
+ f:function(){var cx=330,cy=330,rr=[88,158,228],svg='<svg width="660" height="660" viewBox="0 0 660 660">';
+ svg+='<circle cx="'+cx+'" cy="'+cy+'" r="300" fill="#e2e6e0"/>';
+ [rr[2],rr[1]].forEach(function(r,i){svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#14201b" stroke-opacity="'+(.9-i*.25)+'" stroke-width="1.6"/>'});
+ svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr[2]+'" fill="none" stroke="#ff6a3d" stroke-width="2.6" stroke-dasharray="14 10" style="animation:ring 2s linear infinite"/>';
+ svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr[0]+'" fill="#fff" stroke="#14201b" stroke-width="1.6"/>';
+ function dots(r,list){list.forEach(function(d){var a=d[0]*Math.PI/180,x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);svg+='<circle cx="'+x+'" cy="'+y+'" r="'+(d[2]||8)+'" fill="'+(d[1]?'#ff6a3d':'#14201b')+'"/>'})}
+ dots(rr[0],[[-80,0],[-20,0],[30,0],[100,0],[160,0],[215,0],[270,0,6]]);
+ dots(rr[1],[[-70,0],[-25,0],[40,0],[100,0],[170,1],[220,1],[255,1],[300,1]]);
+ dots(rr[2],[[-60,0],[10,0],[75,0],[130,0],[190,1],[250,1],[320,0,6]]);
+ svg+='<foreignObject x="'+(cx-52)+'" y="'+(cy-70)+'" width="104" height="140"><div xmlns="http://www.w3.org/1999/xhtml">'+phone(3,'height:140px;width:104px;border-width:3px;border-radius:14px;font-size:9px').replace('class="pm"','class="pm"')+'</div></foreignObject>';
+ svg+='<text x="'+(cx+rr[0]-4)+'" y="'+(cy-rr[0]+14)+'" font-family="Geist Mono,monospace" font-size="12" fill="#14201b">R1</text><text x="'+(cx+rr[1]-6)+'" y="'+(cy-rr[1]+14)+'" font-family="Geist Mono,monospace" font-size="12" fill="#14201b">R2</text><text x="'+(cx+rr[2]-6)+'" y="'+(cy-rr[2]+14)+'" font-family="Geist Mono,monospace" font-size="12" fill="#ff6a3d" font-weight="700">R3 · 지금</text></svg>';
+ return '<div class="s5"><div class="cv"><div class="top"><span class="lg">PersonaLab</span><span class="sw"><i></i>동네예약 앱 ▾</span><span>페르소나 보관함</span><span>전체 실행 기록</span></div><div class="ttl"><h1>세 번 고쳤고,<br>네 번째를 앞두고<br>있어요</h1><p>점은 회차에서 관찰된 발견이에요. 해결 여부가 아니라 관찰 기록입니다.</p></div>'+svg+'<div class="lgd"><span><i style="background:#ff6a3d"></i>이번 회차에서 새로 관찰</span><span><i style="background:#14201b"></i>이전 회차에서 이어서 관찰</span></div></div><div class="side"><small>R3 · 실행 중</small><h3>5명 중 2명이<br>탐색을 마쳤어요</h3><div class="rw"><span>관찰된 발견</span><b>7건</b></div><div class="rw"><span>이어서 관찰</span><b>4건</b></div><div class="rw"><span>새로 관찰</span><b>3건</b></div><div class="rw"><span>마지막 기록</span><b>12분 전</b></div><div class="tl">회차 1 · 7건 → 회차 2 · 8건 → 회차 3 · 7건(진행 중)</div><span class="p">실행 보기</span><span class="g">회차 4 만들기</span></div></div>'}});
+
+document.getElementById('out').innerHTML=V.map(function(v){return '<div id="'+v.id+'"><div class="vh"><small>'+v.k+'</small><h2>'+v.h+'</h2><div class="ref">'+v.ref+'</div><p>'+v.p+'</p></div><div class="fr"><div class="sc">'+v.f()+'</div></div></div>'}).join('');
+</script></body></html>

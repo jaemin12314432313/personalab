@@ -1,42 +1,38 @@
-"""AI 패널 생성 (계획서 6장)."""
+"""데이터팀 Persona Engine과 스터디의 패널 생성 API를 연결한다."""
 
-import random
+import importlib
+import importlib.util
+import sys
+from pathlib import Path
+from threading import Lock
+
+_ENGINE = Path(__file__).resolve().parents[4] / "data" / "persona_engine" / "src"
+_PACKAGE = "_personalab_persona_engine"
+_LOAD_LOCK = Lock()
+
+
+def _engine_api():
+    raw = _ENGINE.parents[1] / "raw"
+    for name in ("p24v32_KMP_spss.sav", "P_codebook_v32.xlsx"):
+        if not (raw / name).is_file():
+            raise FileNotFoundError(f"페르소나 원본 데이터 필요: {raw / name}")
+    # data/ux_eval도 src 패키지를 사용하므로 sys.path에 동명의 src를 추가하지 않는다.
+    with _LOAD_LOCK:
+        if _PACKAGE not in sys.modules:
+            spec = importlib.util.spec_from_file_location(
+                _PACKAGE, _ENGINE / "__init__.py", submodule_search_locations=[str(_ENGINE)]
+            )
+            if spec is None or spec.loader is None:
+                raise RuntimeError("페르소나 엔진을 읽을 수 없습니다.")
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[_PACKAGE] = module
+            spec.loader.exec_module(module)
+        return importlib.import_module(f"{_PACKAGE}.api")
 
 
 def sample_personas(conditions: dict, n: int, seed: int) -> list[dict]:
-    """⚠️ AI/Data 교체 지점. 조건에 맞는 페르소나 n명을 뽑는다 (data/persona_engine).
-
-    입력: conditions = {"age": "20-29", "job": ["학생"], ...}
-                       (Persona Engine make_panel 옵션과 같은 이름)
-          seed = 같으면 같은 결과
-    출력: personas.attributes_json 목록. 형식은 아래 네 칸으로 맞춘다.
-          profile   나이·성별·지역·직업군 (실제 참가자와 같은 기준으로 비교할 때)
-          card_text 프롬프트에 넣는 카드 문장 (숫자 없음)
-          traits    가격 민감도 등 등급 (리포트 분석용, 프롬프트에 넣지 않음)
-          source    NVIDIA·미디어패널 원본 id, 매칭 수준 (근거 보기·재현용)
-
-    지금은 형식만 맞춘 임시 구현이다.
-    """
-    rng = random.Random(seed)
-    levels = ("낮음", "중간", "높음")
-    people = []
-    for i in range(n):
-        age = rng.randint(20, 29)
-        people.append(
-            {
-                "profile": {
-                    "age": age,
-                    "sex": rng.choice(("남", "여")),
-                    "region": "수도권",
-                    "job_group": "학생",
-                },
-                "card_text": f"{age}세 대학생이다. (임시 카드)",
-                "traits": {
-                    "price": rng.choice(levels),
-                    "digital": rng.choice(levels),
-                    "privacy": rng.choice(levels),
-                },
-                "source": {"stub": True, "index": i},
-            }
-        )
-    return people
+    """원본 데이터에서 패널을 생성한다. 실패 시 임시·랜덤 프로필로 대체하지 않는다."""
+    engine = _engine_api()
+    engine.parse_conditions(conditions)
+    with _LOAD_LOCK:
+        return engine.generate(conditions, n, seed)

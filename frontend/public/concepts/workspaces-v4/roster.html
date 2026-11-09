@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · D4 패널</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="./base.css">
+<style>
+body{background:var(--warm)}
+.wrap{max-width:1160px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.top{padding:56px 0 24px;display:flex;justify-content:space-between;gap:24px;align-items:flex-end;flex-wrap:wrap}
+.top h1{font-size:clamp(32px,4.8vw,50px);letter-spacing:-.05em;line-height:1.22;font-weight:650;margin-top:12px}
+.top p{color:var(--ink-3);margin-top:10px;font-size:15.5px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 22px}
+.chips button{height:34px;padding:0 14px;border-radius:99px;border:1px solid var(--line-2);background:#fff;font-size:13.5px;color:var(--ink-2);font-weight:520;display:inline-flex;gap:7px;align-items:center;transition:.2s}
+.chips button span{color:var(--ink-3);font-weight:450}
+.chips button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chips button[aria-pressed=true] span{color:#cfcfd4}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;padding-bottom:110px}
+.p{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;position:relative;display:flex;flex-direction:column;gap:14px;transition:border-color .2s,box-shadow .3s,transform .3s var(--ease);cursor:pointer;text-align:left}
+.p:hover{border-color:var(--line-2);box-shadow:0 12px 32px #16161a0d;transform:translateY(-2px)}
+.p[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.p .sel{position:absolute;top:16px;right:16px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line-2);background:#fff;display:grid;place-items:center;transition:.2s}
+.p[aria-pressed=true] .sel{background:var(--ink);border-color:var(--ink)}
+.p[aria-pressed=true] .sel::after{content:"";width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+.who{display:flex;gap:13px;align-items:center}
+.av{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:18px;letter-spacing:-.02em;color:#fff;position:relative;flex:none}
+.av::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px dashed var(--c);opacity:.55}
+.who b{display:block;font-size:17px;letter-spacing:-.03em}
+.who small{color:var(--ink-3);font-size:13px}
+.state{display:flex;align-items:baseline;gap:8px;font-size:13px;font-weight:550}
+.state i{width:8px;height:8px;border-radius:50%;background:var(--stop);flex:none}
+.state.ok i{background:var(--ok)}.state.live i{background:var(--blue);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.3}}
+.trail{display:flex;gap:3px;align-items:center}
+.trail u{width:100%;height:5px;border-radius:3px;background:var(--line);text-decoration:none;display:block}
+.trail u.go{background:var(--ink-3)}.trail u.x{background:var(--stop)}.trail u.ok{background:var(--ok)}
+.said{font-size:14.5px;line-height:1.7;color:#5d4a3c;letter-spacing:-.02em;min-height:75px;position:relative;padding-left:12px;border-left:2px solid var(--brown-line)}
+.said em{font-style:normal;display:block;color:var(--ink-3);font-size:12px;margin-top:6px;letter-spacing:0}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tags span{font-size:12px;color:var(--ink-2);background:var(--warm-2);padding:1px 8px;border-radius:5px}
+.add{border:1.5px dashed var(--line-2);background:transparent;display:grid;place-items:center;text-align:center;color:var(--ink-3);min-height:300px;font-size:14px;gap:6px}
+.add:hover{border-color:var(--brown);color:var(--brown);transform:none;box-shadow:none}
+.add b{font-size:34px;font-weight:300;line-height:1}
+.hide{display:none!important}
+/* 선택 시 아래에서 올라오는 액션 바 */
+.dock{position:fixed;left:50%;bottom:24px;transform:translate(-50%,140%);background:var(--ink);color:#fff;border-radius:16px;padding:10px 12px 10px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 18px 50px #16161a44;transition:transform .5s var(--ease);z-index:30;max-width:calc(100vw - 24px)}
+.dock.on{transform:translate(-50%,0)}
+.dock b{font-weight:650}.dock span{color:#bdbdc4;font-size:14px}
+.dock .btn{background:#fff;color:var(--ink);border-color:#fff;height:38px}
+.dock .btn.ghost{background:transparent;color:#fff;border-color:#ffffff44}
+.dock .btn.ghost:hover{background:#ffffff14}
+.stack{display:flex}.stack i{width:26px;height:26px;border-radius:50%;border:2px solid var(--ink);margin-left:-8px;display:grid;place-items:center;font-size:9.5px;font-style:normal;font-weight:700;color:#fff}.stack i:first-child{margin-left:0}
+@media(max-width:640px){.crumb{display:none}.dock{padding:10px;gap:8px}.dock span{display:none}.dock .btn{padding:0 12px}}
+</style></head>
+<body>
+<header class="bar"><a class="logo" href="./index.html"><i></i>PersonaLab</a><span class="crumb"><b>일정메이트</b> 워크스페이스</span><span class="sp"></span><a class="btn sm quiet" href="#" data-toast="디자인 예시: 테스트 목록은 보조 화면으로 열려요">테스트 3개</a><span class="me">나</span></header>
+
+<main class="wrap">
+  <section class="top">
+    <div><span class="eyebrow">우리 패널 · 27–34세 직장인</span><h1>같은 <span class="ul">다섯 사람<svg viewBox="0 0 300 18" preserveAspectRatio="none"><path pathLength="1" d="M3 11 Q85 1 153 8 T296 6"/><path pathLength="1" d="M21 16 Q150 8 277 13"/></svg></span>이<br>버전마다 돌아와요.</h1><p>테스트가 끝나도 사람은 남아요. 기억을 이어서 다시 보내거나 직접 물어보세요.</p></div>
+  </section>
+
+  <div class="chips" role="group" aria-label="패널 필터"></div>
+  <section class="grid" id="grid" aria-label="페르소나 목록"></section>
+</main>
+
+<div class="dock" id="dock" role="region" aria-label="선택한 페르소나 작업"><div class="stack" id="stack"></div><div><b id="dn">0명</b> <span>선택했어요</span></div><button class="btn ghost sm" data-toast="디자인 예시: 선택한 사람들과 그룹 인터뷰가 열려요">함께 인터뷰</button><button class="btn" id="send">이 사람들만 다시 보내기 →</button></div>
+<p class="foot-note" style="max-width:1160px">디자인 비교용 예시입니다. 페르소나 5명은 공개 데모의 ID·나이·발언을 사용했고, 나머지 속성(직업 상세·성향 태그)은 가상이에요. 실제 계정, 패널, DB, API, LLM과 연결되어 있지 않아요. 얼굴 사진 대신 이니셜만 사용합니다.</p>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let t;const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(t);t=setTimeout(()=>e.classList.remove('on'),2600)};
+const P=[
+ {id:'P563',age:34,job:'사무직',c:'#b4694b',st:'stop',stTxt:'학교·학년에서 멈춤 (v1: 회원가입)',trail:'ggx..',now:'x',said:'나 대학생 아닌데 하는 생각이요. 앱이 나를 대상으로 안 만든 것 같아서 닫으려 했어요.',tags:['비용에 민감','네이버 캘린더 사용'],iv:true},
+ {id:'P938',age:32,job:'직장인',c:'#4f7f9c',st:'stop',stTxt:'학교·학년에서 멈춤',trail:'ggx..',said:'학교 입력칸이 필수라서 대학생 전용 서비스로 느껴졌어요.',tags:['시간 부족','대학생용에 거부감']},
+ {id:'P374',age:27,job:'직장인',c:'#7b6aa6',st:'stop',stTxt:'관심분야에서 멈춤',trail:'gggx.',said:'5개나 골라야 돼요? 나중에 설정에서 하면 안 되나…',tags:['개인정보 민감','네이버 캘린더 사용']},
+ {id:'P069',age:29,job:'직장인',c:'#4d8a6d',st:'ok',stTxt:'홈까지 완주',trail:'ggggo',said:'건너뛰기를 찾는 데 시간이 걸렸지만 끝까지 해봤어요.',tags:['개인정보 민감','노션 사용'],iv:false},
+ {id:'P392',age:27,job:'직장인',c:'#a38a3f',st:'ok',stTxt:'홈까지 완주',trail:'ggggo',said:'인증이 없어져서 훨씬 편했어요. 직장인용 문구가 있으면 더 좋겠어요.',tags:['개인정보 민감','보안 중시']},
+];
+const FILTERS=[['all','전체'],['stop','멈춘 사람'],['ok','완주한 사람'],['iv','인터뷰한 적 있음']];
+let f='all';const sel=new Set();
+const initial=p=>p.id.slice(1);
+const trail=s=>[...s].map(c=>`<u class="${c==='g'?'go':c==='x'?'x':c==='o'?'ok':''}"></u>`).join('');
+function render(){
+  const list=P.filter(p=>f==='all'||(f==='iv'?p.iv:p.st===f));
+  $('.chips').innerHTML=FILTERS.map(([k,l])=>{const n=k==='all'?P.length:P.filter(p=>k==='iv'?p.iv:p.st===k).length;return `<button aria-pressed="${f===k}" data-f="${k}">${l} <span>${n}</span></button>`}).join('');
+  $('#grid').innerHTML=list.map(p=>`<button class="p" aria-pressed="${sel.has(p.id)}" data-id="${p.id}">
+    <span class="sel" aria-hidden="true"></span>
+    <div class="who"><div class="av" style="background:${p.c};--c:${p.c}">${initial(p)}</div><div><b>${p.id}</b><small>${p.age}세 · ${p.job}</small></div></div>
+    <div><div class="state ${p.st==='ok'?'ok':''}"><i></i>${p.stTxt}</div><div class="trail" style="margin-top:9px" aria-label="탐색 경로">${trail(p.trail)}</div></div>
+    <blockquote class="said">“${p.said}”<em>가장 최근 발언 · v2</em></blockquote>
+    <div class="tags">${p.tags.map(x=>`<span>${x}</span>`).join('')}</div></button>`).join('')
+    +`<button class="p add" data-add><b>+</b>패널에 사람 더하기<small>조건을 말하면 AI가 새로 만들어 와요</small></button>`;
+  dock();
+}
+function dock(){
+  const n=sel.size;$('#dock').classList.toggle('on',n>0);$('#dn').textContent=n+'명';
+  $('#stack').innerHTML=[...sel].slice(0,5).map(id=>{const p=P.find(x=>x.id===id);return `<i style="background:${p.c}">${initial(p)}</i>`}).join('');
+}
+document.addEventListener('click',e=>{
+  const a=e.target.closest('[data-toast]');if(a){e.preventDefault();toast(a.dataset.toast);return}
+  const fb=e.target.closest('[data-f]');if(fb){f=fb.dataset.f;render();return}
+  if(e.target.closest('[data-add]')){toast('디자인 예시: 조건을 입력하면 같은 엔진으로 페르소나가 추가돼요');return}
+  const c=e.target.closest('.p[data-id]');if(c){const id=c.dataset.id;sel.has(id)?sel.delete(id):sel.add(id);c.setAttribute('aria-pressed',sel.has(id));dock()}
+  if(e.target.closest('#send')) toast(`디자인 예시: ${sel.size}명에게 이번 수정본을 다시 보여줘요`);
+});
+render();
+</script>
+</body></html>

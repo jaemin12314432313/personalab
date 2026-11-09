@@ -1,0 +1,8 @@
+/* 내부 알림은 페이지 높이에 영향을 주지 않고 화면 상단 중앙에 모은다. */
+.app-notifications{position:fixed;z-index:2000;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(720px,calc(100vw - 32px));display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.app-notifications>#liveNotice,.app-notifications>#workspaceToast{position:static;inset:auto;transform:none;box-sizing:border-box;width:100%;max-width:none;margin:0;padding:12px 16px;border-radius:10px;box-shadow:0 8px 28px #25201714;pointer-events:auto;font:13px/1.7 var(--sans);overflow-wrap:anywhere;max-height:30dvh;overflow:auto}
+.app-notifications>#liveNotice{background:#fffefa;border:1px solid #e6dfd2;color:#625744}
+.app-notifications>#liveNotice.error{background:#fff5f2;border-color:#e5b1a5;color:#a34e3c}
+.app-notifications>#workspaceToast{background:#24241f;border:1px solid #3d3b32;color:#fff;gap:16px}
+.app-notifications>[hidden]{display:none!important}
+@media(max-width:480px){.app-notifications{top:max(10px,env(safe-area-inset-top));width:calc(100vw - 24px)}.app-notifications>#liveNotice,.app-notifications>#workspaceToast{padding:10px 13px;font-size:12px}}

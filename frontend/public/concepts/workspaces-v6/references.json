@@ -1,0 +1,106 @@
+[
+  {
+    "number": 12,
+    "product": "asana",
+    "page": "https://www.saasui.design/pattern/dashboard/asana",
+    "alt": "Asana Dashboard screen with real SaaS Project Management Software UI patterns - SaaSUI design example",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/64963a28a99558b8ed9b7aa7142ab76233d932f3-1728x1081.png",
+    "file": "images/012.img"
+  },
+  {
+    "number": 15,
+    "product": "attio",
+    "page": "https://www.saasui.design/pattern/dashboard/attio",
+    "alt": "Attio dashboard screen in the CRM app UI",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/44203359339629ce5c5301ee05bbfec713a99ac9-1974x1080.png",
+    "file": "images/015.img"
+  },
+  {
+    "number": 18,
+    "product": "campsite",
+    "page": "https://www.saasui.design/pattern/dashboard/campsite",
+    "alt": "Campsite dashboard screen in the team communication app UI",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/773a5071f9e031c7e453f99b0e39503d2c0a708b-2608x1440.png",
+    "file": "images/018.img"
+  },
+  {
+    "number": 21,
+    "product": "clickup",
+    "page": "https://www.saasui.design/pattern/dashboard/clickup",
+    "alt": "Clickup Dashboard screen with real SaaS Collaboration UI patterns - SaaSUI design example",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/a94eb6f5e0b9e91f3e105bca675fb8b2aec8f8fa-1998x1080.jpg",
+    "file": "images/021.img"
+  },
+  {
+    "number": 36,
+    "product": "dovetail",
+    "page": "https://www.saasui.design/pattern/dashboard/dovetail",
+    "alt": "Dovetail dashboard screen in the customer insights and user research app UI",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/820f7003941bc53e82748580ccced96c0834a9c5-1920x976.png",
+    "file": "images/036.img"
+  },
+  {
+    "number": 38,
+    "product": "dovetail",
+    "page": "https://www.saasui.design/pattern/dashboard/dovetail",
+    "alt": "Dovetail dashboard screen (step 3) in the customer insights and user research app UI",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/bec534b8020d4f871b58ce9f5846c0b429fed7c2-1920x976.png",
+    "file": "images/038.img"
+  },
+  {
+    "number": 52,
+    "product": "gamma",
+    "page": "https://www.saasui.design/pattern/dashboard/gamma",
+    "alt": "Gamma dashboard with sidebar and recently viewed gammas",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/c7f985cf125d1ac35d2cc6edac4603d9776f775a-1729x1081.png",
+    "file": "images/052.img"
+  },
+  {
+    "number": 75,
+    "product": "linear",
+    "page": "https://www.saasui.design/pattern/dashboard/linear",
+    "alt": "Linear Dashboard screen with real SaaS Project Management Software UI patterns - SaaSUI design example",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/21a9a18305d79f554c7dd42336a8a13c6e1fb88b-1729x1081.png",
+    "file": "images/075.img"
+  },
+  {
+    "number": 76,
+    "product": "linear",
+    "page": "https://www.saasui.design/pattern/dashboard/linear",
+    "alt": "Linear Dashboard screen with real SaaS Project Management Software UI patterns - SaaSUI design example",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/ea9cc2d95ac626278efde7cc9edb7bf2c2c9e451-1729x1081.png",
+    "file": "images/076.img"
+  },
+  {
+    "number": 85,
+    "product": "miro",
+    "page": "https://www.saasui.design/pattern/dashboard/miro",
+    "alt": "Miro Dashboard screen with real SaaS Collaboration UI patterns - SaaSUI design example",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/4a6325ad789d6d57dfa056ea5d6276b98c8c611b-2004x1080.jpg",
+    "file": "images/085.img"
+  },
+  {
+    "number": 129,
+    "product": "timely",
+    "page": "https://www.saasui.design/pattern/dashboard/timely",
+    "alt": "Timely dashboard screen in the automatic time tracking app UI",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/8e5c3d1ab8eadb944aac48da3b099de80aed4d8c-2612x1440.png",
+    "file": "images/129.img"
+  },
+  {
+    "number": 141,
+    "product": "typeform",
+    "page": "https://www.saasui.design/pattern/dashboard/typeform",
+    "alt": "Typeform Dashboard screen with real SaaS Form Builder UI patterns - SaaSUI design example",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/bde806af9dba34a353a7d24bf14f3094d06be899-2000x1080.jpg",
+    "file": "images/141.img"
+  },
+  {
+    "number": 144,
+    "product": "v7-labs",
+    "page": "https://www.saasui.design/pattern/dashboard/v7-labs",
+    "alt": "V7 Labs dashboard screen in the data labeling and AI app UI",
+    "asset": "https://cdn.sanity.io/images/alowdh95/production/3a225bf5baffb2567910b6efcb5982496ca62a19-1820x1080.png",
+    "file": "images/144.img"
+  }
+]

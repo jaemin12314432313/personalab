@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · F02 Window</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@800&display=swap">
+<link rel="stylesheet" href="./pj.css"><link rel="stylesheet" href="./pj2.css">
+<style>
+/* F02 · Window — 랜딩의 제품 미리보기 창. 왼쪽에서 프로젝트를 고르면 오른쪽에 상세가 바뀌어요. */
+
+:root{--serif:"Noto Serif KR","Nanum Myeongjo",serif;--bg:#fff;--surface:#fff;--surface-2:#f5f6f8;--bar-bg:#ffffffd9;--fg:#16161a;--fg-2:#44464f;--fg-3:#6a6c76;--line:#e3e4e8;--line-2:#cfd2d8;--accent:#16161a;--btn-bg:#16161a;--btn-hover:#2c2c33;--c-run:#2a63c4;--radius:12px;--radius-sm:8px}
+.ul{position:relative;display:inline-block;white-space:nowrap}.ul svg{position:absolute;left:-1%;bottom:-.14em;width:102%;height:.22em;overflow:visible;fill:none;stroke:#d06d5b;stroke-width:2.6;stroke-linecap:round;pointer-events:none}
+.head h1{font:800 34px/1.4 var(--serif);letter-spacing:-.04em}
+.tabs a[aria-current=page]::after{background:#16161a}
+.btn{font-weight:650}
+
+:root{--h-bg:linear-gradient(120deg,#eaf0f8 0%,#f4eff6 60%,#f9eeee 100%);--h-fg:#1e1e24;--h-fg2:#44464f;--h-fg3:#6a6c76;--h-line:#dcdee7;--h-chip:#fff;--h-chip-fg:#2a63c4;--h-done:#14724c;--h-ready:#a05a00;--h-setup:#5b5e69;
+ --h-btn-bg:#16161a;--h-btn-fg:#fff;--h-btn-hover:#2c2c33;--h-btn-shadow:0 8px 20px #16161a2a;--h-track:#d9dcec;--h-ring:#16161a;--h-ring-glow:transparent;
+ --h-ev:#ffffffcc;--h-ev-line:#ffffff;--h-ev-fg:#44464f;--h-ev-b:#16161a;--h-shadow:0 1px 2px #16161a0d;--h-spot:0;--h-title-font:var(--serif);--h-title-weight:800;--h-title:42px;--h-radius:20px}
+.row.hero{border:1px solid #e1e3ea}
+.ev li:first-child i{box-shadow:none}
+.head{padding-bottom:26px}.row.hero{border-color:#e8e6ee;box-shadow:0 1px 2px #16161a08}.win-main{background:#fafafc}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL=Object.assign({"layout":"master","title":"<span class=\"ul\">프로젝트<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path pathLength=\"1\" d=\"M3 11 Q85 1 153 8 T296 6\"/></svg></span>","searchHint":"/","newHint":"N"},{keys:"<span class=\"kbd\">/</span> 검색 · <span class=\"kbd\">N</span> 새 프로젝트"});</script>
+<script src="./pj.js"></script>
+</body></html>

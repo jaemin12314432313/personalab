@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · F07 Split</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@800&display=swap">
+<link rel="stylesheet" href="./pj.css"><link rel="stylesheet" href="./pj2.css">
+<style>
+/* F07 · Split — 왼쪽에 히어로를 고정하고, 오른쪽에 나머지를 카드로 쌓아요. */
+
+:root{--serif:"Noto Serif KR","Nanum Myeongjo",serif;--bg:#fff;--surface:#fff;--surface-2:#f5f6f8;--bar-bg:#ffffffd9;--fg:#16161a;--fg-2:#44464f;--fg-3:#6a6c76;--line:#e3e4e8;--line-2:#cfd2d8;--accent:#16161a;--btn-bg:#16161a;--btn-hover:#2c2c33;--c-run:#2a63c4;--radius:12px;--radius-sm:8px}
+.ul{position:relative;display:inline-block;white-space:nowrap}.ul svg{position:absolute;left:-1%;bottom:-.14em;width:102%;height:.22em;overflow:visible;fill:none;stroke:#d06d5b;stroke-width:2.6;stroke-linecap:round;pointer-events:none}
+.head h1{font:800 34px/1.4 var(--serif);letter-spacing:-.04em}
+.tabs a[aria-current=page]::after{background:#16161a}
+.btn{font-weight:650}
+:root{--h-title-font:var(--serif);--h-title-weight:800;--h-title:40px;--h-pad:32px}
+#rows{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:30px;align-items:start}
+.hero-slot{position:sticky;top:84px}.rest-t{margin-top:6px}
+.row.hero{grid-template-columns:1fr;gap:22px}.row.hero .h-right{flex-direction:column;align-items:stretch;justify-content:flex-start}.hero .ring{align-self:flex-start}
+.rest.as-cards{grid-template-columns:1fr;gap:12px}
+.as-cards .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name more" "last last" "stt date" "act act"}
+.as-cards .row .act{justify-self:stretch}
+@media(max-width:1000px){#rows{grid-template-columns:1fr}.hero-slot{position:static}}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL=Object.assign({"layout":"focus","tiles":true,"rest":"cards","title":"<span class=\"ul\">프로젝트<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path pathLength=\"1\" d=\"M3 11 Q85 1 153 8 T296 6\"/></svg></span>","searchHint":"/","newHint":"N"},{keys:"<span class=\"kbd\">/</span> 검색 · <span class=\"kbd\">N</span> 새 프로젝트"});</script>
+<script src="./pj.js"></script>
+</body></html>

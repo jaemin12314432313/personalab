@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createServer} from 'vite';
+const server=await createServer({server:{middlewareMode:true,hmr:false},appType:'custom'});
+const {executionState}=await server.ssrLoadModule('/src/mockup/ExecutionState.ts');
+const {browserSnapshot}=await server.ssrLoadModule('/src/mockup/DisplayPersona.ts');
+test.after(()=>server.close());
+const result=(id,reason=null)=>({id,persona_id:'P'+id,act:{path:['a'],events:[],end:{result:reason?'drop':'complete',screen:'a',drop_reason:reason}},ask:null});
+const study=()=>({id:'s',serverId:10,runs:{act:20},status:'done',execution:{run_id:20,status:'done',progress:1},personas:[1,2,3].map(id=>({id,attributes:{profile:{age:30},traits:{},source:{}}})),screens:[],evidence:[],results:[result(1),result(2,'PRIVACY'),result(3,'MAX_TURNS')]});
+test('terminal results count goal, abandonment and turn limit without requiring everyone to succeed',()=>{const s=study(),v=executionState(s);assert.equal(v.final,true);assert.equal(v.finished,3);assert.equal(v.canInterview,true);});
+test('a first result does not unlock an active run and even complete-looking records cannot overrule running status',()=>{const s=study();s.execution.status='running';s.results=s.results.slice(0,1);assert.equal(executionState(s).canReport,false);s.results=study().results;assert.equal(executionState(s).canReport,false);});
+test('terminal runs with missing participants are partial records rather than final reports',()=>{const s=study();s.results=s.results.slice(0,1);const v=executionState(s);assert.equal(v.final,false);assert.equal(v.partial,true);assert.equal(v.missing,2);assert.equal(v.canReport,true);s.execution.status='failed';assert.equal(executionState(s).partial,true);});
+test('empty failures have no report and raw captures without a terminal persona record have no interview',()=>{const s=study();s.execution.status='failed';s.results=[];assert.equal(executionState(s).canReport,false);s.evidence=[{image:'capture'}];assert.equal(executionState(s).canReport,true);assert.equal(executionState(s).canInterview,false);});
+test('cached or mismatched run status cannot unlock results until the current server run is checked',()=>{const s=study();delete s.execution;assert.equal(executionState(s).phase,'checking');assert.equal(executionState(s).canReport,false);s.execution={run_id:19,status:'done',progress:1};assert.equal(executionState(s).canReport,false);const original=study(),cached=browserSnapshot(original);assert.equal(cached.execution,undefined);assert.ok(original.execution);});

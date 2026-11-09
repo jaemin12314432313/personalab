@@ -58,3 +58,7 @@ data/persona_engine/outputs/
 
 # UX 흐름 평가 결과
 data/ux_eval/outputs/
+
+# Local PersonaLab design archives and runtime
+scratch/
+.localtools/

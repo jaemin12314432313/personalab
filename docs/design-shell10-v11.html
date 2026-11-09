@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PersonaLab 워크스페이스 v11 · 앱 셸 + 보드 10종</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<style>
+:root{--sans:'Geist','Noto Sans KR',system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace;--img:url('../frontend/public/concepts/people/assets/personas-strip.png')}
+*{box-sizing:border-box}
+body{margin:0;background:#16161a;color:#eee;font-family:var(--sans);line-height:1.5;padding:28px 18px 90px}
+.page{max-width:1560px;margin:0 auto;display:flex;flex-direction:column;gap:52px}
+.intro h1{font-size:30px;margin:0 0 10px;letter-spacing:-.03em}
+.intro p{margin:0 0 8px;color:#a8a8ad;max-width:96ch}
+.intro nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.intro nav a{color:#ddd;border:1px solid #3a3a40;border-radius:99px;padding:5px 14px;font-size:13px;text-decoration:none}
+.vh{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.vh small{font:500 12px var(--mono);color:#ff8a6b}
+.vh h2{margin:0;font-size:22px;letter-spacing:-.03em}
+.vh p{margin:0;color:#a8a8ad;font-size:14px;max-width:104ch}
+.fr{border-radius:14px;overflow-x:auto;border:1px solid #333}
+.sc{min-width:1300px}
+[data-i],[data-v],[data-t],[data-p]{cursor:pointer}
+.av{display:inline-block;flex:none;border-radius:50%;background-image:var(--img);background-size:900% auto;background-repeat:no-repeat;background-color:#d8d3ca}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== app shell (theme variables) ===== */
+.app{--bg:#fff;--bg2:#f7f8fa;--sf:#fff;--sb:#fff;--ln:#eceef2;--ink:#161a2b;--mu:#8a90a2;--ac:#3b6bff;--acs:#e8eeff;--r:12px;--sh:0 1px 2px #1a1f3a0d;
+  --c0:#9aa0ab;--c1:#3b6bff;--c2:#2fa36b;--c3:#e5484d;--rep:#d9822b;--repb:#fff1e0;--new:#3b6bff;--newb:#e8eeff;--gone:#6b7280;--goneb:#eef0f3;
+  display:grid;grid-template-columns:240px 1fr;min-height:780px;background:var(--bg);color:var(--ink);font-size:13.5px;position:relative;overflow:hidden;font-family:var(--sans)}
+.app.dark{--bg:#0e1015;--bg2:#12151c;--sf:#171a22;--sb:#0b0d11;--ln:#232733;--ink:#e9ebf2;--mu:#7f8699;--ac:#7b93ff;--acs:#1d2440;--repb:#2e2314;--newb:#1d2440;--goneb:#1c1f28;--sh:none}
+.app.pastel{--bg:#fbf6ef;--bg2:#fbf6ef;--sb:#f6efe5;--ln:#eadfce;--ac:#f26a4b;--acs:#ffe6de;--r:22px;--c0:#a79f92;--c1:#4d7cf2;--c2:#35a56c;--c3:#e5484d}
+.app.glass{--bg:linear-gradient(135deg,#e9edff,#fdeef5 50%,#e9f8ef);--bg2:transparent;--sf:#ffffffa6;--sb:#ffffff70;--ln:#ffffffd0;--ac:#5a5cf0;--acs:#ffffffb0;--r:20px;--sh:0 8px 30px -14px #4a4f9a44}
+.app.glass .card,.app.glass .col>.colb,.app.glass .side,.app.glass .tabs{backdrop-filter:blur(18px)}
+.app.dark.glass{--bg:linear-gradient(135deg,#10142a,#1b1030 55%,#0d1f25);--sf:#ffffff0f;--sb:#ffffff0a;--ln:#ffffff1c}
+.side{background:var(--sb);border-right:1px solid var(--ln);display:flex;flex-direction:column;padding:16px 12px 14px;gap:14px;min-width:0}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;letter-spacing:-.04em;padding:0 6px}
+.logo i{width:26px;height:26px;border-radius:50%;border:5px solid var(--ac);display:block}
+.logo .cl{margin-left:auto;color:var(--mu);font-weight:400;font-size:14px}
+.nv{display:flex;flex-direction:column;gap:2px}
+.nv div{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px;color:var(--mu);font-weight:500}
+.nv div.on{background:var(--acs);color:var(--ink);font-weight:700}
+.ic{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.sec{display:flex;justify-content:space-between;font:600 10.5px var(--mono);letter-spacing:.1em;color:var(--mu);padding:8px 10px 0;border-top:1px solid var(--ln);margin-top:2px}
+.pj{display:flex;flex-direction:column;gap:1px}
+.pj div{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:10px;font-weight:600;color:var(--ink);min-width:0}
+.pj div:hover{background:var(--bg2)}
+.pj div.on{background:var(--bg2);box-shadow:inset 0 0 0 1px var(--ln)}
+.pj i{width:8px;height:8px;border-radius:50%;flex:none}
+.pj span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.pj em{font-style:normal;color:var(--mu);font-size:11px;letter-spacing:2px}
+.sbf{margin-top:auto;display:flex;background:var(--bg2);border-radius:99px;padding:3px;font-size:12px;font-weight:600;color:var(--mu);border:1px solid var(--ln)}
+.sbf span{flex:1;text-align:center;padding:5px;border-radius:99px;display:flex;gap:6px;justify-content:center;align-items:center}.sbf .on{background:var(--sf);color:var(--ink);box-shadow:0 1px 3px #0002}
+.main{display:flex;flex-direction:column;min-width:0;position:relative}
+.tabs{display:flex;align-items:center;gap:6px;padding:0 24px;height:56px;border-bottom:1px solid var(--ln);background:var(--sf);flex:none}
+.tabs .t{display:flex;gap:8px;align-items:center;padding:0 14px;height:56px;color:var(--mu);font-weight:600}
+.tabs .t.on{color:var(--ac);box-shadow:inset 0 -2px 0 var(--ac)}
+.tabs .sp{flex:1}
+.tabs .q{display:flex;gap:10px;align-items:center;border:1px solid var(--ln);border-radius:99px;padding:6px 16px;color:var(--mu);min-width:230px;background:var(--bg2)}
+.tabs .b{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--mu);border:1px solid var(--ln);position:relative}
+.tabs .b::after{content:"";position:absolute;right:7px;top:7px;width:7px;height:7px;border-radius:50%;background:#ff5a6a;border:2px solid var(--sf)}
+.content{padding:22px 28px 30px;display:flex;flex-direction:column;gap:18px;flex:1;min-width:0}
+.bc{font-size:12px;color:var(--mu)}
+.ph{display:flex;align-items:flex-start;gap:16px}
+.ph h1{margin:2px 0 0;font-size:34px;letter-spacing:-.045em;line-height:1.15;font-weight:800}
+.ph .act{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn{height:38px;border-radius:11px;border:1px solid var(--ln);background:var(--sf);display:inline-flex;align-items:center;gap:7px;padding:0 15px;font-weight:700;font-size:13px;white-space:nowrap;color:var(--ink);box-shadow:var(--sh)}
+.btn.p{background:var(--ac);border-color:var(--ac);color:#fff}
+.app.dark .btn.p{color:#0b0d11}
+.btn.ic1{width:38px;padding:0;justify-content:center}
+.meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.stk{display:inline-flex}.stk .av{border:3px solid var(--sf);margin-left:-9px}.stk .av:first-child{margin-left:0}
+.stk .more{width:34px;height:34px;border-radius:50%;background:var(--bg2);border:3px solid var(--sf);margin-left:-9px;display:grid;place-items:center;font-size:11px;color:var(--mu);font-weight:700}
+.chip{border:1px solid var(--ln);border-radius:11px;padding:7px 14px;font-weight:700;font-size:13px;background:var(--sf)}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.app.glass .chip.on{color:#fff}
+.stt{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;border-radius:99px;padding:3px 11px;background:var(--bg2)}
+.stt i{width:7px;height:7px;border-radius:50%;background:var(--c0)}
+.stt.run{color:var(--c1)}.stt.run i{background:var(--c1);animation:pulse 1.6s infinite}.stt.ok{color:var(--c2)}.stt.ok i{background:var(--c2)}.stt.bad{color:var(--c3)}.stt.bad i{background:var(--c3)}.stt.rd{color:#b5830a}.stt.rd i{background:#e8b84a}.stt.pt{color:#8a63d2}.stt.pt i{background:#8a63d2}
+/* board */
+.board{display:grid;gap:18px;align-items:start;grid-template-columns:repeat(var(--n,4),minmax(0,1fr))}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.col>.hd{display:flex;align-items:center;gap:10px;font:800 12.5px var(--sans);letter-spacing:.06em;padding-bottom:10px;border-bottom:2px solid var(--cc)}
+.col>.hd b{background:var(--bg2);border:1px solid var(--ln);border-radius:99px;padding:0 9px;font-weight:700;color:var(--mu);font-size:11.5px;letter-spacing:0}
+.col>.hd .m{margin-left:auto;color:var(--mu);letter-spacing:2px}
+.col>.colb{display:flex;flex-direction:column;gap:12px;border-radius:var(--r)}
+.app.pastel .col>.colb{background:var(--cb);padding:10px}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r);padding:16px 16px 12px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:10px}
+.card.sel{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
+.card h3{margin:0;font-size:15.5px;letter-spacing:-.02em;font-weight:700}
+.card p{margin:0;color:var(--mu);font-size:12.5px;line-height:1.55}
+.card .ft{display:flex;align-items:center;gap:14px;color:var(--mu);font-size:12px;border-top:1px solid var(--ln);padding-top:10px;margin-top:2px}
+.card .ft span{display:inline-flex;gap:5px;align-items:center}.card .ft .rt{margin-left:auto}
+.card .ro{display:flex;justify-content:space-between;align-items:center}
+.card.drag{transform:rotate(-2.2deg) translateX(-6px);box-shadow:0 22px 40px -14px #1a1f3a40}
+.tg{align-self:flex-start;border-radius:7px;padding:2px 10px;font-size:11.5px;font-weight:700;background:var(--acs);color:var(--ac)}
+.tg.rep{background:var(--repb);color:var(--rep)}.tg.new{background:var(--newb);color:var(--new)}.tg.gone{background:var(--goneb);color:var(--gone)}
+.card .av{border:2px solid var(--sf)}
+.cmt{font-size:12px}
+/* list */
+.lst{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.lst .h,.lst .r{display:grid;grid-template-columns:2fr 1fr 2.4fr 1fr 90px;gap:14px;align-items:center;padding:12px 18px}
+.lst .h{font:600 11px var(--mono);letter-spacing:.08em;color:var(--mu);border-bottom:1px solid var(--ln);background:var(--bg2)}
+.lst .r{border-bottom:1px solid var(--ln)}.lst .r:last-child{border:0}.lst .r.sel{background:var(--acs)}
+.lst .who{display:flex;gap:11px;align-items:center;font-weight:700}.lst .who em{font-style:normal;font-weight:400;color:var(--mu);margin-left:4px}
+/* calendar */
+.cal{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.cal .g{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal .dh{padding:12px 14px;font:600 11px var(--mono);letter-spacing:.06em;color:var(--mu);border-bottom:1px solid var(--ln);border-left:1px solid var(--ln);background:var(--bg2)}
+.cal .dh:first-child,.cal .cd:first-child{border-left:0}
+.cal .dh.td{color:var(--ac)}
+.cal .cd{min-height:300px;border-left:1px solid var(--ln);padding:10px;display:flex;flex-direction:column;gap:8px}
+.cal .cd.td{background:var(--acs)}
+.cal .ev{border-radius:10px;padding:8px 10px;font-weight:700;font-size:12.5px;background:var(--bg2);border-left:3px solid var(--cc)}
+.cal .ev small{display:block;color:var(--mu);font-weight:400;font-size:11.5px}
+.cal .ev.ghost{border:1.5px dashed var(--ln);border-left:3px dashed var(--ln);background:transparent;color:var(--mu)}
+/* inspector / ai */
+.rp{width:340px;flex:none;border-left:1px solid var(--ln);background:var(--sf);padding:20px 20px;display:flex;flex-direction:column;gap:14px}
+.rp h4{margin:0;font:600 11px var(--mono);letter-spacing:.1em;color:var(--mu)}
+.rp .bub{background:var(--bg2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.6}
+.rp .bub b{color:var(--ink)}
+.rp .sg{display:flex;flex-direction:column;gap:6px}
+.rp .sg span{border:1px solid var(--ln);border-radius:10px;padding:8px 12px;font-weight:600;font-size:12.5px;display:flex;justify-content:space-between}
+.rp .ask{margin-top:auto;border:1px solid var(--ln);border-radius:12px;padding:11px 14px;color:var(--mu);display:flex;justify-content:space-between;align-items:center}
+.rp .ask b{background:var(--ac);color:#fff;border-radius:8px;padding:2px 10px;font-size:12px}
+.wrap{display:flex;flex:1;min-width:0}
+.wrap>.content{flex:1}
+/* home bento */
+.bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:150px;gap:14px}
+.bento .w{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--sh)}
+.bento .w .k{font:600 11px var(--mono);letter-spacing:.1em;color:var(--mu)}
+.bento .w b.n{font:800 40px var(--sans);letter-spacing:-.05em;line-height:1}
+.bento .big{grid-column:span 2;grid-row:span 2;background:var(--ac);color:#fff;border-color:var(--ac)}
+.app.dark .bento .big{color:#0b0d11}
+.bento .big h2{margin:6px 0 0;font-size:30px;letter-spacing:-.04em;line-height:1.15}
+.bento .big .btn{align-self:flex-start;background:#fff;color:#161a2b;border-color:#fff}
+.bento .big .k{color:#ffffffb8}
+.bento .wide{grid-column:span 2}
+.bento .rowx{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--ln);font-weight:600}
+.bento .rowx:last-child{border:0}
+.bars{display:flex;gap:6px;align-items:flex-end;height:60px}.bars i{flex:1;background:var(--acs);border-radius:6px 6px 2px 2px;display:block}.bars i.t{background:var(--ac)}
+/* fab */
+.fab{position:absolute;right:26px;bottom:24px;height:46px;border-radius:99px;background:var(--ac);color:#fff;display:inline-flex;align-items:center;gap:8px;padding:0 20px;font-weight:800;box-shadow:0 12px 26px -8px var(--ac);z-index:5}
+.app.dark .fab{color:#0b0d11}
+/* rail */
+.app.rail{grid-template-columns:72px 1fr}
+.app.rail .side{padding:14px 10px;align-items:center}
+.app.rail .logo span,.app.rail .nv span,.app.rail .sec,.app.rail .sbf{display:none}
+.app.rail .nv div{padding:11px;justify-content:center}
+.app.rail .railpj{display:flex;flex-direction:column;gap:10px;align-items:center;border-top:1px solid var(--ln);padding-top:14px}
+.app.rail .railpj div{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px;position:relative}
+.app.rail .railpj div.on{outline:2px solid var(--ink);outline-offset:2px}
+.apptabs{display:flex;gap:4px;padding:10px 24px 0;background:var(--sf);border-bottom:1px solid var(--ln);align-items:flex-end}
+.apptabs div{padding:9px 16px;border-radius:10px 10px 0 0;font-weight:700;color:var(--mu);display:flex;gap:9px;align-items:center;border:1px solid transparent;border-bottom:0}
+.apptabs div.on{background:var(--bg);color:var(--ink);border-color:var(--ln);margin-bottom:-1px}
+.apptabs i{width:8px;height:8px;border-radius:50%}
+.apptabs .all{margin-left:auto;color:var(--ink)}
+</style></head><body>
+<div class="page">
+ <div class="intro">
+  <h1>PersonaLab 워크스페이스 v11 · 앱 셸 + 보드 10종</h1>
+  <p><b>참고 구조(Hiro 같은 프로젝트 관리 앱):</b> 왼쪽 사이드바에 "내 테스트"가 색 점과 함께 목록으로 항상 떠 있고, 위쪽 탭으로 보기(목록·보드·캘린더)를 바꿉니다. 그래서 목록은 계속 앞에 있고, 선택한 앱 하나를 깊게 봅니다.</p>
+  <p><b>우리 제품에 맞게 바꾼 점:</b> 보드의 열은 <b>페르소나의 탐색 상태</b>(대기·탐색 중·종료·중단)이고 카드가 페르소나입니다. "회차" 탭은 열이 회차(R1·R2·R3)이고 카드가 <b>관찰된 발견</b>(반복 관찰·새로 관찰·이번엔 관찰 안 됨)입니다. 관찰되지 않음을 해결됨으로 부르지 않습니다.</p>
+  <p><b>10종 모두 클릭됩니다.</b> 사이드바에서 테스트를 바꾸고, 위 탭으로 보기를 바꾸고, 왼쪽 아래 Dark/Light로 테마를 바꿔 보세요(일부 시안은 스킨이 고정). 이름·수치·문장은 모두 예시입니다.</p>
+  <nav id="nv"></nav>
+ </div>
+ <div id="out" style="display:flex;flex-direction:column;gap:52px"></div>
+</div>
+<script>
+var POS=[5,27.5,50,72.5,95];
+function av(i,s){return '<span class="av" style="width:'+s+'px;height:'+s+'px;background-position:'+POS[i]+'% 28%"></span>'}
+function stk(l,s,more){return '<span class="stk">'+l.map(function(i){return av(i,s)}).join('')+(more?'<span class="more">+'+more+'</span>':'')+'</span>'}
+var P={
+ search:'<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/>',home:'<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>',users:'<circle cx="9" cy="9" r="3"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 7a3 3 0 0 1 0 6M18 14c2 .7 3 2.6 3 5"/>',hist:'<path d="M3 11a9 9 0 1 1 2 7M3 5v6h6M12 7v6l4 2"/>',list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',board:'<rect x="4" y="4" width="6" height="16" rx="1.5"/><rect x="14" y="4" width="6" height="10" rx="1.5"/>',layers:'<path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5"/>',cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',plus:'<path d="M12 5v14M5 12h14"/>',cmt:'<path d="M5 6h14v10H9l-4 3z"/>',link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',clock:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',moon:'<path d="M20 14A8 8 0 0 1 10 4a8 8 0 1 0 10 10z"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>',spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'};
+function ic(n){return '<svg class="ic" viewBox="0 0 24 24">'+P[n]+'</svg>'}
+var T=[
+ {n:'동네예약 앱',d:'iOS 앱 · 모바일',k:'run',st:'실행 중',b:'실행 보기',head:'6명 중 2명이 탐색을 마쳤어요',col:'#3b6bff',
+  R:[['R1','완료','11/3','6명'],['R2','완료','11/5','6명'],['R3','실행 중','11/7','6명']],
+  ppl:[[0,'P-03','34세','자영업자',1,'예약하기 버튼을 찾으려고 두 번 스크롤했어요','홈',8,3],[1,'P-07','27세','대학생',1,'시간 선택에서 뒤로 가기를 눌렀어요','시간 선택',5,2],[2,'P-11','41세','교사',1,'필터가 무슨 뜻인지 몰라 멈췄어요','매장 목록',3,1],[3,'P-02','52세','주부',2,'예약 확인 화면에서 종료했어요','예약 확인',6,2],[4,'P-09','30세','직장인',2,'예약하기까지 도달했어요','예약하기',4,1],[1,'P-12','36세','디자이너',0,'아직 시작하지 않았어요','—',0,0]],
+  F:[[['예약하기 버튼이 아래에 있어 찾기 어려움','홈',4,'new'],['시간 선택에서 뒤로 가기 반복','시간 선택',3,'new'],['매장 필터 의미가 불명확함','매장 목록',2,'new']],[['예약하기 버튼이 아래에 있어 찾기 어려움','홈',3,'rep'],['시간 선택에서 뒤로 가기 반복','시간 선택',4,'rep'],['매장 필터 의미가 불명확함','매장 목록',2,'rep'],['결제 안내 문구에서 멈춤','예약 확인',2,'new']],[['시간 선택에서 뒤로 가기 반복','시간 선택',2,'rep'],['매장 필터 의미가 불명확함','매장 목록',1,'rep'],['결제 안내 문구에서 멈춤','예약 확인',1,'rep'],['예약하기 버튼 위치','홈',0,'gone']]]},
+ {n:'쇼핑몰 결제 개선',d:'웹 · 데스크톱',k:'ok',st:'완료',b:'결과 보기',head:'6명이 모두 끝냈고 발견 8건이 있어요',col:'#2fa36b',
+  R:[['R1','완료','11/1','6명'],['R2','완료','11/4','6명'],['R3','완료','11/6','6명']],
+  ppl:[[1,'P-04','27세','대학생',2,'카드 입력란에서 멈췄어요','결제',9,4],[3,'P-06','41세','교사',2,'쿠폰 위치를 못 찾았어요','결제',7,3],[4,'P-08','30세','직장인',2,'결제 완료까지 도달했어요','완료',5,2]],
+  F:[[['카드 입력란에서 멈춤','결제',3,'new'],['쿠폰 위치가 불명확함','결제',2,'new']],[['카드 입력란에서 멈춤','결제',3,'rep'],['쿠폰 위치가 불명확함','결제',2,'rep'],['영수증 안내가 부족함','완료',2,'new']],[['카드 입력란에서 멈춤','결제',2,'rep'],['쿠폰 위치가 불명확함','결제',3,'rep'],['영수증 안내가 부족함','완료',1,'rep'],['배송지 입력 오류 안내','결제',2,'new']]]},
+ {n:'온보딩 프로토타입',d:'Figma · 모바일',k:'',st:'작성 중',b:'이어서 설정',head:'3단계 대상 사용자에서 멈췄어요',col:'#9aa0ab',R:[['R1','작성 중','11/7','—']],ppl:[],F:[[]]},
+ {n:'학원 관리 대시보드',d:'웹 · 데스크톱',k:'bad',st:'중단',b:'중단 위치 보기',head:'로그인에서 막혀 3명만 저장됐어요',col:'#e5484d',
+  R:[['R1','중단','11/4','6명']],ppl:[[0,'P-01','34세','자영업자',2,'로그인 화면에 도착했어요','로그인',3,1],[2,'P-04','27세','대학생',2,'이메일 입력 후 차단됐어요','로그인',4,1],[3,'P-06','41세','교사',3,'로그인 후 화면에 접근하지 못했어요','로그인',2,1]],
+  F:[[['로그인 후 화면에 접근할 수 없음','로그인',3,'new']]]},
+ {n:'병원 예약 웹',d:'웹 · 모바일 보기',k:'rd',st:'실행 준비 완료',b:'실행 확인',head:'6명 구성과 화면 14개가 준비됐어요',col:'#e8b84a',
+  R:[['R1','완료','10/30','6명'],['R2','준비 완료','11/5','6명']],ppl:[[2,'P-05','41세','교사',0,'실행 전이에요','—',0,0],[4,'P-09','30세','직장인',0,'실행 전이에요','—',0,0],[1,'P-07','27세','대학생',0,'실행 전이에요','—',0,0]],
+  F:[[['진료과 선택이 어려움','홈',3,'new'],['예약 시간 안내 부족','예약',2,'new']],[]]},
+ {n:'가계부 앱',d:'Android · 모바일',k:'pt',st:'부분 기록',b:'부분 결과 보기',head:'6명 중 4명의 기록이 저장됐어요',col:'#8a63d2',
+  R:[['R1','부분 기록','11/2','6명']],ppl:[[3,'P-02','52세','주부',2,'지출 입력에서 멈췄어요','입력',6,2],[0,'P-03','34세','자영업자',2,'카테고리 선택을 마쳤어요','카테고리',4,1]],F:[[['지출 입력에서 멈춤','입력',2,'new']]]}
+];
+var LANES=[['대기','var(--c0)','#f3f1ec'],['탐색 중','var(--c1)','#e8efff'],['종료','var(--c2)','#e4f5ec'],['중단·차단','var(--c3)','#fde9e8']];
+var KL={rep:'반복 관찰',new:'새로 관찰',gone:'이번엔 관찰 안 됨'};
+var V=[],ST={};
+function dot(t){return '<i style="background:'+t.col+'"></i>'}
+function sidebar(s,v){var items=T.map(function(t,i){return '<div data-t="'+i+'" class="'+(i===s.sel?'on':'')+'">'+dot(t)+'<span>'+t.n+'</span><em>···</em></div>'}).join('');
+ if(v.rail)return '<div class="side"><div class="logo"><i></i></div><div class="nv"><div class="on">'+ic('home')+'</div><div>'+ic('users')+'</div><div>'+ic('hist')+'</div></div><div class="railpj">'+T.map(function(t,i){return '<div data-t="'+i+'" class="'+(i===s.sel?'on':'')+'" style="background:'+t.col+'">'+t.n.charAt(0)+'</div>'}).join('')+'<div style="background:var(--bg2);color:var(--mu)">'+ic('plus')+'</div></div></div>';
+ return '<div class="side"><div class="logo"><i></i><span>PersonaLab</span><span class="cl">«</span></div><div class="nv"><div class="on">'+ic('home')+'<span>내 테스트</span></div><div>'+ic('users')+'<span>페르소나 보관함</span></div><div>'+ic('hist')+'<span>전체 실행 기록</span></div></div><div class="sec"><span>내 테스트 '+T.length+'</span><span>+</span></div><div class="pj">'+items+'</div>'+(v.toggle?'<div class="sbf"><span data-th="1" class="'+(s.dark?'on':'')+'">'+ic('moon')+'Dark</span><span data-th="0" class="'+(s.dark?'':'on')+'">'+ic('sun')+'Light</span></div>':'')+'</div>'}
+function tabsBar(s,v){var names={list:['list','목록'],board:['board','보드'],rounds:['layers','회차'],cal:['cal','캘린더'],home:['home','홈']};
+ return '<div class="tabs">'+v.tabs.map(function(k){return '<div class="t'+(k===s.view?' on':'')+'" data-v="'+k+'">'+ic(names[k][0])+names[k][1]+'</div>'}).join('')+'<span class="sp"></span><div class="q">'+ic('search')+'테스트 검색</div><div class="b">'+ic('cmt')+'</div><div class="b">'+ic('bell')+'</div>'+av(0,36)+'</div>'}
+function header(t,s,v){var crumbs={list:'목록',board:'보드',rounds:'회차',cal:'캘린더',home:'홈'}[s.view];var n=t.ppl.length;
+ return '<div class="bc">내 테스트 / '+t.n+' / '+crumbs+'</div><div class="ph"><div><h1>'+t.n+'</h1></div><div class="act"><span class="stt '+t.k+'"><i></i>'+t.st+'</span><span class="btn p">'+t.b+'</span><span class="btn">회차 만들기</span><span class="btn ic1">···</span></div></div><div class="meta">'+(n?stk(t.ppl.slice(0,4).map(function(p){return p[0]}),34,Math.max(0,n-4)||(n>4?n-4:0)):'<span style="color:var(--mu)">참여 페르소나를 아직 고르지 않았어요</span>')+'<span class="chip on">이번 회차</span><span class="chip">종료만</span><span style="color:var(--mu);font-size:12.5px;margin-left:6px">'+t.d+' · '+t.head+'</span></div>'}
+function pcard(p,i,s,drag){return '<div class="card'+(drag?' drag':'')+'" data-p="'+i+'"><h3>'+p[1]+' · '+p[2]+' '+p[3]+'</h3><p>'+p[5]+'</p><span class="tg">'+p[6]+'</span><div class="ft"><span>'+ic('cmt')+p[7]+'</span><span>'+ic('link')+p[8]+'</span><span class="rt">'+av(p[0],28)+'</span></div></div>'}
+function personaBoard(t,s){if(!t.ppl.length)return '<div class="card" style="padding:28px;align-items:center;color:var(--mu)">참여 페르소나를 고르면 여기에 보드가 생겨요.</div>';
+ return '<div class="board" style="--n:4">'+LANES.map(function(l,li){var list=t.ppl.filter(function(p){return p[4]===li});return '<div class="col" style="--cc:'+l[1]+';--cb:'+l[2]+'"><div class="hd">'+l[0].toUpperCase()+' <b>'+list.length+'</b><span class="m">···</span></div><div class="colb">'+list.map(function(p,j){return pcard(p,t.ppl.indexOf(p),s,s.drag&&li===1&&j===0)}).join('')+(list.length?'':'<div class="card" style="border-style:dashed;box-shadow:none;color:var(--mu);align-items:center;padding:18px">없음</div>')+'</div></div>'}).join('')+'</div>'}
+function roundsBoard(t,s){var n=t.R.length+1;return '<div class="board" style="--n:'+Math.min(n,4)+'">'+t.R.map(function(r,i){var f=t.F[i]||[];var cc=r[1]==='실행 중'?'var(--c1)':r[1]==='중단'?'var(--c3)':r[1]==='완료'?'var(--c2)':'var(--c0)';
+  return '<div class="col" style="--cc:'+cc+';--cb:var(--bg2)"><div class="hd">'+r[0]+' · '+r[1].toUpperCase()+' <b>'+f.length+'</b><span class="m">'+r[2]+'</span></div><div class="colb">'+f.map(function(x,j){return '<div class="card'+(s.drag&&i===t.R.length-1&&j===0?' drag':'')+'"><span class="tg '+x[3]+'">'+KL[x[3]]+'</span><h3>'+x[0]+'</h3><div class="ft"><span>'+x[1]+'</span><span>'+(x[3]==='gone'?'진행 중이라 확정 아님':x[2]+'/6명')+'</span><span class="rt">근거 보기</span></div></div>'}).join('')+(f.length?'':'<div class="card" style="border-style:dashed;box-shadow:none;color:var(--mu);align-items:center;padding:18px">'+(r[1]==='작성 중'?'설정을 마치면 쌓여요':'관찰 기록 없음')+'</div>')+'</div></div>'}).join('')+'<div class="col" style="--cc:var(--ln)"><div class="hd" style="color:var(--mu)">새 회차 <b>+</b></div><div class="colb"><div class="card" style="border:2px dashed var(--ln);box-shadow:none;align-items:center;justify-content:center;min-height:140px;color:var(--mu);font-weight:700;background:transparent">+ 수정 회차 만들기</div></div></div></div>'}
+function listView(t,s){var rows=t.ppl.map(function(p,i){return '<div class="r'+(i===s.p?' sel':'')+'" data-p="'+i+'"><span class="who">'+av(p[0],32)+'<span>'+p[1]+'<em>'+p[2]+' '+p[3]+'</em></span></span><span class="stt '+['','run','ok','bad'][p[4]]+'"><i></i>'+LANES[p[4]][0]+'</span><span style="color:var(--mu)">'+p[5]+'</span><span><span class="tg">'+p[6]+'</span></span><span style="color:var(--mu);text-align:right">행동 '+p[7]+'</span></div>'}).join('');
+ return '<div class="lst"><div class="h"><span>페르소나</span><span>상태</span><span>마지막 행동</span><span>화면</span><span style="text-align:right">기록</span></div>'+(rows||'<div class="r" style="color:var(--mu)">참여 페르소나를 고르면 목록이 생겨요.</div>')+'</div>'}
+function calView(t,s){var days=[['월','3'],['화','4'],['수','5'],['목','6'],['금','7'],['토','8'],['일','9']];
+ var ev=function(d){return t.R.filter(function(r){return r[2]==='11/'+d||(d==='7'&&r[2]==='11/7')}).map(function(r){var cc=r[1]==='실행 중'?'var(--c1)':r[1]==='중단'?'var(--c3)':r[1]==='완료'?'var(--c2)':'var(--c0)';return '<div class="ev" style="--cc:'+cc+'">'+r[0]+' · '+r[1]+'<small>'+r[3]+' · '+t.d.split(' · ')[0]+'</small></div>'}).join('')};
+ return '<div class="cal"><div class="g">'+days.map(function(d){return '<div class="dh'+(d[1]==='7'?' td':'')+'">'+d[0]+' '+d[1]+(d[1]==='7'?' · 오늘':'')+'</div>'}).join('')+days.map(function(d){return '<div class="cd'+(d[1]==='7'?' td':'')+'">'+ev(d[1])+(d[1]==='8'?'<div class="ev ghost">다음 회차 예정<small>＋ 눌러서 만들기</small></div>':'')+'</div>'}).join('')+'</div></div><div style="font-size:12px;color:var(--mu)">이번 주(11/3–11/9)에 실행한 회차만 보여요. 이전 회차는 회차 탭에서 열어요.</div>'}
+function homeView(s){var run=T[0];return '<div class="bento"><div class="w big"><div><span class="k">지금 이어서 · 회차 3</span><h2>'+run.n+'<br>'+run.head+'</h2></div><span class="btn">'+run.b+' →</span></div><div class="w"><span class="k">확인 필요</span><b class="n">2</b><span style="color:var(--mu)">중단 · 부분 기록</span></div><div class="w"><span class="k">전체 테스트</span><b class="n">6</b><span style="color:var(--mu)">이번 주 실행 3회</span></div><div class="w wide"><span class="k">이번 주 활동</span><div class="bars"><i style="height:30%"></i><i style="height:55%"></i><i style="height:40%"></i><i style="height:70%"></i><i class="t" style="height:100%"></i><i style="height:20%"></i><i style="height:12%"></i></div></div><div class="w wide" style="grid-row:span 2"><span class="k">최근 기록</span><div>'+[['P-03','동네예약 앱','12분 전'],['P-07','동네예약 앱','31분 전'],['P-06','쇼핑몰 결제 개선','어제'],['P-01','학원 관리 대시보드','3일 전']].map(function(r){return '<div class="rowx"><span>'+r[0]+' · '+r[1]+'</span><span style="color:var(--mu);font-weight:400">'+r[2]+'</span></div>'}).join('')+'</div></div><div class="w wide"><span class="k">상태별</span><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="stt run"><i></i>실행 중 1</span><span class="stt bad"><i></i>중단 1</span><span class="stt pt"><i></i>부분 기록 1</span><span class="stt ok"><i></i>완료 1</span><span class="stt"><i></i>작성·준비 2</span></div></div></div>'}
+function aiPanel(t,s){return '<div class="rp"><h4>'+ic('spark').replace('class="ic"','class="ic" style="vertical-align:-4px;margin-right:6px"')+'이 테스트에 물어보기</h4><div class="bub"><b>회차 2 → 3</b>에서 달라진 점을 기록 기준으로 정리했어요.<br>· 예약하기 버튼 위치는 이번 회차에서 아직 관찰되지 않았어요(진행 중).<br>· 시간 선택 뒤로 가기는 계속 관찰돼요.</div><div class="sg"><span>시간 선택에서 막힌 사람에게 묻기 <b>→</b></span><span>회차 2와 비교 보기 <b>→</b></span><span>근거 화면 열기 <b>→</b></span></div><div class="bub" style="background:transparent;font-size:12px;color:var(--mu)">기록에서 답을 찾으며, 새 모델 호출은 직접 선택할 때만 해요. AI 요약은 실제 사용자 조사가 아닙니다.</div><div class="ask">질문하기…<b>보내기</b></div></div>'}
+function inspector(t,s){var p=t.ppl[s.p]||t.ppl[0];if(!p)return '';return '<div class="rp"><h4>선택한 페르소나</h4><div style="display:flex;gap:12px;align-items:center">'+av(p[0],52)+'<div><b style="font-size:17px">'+p[1]+'</b><div style="color:var(--mu)">'+p[2]+' · '+p[3]+'</div></div></div><span class="stt '+['','run','ok','bad'][p[4]]+'" style="align-self:flex-start"><i></i>'+LANES[p[4]][0]+'</span><div class="bub">“'+p[5]+'”</div><div><h4>화면</h4><span class="tg" style="margin-top:6px">'+p[6]+'</span></div><div class="sg"><span>근거 화면과 원문 보기 <b>→</b></span><span>이 사람과 인터뷰 <b>→</b></span></div><div class="ask">얼굴은 AI 대표 이미지예요</div></div>'}
+function bodyView(t,s,v){if(s.view==='home')return homeView(s);var hd=header(t,s,v),vw=s.view==='board'?personaBoard(t,s):s.view==='rounds'?roundsBoard(t,s):s.view==='cal'?calView(t,s):listView(t,s);return hd+vw}
+function render(v){var s=ST[v.id],t=T[s.sel];var cls='app '+v.skin+(s.dark?' dark':'')+(v.rail?' rail':'');
+ var tabs=v.apptabs?'<div class="apptabs">'+T.map(function(x,i){return '<div data-t="'+i+'" class="'+(i===s.sel?'on':'')+'"><i style="background:'+x.col+'"></i>'+x.n+'</div>'}).join('')+'<div class="all">⌗ 모든 테스트 '+T.length+'</div></div>':'';
+ var right=v.ai?aiPanel(t,s):v.insp?inspector(t,s):'';
+ return '<div class="'+cls+'">'+sidebar(s,v)+'<div class="main">'+tabs+tabsBar(s,v)+'<div class="wrap"><div class="content">'+bodyView(t,s,v)+'</div>'+right+'</div>'+(v.fab?'<span class="fab">'+ic('plus')+' 새 회차</span>':'')+'</div></div>'}
+var D=[
+ ['m1','M1 · LIGHT BOARD','Hiro식 라이트 보드: 페르소나 상태 칸반',{skin:'',view:'board',tabs:['list','board','rounds','cal'],toggle:1,fab:1,drag:1},'참고 이미지와 가장 가까운 안. 열은 대기·탐색 중·종료·중단, 카드는 페르소나. 끌고 있는 카드는 살짝 기울어져 있어요.'],
+ ['m2','M2 · ROUNDS BOARD','회차 보드: 열이 회차, 카드가 발견',{skin:'',view:'rounds',tabs:['rounds','board','list','cal'],toggle:1,drag:1},'한 앱을 계속 고치는 사용의 핵심 화면. R1 R2 R3 열에서 같은 발견이 반복되는지, 새로 나왔는지, 이번엔 관찰되지 않았는지 한눈에 보여요.'],
+ ['m3','M3 · MIDNIGHT','다크 보드: 차분한 어두운 톤',{skin:'dark',view:'board',tabs:['board','rounds','list','cal'],toggle:1},'오로라 빛 없이 단색 다크. 상태 색만 포인트로 쓰고 나머지는 회색 단계로 맞췄어요. 왼쪽 아래 Light로 되돌릴 수 있어요.'],
+ ['m4','M4 · CALENDAR','캘린더 보기: 언제 어떤 회차를 돌렸나',{skin:'',view:'cal',tabs:['cal','board','rounds','list'],toggle:1},'Notion Calendar식 주간 보기. 오늘 열이 강조되고 다음 회차 예정칸이 점선으로 있어요. 시간 흐름으로 기억하는 사용자에게 좋아요.'],
+ ['m5','M5 · LIST + INSPECTOR','목록 + 오른쪽 인스펙터',{skin:'',view:'list',tabs:['list','board','rounds','cal'],toggle:1,insp:1},'Linear식. 페르소나 행을 누르면 오른쪽에 그 사람의 마지막 행동, 화면, 인터뷰 바로가기가 열려요.'],
+ ['m6','M6 · PASTEL','파스텔 보드: 따뜻하고 둥근 톤',{skin:'pastel',view:'board',tabs:['board','rounds','list','cal'],fab:1,drag:1},'랜딩의 따뜻한 종이색과 이어지는 안. 열마다 옅은 색 바탕, 큰 라운드. 새 회차 버튼이 떠 있어요.'],
+ ['m7','M7 · LIQUID GLASS','라이트 글래스: 반투명 패널',{skin:'glass',view:'rounds',tabs:['rounds','board','list','cal'],toggle:1,drag:1},'요즘 많이 쓰는 프로스트 글래스를 라이트 톤으로. 배경 그라데이션은 아주 옅게, 패널만 반투명이에요.'],
+ ['m8','M8 · ICON RAIL','아이콘 레일 + 열어 둔 앱 탭',{skin:'',view:'board',tabs:['board','rounds','list','cal'],rail:1,apptabs:1},'사이드바를 아이콘 레일로 접고, 앱은 위 탭으로 엽니다. 화면을 가장 넓게 쓰고 앱 하나에 집중하기 좋아요. 오른쪽 끝 "모든 테스트"가 전체 목록이에요.'],
+ ['m9','M9 · AI PANEL','AI 패널: 이 테스트에 물어보기',{skin:'',view:'board',tabs:['board','rounds','list','cal'],toggle:1,ai:1},'오른쪽에 회차 간 달라진 점을 정리해 주고 인터뷰·비교로 바로 보내 줘요. 기록 기반이며 새 모델 호출은 선택할 때만이라고 안내해요.'],
+ ['m10','M10 · HOME BENTO','홈 대시보드: 벤토 위젯',{skin:'',view:'home',tabs:['home','board','rounds','list'],toggle:1},'사이드바 "내 테스트" 홈에 들어오면 이어서 할 것, 확인 필요, 이번 주 활동, 최근 기록이 위젯으로 모여 있어요. 숫자는 개수일 뿐 점수가 아니에요.']];
+D.forEach(function(d){V.push({id:d[0],title:d[1],h:d[2],o:d[3],p:d[4]});ST[d[0]]={sel:0,view:d[3].view,dark:d[3].skin==='dark',p:0,drag:!!d[3].drag}});
+document.getElementById('nv').innerHTML=V.map(function(v){return '<a href="#'+v.id+'">'+v.title.split(' · ')[0]+'</a>'}).join('');
+document.getElementById('out').innerHTML=V.map(function(v){return '<div id="'+v.id+'"><div class="vh"><small>'+v.title+'</small><h2>'+v.h+'</h2><p>'+v.p+'</p></div><div class="fr"><div class="sc" id="sc-'+v.id+'"></div></div></div>'}).join('');
+V.forEach(function(v){var el=document.getElementById('sc-'+v.id);var o=v.o;o.id=v.id;function r(){el.innerHTML=render(o)}r();
+ el.addEventListener('click',function(e){var s=ST[v.id];var x;
+  if(x=e.target.closest('[data-th]')){s.dark=x.getAttribute('data-th')==='1';r();return}
+  if(x=e.target.closest('[data-t]')){s.sel=+x.getAttribute('data-t');s.p=0;r();return}
+  if(x=e.target.closest('[data-v]')){s.view=x.getAttribute('data-v');r();return}
+  if(x=e.target.closest('[data-p]')){s.p=+x.getAttribute('data-p');r();return}})});
+</script></body></html>

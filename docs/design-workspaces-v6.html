@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PersonaLab 워크스페이스 시안 모음 v6</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@600;700;800&display=swap">
+<style>
+:root{--sans:'Geist','Noto Sans KR',system-ui,sans-serif;--kr:'Noto Sans KR','Geist',system-ui,sans-serif;--serif:'Noto Serif KR',Georgia,serif;--mono:'Geist Mono',ui-monospace,monospace;
+ --img:url('../frontend/public/concepts/people/assets/personas-strip.png')}
+*{box-sizing:border-box}
+body{margin:0;background:#1b1b1e;color:#eee;font-family:var(--kr);line-height:1.5;padding:32px 20px 90px}
+.page{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:54px}
+.intro h1{font-size:30px;margin:0 0 8px;letter-spacing:-.03em}
+.intro p{margin:0 0 6px;color:#a8a8ad;max-width:76ch}
+.intro nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.intro nav a{color:#ddd;border:1px solid #3a3a40;border-radius:99px;padding:5px 14px;font-size:13px;text-decoration:none}
+.intro nav a:hover{border-color:#fff}
+.grp{font:500 12px var(--mono);letter-spacing:.08em;color:#8d8d95;border-top:1px solid #333;padding-top:18px}
+.grp b{color:#fff;font-weight:600}
+.vh{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.vh small{font:500 12px var(--mono);color:#ff8a6b;letter-spacing:.04em}
+.vh h2{margin:0;font-size:22px;letter-spacing:-.03em}
+.vh p{margin:0;color:#a8a8ad;font-size:14px;max-width:84ch}
+.vh .ref{font:400 12px var(--mono);color:#7d7d86}
+.fr{border-radius:16px;overflow-x:auto;border:1px solid #333}
+.sc{min-width:1040px;position:relative}
+.av{display:inline-block;flex:none;border-radius:50%;background-image:var(--img);background-size:900% auto;background-repeat:no-repeat;background-color:#d8d3ca}
+.ph{background-image:var(--img);background-size:500% 100%;background-repeat:no-repeat}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(10px,-6px)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== A1 POLAROID DESK ===== */
+.a1{background:linear-gradient(#f7f5f1,#ece9e3);color:#2d2a2e;font-family:var(--kr);padding:0 0 44px;min-height:760px}
+.a1 .nav{display:flex;align-items:center;gap:30px;padding:20px 48px;font-size:14px;color:#8a8389}
+.a1 .lg{font:800 21px var(--serif);letter-spacing:-.06em;color:#17161a}
+.a1 .nav .on{color:#17161a;font-weight:700;box-shadow:inset 0 -6px 0 #d06d5b55}
+.a1 .nav .nb{margin-left:auto;background:#17161a;color:#fff;border-radius:99px;padding:9px 20px;font-weight:700;font-size:13px}
+.a1 .head{text-align:center;padding:30px 0 6px}
+.a1 .head h1{font:800 44px/1.3 var(--serif);letter-spacing:-.07em;margin:0}
+.a1 .head h1 u{text-decoration:none;background:linear-gradient(transparent 78%,#d06d5b 78%,#d06d5b 90%,transparent 90%)}
+.a1 .head p{color:#837c83;margin:10px 0 0;font-size:14px}
+.a1 .tools{display:flex;justify-content:center;gap:10px;margin:22px 0 10px;font-size:13px;color:#837c83}
+.a1 .tools span{border:1px solid #e2ded8;background:#fff;border-radius:99px;padding:7px 16px}
+.a1 .tools .s{min-width:260px;text-align:left}
+.a1 .desk{display:grid;grid-template-columns:repeat(3,1fr);gap:40px 34px;padding:34px 70px 0}
+.a1 .pc{position:relative;transform:rotate(var(--r,0deg));transition:transform .4s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.a1 .pc:nth-child(3n+1){--r:-1.3deg}.a1 .pc:nth-child(3n+2){--r:.8deg;margin-top:14px}.a1 .pc:nth-child(3n){--r:-.5deg}
+.a1 .pc:hover{transform:rotate(0) translateY(-8px)}
+.a1 .fl{border:1px solid #e2ded8;border-radius:9px;background:#fff;padding:6px;box-shadow:0 9px 23px #342d2412;overflow:hidden}
+.a1 .faces{display:flex;gap:2px;height:150px;border-radius:5px;overflow:hidden;filter:saturate(.65)}
+.a1 .faces .ph{flex:1;background-size:500% 100%}
+.a1 .faces.none{background:repeating-linear-gradient(45deg,#f3f0eb,#f3f0eb 8px,#ece8e1 8px,#ece8e1 16px);display:grid;place-items:center;font-size:12px;color:#9a9298;filter:none}
+.a1 .inf{padding:12px 8px 6px;display:flex;flex-direction:column;gap:6px}
+.a1 .inf h3{margin:0;font:800 19px var(--serif);letter-spacing:-.05em}
+.a1 .row{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:#9a9298}
+.a1 .st{font-weight:700;display:inline-flex;align-items:center;gap:6px;color:#6f6a62}
+.a1 .st i{width:7px;height:7px;border-radius:50%;background:#bbb4aa}
+.a1 .st.run{color:#2f5fd0}.a1 .st.run i{background:#2f5fd0;animation:pulse 1.6s infinite}
+.a1 .st.bad{color:#b3382c}.a1 .st.bad i{background:#b3382c}
+.a1 .st.ok{color:#3d7a52}.a1 .st.ok i{background:#3d7a52}
+.a1 .go{margin-top:6px;border:1px solid #17161a;border-radius:99px;padding:7px 0;text-align:center;font-size:12px;font-weight:700}
+.a1 .go.p{background:#17161a;color:#fff}
+.a1 .tape{position:absolute;left:50%;top:-9px;width:64px;height:20px;background:#d06d5b55;transform:translateX(-50%) rotate(-3deg)}
+
+/* ===== A2 LOGBOOK ===== */
+.a2{background:#faf8f4;color:#24211f;font-family:var(--kr);padding:0 64px 50px;min-height:760px}
+.a2 .nav{display:flex;align-items:center;gap:28px;padding:24px 0;font-size:14px;color:#8a8389;border-bottom:1px solid #24211f}
+.a2 .lg{font:800 21px var(--serif);letter-spacing:-.06em;color:#17161a}
+.a2 .nav .on{color:#17161a;font-weight:700}
+.a2 .nav .nb{margin-left:auto;font-weight:700;color:#17161a;border-bottom:2px solid #d06d5b}
+.a2 .hero{display:flex;justify-content:space-between;align-items:flex-end;padding:34px 0 18px}
+.a2 .hero h1{font:800 42px/1.2 var(--serif);letter-spacing:-.07em;margin:0}
+.a2 .hero .q{width:300px;border-bottom:1.5px solid #24211f;padding:8px 0;color:#9a9298;font-size:14px}
+.a2 .day{display:grid;grid-template-columns:150px 1fr;gap:20px;padding:22px 0;border-top:1px solid #dcd7cd}
+.a2 .day .d{font:800 15px var(--serif);color:#837c83;letter-spacing:-.03em}
+.a2 .day .d b{display:block;font:800 52px/1 var(--serif);color:#24211f;letter-spacing:-.08em;margin-bottom:4px}
+.a2 .ent{display:grid;grid-template-columns:1.6fr 1fr 130px 150px;gap:18px;align-items:center;padding:14px 12px;border-radius:10px}
+.a2 .ent+.ent{border-top:1px dotted #d6d0c4}
+.a2 .ent:hover{background:#f1ede5}
+.a2 .ent h3{margin:0;font:800 21px var(--serif);letter-spacing:-.06em}
+.a2 .ent p{margin:3px 0 0;color:#837c83;font-size:13px}
+.a2 .stk{display:flex}.a2 .stk .av{border:2px solid #faf8f4;margin-left:-9px;filter:saturate(.7)}.a2 .stk .av:first-child{margin-left:0}
+.a2 .tg{font-size:12px;font-weight:700}
+.a2 .tg.run{color:#2f5fd0}.a2 .tg.bad{color:#b3382c}.a2 .tg.ok{color:#3d7a52}
+.a2 .act{justify-self:end;font-weight:700;font-size:13px;border-bottom:2px solid #d06d5b;padding-bottom:1px}
+
+/* ===== B1 MISSION CONTROL ===== */
+.b1{background:#07090c;color:#cfd6df;font-family:var(--sans);min-height:760px;display:flex;flex-direction:column}
+.b1 .bar{display:flex;align-items:center;gap:20px;padding:12px 22px;border-bottom:1px solid #182029;font-size:13px}
+.b1 .lg{font:700 14px var(--mono);color:#5eead4;letter-spacing:.04em}
+.b1 .bar .m{color:#6b7684}.b1 .bar .on{color:#fff}
+.b1 .bar .nb{margin-left:auto;border:1px solid #2a3642;border-radius:6px;padding:6px 12px;font:500 12px var(--mono);color:#cfd6df}
+.b1 .kp{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #182029}
+.b1 .kp div{padding:18px 22px;border-right:1px solid #182029}
+.b1 .kp b{display:block;font:500 34px/1 var(--mono);color:#fff;letter-spacing:-.04em}
+.b1 .kp span{font:500 11px var(--mono);color:#6b7684;letter-spacing:.08em}
+.b1 .kp .hot b{color:#5eead4}.b1 .kp .bd b{color:#ff7a6b}
+.b1 .body{display:grid;grid-template-columns:1fr 340px;flex:1}
+.b1 .tb{padding:6px 0}
+.b1 .r{display:grid;grid-template-columns:20px 1.3fr 180px 1fr 110px;gap:16px;align-items:center;padding:13px 22px;border-bottom:1px solid #121922}
+.b1 .r:hover{background:#0d131a}
+.b1 .r .n{color:#fff;font-weight:600}.b1 .r .s{font:400 12px var(--mono);color:#6b7684}
+.b1 .seg{display:flex;gap:3px}.b1 .seg i{width:16px;height:22px;border-radius:3px;background:#17202a}
+.b1 .seg i.d{background:#5eead4}.b1 .seg i.r{background:#5eead466;animation:pulse 1.4s infinite}.b1 .seg i.x{background:#ff7a6b}
+.b1 .dot{width:9px;height:9px;border-radius:50%;background:#3a4654}
+.b1 .dot.r{background:#5eead4;box-shadow:0 0 12px #5eead4;animation:pulse 1.4s infinite}.b1 .dot.x{background:#ff7a6b}.b1 .dot.d{background:#4ade80}
+.b1 .go{justify-self:end;border:1px solid #2a3642;border-radius:6px;padding:5px 10px;font:500 12px var(--mono);color:#cfd6df}
+.b1 .go.p{background:#5eead4;border-color:#5eead4;color:#04201b}
+.b1 .log{border-left:1px solid #182029;padding:16px 18px;font:400 12px/1.9 var(--mono);color:#7c8896;display:flex;flex-direction:column}
+.b1 .log h4{margin:0 0 8px;font:500 11px var(--mono);letter-spacing:.08em;color:#6b7684}
+.b1 .log b{color:#5eead4;font-weight:500}.b1 .log .e{color:#ff7a6b}
+
+/* ===== B2 CANVAS ===== */
+.b2{background:#f2f2ef;background-image:radial-gradient(#c9c9c2 1.2px,transparent 1.4px);background-size:24px 24px;color:#17171a;font-family:var(--sans);height:760px;position:relative;overflow:hidden}
+.b2 .tl{position:absolute;left:20px;top:18px;display:flex;gap:10px;align-items:center}
+.b2 .tl .lg{font:800 16px var(--sans);letter-spacing:-.03em;background:#fff;border-radius:10px;padding:8px 14px;box-shadow:0 1px 3px #0002}
+.b2 .tl span{background:#fff;border-radius:10px;padding:8px 13px;font-size:13px;box-shadow:0 1px 3px #0002;color:#555}
+.b2 .tr{position:absolute;right:20px;top:18px;background:#17171a;color:#fff;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600}
+.b2 .nd{position:absolute;width:236px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 1px 2px #0002,0 8px 24px -10px #0003;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.b2 .nd h3{margin:0;font-size:15px;letter-spacing:-.02em}
+.b2 .nd .m{color:#8a8a90;font-size:12px}
+.b2 .nd .t{display:flex;justify-content:space-between;align-items:center;font:500 11px var(--mono);color:#8a8a90}
+.b2 .nd .ch{align-self:flex-start;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:#eee;color:#555}
+.b2 .nd.run{outline:2px solid #4f46e5;outline-offset:0}.b2 .nd.run .ch{background:#e0e7ff;color:#4338ca}
+.b2 .nd.bad .ch{background:#ffe1dc;color:#b3382c}.b2 .nd.ok .ch{background:#dcf5e6;color:#1f7a45}
+.b2 .nd .stk{display:flex}.b2 .nd .stk .av{border:2px solid #fff;margin-left:-8px}.b2 .nd .stk .av:first-child{margin-left:0}
+.b2 .nd .go{background:#17171a;color:#fff;text-align:center;border-radius:8px;padding:6px;font-weight:600;font-size:12px}
+.b2 svg{position:absolute;inset:0;pointer-events:none}
+.b2 .dock{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:#fff;border-radius:14px;padding:8px 10px;display:flex;gap:4px;box-shadow:0 8px 30px -8px #0004;font-size:13px}
+.b2 .dock span{padding:7px 14px;border-radius:9px;color:#555}.b2 .dock .on{background:#17171a;color:#fff}
+.b2 .lab{position:absolute;font:500 11px var(--mono);letter-spacing:.06em;color:#9a9aa0}
+
+/* ===== B3 TRIAGE ===== */
+.b3{background:#fff;color:#18181b;font-family:var(--sans);min-height:760px;display:flex;flex-direction:column}
+.b3 .bar{display:flex;align-items:center;gap:20px;padding:12px 22px;border-bottom:1px solid #eaeaec;font-size:13px;color:#71717a}
+.b3 .lg{font-weight:800;color:#18181b;letter-spacing:-.03em;font-size:15px}
+.b3 .bar .nb{margin-left:auto;background:#2563eb;color:#fff;border-radius:8px;padding:7px 14px;font-weight:600}
+.b3 .main{display:grid;grid-template-columns:380px 1fr;flex:1}
+.b3 .ls{border-right:1px solid #eaeaec;display:flex;flex-direction:column}
+.b3 .tabs{display:flex;gap:18px;padding:14px 20px 0;border-bottom:1px solid #eaeaec;font-size:13px;color:#71717a}
+.b3 .tabs b{font-weight:500;padding-bottom:10px}.b3 .tabs .on{color:#18181b;border-bottom:2px solid #2563eb;font-weight:600}
+.b3 .it{padding:14px 20px;border-bottom:1px solid #f3f3f5;display:flex;flex-direction:column;gap:3px}
+.b3 .it.sel{background:#eff4ff;box-shadow:inset 3px 0 0 #2563eb}
+.b3 .it .a{display:flex;justify-content:space-between;font-size:12px;color:#71717a}
+.b3 .it h4{margin:0;font-size:14px;font-weight:600}.b3 .it p{margin:0;font-size:12.5px;color:#71717a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b3 .it .u{width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;margin-right:6px}
+.b3 .rd{padding:34px 44px;display:flex;flex-direction:column;gap:20px}
+.b3 .rd h2{font-size:30px;margin:0;letter-spacing:-.04em}
+.b3 .chip{display:inline-flex;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:#fee2e2;color:#b91c1c}
+.b3 .tlx{display:flex;flex-direction:column;gap:0;border-left:2px solid #e4e4e7;margin-left:6px}
+.b3 .tlx div{padding:0 0 16px 18px;position:relative;font-size:13.5px;color:#3f3f46}
+.b3 .tlx div::before{content:"";position:absolute;left:-6px;top:5px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #a1a1aa}
+.b3 .tlx .x::before{border-color:#ef4444;background:#ef4444}
+.b3 .tlx time{display:block;font:400 11px var(--mono);color:#a1a1aa}
+.b3 .ppl{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.b3 .ppl div{border:1px solid #eaeaec;border-radius:12px;padding:10px;display:flex;gap:10px;font-size:12.5px;color:#52525b;align-items:center}
+.b3 .ppl b{display:block;color:#18181b;font-size:13px}
+.b3 .acts{display:flex;gap:10px;align-items:center}
+.b3 .acts .p{background:#18181b;color:#fff;border-radius:10px;padding:11px 20px;font-weight:600;font-size:14px}
+.b3 .acts .g{border:1px solid #e4e4e7;border-radius:10px;padding:10px 16px;font-size:13px;color:#52525b}
+.b3 kbd{font:500 11px var(--mono);border:1px solid #d4d4d8;border-radius:5px;padding:1px 6px;color:#71717a;background:#fafafa}
+
+/* ===== B4 GRID TABLE ===== */
+.b4{background:#fff;color:#1c1b22;font-family:var(--sans);min-height:760px;font-size:13px}
+.b4 .bar{display:flex;align-items:center;gap:18px;padding:11px 20px;border-bottom:1px solid #ecebf0;color:#6e6c78}
+.b4 .lg{font-weight:800;color:#1c1b22;letter-spacing:-.03em;font-size:15px}
+.b4 .bar .nb{margin-left:auto;background:#6c47ff;color:#fff;border-radius:8px;padding:7px 14px;font-weight:600}
+.b4 .vt{display:flex;gap:4px;padding:10px 20px 0;border-bottom:1px solid #ecebf0}
+.b4 .vt b{font-weight:500;padding:6px 12px 10px;color:#6e6c78}.b4 .vt .on{color:#6c47ff;border-bottom:2px solid #6c47ff;font-weight:600}
+.b4 .ft{display:flex;gap:8px;padding:12px 20px;align-items:center;color:#6e6c78}
+.b4 .ft span{border:1px solid #e3e1ea;border-radius:7px;padding:4px 10px}
+.b4 .g{display:grid;grid-template-columns:34px 36px 1.5fr 130px 150px 150px 70px 90px 130px;align-items:center}
+.b4 .h{background:#f8f7fb;border-top:1px solid #ecebf0;border-bottom:1px solid #ecebf0;font-size:12px;color:#6e6c78;font-weight:600}
+.b4 .h>*,.b4 .cl>*{padding:9px 10px;border-right:1px solid #f0eff5;min-height:40px;display:flex;align-items:center;gap:6px;overflow:hidden;white-space:nowrap}
+.b4 .cl{border-bottom:1px solid #f0eff5}.b4 .cl:hover{background:#faf9ff}
+.b4 .no{color:#a8a6b3;justify-content:center;font:400 11px var(--mono)}
+.b4 .ck{width:14px;height:14px;border:1.5px solid #cfccd9;border-radius:4px}
+.b4 .nm{font-weight:600}
+.b4 .pl{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:2px 10px;font-weight:600;font-size:12px}
+.b4 .pl.run{background:#e8e3ff;color:#5430e0}.b4 .pl.ok{background:#dcf7e8;color:#157a45}.b4 .pl.bad{background:#ffe3df;color:#b3382c}.b4 .pl.dr{background:#eeedf3;color:#5d5b69}.b4 .pl.rd{background:#fff0cc;color:#8a5a00}.b4 .pl.pt{background:#f1e4ff;color:#7a2fc0}
+.b4 .stk{display:flex}.b4 .stk .av{border:2px solid #fff;margin-left:-7px}.b4 .stk .av:first-child{margin-left:0}
+.b4 .sp{width:90px;height:8px;border-radius:9px;background:#eeedf3;overflow:hidden}.b4 .sp i{display:block;height:100%;background:#6c47ff}
+.b4 .ac{color:#6c47ff;font-weight:600}
+.b4 .ad{color:#a8a6b3;padding:10px 20px}
+
+/* ===== B5 SWISS POSTER ===== */
+.b5{background:#f4f3ee;color:#0d0d0d;font-family:var(--sans);min-height:760px;padding:0 40px 40px;position:relative}
+.b5 .bar{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:20px 0;border-bottom:3px solid #0d0d0d;font-size:13px;font-weight:600}
+.b5 .bar .nb{justify-self:end;background:#ff3b1f;color:#fff;padding:6px 16px;border-radius:0;font-weight:700}
+.b5 .lg{font-weight:800;letter-spacing:-.04em;font-size:17px}
+.b5 .big{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:24px 0 22px;border-bottom:1px solid #0d0d0d}
+.b5 .big div b{display:block;font:800 120px/.9 var(--sans);letter-spacing:-.08em}
+.b5 .big div span{display:block;font-size:14px;font-weight:700;margin-top:8px}
+.b5 .big .hot b{color:#ff3b1f}
+.b5 .tb{display:grid;grid-template-columns:50px 1.5fr 1.5fr 160px 160px;gap:20px;padding:10px 0;font:500 11px var(--mono);letter-spacing:.06em;color:#6d6c66;border-bottom:1px solid #0d0d0d}
+.b5 .r{display:grid;grid-template-columns:50px 1.5fr 1.5fr 160px 160px;gap:20px;align-items:center;padding:16px 0;border-bottom:1px solid #c9c8c0}
+.b5 .r:hover{background:#0d0d0d;color:#f4f3ee}.b5 .r:hover .s{color:#c9c8c0}
+.b5 .r .nn{font:500 13px var(--mono)}.b5 .r h3{margin:0;font-size:24px;letter-spacing:-.04em;font-weight:700}
+.b5 .r .s{font-size:13px;color:#6d6c66}
+.b5 .r .t{font-weight:700;font-size:14px}.b5 .r .t.hot{color:#ff3b1f}
+.b5 .r .a{justify-self:end;font-weight:700;font-size:14px}.b5 .r .a::after{content:" →"}
+
+/* ===== B6 WEEK TIMELINE ===== */
+.b6{background:#fbfbf9;color:#1a1a1d;font-family:var(--sans);min-height:760px;font-size:13px}
+.b6 .bar{display:flex;align-items:center;gap:20px;padding:13px 24px;border-bottom:1px solid #eceae4;color:#77746c}
+.b6 .lg{font-weight:800;color:#1a1a1d;font-size:15px;letter-spacing:-.03em}
+.b6 .bar .nb{margin-left:auto;background:#1a1a1d;color:#fff;border-radius:8px;padding:7px 14px;font-weight:600}
+.b6 .ttl{display:flex;align-items:baseline;gap:14px;padding:26px 24px 14px}
+.b6 .ttl h1{font-size:28px;margin:0;letter-spacing:-.04em}.b6 .ttl span{color:#77746c}
+.b6 .gr{display:grid;grid-template-columns:240px repeat(7,1fr);position:relative;margin:0 24px;border-top:1px solid #eceae4}
+.b6 .gh{padding:10px 8px;font:500 11px var(--mono);color:#9a978e;letter-spacing:.05em;border-bottom:1px solid #eceae4;border-left:1px solid #f1efe9}
+.b6 .gh.td{color:#e0503a;font-weight:600}
+.b6 .gn{padding:0 8px;height:74px;display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid #f1efe9}
+.b6 .gn b{font-size:14px}.b6 .gn span{color:#9a978e;font-size:12px}
+.b6 .gc{border-left:1px solid #f1efe9;border-bottom:1px solid #f1efe9;height:74px}
+.b6 .gc.td{background:#fff7f4}
+.b6 .bk{position:absolute;height:34px;border-radius:9px;display:flex;align-items:center;gap:8px;padding:0 12px;font-weight:600;font-size:12.5px;color:#fff;white-space:nowrap;overflow:hidden}
+.b6 .bk.run{background:linear-gradient(90deg,#2d7ff9,#6c8cff)}.b6 .bk.ok{background:#2f9e6a}.b6 .bk.dr{background:#fff;color:#55524a;border:1.5px dashed #bdb9ad}
+.b6 .bk.bad{background:repeating-linear-gradient(135deg,#e0503a,#e0503a 8px,#d2402a 8px,#d2402a 16px)}
+.b6 .bk.rd{background:#fff;color:#8a6a00;border:1.5px solid #e8b84a}.b6 .bk.pt{background:#8a63d2}
+.b6 .now{position:absolute;top:0;bottom:0;width:2px;background:#e0503a}
+.b6 .now::before{content:"지금";position:absolute;top:-1px;left:-14px;background:#e0503a;color:#fff;font:600 10px var(--sans);padding:1px 6px;border-radius:99px}
+.b6 .bk .av{border:2px solid #ffffffaa}
+
+/* ===== B7 BIG ASK ===== */
+.b7{background:radial-gradient(900px 500px at 50% -10%,#fff4e6,#fff0 70%),#f8f7f5;color:#1b1a1d;font-family:var(--sans);min-height:760px;display:flex;flex-direction:column;align-items:center}
+.b7 .bar{align-self:stretch;display:flex;align-items:center;gap:22px;padding:18px 32px;font-size:13px;color:#77737f}
+.b7 .lg{font-weight:800;color:#1b1a1d;letter-spacing:-.04em;font-size:16px}
+.b7 .bar .ac{margin-left:auto;display:flex;gap:10px;align-items:center}
+.b7 .bar .ac i{width:30px;height:30px;border-radius:50%;background:#1b1a1d;display:grid;place-items:center;color:#fff;font-style:normal;font-size:12px}
+.b7 h1{margin:84px 0 22px;font:800 42px/1.25 var(--serif);letter-spacing:-.06em;text-align:center}
+.b7 .ask{width:680px;height:64px;border-radius:20px;background:#fff;box-shadow:0 1px 2px #0002,0 18px 40px -18px #3a2a1a55;display:flex;align-items:center;padding:0 22px;gap:14px;font-size:16px;color:#a4a0aa}
+.b7 .ask kbd{margin-left:auto;font:500 12px var(--mono);border:1px solid #e3e0e7;border-radius:6px;padding:2px 8px}
+.b7 .sg{display:flex;gap:12px;margin-top:30px}
+.b7 .sgc{width:218px;background:#fff;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 2px #0001;font-size:13px}
+.b7 .sgc .k{font:500 11px var(--mono);letter-spacing:.06em;color:#9b97a3}
+.b7 .sgc h3{margin:0;font-size:17px;letter-spacing:-.03em}.b7 .sgc p{margin:0;color:#77737f;font-size:12.5px}
+.b7 .sgc .go{margin-top:6px;text-align:center;background:#1b1a1d;color:#fff;border-radius:10px;padding:8px;font-weight:600;font-size:13px}
+.b7 .sgc.hot{background:#1b1a1d;color:#fff}.b7 .sgc.hot .k{color:#aaa6b2}.b7 .sgc.hot p{color:#c9c5d0}.b7 .sgc.hot .go{background:#fff;color:#1b1a1d}
+.b7 .rc{width:680px;margin-top:34px;display:flex;flex-direction:column}
+.b7 .rc h4{margin:0 0 6px;font:500 11px var(--mono);letter-spacing:.08em;color:#9b97a3}
+.b7 .rc div{display:flex;justify-content:space-between;padding:11px 4px;border-bottom:1px solid #e9e6ec;font-size:14px}
+.b7 .rc span{color:#9b97a3;font-size:12.5px}
+</style></head><body>
+<div class="page">
+ <div class="intro">
+  <h1>PersonaLab 워크스페이스 홈 · 시안 9종 (v6)</h1>
+  <p><b>랜딩과 이어지는 2종</b>은 랜딩의 따뜻한 종이 배경, 세리프 제목, 코랄 밑줄, 기울어진 인물 사진 카드를 그대로 가져왔습니다. <b>워크스페이스만의 대비 7종</b>은 랜딩과 일부러 분리해서, 일하는 도구로서의 밀도·구조를 바꿨습니다.</p>
+  <p>인물 사진은 랜딩의 AI 대표 이미지(personas-strip.png)를 썼습니다. 이름과 수치는 예시이고, 기능 요소(검색·상태·최신 회차·상태별 버튼)는 모든 시안에 들어 있습니다.</p>
+  <nav><a href="#a1">A1 Polaroid Desk</a><a href="#a2">A2 Logbook</a><a href="#b1">B1 Mission Control</a><a href="#b2">B2 Canvas</a><a href="#b3">B3 Triage</a><a href="#b4">B4 Grid</a><a href="#b5">B5 Swiss</a><a href="#b6">B6 Week</a><a href="#b7">B7 Big Ask</a></nav>
+ </div>
+ <div id="out" style="display:flex;flex-direction:column;gap:54px"></div>
+</div>
+<script>
+var D=[
+ {n:'동네예약 앱',d:'iOS 앱 · 모바일',r:3,k:'run',st:'실행 중',inf:'5명 중 2명 종료',t:'12분 전',b:'실행 보기',p:[0,1,2,3,4],done:2,run:3},
+ {n:'쇼핑몰 결제 개선',d:'웹 · 데스크톱',r:3,k:'ok',st:'완료',inf:'6명 종료 · 발견 8건',t:'어제',b:'결과 보기',p:[1,3,4],done:6,run:0},
+ {n:'온보딩 프로토타입',d:'Figma · 모바일',r:1,k:'dr',st:'작성 중',inf:'3단계 대상 사용자',t:'오늘 09:40',b:'이어서 설정',p:[]},
+ {n:'학원 관리 대시보드',d:'웹 · 데스크톱',r:1,k:'bad',st:'중단',inf:'로그인에서 차단 · 3/6 저장',t:'3일 전',b:'중단 위치 보기',p:[0,2,3],done:3,run:0},
+ {n:'병원 예약 웹',d:'웹 · 모바일',r:2,k:'rd',st:'실행 준비 완료',inf:'6명 구성 · 화면 14개',t:'2일 전',b:'실행 확인',p:[2,4,1]},
+ {n:'가계부 앱',d:'Android · 모바일',r:1,k:'pt',st:'부분 기록',inf:'종료 기록 4/6',t:'5일 전',b:'부분 결과 보기',p:[3,0],done:4,run:0}
+];
+var POS=[5,27.5,50,72.5,95];
+function av(i,s){return '<span class="av" style="width:'+s+'px;height:'+s+'px;background-position:'+POS[i]+'% 28%"></span>'}
+function stk(p,s){return '<span class="stk">'+p.map(function(i){return av(i,s)}).join('')+'</span>'}
+function nb(a){return a}
+var V=[];
+
+/* A1 */
+V.push({id:'a1',g:'A · 랜딩과 이어지는',k:'A1 · POLAROID DESK',h:'기울어진 인물 사진 카드 책상',ref:'참고: PersonaLab 랜딩 인물 스트립, Are.na, Cosmos',p:'테스트마다 참여 페르소나 얼굴이 사진처럼 위에 놓입니다. 랜딩에서 본 카드가 그대로 로그인 후로 이어지고, "사람을 만나는 제품"이라는 정체성이 홈에서도 보입니다. 작성 중인 테스트는 빗금 빈 사진입니다. 단점은 사진 영역 때문에 한 화면에 6개 정도가 한계라는 점입니다.',
+ f:function(){var cards=D.map(function(x,i){var ph=x.p.length?'<div class="faces">'+x.p.map(function(j){return '<span class="ph" style="background-position:'+(j*25)+'% 0"></span>'}).join('')+'</div>':'<div class="faces none">페르소나 미선택</div>';
+  return '<div class="pc">'+(i%2===0?'<span class="tape"></span>':'')+'<div class="fl">'+ph+'<div class="inf"><h3>'+x.n+'</h3><div class="row"><span class="st '+x.k+'"><i></i>'+x.st+'</span><span>회차 '+x.r+' · '+x.t+'</span></div><div class="row"><span>'+x.inf+'</span></div><div class="go'+(x.k==='run'||x.k==='bad'?' p':'')+'">'+x.b+'</div></div></div></div>'}).join('');
+  return '<div class="a1"><div class="nav"><span class="lg">PersonaLab</span><span class="on">내 테스트</span><span>페르소나 보관함</span><span>전체 실행 기록</span><span class="nb">+ 새 테스트 만들기</span></div><div class="head"><h1>이어서 볼 <u>테스트</u>를 골라 주세요</h1><p>동네예약 앱에서 5명 중 2명이 탐색을 마쳤어요.</p></div><div class="tools"><span class="s">⌕ 테스트 이름 검색</span><span>상태 전체 ▾</span><span>최근 수정순 ▾</span><span>보관함 · 휴지통</span></div><div class="desk">'+cards+'</div></div>'}});
+
+/* A2 */
+V.push({id:'a2',g:'',k:'A2 · LOGBOOK',h:'날짜로 쌓이는 연구 노트',ref:'참고: Readwise Reader, Day One, 신문 지면',p:'목록을 날짜별 노트로 묶었습니다. 큰 세리프 날짜, 얇은 점선 구분, 겹친 얼굴, 코랄 밑줄 버튼. 랜딩의 에디토리얼 톤과 가장 가깝고 조용합니다. "언제 무엇을 했는지"가 기억나는 사용자에게 맞고, 상태 우선순위가 약해지는 것이 단점입니다.',
+ f:function(){function e(x){return '<div class="ent"><div><h3>'+x.n+'</h3><p>'+x.inf+' · '+x.d+' · 회차 '+x.r+'</p></div>'+(x.p.length?stk(x.p,30):'<span style="color:#a39ea4;font-size:12px">페르소나 미선택</span>')+'<span class="tg '+(x.k==='run'?'run':x.k==='bad'?'bad':x.k==='ok'?'ok':'')+'">'+x.st+'</span><span class="act">'+x.b+'</span></div>'}
+ function day(a,b,l){return '<div class="day"><div class="d"><b>'+a+'</b>'+b+'</div><div>'+l.map(e).join('')+'</div></div>'}
+ return '<div class="a2"><div class="nav"><span class="lg">PersonaLab</span><span class="on">내 테스트</span><span>페르소나 보관함</span><span>전체 실행 기록</span><span class="nb">새 테스트 만들기 +</span></div><div class="hero"><h1>내 테스트<br>노트</h1><div class="q">⌕ 이름이나 키워드로 찾기</div></div>'+day('07','오늘 · 11월',[D[0],D[2]])+day('06','어제',[D[1]])+day('05','이틀 전',[D[4]])+day('04','3일 전',[D[3]])+day('02','5일 전',[D[5]])+'</div>'}});
+
+/* B1 */
+V.push({id:'b1',g:'B · 워크스페이스만의 대비',k:'B1 · MISSION CONTROL',h:'관제실: 실행 중인 페르소나를 실시간으로',ref:'참고: Vercel 배포 화면, Datadog, Linear 상태 아이콘',p:'테스트 한 줄마다 페르소나 한 명이 칸 하나로 보이고(채움=종료, 깜빡임=탐색 중, 빨강=중단), 오른쪽에 실시간 행동 로그가 흐릅니다. 실행이 핵심인 제품 성격을 가장 직접 보여 주지만, 처음 쓰는 사람에게는 차갑고 전문적입니다.',
+ f:function(){function seg(x){if(!x.p.length&&x.k!=='rd'&&x.k!=='dr')return '';var n=(x.k==='dr')?0:6,h='';for(var i=0;i<n;i++){var c=i<(x.done||0)?(x.k==='bad'?'':'d'):(i<(x.done||0)+(x.run||0)?'r':'');h+='<i class="'+c+'"></i>'}if(x.k==='bad')h='<i class="d"></i><i class="d"></i><i class="d"></i><i class="x"></i><i></i><i></i>';return '<span class="seg">'+h+'</span>'}
+ var rows=D.map(function(x){var c=x.k==='run'?'r':x.k==='bad'?'x':x.k==='ok'?'d':'';return '<div class="r"><span class="dot '+c+'"></span><span><div class="n">'+x.n+'</div><div class="s">'+x.d+' · 회차 '+x.r+'</div></span>'+(seg(x)||'<span class="s">구성 전</span>')+'<span class="s">'+x.st+' · '+x.inf+'</span><span class="go'+(x.k==='run'?' p':'')+'">'+x.b+'</span></div>'}).join('');
+ return '<div class="b1"><div class="bar"><span class="lg">PERSONALAB</span><span class="on">내 테스트</span><span class="m">페르소나 보관함</span><span class="m">전체 실행 기록</span><span class="nb">+ 새 테스트 ⌘N</span></div><div class="kp"><div class="hot"><b>03</b><span>탐색 중인 페르소나</span></div><div><b>01</b><span>실행 중 테스트</span></div><div class="bd"><b>02</b><span>확인 필요</span></div><div><b>06</b><span>전체 테스트</span></div></div><div class="body"><div class="tb">'+rows+'</div><div class="log"><h4>LIVE · 동네예약 앱</h4><div><b>12:41:08</b> P-03 클릭 → 예약하기</div><div><b>12:41:02</b> P-07 스크롤 ↓ 홈</div><div><b>12:40:51</b> P-11 입력 → 이름</div><div class="e">12:40:33 P-02 종료 · 한도 도달</div><div><b>12:40:20</b> P-03 이동 → 시간 선택</div><div><b>12:40:02</b> P-07 클릭 → 매장 목록</div><div>12:39:48 P-09 종료 · 목표 도달</div></div></div></div>'}});
+
+/* B2 */
+V.push({id:'b2',g:'',k:'B2 · CANVAS',h:'캔버스: 테스트와 회차가 선으로 이어지는 지도',ref:'참고: Figma, Miro, Linear Roadmap',p:'테스트가 점 격자 위의 노드이고, 같은 테스트의 회차는 선으로 연결됩니다. 수정 회차를 반복하는 제품 루프(회차1→2→3)가 공간적으로 보입니다. 이동·확대와 묶어 정리하기가 자연스럽지만, 테스트가 많아지면 정렬 규칙이 필요합니다.',
+ f:function(){function nd(x,l,t,extra){var c=x.k==='run'?' run':x.k==='bad'?' bad':x.k==='ok'?' ok':'';return '<div class="nd'+c+'" style="left:'+l+'px;top:'+t+'px"><div class="t"><span>회차 '+(extra||x.r)+'</span><span>'+x.t+'</span></div><h3>'+x.n+'</h3><span class="ch">'+x.st+'</span><div class="m">'+x.inf+'</div>'+(x.p.length?stk(x.p,24):'')+'<div class="go">'+x.b+'</div></div>'}
+ var s='<svg width="1040" height="760" fill="none" stroke="#b9b9b0" stroke-width="1.6"><path d="M260 225 C300 225 290 225 320 225"/><path d="M556 225 C590 225 600 225 620 225"/><path d="M300 560 C340 560 330 560 360 560"/></svg>';
+ var ghost=function(l,t,r,s2){return '<div class="nd" style="left:'+l+'px;top:'+t+'px;width:200px;opacity:.7"><div class="t"><span>회차 '+r+'</span><span>'+s2+'</span></div><h3>쇼핑몰 결제 개선</h3><span class="ch ok" style="background:#dcf5e6;color:#1f7a45">완료</span></div>'};
+ return '<div class="b2"><div class="tl"><span class="lg">PersonaLab</span><span>내 테스트</span><span>페르소나 보관함</span><span>전체 실행 기록</span></div><div class="tr">+ 새 테스트</div><div class="lab" style="left:60px;top:100px">쇼핑몰 결제 개선 · 3개 회차</div>'+s+ghost(60,150,1,'11/1')+ghost(320,150,2,'11/4')+nd(D[1],620,150)+'<div class="lab" style="left:60px;top:400px">진행·작성 중</div>'+nd(D[0],60,430)+nd(D[2],340,430)+nd(D[4],620,430)+'<div class="lab" style="left:60px;top:640px">확인 필요</div><div style="position:absolute;left:60px;top:660px;display:flex;gap:20px;transform:scale(.9);transform-origin:left top"></div><div class="nd bad" style="left:700px;top:600px;width:236px"><div class="t"><span>회차 1</span><span>3일 전</span></div><h3>학원 관리 대시보드</h3><span class="ch">중단</span><div class="m">로그인에서 차단 · 3/6 저장</div><div class="go">중단 위치 보기</div></div><div class="dock"><span class="on">선택</span><span>이동</span><span>⌕ 검색</span><span>− 100% +</span></div></div>'}});
+
+/* B3 */
+V.push({id:'b3',g:'',k:'B3 · TRIAGE',h:'받은편지함: 확인할 것부터 하나씩 처리',ref:'참고: Superhuman, Linear Inbox, Apple Mail',p:'왼쪽은 "확인 필요 · 진행 · 초안" 탭의 목록, 오른쪽은 선택한 테스트의 상황 요약과 다음 행동 하나입니다. J/K로 넘기며 막힌 것을 빠르게 치우는 흐름입니다. 업무 도구의 효율은 가장 좋고, 테스트가 3~4개일 때는 과합니다.',
+ f:function(){var its=[[D[3],1],[D[5],1],[D[0],0],[D[2],0],[D[4],0],[D[1],0]].map(function(a,i){var x=a[0];return '<div class="it'+(i===0?' sel':'')+'"><div class="a"><span>'+(a[1]?'<span class="u"></span>':'')+x.st+'</span><span>'+x.t+'</span></div><h4>'+x.n+'</h4><p>'+x.inf+'</p></div>'}).join('');
+ return '<div class="b3"><div class="bar"><span class="lg">PersonaLab</span><b style="color:#18181b;font-weight:600">내 테스트</b><span>페르소나 보관함</span><span>전체 실행 기록</span><span style="margin-left:24px;border:1px solid #e4e4e7;border-radius:8px;padding:5px 12px;min-width:220px">⌕ 검색 <kbd>/</kbd></span><span class="nb">+ 새 테스트</span></div><div class="main"><div class="ls"><div class="tabs"><b class="on">확인 필요 2</b><b>진행 1</b><b>초안 2</b><b>완료 1</b></div>'+its+'</div><div class="rd"><div><span class="chip">중단</span></div><h2>학원 관리 대시보드</h2><p style="margin:0;color:#52525b">웹 · 데스크톱 · 회차 1 · 3일 전. 6명 중 3명의 기록이 저장됐고 나머지는 로그인 화면에서 차단됐어요.</p><div class="tlx"><div><time>11/04 14:02</time>P-01 홈 → 로그인 화면 도착</div><div><time>11/04 14:03</time>P-01 이메일 입력, 로그인 클릭</div><div class="x"><time>11/04 14:03</time>로그인 후 화면 접근 불가 · 3명 차단</div></div><div class="ppl"><div>'+av(0,34)+'<span><b>P-01 · 34세</b>자영업자 · 종료</span></div><div>'+av(2,34)+'<span><b>P-04 · 27세</b>대학생 · 종료</span></div><div>'+av(3,34)+'<span><b>P-06 · 41세</b>교사 · 차단</span></div></div><div class="acts"><span class="p">중단 위치 보기</span><span class="g">설정 수정</span><span class="g">다음 항목 <kbd>J</kbd></span><span class="g">보관 <kbd>E</kbd></span></div></div></div></div>'}});
+
+/* B4 */
+V.push({id:'b4',g:'',k:'B4 · GRID',h:'스프레드시트형 테이블',ref:'참고: Airtable, Attio, Notion Database',p:'열마다 의미가 있습니다: 상태 칩, 참여 얼굴, 진행 막대, 회차, 수정일. 상단에는 저장된 보기 탭(모든 테스트·확인 필요)과 필터·그룹. 테스트가 수십 개로 늘어도 버티는 구조입니다. 가장 "관리 도구"답고 감성은 가장 약합니다.',
+ f:function(){var pc={run:'run',ok:'ok',dr:'dr',bad:'bad',rd:'rd',pt:'pt'};var rows=D.map(function(x,i){var pr=x.k==='run'?40:x.k==='ok'?100:x.k==='bad'?50:x.k==='pt'?66:0;return '<div class="g cl"><span class="no">'+(i+1)+'</span><span class="no"><i class="ck"></i></span><span class="nm">'+x.n+'</span><span><span class="pl '+pc[x.k]+'">'+x.st+'</span></span><span>'+(x.p.length?stk(x.p,22):'<span style="color:#a8a6b3">—</span>')+'</span><span><span class="sp"><i style="width:'+pr+'%"></i></span></span><span style="color:#6e6c78">R'+x.r+'</span><span style="color:#6e6c78">'+x.t+'</span><span class="ac">'+x.b+' →</span></div>'}).join('');
+ return '<div class="b4"><div class="bar"><span class="lg">PersonaLab</span><b style="color:#1c1b22;font-weight:600">내 테스트</b><span>페르소나 보관함</span><span>전체 실행 기록</span><span class="nb">+ 새 테스트</span></div><div class="vt"><b class="on">모든 테스트 6</b><b>확인 필요 2</b><b>이번 주</b><b>＋ 보기 추가</b></div><div class="ft"><span>⌕ 검색</span><span>필터 0</span><span>그룹: 없음</span><span>정렬: 최근 수정 ↓</span><span style="margin-left:auto">보관함 · 휴지통</span></div><div class="g h"><span></span><span></span><span>테스트 이름</span><span>상태</span><span>참여 페르소나</span><span>진행</span><span>회차</span><span>수정</span><span>이동</span></div>'+rows+'<div class="ad">＋ 새 테스트</div></div>'}});
+
+/* B5 */
+V.push({id:'b5',g:'',k:'B5 · SWISS',h:'스위스 타이포 포스터: 숫자가 먼저 읽힌다',ref:'참고: Swiss International Style, Teenage Engineering, Linear 랜딩 타이포',p:'맨 위에 상태별 개수가 거대한 숫자로 나오고, 아래는 줄 긋기 표입니다. 흑백에 빨강 하나만 써서 "지금 볼 것"만 튑니다. 가장 대담하고 사진·카드가 없어 가볍지만, 여기서 숫자는 개수일 뿐 점수가 아니라는 점을 분명히 해야 합니다.',
+ f:function(){var rows=D.map(function(x,i){var hot=x.k==='run'||x.k==='bad';return '<div class="r"><span class="nn">0'+(i+1)+'</span><div><h3>'+x.n+'</h3><div class="s">'+x.d+' · 회차 '+x.r+'</div></div><span class="s">'+x.inf+'</span><span class="t'+(hot?' hot':'')+'">'+x.st+'</span><span class="a">'+x.b+'</span></div>'}).join('');
+ return '<div class="b5"><div class="bar"><span class="lg">PersonaLab</span><span>내 테스트</span><span>페르소나 보관함 · 전체 실행 기록</span><span class="nb">+ 새 테스트</span></div><div class="big"><div class="hot"><b>1</b><span>실행 중</span></div><div class="hot"><b>2</b><span>확인 필요</span></div><div><b>2</b><span>이어서 할 것</span></div><div><b>1</b><span>완료</span></div></div><div class="tb"><span>NO</span><span>테스트</span><span>마지막 작업</span><span>상태</span><span style="justify-self:end">다음 행동</span></div>'+rows+'</div>'}});
+
+/* B6 */
+V.push({id:'b6',g:'',k:'B6 · WEEK',h:'주간 타임라인: 언제 돌렸고 지금 어디까지 왔나',ref:'참고: Linear Roadmap, Cron/Notion Calendar, Gantt',p:'가로축이 이번 주(11/3~11/9)이고, 막대는 테스트의 작업 기간입니다. 파랑 그라데이션은 지금 진행 중이고 "지금" 선까지 이어집니다. 빗금 빨강은 중단, 점선은 작성 중. 언제 어떤 결과가 나왔는지 기억에 의존하는 사용자에게 좋고, 기간이 긴 수정 회차 이력에도 확장됩니다.',
+ f:function(){var cols=['월 3','화 4','수 5','목 6','금 7','토 8','일 9'];var names=D.map(function(x){return '<div class="gn"><b>'+x.n+'</b><span>회차 '+x.r+' · '+x.st+'</span></div>'});
+ var cells='';D.forEach(function(x,i){cells+=names[i];for(var c=0;c<7;c++)cells+='<div class="gc'+(c===4?' td':'')+'"></div>'});
+ var W=100/7,L=240; /* 막대 위치: 표 내부 % 기준은 절대 px 계산 대신 calc */
+ function bk(i,s,e,x,txt){return '<div class="bk '+x+'" style="left:calc(240px + (100% - 240px) * '+(s/7)+' + 6px);width:calc((100% - 240px) * '+((e-s)/7)+' - 12px);top:'+(41+i*74+20)+'px">'+txt+'</div>'}
+ return '<div class="b6"><div class="bar"><span class="lg">PersonaLab</span><b style="color:#1a1a1d;font-weight:600">내 테스트</b><span>페르소나 보관함</span><span>전체 실행 기록</span><span class="nb">+ 새 테스트</span></div><div class="ttl"><h1>이번 주</h1><span>11월 3일 – 9일 · 테스트 6</span><span style="margin-left:auto;border:1px solid #e2dfd6;border-radius:8px;padding:5px 12px">⌕ 검색</span><span style="border:1px solid #e2dfd6;border-radius:8px;padding:5px 12px">상태 전체 ▾</span></div><div class="gr"><div class="gh">테스트</div>'+cols.map(function(c,i){return '<div class="gh'+(i===4?' td':'')+'">'+c+'</div>'}).join('')+cells+
+ bk(0,2,4.55,'run',stk([0,1,2],20)+' 5명 중 2명 종료')+bk(1,0,3.6,'ok','6명 종료 · 발견 8건')+bk(2,4,4.6,'dr','작성 중')+bk(3,1,1.9,'bad','로그인 차단')+bk(4,2,3.3,'rd','실행 준비 완료')+bk(5,-0.0,1.4,'pt','4/6')+
+ '<div class="now" style="left:calc(240px + (100% - 240px) * '+(4.55/7)+')"></div></div></div>'}});
+
+/* B7 */
+V.push({id:'b7',g:'',k:'B7 · BIG ASK',h:'한 문장 입력창이 중심인 홈',ref:'참고: Raycast, ChatGPT 홈, Arc 새 탭',p:'목록 대신 큰 입력창 하나와 "지금 이어갈 것" 카드 3장만 보입니다. 이름이나 상태로 말하듯 찾고, 나머지는 아래 "최근"에 접어 둡니다. 테스트가 적을 때 가장 단정하고 첫 인상이 좋습니다. 많아지면 전체 목록 진입이 한 단계 늘어납니다.',
+ f:function(){return '<div class="b7"><div class="bar"><span class="lg">PersonaLab</span><span style="color:#1b1a1d;font-weight:600">내 테스트</span><span>페르소나 보관함</span><span>전체 실행 기록</span><span class="ac"><span>보관함 · 휴지통</span><i>김</i></span></div><h1>무엇을 이어서<br>살펴볼까요?</h1><div class="ask">⌕ 테스트 이름이나 상태로 찾기 (예: 중단, 결제)<kbd>/</kbd></div><div class="sg"><div class="sgc hot"><span class="k">실행 중</span><h3>동네예약 앱</h3><p>5명 중 2명 종료 · 12분 전</p><span class="go">실행 보기</span></div><div class="sgc"><span class="k">확인 필요</span><h3>학원 관리 대시보드</h3><p>로그인에서 차단 · 3/6 저장</p><span class="go">중단 위치 보기</span></div><div class="sgc"><span class="k">이어서 설정</span><h3>온보딩 프로토타입</h3><p>3단계 대상 사용자</p><span class="go">이어서 설정</span></div><div class="sgc" style="background:transparent;box-shadow:none;border:2px dashed #d6d2da;align-items:center;justify-content:center;color:#77737f;font-weight:600"><span style="font-size:30px;color:#1b1a1d;font-weight:300">＋</span>새 테스트</div></div><div class="rc"><h4>최근 · 결과 있음</h4><div>쇼핑몰 결제 개선<span>완료 · 회차 3 · 어제</span></div><div>병원 예약 웹<span>실행 준비 완료 · 2일 전</span></div><div>가계부 앱<span>부분 기록 4/6 · 5일 전</span></div><div style="border:0"><span>전체 6개 보기 →</span></div></div></div>'}});
+
+document.getElementById('out').innerHTML=V.map(function(v){return (v.g?'<div class="grp"><b>'+v.g+'</b></div>':'')+'<div id="'+v.id+'"><div class="vh"><small>'+v.k+'</small><h2>'+v.h+'</h2><div class="ref">'+v.ref+'</div><p>'+v.p+'</p></div><div class="fr"><div class="sc">'+v.f()+'</div></div></div>'}).join('');
+</script></body></html>

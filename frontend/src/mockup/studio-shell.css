@@ -1,0 +1,179 @@
+/* Studio pages (new-test setup 1–6, run, report, interview) in the same pastel shell as the workspace home.
+   Scoped to studio containers so the landing page keeps its approved style. Loaded last. */
+.studio-view,.studio-context,#apphead,.studio-readonly,.wf-progress,.panel-actionbar,#v-compare{
+  --pl-bg:#fbf6ef;--pl-sb:#f6efe5;--pl-ln:#eadfce;--pl-ln2:#dccfb9;--pl-ink:#1d1a16;--pl-mu:#6f6454;--pl-ac:#f26a4b;--pl-acs:#ffe6de;--pl-blue:#4d7cf2;--pl-green:#35a56c;--pl-red:#e5484d;
+  --pl-f:var(--sans);--pl-serif:var(--serif);
+  /* re-point the legacy variables used all over the studio CSS */
+  --line:var(--pl-ln);--line-2:var(--pl-ln2);--paper-2:#f6efe5;--ink:var(--pl-ink);--ink-2:#4a443b;--ink-3:var(--pl-mu);
+  --wf-line:var(--pl-ln);--wf-muted:var(--pl-mu);--wf-paper:var(--pl-bg);--wf-ink:var(--pl-ink);
+  --rv-ink:var(--pl-ink);--rv-muted:#7a7060;--rv-line:var(--pl-ln);--rv-soft:#f6efe5;--rv-accent:var(--pl-ac);--rv-warm:var(--pl-ac)}
+
+/* ================= sidebar (same family as the workspace sidebar) ================= */
+#apphead.studio-sidebar{background:var(--pl-sb);border-right:1px solid var(--pl-ln);font-family:var(--pl-f)}
+.studio-back{background:#fff;border:1px solid var(--pl-ln);border-radius:12px;font-weight:600;margin:16px 0 14px;padding:11px 14px}
+.studio-back:hover{border-color:var(--pl-ink)}
+.studio-test-label{font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--pl-mu);margin:0 10px 6px}
+.studio-test-name{font:800 17px/1.4 var(--pl-f);letter-spacing:-.03em;margin:0 10px 18px}
+#apphead .stepper a{height:42px;border-radius:12px;color:#6f6558;font:600 13.5px var(--pl-f);padding:0 12px}
+#apphead .stepper a .q{color:var(--pl-mu)}
+#apphead .stepper a[aria-current]{background:var(--pl-acs);color:var(--pl-ink);font-weight:800}
+#apphead .stepper a[aria-current] .q{color:var(--pl-ac)}
+#apphead .stepper a[aria-current]:hover{background:var(--pl-acs)}
+#apphead .stepper a:hover:not([aria-current]){background:#fff;color:var(--pl-ink)}
+#apphead .stepper small{font-size:10.5px;font-weight:600;color:var(--pl-mu);background:#0000000a;border-radius:99px;padding:1px 8px}
+#apphead .stepper a[aria-current] small{background:#fff9;color:#8a3b25}
+.studio-sidebar-foot{padding-top:24px}
+.studio-revision{border:1px dashed var(--pl-ln2);border-radius:12px;background:transparent;color:var(--pl-ink);font-weight:700}
+.studio-revision:hover{background:#fff;border-style:solid;border-color:var(--pl-ink)}
+.studio-account{border-top:1px solid var(--pl-ln)}
+.studio-account summary:hover{background:#fff}
+.studio-account-mark{background:#fff;border:1px solid var(--pl-ln);border-radius:50%;color:var(--pl-ink)}
+.studio-account-menu{background:#fff;border:1px solid var(--pl-ln);border-radius:14px}
+
+/* ================= page chrome ================= */
+.studio-context{background:var(--pl-bg);border-bottom:1px solid var(--pl-ln);font-family:var(--pl-f)}
+.studio-context strong{font-weight:700}
+.studio-view{background:var(--pl-bg);font-family:var(--pl-f);color:var(--pl-ink)}
+.studio-readonly{background:var(--pl-acs);color:#8a3b25}
+.studio-readonly button{color:#8a3b25;font-weight:800}
+.studio-view>.page{padding-top:34px}
+.studio-view .qno,.studio-view .wf-eyebrow,.rv-root .rv-eyebrow{font:600 11px 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--pl-ac)}
+.studio-view .qtitle,.studio-view .wf-heading h1{font:800 clamp(30px,2.6vw,42px)/1.2 var(--pl-f);letter-spacing:-.05em;color:var(--pl-ink)}
+.studio-view .qdesc,.studio-view .wf-heading p{color:#7a7060;font-size:15px;line-height:1.7}
+.studio-view .qhead{border-bottom:0;padding-bottom:6px}
+.studio-view h2,.studio-view h3{font-family:var(--pl-f);letter-spacing:-.03em}
+
+/* setup step indicator */
+.wf-progress{background:transparent;border-bottom:1px solid var(--pl-ln);font-family:var(--pl-f)}
+.wf-progress a{color:var(--pl-mu);font-weight:600}
+.wf-progress a b{border-radius:99px;border-color:var(--pl-ln2);background:#fff;color:var(--pl-mu)}
+.wf-progress a[aria-current=step],.wf-progress a[aria-current=page]{color:var(--pl-ink);font-weight:800}
+.wf-progress a[aria-current=step] b,.wf-progress a[aria-current=page] b{background:var(--pl-ac);border-color:var(--pl-ac);color:#fff}
+.wf-progress a.done b,.wf-progress a[data-done] b{background:var(--pl-ink);border-color:var(--pl-ink);color:#fff}
+
+/* ================= cards, forms, buttons ================= */
+.studio-view .card,.wf-source-panel,.wf-source-panel+*,.wf-scope-panel,.studio-run-preparation,.sr-review,.wf-guide{border-radius:24px;border-color:var(--pl-ln);background:#fff;box-shadow:0 1px 2px #5a3d1a0d}
+.studio-view .input,.studio-view .select,.studio-view textarea{border:1px solid var(--pl-ln2);border-radius:14px;background:#fff;font-family:var(--pl-f);color:var(--pl-ink)}
+.studio-view .input:focus,.studio-view .select:focus,.studio-view textarea:focus{outline:0;border-color:var(--pl-ac);box-shadow:0 0 0 3px #f26a4b26}
+.studio-view .label,.studio-view .k{font-weight:700;color:var(--pl-ink)}
+.studio-view .btn,.rv-root .btn{border-radius:99px;border:1px solid var(--pl-ln2);background:#fff;color:var(--pl-ink);font-family:var(--pl-f);font-weight:700}
+.studio-view .btn:hover:not(:disabled),.rv-root .btn:hover:not(:disabled){border-color:var(--pl-ink)}
+.studio-view .btn.solid,.rv-root .btn.solid{background:var(--pl-ac);border-color:var(--pl-ac);color:#fff}
+.studio-view .btn.solid:hover:not(:disabled),.rv-root .btn.solid:hover:not(:disabled){background:#e65a3b;border-color:#e65a3b}
+.studio-view .btn:disabled,.studio-view .btn[aria-disabled=true]{background:#efe8dc;border-color:#efe8dc;color:#a89f90}
+.studio-view .tag,.rv-root .rv-badge{border-radius:99px}
+.studio-view details>summary{color:#6f6558}
+.studio-view .hint{color:var(--pl-mu)}
+.studio-view input[type=radio],.studio-view input[type=checkbox]{accent-color:var(--pl-ac)}
+.studio-view .choice,.studio-view [class*="kind"] label{border-radius:14px}
+
+/* bottom action bar */
+.studio-view .wf-step-actions,.panel-actionbar{background:#fbf6efee;border-top:1px solid var(--pl-ln);box-shadow:none;backdrop-filter:blur(10px);font-family:var(--pl-f)}
+.studio-view .wf-step-actions .wf-action-status strong{font-weight:800}
+.studio-view .wf-step-actions .btn:not(.solid):not(:disabled){background:#fff}
+.studio-view .wf-step-actions .btn.solid,.studio-view .wf-step-actions .btn:last-child:not([data-step-back]){}
+
+/* ================= run page ================= */
+#v-run .roster>*{border-radius:14px}
+#v-run .phase .tag{background:#efe8dc;color:#6f6558;border:0;font-weight:700}
+#v-run .progress{background:#efe8dc;border-radius:99px;height:8px;overflow:hidden}
+#v-run .progress>i{background:var(--pl-ac)}
+#v-run .roster .chip,#v-run .roster [class*="status"]{border-radius:99px}
+#v-run .run>div:first-child,#v-run .run>div:last-child{background:#fff;border:1px solid var(--pl-ln);border-radius:24px}
+#v-run .log li{border-color:var(--pl-ln)}
+#v-run .wf-browser-execution,.prototype-stage{border-radius:24px}
+.live-notice{border-radius:14px}
+
+/* ================= report & interview ================= */
+.rv-root{font-family:var(--pl-f)}
+.rv-root h1,.rv-root h2,.rv-root h3,.rv-heading h1{font-family:var(--pl-f);font-weight:800;letter-spacing:-.045em}
+.rv-root .rv-heading h1,.rv-root h1{font-family:var(--pl-f)!important;font-size:clamp(30px,2.6vw,42px);line-height:1.2;font-weight:800}
+.rv-root .rv-chat-empty strong,.rv-root .rv-section-heading h2,.rv-root h2{font-family:var(--pl-f)!important}
+.rv-root .rv-source,.rv-root .rv-compact-meta{color:#7a7060}
+.rv-root .rv-source span:first-child{background:var(--pl-acs);color:#8a3b25;border-radius:99px}
+.rv-tabs{border-bottom:1px solid var(--pl-ln)}
+.rv-tabs button{font-weight:700;color:var(--pl-mu);border-radius:0}
+.rv-tabs button[aria-selected=true],.rv-tabs button.on{color:var(--pl-ac);box-shadow:inset 0 -2px 0 var(--pl-ac);border-color:transparent}
+.rv-summary-line,.rv-metrics{color:#6f6558}
+.rv-issue-list button,.rv-issue-list li{border-radius:18px;border-color:var(--pl-ln);background:#fff}
+.rv-issue-list button.selected,.rv-issue-list .selected{background:var(--pl-acs);border-color:#f3b7a6}
+.rv-evidence,.rv-evidence-body,.rv-records,.rv-record-table,.rv-coverage{border-radius:24px;border-color:var(--pl-ln);background:#fff}
+.rv-evidence{overflow:hidden}
+.rv-badge{background:#f3ece0;color:#6f6558;font-weight:700}
+.rv-badge.complete,.rv-badge.goal{background:#e4f5ec;color:#23784a}
+.rv-badge.drop,.rv-badge.stopped{background:#fde9e8;color:#c0392b}
+.rv-person-chip{border-radius:99px;border-color:var(--pl-ln);background:#fff}
+.rv-person-chip[aria-pressed=true]{border-color:var(--pl-ink);background:var(--pl-acs)}
+.rv-avatar{border-radius:50%;background-color:#d8d3ca;color:#6f6558}
+.rv-avatar.photo{background-size:900% auto;background-position:var(--ax,50%) 28%}
+.rv-avatar.large{width:56px;height:56px;border-radius:50%}
+.rv-hypothesis,.rv-quote-panel{border-radius:18px;background:#f6efe5}
+
+/* interview */
+.rv-interview-layout{border-radius:28px;border-color:var(--pl-ln);background:#fff;grid-template-columns:300px minmax(0,1fr)!important}
+.rv-interview-context{background:var(--pl-sb);border-right:1px solid var(--pl-ln)}
+.rv-interview-context>p{color:#7a7060}
+.rv-profile{border-top-color:var(--pl-ln);color:#7a7060}
+.rv-conversation{background:#fff}
+.rv-chat-intro{border-bottom-color:var(--pl-ln)}
+.rv-chat-intro p,.rv-chat-foot,.rv-messages article span{color:var(--pl-mu)!important}
+.rv-messages article{border-radius:20px;padding:15px 20px}
+.rv-question{background:var(--pl-ink);color:#fff;border-radius:20px 20px 6px 20px}
+.rv-question span{color:#cfc6b8!important}
+.rv-answer{background:var(--pl-sb);border:0;border-radius:20px 20px 20px 6px}
+.rv-chat-empty{color:#7a7060}
+.rv-chat-empty strong{font:800 24px var(--pl-f);letter-spacing:-.04em;color:var(--pl-ink)}
+.rv-question-chips>button{border:1px solid var(--pl-ln2);border-radius:99px;background:#fff;color:#6f6558;font-weight:600;padding:8px 14px;font-size:12px}
+.rv-question-chips>button:hover{background:var(--pl-acs);border-color:#f3b7a6;color:#8a3b25}
+.rv-conversation form{border:1px solid var(--pl-ln2);border-radius:20px;background:#fff}
+.rv-conversation form:focus-within{border-color:var(--pl-ac);box-shadow:0 0 0 3px #f26a4b26}
+.rv-conversation form .btn{background:var(--pl-ac);border-color:var(--pl-ac);color:#fff;border-radius:99px}
+.rv-root select{border-radius:14px;border:1px solid var(--pl-ln2);background-color:#fff}
+
+/* ================= match sidebar width with the workspace (272px) ================= */
+@media(min-width:1021px){
+  #apphead.studio-sidebar{width:272px;padding:20px 12px 14px}
+  .studio-context,.studio-view,.studio-readonly{margin-left:272px}
+  .studio-active>#liveNotice:not([hidden]){margin-left:272px}
+  .studio-view .wf-step-actions,.panel-actionbar{left:272px}
+  .wf-progress{margin-left:316px}
+}
+.report-document-actions{background:var(--pl-bg);border-top:1px solid var(--pl-ln)}
+
+/* run page: roster needs room for "28세 대학원생 · 상태" on one line */
+@media(min-width:1300px){#v-run .run{grid-template-columns:300px minmax(0,1fr) 300px!important;gap:22px}}
+.studio-view .btn:disabled,.studio-view .btn[aria-disabled=true]{color:#6f6454}
+#v-run .phone-col{min-width:0;overflow:hidden}
+.rv-root .rv-hypothesis{border:0;background:#f6efe5;padding:16px 18px;border-radius:18px}
+.rv-conversation textarea{border:0!important;box-shadow:none!important;border-radius:0!important;background:transparent!important}
+
+/* ---------- run page: one clear state strip + compact summary after a run ---------- */
+.run-state{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 16px;padding:14px 20px;border-radius:18px;background:#fff;border:1px solid var(--pl-ln);font-family:var(--pl-f)}
+.run-state[hidden]{display:none}
+.run-state i{width:10px;height:10px;border-radius:50%;background:#a79f92;flex:none}
+.run-state b{font-weight:800;font-size:15px;letter-spacing:-.02em}
+.run-state span{color:#5e5446;font-size:13.5px}
+.run-state em{margin-left:auto;font-style:normal;color:#6f6454;font-size:13px}
+.run-state[data-kind=run]{background:#eef3ff;border-color:#cdd9ff}.run-state[data-kind=run] i{background:var(--pl-blue);animation:ws-live 1.6s ease-in-out infinite}
+.run-state[data-kind=bad]{background:#fff0ee;border-color:#f6c9c4}.run-state[data-kind=bad] i{background:var(--pl-red)}
+.run-state[data-kind=ok]{background:#eaf7f0;border-color:#c5e8d5}.run-state[data-kind=ok] i{background:var(--pl-green)}
+.studio-run-preparation.is-compact{margin-bottom:18px;border-radius:16px}
+.studio-run-preparation.is-compact .studio-run-checks a{padding:11px 18px}
+.studio-run-preparation.is-compact .studio-run-checks small{display:none}
+.studio-run-preparation.is-compact .studio-run-meta{padding:9px 18px;font-size:12.5px}
+@keyframes ws-live{0%,100%{opacity:1}50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){.run-state i{animation:none!important}}
+.rv-root .rv-hypothesis{background:#fff;border:1px solid var(--pl-ln);padding:16px 18px;margin-top:16px;border-radius:18px}
+/* after a run the three setup cards collapse into one line, so the observation stage is visible without scrolling */
+.studio-run-preparation.is-compact .studio-run-checks{display:none}
+.studio-run-preparation.is-compact .studio-run-meta{padding:10px 18px}
+.run-state:not([hidden])~#transmissionStatus{display:none}
+#v-run .qhead{padding-bottom:0}
+#v-run .qdesc{margin-bottom:6px}
+.studio-view [hidden],.studio-sidebar [hidden],.run-state[hidden]{display:none!important}
+
+/* ---------- landing alignment: logo + typography ---------- */
+.studio-brand{display:inline-flex;align-items:center;gap:8px;font-size:21px;color:var(--pl-ink);font-weight:700;letter-spacing:-.045em}
+.studio-brand .brand-symbol{width:28px;height:28px}
+.studio-view .qtitle,.studio-view .wf-heading h1,.rv-root .rv-heading h1,.rv-root h1,.rv-root .rv-chat-empty strong{font-family:var(--pl-serif)!important;font-weight:800;letter-spacing:-.045em}
+.studio-view .qtitle{font-size:clamp(30px,2.5vw,40px)}
