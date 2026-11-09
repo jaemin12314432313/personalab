@@ -32,7 +32,9 @@ from app.schemas.report import (
 
 def display_id(persona) -> str:
     """페르소나 데이터에 persona_id 가 있으면 그것, 없으면 DB 번호로 만든다."""
-    given = persona.attributes_json.get("persona_id") or persona.attributes_json.get("source", {}).get("persona_id")
+    given = persona.attributes_json.get("persona_id") or persona.attributes_json.get(
+        "source", {}
+    ).get("persona_id")
     return given or f"{PERSONA_ID_PREFIX}{persona.id:0{PERSONA_ID_WIDTH}d}"
 
 
@@ -46,7 +48,11 @@ def build_act(rows: list, notes: dict | None = None) -> ActResultOut | None:
         return None
 
     # click 다음에 도착한 화면: 다음 턴의 화면, 마지막 click 이면 종료 화면
-    arrivals = ([t.screen_id for t in turns[1:]] + [closing.screen_id if closing else None]) if turns else []
+    arrivals = (
+        ([t.screen_id for t in turns[1:]] + [closing.screen_id if closing else None])
+        if turns
+        else []
+    )
     events = [
         ActEventOut(
             turn=t.turn + TURN_NUMBER_OFFSET,
@@ -88,7 +94,11 @@ def build_results(
             id=p.id,
             persona_id=display_id(p),
             ask=AskResultOut.model_validate(asks[p.id]) if p.id in asks else None,
-            act=build_act(acts[p.id], {t: c for (pid, t), c in (annotations or {}).items() if pid == p.id}) if p.id in acts else None,
+            act=build_act(
+                acts[p.id], {t: c for (pid, t), c in (annotations or {}).items() if pid == p.id}
+            )
+            if p.id in acts
+            else None,
         )
         for p in personas
     ]
@@ -100,7 +110,7 @@ def detect_engine(results: list) -> str | None:
 
     found = False
     for result in results:
-        for event in (result.act.events if result.act else []):
+        for event in result.act.events if result.act else []:
             found = True
             if event.reason and event.reason.startswith(RULE_REASON_PREFIX):
                 return "rule"

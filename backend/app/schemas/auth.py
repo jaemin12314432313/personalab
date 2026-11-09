@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, SecretStr, field_validator
+
 from app.core.config import AUTH_PASSWORD_MAX, AUTH_PASSWORD_MIN
 
 

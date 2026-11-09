@@ -6,9 +6,18 @@ from threading import Lock
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
-from app.core.config import AUTH_HASH_MEMORY, AUTH_HASH_PARALLELISM, AUTH_HASH_TIME, AUTH_RATE_MAX_ATTEMPTS, AUTH_RATE_WINDOW_SECONDS
 
-hasher = PasswordHasher(memory_cost=AUTH_HASH_MEMORY, time_cost=AUTH_HASH_TIME, parallelism=AUTH_HASH_PARALLELISM)
+from app.core.config import (
+    AUTH_HASH_MEMORY,
+    AUTH_HASH_PARALLELISM,
+    AUTH_HASH_TIME,
+    AUTH_RATE_MAX_ATTEMPTS,
+    AUTH_RATE_WINDOW_SECONDS,
+)
+
+hasher = PasswordHasher(
+    memory_cost=AUTH_HASH_MEMORY, time_cost=AUTH_HASH_TIME, parallelism=AUTH_HASH_PARALLELISM
+)
 _dummy_hash = hasher.hash(secrets.token_urlsafe(32))
 _attempts: dict[str, deque] = {}
 _lock = Lock()

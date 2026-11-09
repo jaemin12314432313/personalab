@@ -3,7 +3,7 @@
 import json
 
 from app.core.config import ACT_ABANDON, ACT_CLICK, DROP_REASONS
-from app.services.llm import call_llm, require_persona_transmission, image_part
+from app.services.llm import call_llm, image_part, require_persona_transmission
 
 ACT_SYSTEM = (
     "너는 앱을 처음 접하는 사용자다. 페르소나 카드의 배경으로 과제를 수행한다. "
@@ -33,8 +33,16 @@ def build_act_prompt(persona: dict, task: str, screen: dict, history: list[str])
         "additionalProperties": False,
     }
 
-    observation = {"id": screen["id"], "label": screen["label"], "description": screen.get("description", ""), "clickable": targets}
-    if screen.get("image"): observation["visual_source"]="사용자가 등록한 화면 이미지 첨부. 등록된 버튼만 선택하며 OS/키보드/실제 설치 앱 동작은 추정하지 않는다."
+    observation = {
+        "id": screen["id"],
+        "label": screen["label"],
+        "description": screen.get("description", ""),
+        "clickable": targets,
+    }
+    if screen.get("image"):
+        observation["visual_source"] = (
+            "사용자가 등록한 화면 이미지 첨부. 등록된 버튼만 선택하며 OS/키보드/실제 설치 앱 동작은 추정하지 않는다."
+        )
     contents = [
         f"Persona\n{persona['card_text']}",
         f"Task\n{task}",
@@ -48,6 +56,7 @@ def decide_step(persona: dict, task: str, screen: dict, history: list[str]) -> d
     require_persona_transmission()
     prompt = build_act_prompt(persona, task, screen, history)
     targets = [element["text"] for element in screen["elements"]]
+
     def check(out):
         if not isinstance(out.get("reason"), str) or not out["reason"].strip():
             return "이유가 비어 있다"
@@ -61,8 +70,9 @@ def decide_step(persona: dict, task: str, screen: dict, history: list[str]) -> d
             return None if out.get("target") is None else "이탈 시 target은 null"
         return "action 형식 오류"
 
-    contents=list(prompt["contents"])
+    contents = list(prompt["contents"])
     if screen.get("image"):
-        part=image_part(screen["image"])
-        if part is not None:contents.append(part)
+        part = image_part(screen["image"])
+        if part is not None:
+            contents.append(part)
     return call_llm(prompt["system"], contents, prompt["response_schema"], check)

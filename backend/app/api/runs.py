@@ -53,7 +53,9 @@ async def run_report(
             source=await study_repo.study_source(session, run.study_id),
             ask_run_id=None,
             act_run_id=run.id,
-            results=(snap_results := [PersonaResultOut.model_validate(r) for r in snapshot.results_json]),
+            results=(
+                snap_results := [PersonaResultOut.model_validate(r) for r in snapshot.results_json]
+            ),
             engine=detect_engine(snap_results),
             outcome=snapshot.outcome,
             saved_at=snapshot.built_at,
@@ -67,7 +69,14 @@ async def run_report(
         source=await study_repo.study_source(session, run.study_id),
         ask_run_id=ask.id if ask else None,
         act_run_id=act.id if act else None,
-        results=(live := build_results(personas, asks, acts, await workflow_repo.annotations(session, act.id) if act else None)),
+        results=(
+            live := build_results(
+                personas,
+                asks,
+                acts,
+                await workflow_repo.annotations(session, act.id) if act else None,
+            )
+        ),
         engine=detect_engine(live),
         meta=await _meta(session, run),
     )

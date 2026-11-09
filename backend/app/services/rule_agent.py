@@ -3,6 +3,7 @@
 실제 AI 페르소나의 판단처럼 보이지 않도록 모든 판단에 engine='rule'을 남기고 이유 문장에 '규칙 기반'을 밝힌다.
 감정·시선·체류 시간 같은 값은 만들지 않는다. 눌러 볼 요소를 고르는 기준만 설명한다.
 """
+
 import hashlib
 import random
 import re
@@ -14,11 +15,28 @@ from app.core.config import ACT_ABANDON, ACT_CLICK, RULE_REASON_PREFIX, settings
 ENGINE_RULE = "rule"
 ENGINE_LLM = "llm"
 # 화면에서 다음 행동으로 이어지기 쉬운 문구
-CTA_WORDS = ("시작", "가입", "다음", "계속", "보기", "더보기", "검색", "확인", "로그인", "둘러", "예약", "신청", "만들기", "추가")
+CTA_WORDS = (
+    "시작",
+    "가입",
+    "다음",
+    "계속",
+    "보기",
+    "더보기",
+    "검색",
+    "확인",
+    "로그인",
+    "둘러",
+    "예약",
+    "신청",
+    "만들기",
+    "추가",
+)
 NO_FILL_TYPES = {"file", "hidden", "checkbox", "radio", "submit", "button", "image", "reset"}
 FILL_KINDS = {"input", "textarea"}
 # 다른 사이트(예: 계정 로그인 창)로 나가 실행이 멈추는 일을 막는다. 버튼에는 주소가 없어 글자로 거른다
-LEAVES_SITE = re.compile(r"로그인|로그아웃|sign\s*in|log\s*in|login|continue\s+with|google\s*계정|계정\s*선택", re.I)
+LEAVES_SITE = re.compile(
+    r"로그인|로그아웃|sign\s*in|log\s*in|login|continue\s+with|google\s*계정|계정\s*선택", re.I
+)
 # 더 눌러 볼 곳이 없을 때 쓰는 종료 코드(CLAUDE.md의 8개 중 하나). 규칙 기반에서는 길을 잃었다는 뜻이 아니라 탐색이 끝났다는 뜻이며, 이유 문장에 그렇게 적는다
 DROP_NOTHING_LEFT = "NAVIGATION_LOST"
 
@@ -70,7 +88,13 @@ def _pick(candidates: list[tuple[int, int, object]], seed: int):
 
 
 def _row(action: str, target, reason: str, drop_reason=None) -> dict:
-    return {"action": action, "target": target, "drop_reason": drop_reason, "reason": reason, "engine": ENGINE_RULE}
+    return {
+        "action": action,
+        "target": target,
+        "drop_reason": drop_reason,
+        "reason": reason,
+        "engine": ENGINE_RULE,
+    }
 
 
 def _think() -> None:
@@ -85,12 +109,25 @@ def decide_screens(persona: dict, task: str, screen: dict, history: list) -> dic
     """직접 등록한 화면(버튼 이름 목록)용 판단."""
     from app.services.browser import SENSITIVE
 
-    elements = [e for e in screen.get("elements", []) if e.get("text") and not SENSITIVE.search(e["text"])]
+    elements = [
+        e for e in screen.get("elements", []) if e.get("text") and not SENSITIVE.search(e["text"])
+    ]
     if not elements:
-        return _row(ACT_ABANDON, None, f"{RULE_REASON_PREFIX}: 더 눌러 볼 버튼이 없어 탐색을 마쳤어요. 사람이 길을 잃은 것은 아니에요.", DROP_NOTHING_LEFT)
+        return _row(
+            ACT_ABANDON,
+            None,
+            f"{RULE_REASON_PREFIX}: 더 눌러 볼 버튼이 없어 탐색을 마쳤어요. 사람이 길을 잃은 것은 아니에요.",
+            DROP_NOTHING_LEFT,
+        )
     words = _words(task)
-    chosen = _pick([(_score(e["text"], words), i, e) for i, e in enumerate(elements)], _seed(persona))
-    return _row(ACT_CLICK, chosen["text"], f"{RULE_REASON_PREFIX}: 과제와 가까워 보이는 '{chosen['text']}' 버튼을 눌렀어요.")
+    chosen = _pick(
+        [(_score(e["text"], words), i, e) for i, e in enumerate(elements)], _seed(persona)
+    )
+    return _row(
+        ACT_CLICK,
+        chosen["text"],
+        f"{RULE_REASON_PREFIX}: 과제와 가까워 보이는 '{chosen['text']}' 버튼을 눌렀어요.",
+    )
 
 
 def decide_browser(persona: dict, task: str, screen: dict, image, history: list) -> dict:
@@ -102,13 +139,51 @@ def decide_browser(persona: dict, task: str, screen: dict, image, history: list)
     elements = [e for e in screen.get("elements", []) if e.get("text")]
     # 입력칸이 비어 있으면 한 번 채워 본다(보호된 형식은 실행기가 알아서 안전한 값으로 바꾼다)
     for e in elements:
-        if e.get("kind") in FILL_KINDS and e.get("type") not in NO_FILL_TYPES and not e.get("filled") and e["text"] not in done:
-            return {**_row("fill", e["id"], f"{RULE_REASON_PREFIX}: 비어 있는 '{e['text']}' 입력칸을 채워 봤어요."), "value": "테스트"}
-    clickable = [e for e in elements if e.get("kind") not in FILL_KINDS and not SENSITIVE.search(e["text"]) and e["text"] not in done and _stays_on_site(e, screen)]
+        if (
+            e.get("kind") in FILL_KINDS
+            and e.get("type") not in NO_FILL_TYPES
+            and not e.get("filled")
+            and e["text"] not in done
+        ):
+            return {
+                **_row(
+                    "fill",
+                    e["id"],
+                    f"{RULE_REASON_PREFIX}: 비어 있는 '{e['text']}' 입력칸을 채워 봤어요.",
+                ),
+                "value": "테스트",
+            }
+    clickable = [
+        e
+        for e in elements
+        if e.get("kind") not in FILL_KINDS
+        and not SENSITIVE.search(e["text"])
+        and e["text"] not in done
+        and _stays_on_site(e, screen)
+    ]
     if not clickable:
-        return _row(ACT_ABANDON, None, f"{RULE_REASON_PREFIX}: 더 눌러 볼 요소가 없어 탐색을 마쳤어요. 사람이 길을 잃은 것은 아니에요.", DROP_NOTHING_LEFT)
+        return _row(
+            ACT_ABANDON,
+            None,
+            f"{RULE_REASON_PREFIX}: 더 눌러 볼 요소가 없어 탐색을 마쳤어요. 사람이 길을 잃은 것은 아니에요.",
+            DROP_NOTHING_LEFT,
+        )
     words = _words(task)
     # 같은 사이트 안의 링크는 이동이 GET이라 안전하게 이어진다. 버튼은 클릭하면 서비스가 데이터를 보내는 요청을 일으켜 실행이 멈추는 일이 잦아 뒤로 둔다
-    scored = [(_score(e["text"], words) + (4 if e.get("href") else 0) + (2 if e.get("dialog") else 0) - (1 if e.get("navigation") and e.get("selected") else 0), i, e) for i, e in enumerate(clickable)]
+    scored = [
+        (
+            _score(e["text"], words)
+            + (4 if e.get("href") else 0)
+            + (2 if e.get("dialog") else 0)
+            - (1 if e.get("navigation") and e.get("selected") else 0),
+            i,
+            e,
+        )
+        for i, e in enumerate(clickable)
+    ]
     chosen = _pick(scored, _seed(persona))
-    return _row(ACT_CLICK, chosen["id"], f"{RULE_REASON_PREFIX}: 아직 누르지 않은 '{chosen['text']}'을(를) 눌렀어요.")
+    return _row(
+        ACT_CLICK,
+        chosen["id"],
+        f"{RULE_REASON_PREFIX}: 아직 누르지 않은 '{chosen['text']}'을(를) 눌렀어요.",
+    )

@@ -1,12 +1,13 @@
 """공급자와 무관한 JSON 호출. 키·원본 응답을 오류와 로그에 노출하지 않는다."""
+
 import base64
 import contextvars
-import threading
-from copy import deepcopy
 import json
 import logging
+import threading
 import time
 from collections.abc import Callable
+from copy import deepcopy
 from functools import cache
 
 import httpx
@@ -14,9 +15,15 @@ from google import genai
 from google.genai import errors, types
 
 from app.core.config import (
-    LLM_DEFAULT_MODEL, LLM_IMAGE_TYPES, LLM_RATE_LIMIT_WAIT_SEC,
-    LLM_SERVER_BUSY_WAIT_SEC, OPENAI_API_BASE, OPENAI_DEFAULT_MODEL, PERSONA_TRANSMISSION_BLOCKED,
-    OPENAI_RETRY_WAIT_SEC, settings,
+    LLM_DEFAULT_MODEL,
+    LLM_IMAGE_TYPES,
+    LLM_RATE_LIMIT_WAIT_SEC,
+    LLM_SERVER_BUSY_WAIT_SEC,
+    OPENAI_API_BASE,
+    OPENAI_DEFAULT_MODEL,
+    OPENAI_RETRY_WAIT_SEC,
+    PERSONA_TRANSMISSION_BLOCKED,
+    settings,
 )
 
 Check = Callable[[dict], str | None]
@@ -28,22 +35,34 @@ class UsageSink:
     """한 실행 동안의 LLM 호출 횟수와 토큰을 모은다. 재시도도 과금되므로 호출마다 더한다."""
 
     def __init__(self):
-        self._lock=threading.Lock();self.calls=0;self.input_tokens=0;self.output_tokens=0
+        self._lock = threading.Lock()
+        self.calls = 0
+        self.input_tokens = 0
+        self.output_tokens = 0
 
-    def add(self,input_tokens:int,output_tokens:int):
+    def add(self, input_tokens: int, output_tokens: int):
         with self._lock:
-            self.calls+=1;self.input_tokens+=int(input_tokens or 0);self.output_tokens+=int(output_tokens or 0)
+            self.calls += 1
+            self.input_tokens += int(input_tokens or 0)
+            self.output_tokens += int(output_tokens or 0)
 
-    def snapshot(self)->dict:
-        with self._lock:return {"calls":self.calls,"input_tokens":self.input_tokens,"output_tokens":self.output_tokens}
+    def snapshot(self) -> dict:
+        with self._lock:
+            return {
+                "calls": self.calls,
+                "input_tokens": self.input_tokens,
+                "output_tokens": self.output_tokens,
+            }
 
 
 # 실행 하나가 시작할 때 설정한다. asyncio 작업과 to_thread 스레드가 같은 수집기를 이어받는다.
-_USAGE=contextvars.ContextVar("personalab_llm_usage",default=None)
+_USAGE = contextvars.ContextVar("personalab_llm_usage", default=None)
 
 
-def start_usage()->UsageSink:
-    sink=UsageSink();_USAGE.set(sink);return sink
+def start_usage() -> UsageSink:
+    sink = UsageSink()
+    _USAGE.set(sink)
+    return sink
 
 
 class LLMError(RuntimeError):
@@ -67,18 +86,22 @@ def require_persona_transmission() -> None:
 def get_client() -> genai.Client:
     if not settings.llm_api_key:
         raise FatalLLMError("서버에 LLM_API_KEY를 설정해 주세요.")
-    return genai.Client(api_key=settings.llm_api_key,
-                        http_options=types.HttpOptions(timeout=settings.llm_timeout * 1000))
+    return genai.Client(
+        api_key=settings.llm_api_key,
+        http_options=types.HttpOptions(timeout=settings.llm_timeout * 1000),
+    )
 
 
 @cache
 def get_openai_client() -> httpx.Client:
-    return httpx.Client(base_url=OPENAI_API_BASE + "/", timeout=settings.llm_timeout,
-                        follow_redirects=False)
+    return httpx.Client(
+        base_url=OPENAI_API_BASE + "/", timeout=settings.llm_timeout, follow_redirects=False
+    )
 
 
 def strict_schema(schema: dict) -> dict:
     result = deepcopy(schema)
+
     def visit(node):
         if isinstance(node, dict):
             if node.get("type") == "object":
@@ -90,6 +113,7 @@ def strict_schema(schema: dict) -> dict:
         elif isinstance(node, list):
             for value in node:
                 visit(value)
+
     visit(result)
     return result
 
@@ -107,24 +131,37 @@ def openai_text(system: str, contents: list, schema: dict) -> str:
             raise LLMError("지원하지 않는 LLM 입력 형식입니다.")
     model = settings.llm_model or OPENAI_DEFAULT_MODEL
     payload = {
-        "model": model, "instructions": system,
+        "model": model,
+        "instructions": system,
         "input": [{"role": "user", "content": user_content}],
-        "text": {"format": {"type": "json_schema", "name": "personalab_response",
-                              "strict": True, "schema": strict_schema(schema)}},
-        "max_output_tokens": settings.llm_max_output_tokens, "store": False,
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": "personalab_response",
+                "strict": True,
+                "schema": strict_schema(schema),
+            }
+        },
+        "max_output_tokens": settings.llm_max_output_tokens,
+        "store": False,
     }
     if model.startswith("gpt-5.4"):
         payload["reasoning"] = {"effort": "none"}
-    response = get_openai_client().post("responses", json=payload,
-        headers={"Authorization": "Bearer " + settings.llm_api_key})
+    response = get_openai_client().post(
+        "responses", json=payload, headers={"Authorization": "Bearer " + settings.llm_api_key}
+    )
     try:
         body = response.json()
     except ValueError:
         body = {}
     if isinstance(body, dict) and isinstance(body.get("usage"), dict):
         usage = body.get("usage") or {}
-        log.info("LLM provider=openai model=%s input_tokens=%s output_tokens=%s",
-                 model, usage.get("input_tokens", 0), usage.get("output_tokens", 0))
+        log.info(
+            "LLM provider=openai model=%s input_tokens=%s output_tokens=%s",
+            model,
+            usage.get("input_tokens", 0),
+            usage.get("output_tokens", 0),
+        )
         sink = _USAGE.get()
         if sink is not None:
             sink.add(usage.get("input_tokens", 0), usage.get("output_tokens", 0))
@@ -133,9 +170,13 @@ def openai_text(system: str, contents: list, schema: dict) -> str:
         error = body.get("error", {}) if isinstance(body, dict) else {}
         code = error.get("code") if isinstance(error, dict) else None
         if status == 429 and code == "insufficient_quota":
-            raise FatalLLMError("OpenAI API 크레딧 또는 결제 한도를 확인해 주세요. (insufficient_quota)")
+            raise FatalLLMError(
+                "OpenAI API 크레딧 또는 결제 한도를 확인해 주세요. (insufficient_quota)"
+            )
         if status in (401, 403):
-            raise FatalLLMError(f"OpenAI 키 또는 프로젝트의 모델 접근 권한을 확인해 주세요. (HTTP {status})")
+            raise FatalLLMError(
+                f"OpenAI 키 또는 프로젝트의 모델 접근 권한을 확인해 주세요. (HTTP {status})"
+            )
         if status == 429 or status >= 500:
             raise RetryableLLMError(f"OpenAI 일시적 호출 제한 또는 서버 오류 (HTTP {status})")
         raise LLMError(f"OpenAI 요청 형식 또는 모델 설정을 확인해 주세요. (HTTP {status})")
@@ -161,10 +202,14 @@ def call_llm(system: str, contents: list, schema: dict, check: Check | None = No
                 text = openai_text(system, contents, schema)
             else:
                 config = types.GenerateContentConfig(
-                    system_instruction=system, response_mime_type="application/json",
-                    response_json_schema=schema, max_output_tokens=settings.llm_max_output_tokens)
+                    system_instruction=system,
+                    response_mime_type="application/json",
+                    response_json_schema=schema,
+                    max_output_tokens=settings.llm_max_output_tokens,
+                )
                 response = get_client().models.generate_content(
-                    model=settings.llm_model or LLM_DEFAULT_MODEL, contents=contents, config=config)
+                    model=settings.llm_model or LLM_DEFAULT_MODEL, contents=contents, config=config
+                )
                 text = response.text or "null"
             out = json.loads(text)
             if not isinstance(out, dict):

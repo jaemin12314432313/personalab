@@ -1,4 +1,5 @@
 """Usage: python scripts/import_persona_library.py --directory ../data/persona_engine/outputs --source-commit SHA"""
+
 import argparse
 import asyncio
 import json
@@ -18,7 +19,11 @@ async def run(args):
         async with SessionLocal() as session:
             async with session.begin():
                 result = await import_prepared(session, panels)
-        print(json.dumps({"total": sum(p["count"] for p in result), "panels": result}, ensure_ascii=True))
+        print(
+            json.dumps(
+                {"total": sum(p["count"] for p in result), "panels": result}, ensure_ascii=True
+            )
+        )
     finally:
         await engine.dispose()
 

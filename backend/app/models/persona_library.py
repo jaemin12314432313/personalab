@@ -1,4 +1,5 @@
 """기존 생성 패널의 변경 불가능한 버전과 재사용 카드 보관함."""
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint, func
@@ -10,7 +11,9 @@ from app.models.base import Base
 
 class PersonaLibraryPanel(Base):
     __tablename__ = "persona_library_panels"
-    __table_args__ = (UniqueConstraint("panel_key", "version_hash", name="uq_library_panel_version"),)
+    __table_args__ = (
+        UniqueConstraint("panel_key", "version_hash", name="uq_library_panel_version"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     panel_key: Mapped[str] = mapped_column(String(200))
@@ -22,10 +25,14 @@ class PersonaLibraryPanel(Base):
 
 class PersonaLibraryEntry(Base):
     __tablename__ = "persona_library_entries"
-    __table_args__ = (UniqueConstraint("panel_id", "source_persona_id", name="uq_library_panel_persona"),)
+    __table_args__ = (
+        UniqueConstraint("panel_id", "source_persona_id", name="uq_library_panel_persona"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    panel_id: Mapped[int] = mapped_column(ForeignKey("persona_library_panels.id", ondelete="RESTRICT"), index=True)
+    panel_id: Mapped[int] = mapped_column(
+        ForeignKey("persona_library_panels.id", ondelete="RESTRICT"), index=True
+    )
     source_persona_id: Mapped[str] = mapped_column(String(50))
     profile_hash: Mapped[str] = mapped_column(String(64))
     attributes_json: Mapped[dict] = mapped_column(JSONB)

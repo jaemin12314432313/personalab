@@ -8,7 +8,9 @@ from app.models.base import Base
 
 class UserCredential(Base):
     __tablename__ = "user_credentials"
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
     password_hash: Mapped[str] = mapped_column(Text)
 
 

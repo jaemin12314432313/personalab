@@ -15,6 +15,7 @@ from app.core.config import settings
 def pin_llm_engine(monkeypatch):
     """기본 설정은 규칙 기반(비용 없음)이지만, 기존 테스트는 모델 경로를 가정한다. 규칙 기반은 따로 켠다."""
     from app.core.config import settings
+
     monkeypatch.setattr(settings, "agent_engine", "llm")
     monkeypatch.setattr(settings, "rule_step_delay_ms", 0)
     monkeypatch.setattr(settings, "run_concurrency", 1)
@@ -23,6 +24,7 @@ def pin_llm_engine(monkeypatch):
 @pytest.fixture(autouse=True)
 def clear_auth_rate_state():
     from app.services.auth import _attempts
+
     _attempts.clear()
 
 

@@ -9,7 +9,11 @@ from app.services.auth import token_digest
 
 async def current_user_id(request: Request, session: AsyncSession = Depends(get_session)) -> int:
     token = request.cookies.get(AUTH_COOKIE, "")
-    user = await auth_repo.user_for_session(session, token_digest(token)) if token and len(token) <= 128 else None
+    user = (
+        await auth_repo.user_for_session(session, token_digest(token))
+        if token and len(token) <= 128
+        else None
+    )
     if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "로그인이 필요합니다.")
     return user.id

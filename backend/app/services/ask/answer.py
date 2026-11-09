@@ -31,7 +31,14 @@ def ask_persona(persona: dict, product: dict, questions: list[dict]) -> dict:
             "willingness_to_pay": {"type": "integer", "minimum": 0, "maximum": MAX_WTP},
             "reason": {"type": "string"},
         },
-        "required": ["usage_intention", "needed_features", "unneeded_features", "concern", "willingness_to_pay", "reason"],
+        "required": [
+            "usage_intention",
+            "needed_features",
+            "unneeded_features",
+            "concern",
+            "willingness_to_pay",
+            "reason",
+        ],
         "additionalProperties": False,
     }
     contents = [

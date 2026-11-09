@@ -1,11 +1,12 @@
 import base64
+
 """스터디 입력 API 스키마 (계획서 3장 ①~⑤, 10장)."""
 
-from pydantic import field_serializer, BaseModel, ConfigDict, Field, model_validator
-from app.schemas.run import RunOut
-from app.schemas.workspace import WorkspaceState
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 
 from app.core.config import settings
+from app.schemas.run import RunOut
+from app.schemas.workspace import WorkspaceState
 
 
 class StudyCreate(BaseModel):
@@ -20,9 +21,9 @@ class StudyOut(BaseModel):
     status: str
     root_study_id: int | None = None
     revision: int = 1
-    product_id: str = ''
-    test_title: str = ''
-    round_note: str = ''
+    product_id: str = ""
+    test_title: str = ""
+    round_note: str = ""
     workspace: WorkspaceState = Field(default_factory=WorkspaceState)
 
 
@@ -43,17 +44,34 @@ class Element(BaseModel):
 
 
 class Screen(BaseModel):
-    image: str | None = Field(default=None,max_length=1400000)
+    image: str | None = Field(default=None, max_length=1400000)
 
     @model_validator(mode="after")
     def safe_image(self):
-        if not self.image:return self
-        head,sep,payload=self.image.partition(",")
-        if head not in ("data:image/png;base64","data:image/jpeg;base64","data:image/webp;base64") or not sep:raise ValueError("PNG/JPEG/WebP 화면 이미지만 사용할 수 있습니다.")
-        try:data=base64.b64decode(payload,validate=True)
-        except ValueError:raise ValueError("이미지 형식이 올바르지 않습니다.") from None
-        valid=(head.startswith("data:image/png") and data.startswith(b"\x89PNG\r\n\x1a\n")) or (head.startswith("data:image/jpeg") and data.startswith(b"\xff\xd8\xff")) or (head.startswith("data:image/webp") and data.startswith(b"RIFF") and data[8:12]==b"WEBP")
-        if not valid or len(data)>1024*1024:raise ValueError("올바른 이미지 파일을 1MB 이하로 올려주세요.")
+        if not self.image:
+            return self
+        head, sep, payload = self.image.partition(",")
+        if (
+            head
+            not in ("data:image/png;base64", "data:image/jpeg;base64", "data:image/webp;base64")
+            or not sep
+        ):
+            raise ValueError("PNG/JPEG/WebP 화면 이미지만 사용할 수 있습니다.")
+        try:
+            data = base64.b64decode(payload, validate=True)
+        except ValueError:
+            raise ValueError("이미지 형식이 올바르지 않습니다.") from None
+        valid = (
+            (head.startswith("data:image/png") and data.startswith(b"\x89PNG\r\n\x1a\n"))
+            or (head.startswith("data:image/jpeg") and data.startswith(b"\xff\xd8\xff"))
+            or (
+                head.startswith("data:image/webp")
+                and data.startswith(b"RIFF")
+                and data[8:12] == b"WEBP"
+            )
+        )
+        if not valid or len(data) > 1024 * 1024:
+            raise ValueError("올바른 이미지 파일을 1MB 이하로 올려주세요.")
         return self
 
     id: str = Field(min_length=1, max_length=50)
@@ -69,7 +87,8 @@ class PrototypeManualIn(BaseModel):
 
     @model_validator(mode="after")
     def links_point_to_screens(self):
-        if sum(len(s.image or "") for s in self.screens)>5600000:raise ValueError("전체 화면 이미지는 4MB 이하로 등록하세요.")
+        if sum(len(s.image or "") for s in self.screens) > 5600000:
+            raise ValueError("전체 화면 이미지는 4MB 이하로 등록하세요.")
         ids = [s.id for s in self.screens]
         if len(ids) != len(set(ids)):
             raise ValueError("화면 id 가 중복된다")
@@ -132,10 +151,11 @@ class PersonaOut(BaseModel):
     id: int
     attributes: dict
 
-    @field_serializer('attributes')
-    def display_attributes(self,value):
+    @field_serializer("attributes")
+    def display_attributes(self, value):
         from app.services.persona_display import public_attributes
-        return public_attributes(value,f'P{self.id:04}')
+
+        return public_attributes(value, f"P{self.id:04}")
 
 
 class StudyDetailOut(StudyOut):

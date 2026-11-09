@@ -22,12 +22,14 @@ class AskResultOut(BaseModel):
 
 class ConcernOut(BaseModel):
     """이탈 없이 지나가면서 남긴 걱정. code는 이탈 사유 8개 중 하나다(분류는 늘리지 않는다)."""
+
     code: str
     note: str
 
 
 class ObservationOut(BaseModel):
     """화면에서 눈에 띈 UX 관찰 하나. 문제(issue)와 잘 된 점(good)을 함께 담는다."""
+
     dimension: str
     polarity: Literal["issue", "good"]
     severity: str | None = None  # issue일 때만: minor / moderate / blocking
@@ -67,6 +69,7 @@ class PersonaResultOut(BaseModel):
 
 class RunMetaOut(BaseModel):
     """이 실행이 어떤 조건으로 돌았는지. 회차 비교가 같은 조건인지 판단하고, 호출량을 보여 주는 데 쓴다."""
+
     engine: Literal["rule", "llm"]
     model: str | None = None
     prompt_rev: str | None = None
@@ -75,7 +78,7 @@ class RunMetaOut(BaseModel):
 
 
 class ReportOut(BaseModel):
-    source:Literal["live","local-demo"] = "live"
+    source: Literal["live", "local-demo"] = "live"
     study_id: int
     ask_run_id: int | None = None  # 가장 최근에 끝난 실행
     act_run_id: int | None = None

@@ -1,4 +1,5 @@
 """완성된 패널을 검증해서 가져온다. HTML 스크립트와 생성 엔진은 실행하지 않는다."""
+
 import hashlib
 import json
 import math
@@ -8,15 +9,33 @@ from uuid import UUID
 
 from app.repositories import persona_library as repo
 
-REQUIRED = {"persona_id", "uuid", "age", "sex", "province", "occupation", "school", "region3",
-            "job_group", "student_inferred", "donor_pid", "ps_grade", "da_grade", "ns_grade",
-            "privacy_concern", "ott_payment", "match_level", "card_text"}
+REQUIRED = {
+    "persona_id",
+    "uuid",
+    "age",
+    "sex",
+    "province",
+    "occupation",
+    "school",
+    "region3",
+    "job_group",
+    "student_inferred",
+    "donor_pid",
+    "ps_grade",
+    "da_grade",
+    "ns_grade",
+    "privacy_concern",
+    "ott_payment",
+    "match_level",
+    "card_text",
+}
 GRADES = {"낮음", "중간", "높음"}
 
 
 def digest_json(value) -> str:
-    encoded = json.dumps(value, ensure_ascii=False, sort_keys=True, allow_nan=False,
-                         separators=(",", ":")).encode("utf-8")
+    encoded = json.dumps(
+        value, ensure_ascii=False, sort_keys=True, allow_nan=False, separators=(",", ":")
+    ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
 
 
@@ -37,7 +56,7 @@ def read_viewer(path: Path) -> dict:
     match = re.search(r"\bconst\s+DATA\s*=\s*", text)
     if not match:
         raise ValueError("뷰어에 DATA JSON이 없습니다.")
-    data, _ = json.JSONDecoder().raw_decode(text[match.end():])
+    data, _ = json.JSONDecoder().raw_decode(text[match.end() :])
     if not isinstance(data, dict):
         raise ValueError("실제 카드 데이터가 없는 뷰어입니다.")
     return data
@@ -102,29 +121,62 @@ def prepare_panel(path: Path, source_commit: str, viewer: dict | None = None) ->
             if viewer_card != card:
                 raise ValueError(f"{pid}: 뷰어와 카드 문구가 다릅니다.")
         attributes = {
-            "profile": {"age": age, "sex": row["sex"], "region": row["province"],
-                        "region3": row["region3"], "job_group": row["job_group"],
-                        "school": row["school"], "occupation": row["occupation"],
-                        "education_level": row.get("education_level"),
-                        "marital": row.get("marital")},
+            "profile": {
+                "age": age,
+                "sex": row["sex"],
+                "region": row["province"],
+                "region3": row["region3"],
+                "job_group": row["job_group"],
+                "school": row["school"],
+                "occupation": row["occupation"],
+                "education_level": row.get("education_level"),
+                "marital": row.get("marital"),
+            },
             "card_text": card,
-            "traits": {"price": row["ps_grade"], "digital": row["da_grade"],
-                       "novelty": row["ns_grade"], "privacy": privacy, "ott": row["ott_payment"]},
-            "source": {"persona_id": pid, "nvidia_uuid": str(row["uuid"]),
-                       "donor_pid": int(row["donor_pid"]), "match_level": int(row["match_level"]),
-                       "student_inferred": bool(row["student_inferred"]),
-                       "scoring_version": report["scoring_version"], "seed": int(report["seed"]),
-                       "panel_key": path.stem, "panel_version": version,
-                       "source_commit": source_commit, "kind": "imported_matched_panel"},
+            "traits": {
+                "price": row["ps_grade"],
+                "digital": row["da_grade"],
+                "novelty": row["ns_grade"],
+                "privacy": privacy,
+                "ott": row["ott_payment"],
+            },
+            "source": {
+                "persona_id": pid,
+                "nvidia_uuid": str(row["uuid"]),
+                "donor_pid": int(row["donor_pid"]),
+                "match_level": int(row["match_level"]),
+                "student_inferred": bool(row["student_inferred"]),
+                "scoring_version": report["scoring_version"],
+                "seed": int(report["seed"]),
+                "panel_key": path.stem,
+                "panel_version": version,
+                "source_commit": source_commit,
+                "kind": "imported_matched_panel",
+            },
             "original_row": row,
         }
-        entries.append({"source_persona_id": pid, "profile_hash": digest_json(attributes),
-                        "attributes_json": attributes})
-    return {"panel_key": path.stem, "version_hash": version, "source_commit": source_commit,
-            "metadata": {"report": report, "checks": report_file["checks"], "count": len(entries),
-                         "file": path.name, "viewer_verified": viewer is not None,
-                         "csv_verified": csv_path.exists(), "scope": "team_reference"},
-            "entries": entries}
+        entries.append(
+            {
+                "source_persona_id": pid,
+                "profile_hash": digest_json(attributes),
+                "attributes_json": attributes,
+            }
+        )
+    return {
+        "panel_key": path.stem,
+        "version_hash": version,
+        "source_commit": source_commit,
+        "metadata": {
+            "report": report,
+            "checks": report_file["checks"],
+            "count": len(entries),
+            "file": path.name,
+            "viewer_verified": viewer is not None,
+            "csv_verified": csv_path.exists(),
+            "scope": "team_reference",
+        },
+        "entries": entries,
+    }
 
 
 def prepare_directory(directory: Path, source_commit: str, expected_total: int = 400):
@@ -145,7 +197,13 @@ async def import_prepared(session, panels):
     summary = []
     for panel in panels:
         panel_id, created = await repo.store_panel(session, panel)
-        summary.append({"panel_id": panel_id, "panel_key": panel["panel_key"],
-                        "count": len(panel["entries"]), "created": created,
-                        "version_hash": panel["version_hash"]})
+        summary.append(
+            {
+                "panel_id": panel_id,
+                "panel_key": panel["panel_key"],
+                "count": len(panel["entries"]),
+                "created": created,
+                "version_hash": panel["version_hash"],
+            }
+        )
     return summary

@@ -37,7 +37,12 @@ class Settings(BaseSettings):
 
     local_tools_enabled: bool = False
     run_mode: str = "live"
-    auth_allowed_origins: list[str] = ["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:8000", "http://localhost:8000"]
+    auth_allowed_origins: list[str] = [
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+    ]
     auth_cookie_secure: bool = False
 
 
@@ -95,7 +100,9 @@ REPORT_OUTCOMES = ("done", "cancelled", "failed")
 REPORT_RULES_VERSION = 1
 # 규칙 기반 탐색이 남기는 이유 문장의 머리말. 보고서가 판단 엔진을 구분할 때 쓴다(DB 스키마를 바꾸지 않기 위해)
 RULE_REASON_PREFIX = "규칙 기반 탐색"
-RULE_ENGINE_INTERVIEW_NOTICE = "지금은 AI 호출 없이 동작하는 모드라 인터뷰는 저장된 기록 조회만 제공합니다."
+RULE_ENGINE_INTERVIEW_NOTICE = (
+    "지금은 AI 호출 없이 동작하는 모드라 인터뷰는 저장된 기록 조회만 제공합니다."
+)
 INVITE_STATUS_DEFAULT = "pending"
 
 # ── Ask 응답 범위 (계획서 7-2) ───────────────────────────────
@@ -151,7 +158,7 @@ BROWSER_MAX_TEXT = 6000
 BROWSER_MAX_FILES = 100
 BROWSER_UPLOAD_BYTES = 8 * 1024 * 1024
 BROWSER_LOCAL_PORTS = (3000, 4173, 5173, 8080)
-BROWSER_RUNTIME = Path(__file__).resolve().parents[3] / '.localtools' / 'personalab' / 'browsers'
+BROWSER_RUNTIME = Path(__file__).resolve().parents[3] / ".localtools" / "personalab" / "browsers"
 
 SITE_SCAN_MAX_PAGES = 20
 SITE_SCAN_MAX_DISCOVERED = 200
@@ -168,9 +175,21 @@ BROWSER_MAX_VISITS_PER_SCREEN = 3
 # UX 관찰의 차원·방향·심각도. 이탈 사유 8개(DROP_REASONS)와 별개이며, 그 8개는 그대로 둔다.
 # 차원: 이해(목적·문구·정보) / 길찾기(메뉴·이동·현재 위치) / 시각(위계·가독성·대비·일관성) / 입력·피드백(폼·오류·상태)
 #       / 신뢰(요구 정보의 근거·안심) / 조작성(터치 크기·라벨) / 인상(첫인상·세련됨; AI 인상이라 신뢰가 낮다)
-OBS_DIMENSIONS: tuple[str, ...] = ("이해", "길찾기", "시각", "입력·피드백", "신뢰", "조작성", "인상")
+OBS_DIMENSIONS: tuple[str, ...] = (
+    "이해",
+    "길찾기",
+    "시각",
+    "입력·피드백",
+    "신뢰",
+    "조작성",
+    "인상",
+)
 OBS_POLARITIES: tuple[str, ...] = ("issue", "good")
-OBS_SEVERITIES: tuple[str, ...] = ("minor", "moderate", "blocking")  # blocking: 이 사람이라면 여기서 그만둘 만한 수준
+OBS_SEVERITIES: tuple[str, ...] = (
+    "minor",
+    "moderate",
+    "blocking",
+)  # blocking: 이 사람이라면 여기서 그만둘 만한 수준
 PROMPT_REVISION = "2026-11-10.4"
 # 같은 질문을 이 시간 안에 다시 보내면 유료 호출을 반복하지 않고 직전 답을 돌려준다(더블 클릭·응답 유실 뒤 재시도 방어).
 INTERVIEW_DEDUPE_SECONDS = 120

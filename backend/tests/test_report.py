@@ -110,7 +110,7 @@ def test_results_follow_panel_order_and_fill_missing_sides_with_none():
 
 
 def test_all_invalid_turns_still_return_a_system_end_without_fake_events():
-    act=build_act([row(3,'S01',ACT_STOP,drop='MAX_TURNS',reason=None)])
-    assert act.events==[]
-    assert act.path==['S01']
-    assert act.end.drop_reason=='MAX_TURNS'
+    act = build_act([row(3, "S01", ACT_STOP, drop="MAX_TURNS", reason=None)])
+    assert act.events == []
+    assert act.path == ["S01"]
+    assert act.end.drop_reason == "MAX_TURNS"
