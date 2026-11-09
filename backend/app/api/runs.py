@@ -5,11 +5,20 @@ from app.api.deps import current_user_id
 from app.core.db import get_session
 from app.repositories import run as run_repo
 from app.repositories import study as study_repo
-from app.schemas.report import PersonaResultOut, ReportOut
+from app.repositories import workflow as workflow_repo
+from app.schemas.report import PersonaResultOut, ReportOut, RunMetaOut
 from app.schemas.run import RunOut
 from app.services.report import build_results, detect_engine
 
 router = APIRouter(prefix="/runs", tags=["runs"])
+
+
+async def _meta(session, run):
+    """이 실행의 조건·사용량. 기록이 없는 예전 실행은 None(추측해서 채우지 않는다)."""
+    if run.mode != "act":
+        return None
+    data = await workflow_repo.run_meta(session, run.study_id, run.id)
+    return RunMetaOut.model_validate(data) if data else None
 
 
 @router.get("/{run_id}/status", response_model=RunOut)
@@ -48,6 +57,7 @@ async def run_report(
             engine=detect_engine(snap_results),
             outcome=snapshot.outcome,
             saved_at=snapshot.built_at,
+            meta=await _meta(session, run),
         )
     personas = await study_repo.list_personas(session, run.study_id)
     asks = await run_repo.list_ask_responses(session, ask.id) if ask else []
@@ -59,4 +69,5 @@ async def run_report(
         act_run_id=act.id if act else None,
         results=(live := build_results(personas, asks, acts)),
         engine=detect_engine(live),
+        meta=await _meta(session, run),
     )

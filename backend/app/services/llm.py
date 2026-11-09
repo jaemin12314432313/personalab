@@ -1,5 +1,7 @@
 """공급자와 무관한 JSON 호출. 키·원본 응답을 오류와 로그에 노출하지 않는다."""
 import base64
+import contextvars
+import threading
 from copy import deepcopy
 import json
 import logging
@@ -20,6 +22,28 @@ from app.core.config import (
 Check = Callable[[dict], str | None]
 HTTP_TOO_MANY_REQUESTS = 429
 log = logging.getLogger("uvicorn.error.llm")
+
+
+class UsageSink:
+    """한 실행 동안의 LLM 호출 횟수와 토큰을 모은다. 재시도도 과금되므로 호출마다 더한다."""
+
+    def __init__(self):
+        self._lock=threading.Lock();self.calls=0;self.input_tokens=0;self.output_tokens=0
+
+    def add(self,input_tokens:int,output_tokens:int):
+        with self._lock:
+            self.calls+=1;self.input_tokens+=int(input_tokens or 0);self.output_tokens+=int(output_tokens or 0)
+
+    def snapshot(self)->dict:
+        with self._lock:return {"calls":self.calls,"input_tokens":self.input_tokens,"output_tokens":self.output_tokens}
+
+
+# 실행 하나가 시작할 때 설정한다. asyncio 작업과 to_thread 스레드가 같은 수집기를 이어받는다.
+_USAGE=contextvars.ContextVar("personalab_llm_usage",default=None)
+
+
+def start_usage()->UsageSink:
+    sink=UsageSink();_USAGE.set(sink);return sink
 
 
 class LLMError(RuntimeError):
@@ -101,6 +125,9 @@ def openai_text(system: str, contents: list, schema: dict) -> str:
         usage = body.get("usage") or {}
         log.info("LLM provider=openai model=%s input_tokens=%s output_tokens=%s",
                  model, usage.get("input_tokens", 0), usage.get("output_tokens", 0))
+        sink = _USAGE.get()
+        if sink is not None:
+            sink.add(usage.get("input_tokens", 0), usage.get("output_tokens", 0))
     status = response.status_code
     if status >= 400:
         error = body.get("error", {}) if isinstance(body, dict) else {}

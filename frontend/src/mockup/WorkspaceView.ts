@@ -10,7 +10,7 @@ export interface WorkspaceRound {
   findings?: WorkspaceFinding[];
   studyId?: number;        // 이 회차의 테스트 번호(열기·비교에 쓴다)
   note?: string;           // 이 회차에서 바꾼 점
-  stats?: { total: number; complete: number; drop: number; system: number; visited: number; problems: number }; // 종료 기록 기준 결과
+  stats?: { total: number; complete: number; drop: number; system: number; visited: number; problems: number; llm?: boolean }; // 종료 기록 기준 결과
   site?: boolean;          // 사이트 전반 탐색(목표 화면이 없는 회차)인지
 }
 export interface WorkspacePerson {
@@ -207,18 +207,24 @@ function roundsView(entry: WorkspaceEntry, trashed: boolean) {
 
 const WEEK = ['월', '화', '수', '목', '금', '토', '일'];
 const DROP_TEXT: Record<string, string> = { PRIVACY: '개인정보가 부담스러웠어요', TOO_MANY_STEPS: '단계가 너무 많았어요', UNCLEAR_PURPOSE: '화면의 목적이 불분명했어요', TRUST: '믿을 수 있는지 확신하지 못했어요', PRICE: '비용이 부담스러웠어요', FEATURE_MISSING: '필요한 기능을 찾지 못했어요', SWITCHING_COST: '갈아타기 부담이 있었어요', NAVIGATION_LOST: '경로를 찾지 못했어요' };
-function delta(now: number, before: number | undefined, goodWhenUp: boolean) {
+// mode: 'up'=늘면 좋음, 'down'=줄면 좋음, 'neutral'=개선의 근거가 아니라 색을 칠하지 않음(방문 범위·시스템 종료).
+// noise: AI 실행은 같은 조건에서도 매번 달라서 이 크기보다 작은 차이는 고친 효과로 보지 않는다.
+function delta(now: number, before: number | undefined, mode: 'up' | 'down' | 'neutral', noise = 0) {
   if (before === undefined || now === before) return '';
-  const d = now - before, good = goodWhenUp ? d > 0 : d < 0;
-  return `<i class="ws-d ${good ? 'good' : 'bad'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d)}</i>`;
+  const d = now - before, arrow = `${d > 0 ? '▲' : '▼'} ${Math.abs(d)}`;
+  if (mode === 'neutral') return `<i class="ws-d">${arrow}</i>`;
+  if (noise && Math.abs(d) < noise) return `<i class="ws-d noise" title="AI 실행은 같은 조건에서도 매번 조금씩 달라서 작은 차이는 고친 효과로 보기 어려워요">≈ ${arrow}</i>`;
+  const good = mode === 'up' ? d > 0 : d < 0;
+  return `<i class="ws-d ${good ? 'good' : 'bad'}">${arrow}</i>`;
 }
 function roundCard(r: WorkspaceRound, prev: WorkspaceRound | undefined, latest: boolean, trashed = false, deletable = false) {
   const st = r.stats, pst = prev?.stats;
+  const noise = st && pst && (st.llm || pst.llm) ? Math.max(2, Math.round(Math.max(st.total, pst.total) * 0.1)) : 0;
   const bar = st && st.total ? `<div class="ws-rbar" role="img" aria-label="목표 도달 ${st.complete}명, 중단 ${st.drop}명, 한도 ${st.system}명"><span style="flex:${st.complete}" data-k="complete"></span><span style="flex:${st.drop}" data-k="drop"></span><span style="flex:${st.system}" data-k="system"></span></div>` : '<div class="ws-rbar empty"></div>';
   // 전반 탐색에는 목표 화면이 없으므로 '목표 도달'이 아니라 방문 페이지와 발견한 문제를 보여 준다
   const nums = st ? (r.site
-    ? `<dl class="ws-rnums"><div><dt>방문 페이지</dt><dd>${st.visited}<small>개</small>${delta(st.visited, pst?.visited, true)}</dd></div><div><dt>발견한 문제</dt><dd>${st.problems}<small>곳</small>${delta(st.problems, pst?.problems, false)}</dd></div><div><dt>참여</dt><dd>${st.total}<small>명</small></dd></div></dl>`
-    : `<dl class="ws-rnums"><div><dt>목표 도달</dt><dd>${st.complete}<small>/${st.total}</small>${delta(st.complete, pst?.complete, true)}</dd></div><div><dt>탐색 중단</dt><dd>${st.drop}${delta(st.drop, pst?.drop, false)}</dd></div><div><dt>탐색 한도</dt><dd>${st.system}${delta(st.system, pst?.system, false)}</dd></div></dl>`)
+    ? `<dl class="ws-rnums"><div><dt>방문 페이지</dt><dd>${st.visited}<small>개</small>${delta(st.visited, pst?.visited, 'neutral')}</dd></div><div><dt>발견한 문제</dt><dd>${st.problems}<small>곳</small>${delta(st.problems, pst?.problems, 'down', noise)}</dd></div><div><dt>참여</dt><dd>${st.total}<small>명</small></dd></div></dl>`
+    : `<dl class="ws-rnums"><div><dt>목표 도달</dt><dd>${st.complete}<small>/${st.total}</small>${delta(st.complete, pst?.complete, 'up', noise)}</dd></div><div><dt>탐색 중단</dt><dd>${st.drop}${delta(st.drop, pst?.drop, 'down', noise)}</dd></div><div><dt>탐색 한도</dt><dd>${st.system}${delta(st.system, pst?.system, 'neutral')}</dd></div></dl>`)
     : `<p class="ws-rwait">${r.state === 'running' ? '탐색이 끝나면 결과가 쌓여요.' : r.state === 'draft' || r.state === 'ready' ? '아직 실행 전이에요.' : '저장된 결과가 없어요.'}</p>`;
   const hasResult = r.state === 'done' || r.state === 'failed' || r.state === 'partial';
   const open = trashed ? '<p class="ws-rtrash">휴지통에 있어요. 복원하면 리포트와 인터뷰를 열 수 있어요.</p>' : r.studyId ? (hasResult

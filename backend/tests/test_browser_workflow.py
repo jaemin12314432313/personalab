@@ -436,3 +436,28 @@ async def test_shared_browser_is_launched_once_and_reused_then_closed():
     # 공유 블록 밖에서는 이전처럼 호출마다 따로 띄운다
     async with browser.open_page(bundle(),'desktop') as (page,base,blocked):
         assert page is not None
+
+
+async def test_run_meta_records_engine_model_prompt_revision_and_usage(client,session,monkeypatch):
+    from app.services import runner
+    from app.core.config import PROMPT_REVISION
+    from app.services import llm
+    sid,run=await _two_persona_run(client,session)
+    original=browser.explore
+    def decide(persona,task,screen,image,history):
+        element=next(e for e in screen['elements'] if e['text']=='결과 보기')
+        return {'action':'click','target':element['id'],'value':None,'drop_reason':None,'reason':'가상 선택'}
+    async def simulated(*args,**kw):
+        # 실제 호출 없이 사용량 수집기에 두 번의 호출을 흉내 낸다(재시도도 과금되므로 호출마다 더한다)
+        sink=llm._USAGE.get();sink.add(2000,100);sink.add(2600,90)
+        return await original(*args,decide=decide,**kw)
+    monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
+    monkeypatch.setattr(runner.rule_agent,'use_rule_engine',lambda:False)
+    monkeypatch.setattr(browser,'explore',simulated)
+    await runner.execute_run(session,run.id)
+    report=(await client.get(f'/runs/{run.id}/report')).json()
+    meta=report['meta']
+    assert meta['engine']=='llm' and meta['prompt_rev']==PROMPT_REVISION and meta['failed_personas']==0
+    assert meta['usage']=={'calls':4,'input_tokens':9200,'output_tokens':380}   # 두 사람 × 두 번
+    live=(await client.get(f'/studies/{sid}/report')).json()
+    assert live['meta']['usage']['calls']==4

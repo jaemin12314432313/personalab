@@ -16,7 +16,7 @@ from app.repositories import workspace as workspace_repo
 from app.schemas.workspace import WorkspaceState
 from app.repositories import run as run_repo
 from app.repositories import study as study_repo
-from app.schemas.report import ReportOut
+from app.schemas.report import ReportOut, RunMetaOut
 from app.schemas.run import RunCreate, RunOut
 from app.schemas.study import (
     FigmaImportIn,
@@ -253,6 +253,7 @@ async def get_report(
         ask_run_id=ask_run.id if ask_run else None,
         act_run_id=act_run.id if act_run else None,
         results=build_results(personas, ask_rows, act_rows),
+        meta=(RunMetaOut.model_validate(m) if act_run and (m := await workflow_repo.run_meta(session, study.id, act_run.id)) else None),
     )
 
 

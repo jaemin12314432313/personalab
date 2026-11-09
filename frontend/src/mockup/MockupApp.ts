@@ -369,7 +369,7 @@ export function mountMockup(root: HTMLElement) {
       const statsOf = async (r: Revision): Promise<WorkspaceRound['stats']> => {
         const act = [...r.runs].filter(x => x.mode === 'act' && x.status === 'done').sort((a, b) => b.id - a.id)[0];
         if (!act) return undefined;
-        try { const rep = act.id === latestAct?.id ? report : await api.getRunReport(act.id); const rows = rep.results.filter(x => x.act); if (!rows.length) return undefined; const o = rows.map(x => outcome(x)); const issues = new Set(rows.filter(x => outcome(x) === 'drop').map(x => `${x.act!.end.screen}|${x.act!.end.drop_reason}`)); return { total: rows.length, complete: o.filter(k => k === 'complete').length, drop: o.filter(k => k === 'drop').length, system: o.filter(k => k === 'system').length, visited: new Set(rows.flatMap(x => x.act!.path)).size, problems: issues.size }; } catch { return undefined; }
+        try { const rep = act.id === latestAct?.id ? report : await api.getRunReport(act.id); const rows = rep.results.filter(x => x.act); if (!rows.length) return undefined; const o = rows.map(x => outcome(x)); const issues = new Set(rows.filter(x => outcome(x) === 'drop').map(x => `${x.act!.end.screen}|${x.act!.end.drop_reason}`)); return { llm: rep.engine === 'llm', total: rows.length, complete: o.filter(k => k === 'complete').length, drop: o.filter(k => k === 'drop').length, system: o.filter(k => k === 'system').length, visited: new Set(rows.flatMap(x => x.act!.path)).size, problems: issues.size }; } catch { return undefined; }
       };
       // 사람마다 서버에 저장된 인터뷰 대화 개수를 모아 개요에 보여 준다
       if (latestAct) {
@@ -514,7 +514,7 @@ export function mountMockup(root: HTMLElement) {
       restored = newStudy(); restored.serverId = serverId; restored.name = detail.name;restored.workspace=detail.workspace;
       if (detail.product) { const parts = detail.product.description.split('\n'); restored.product = { name: parts.length > 1 ? parts.shift()! : detail.name, description: parts.join('\n'), features: detail.product.features, price: detail.product.price }; }
       restored.screens = detail.prototype?.screens || []; restored.goal = detail.task?.goal_screen_id || ''; restored.task = detail.task?.description || '';
-      restored.personas = detail.personas.map(p=>({...p,attributes:displayAttributes(p.attributes)})); restored.count = detail.personas.length || DEFAULT_PANEL_COUNT; restored.results = report.results; restored.reportSource=report.source==='local-demo'?'local-demo':undefined;
+      restored.personas = detail.personas.map(p=>({...p,attributes:displayAttributes(p.attributes)})); restored.count = detail.personas.length || DEFAULT_PANEL_COUNT; restored.results = report.results; restored.runMeta = report.meta ?? null; restored.reportSource=report.source==='local-demo'?'local-demo':undefined;
       restored.libraryPanelId = detail.personas[0]?.attributes.source.library_panel_id;
       restored.panelSource = restored.libraryPanelId ? 'library' : detail.personas.length ? 'engine' : 'library';
       restored.runs = Object.fromEntries([...(detail.runs || [])].sort((a,b) => a.id - b.id).map(run => [run.mode, run.id]));
@@ -734,7 +734,7 @@ export function mountMockup(root: HTMLElement) {
           await new Promise(resolve => setTimeout(resolve, 1800));
         }
       }
-      const report = await currentReport(); requireSession(owner, draftId); study.results = report.results; study.status = 'done'; if (study.serverId) serverDetail.delete(study.serverId); persist(); renderReport(); notice('실행 기록이 서버에 저장되었습니다. 보고서에서 확인하세요.');if(capabilities?.workflow_ready)await loadRevisions();
+      const report = await currentReport(); requireSession(owner, draftId); study.results = report.results; study.runMeta = report.meta ?? null; study.status = 'done'; if (study.serverId) serverDetail.delete(study.serverId); persist(); renderReport(); notice('실행 기록이 서버에 저장되었습니다. 보고서에서 확인하세요.');if(capabilities?.workflow_ready)await loadRevisions();
     } catch (error) { if (sameSession(owner, draftId)) { if(!study.runs?.act)study.status='ready';else if(study.status==='running')runRefreshPaused=true;persist(); } throw error; }
     finally { if (sameSession(owner, draftId)) { running = false; renderStudioContext(); lockInputs(); } }
   }
@@ -747,7 +747,7 @@ export function mountMockup(root: HTMLElement) {
       const [status,report]=await Promise.all([api.getRun(run),api.getRunReport(run)]);
       requireSession(owner,draftId);if(request!==runRefresh)return;
       if(!['pending','running','done','failed'].includes(status.status))throw new Error('실행 상태를 확인하지 못했습니다. 다시 새로고침해 주세요.');
-      recordRunStatus(study,run,status);study.results=report.results;
+      recordRunStatus(study,run,status);study.results=report.results;study.runMeta=report.meta??null;
       let evidenceWarning='';try{await refreshEvidence();}catch{requireSession(owner,draftId);evidenceWarning='일부 화면 이미지를 불러오지 못했어요. 저장된 종료 기록과 리포트는 확인할 수 있습니다.';}requireSession(owner,draftId);if(request!==runRefresh)return;
       persist();renderRoster();renderReport();renderOverview();
       const destination=returnAfterRunCheck;if(destination&&destination.id===study.id&&destination.run===run&&destination.owner===sessionEpoch){returnAfterRunCheck=undefined;if(location.hash==='#run'&&!navigationIssue(destination.view)){location.hash='#'+destination.view;route();}}
@@ -1324,7 +1324,7 @@ export function mountMockup(root: HTMLElement) {
     const before=Number(input('compareBefore').value),after=Number(input('compareAfter').value);
     if(before===after){el('comparisonResult').textContent='서로 다른 회차를 선택하세요.';return;}
     el('comparisonResult').textContent='각 회차의 기록과 조건을 불러오고 있습니다.';
-    const load=async(sid:number)=>{const [detail,report,workflow]=await Promise.all([api.getStudy(sid),api.getReport(sid),api.getWorkflow(sid)]);const s=newStudy();s.serverId=sid;s.workflow=workflow;s.task=detail.task?.description||'';s.screens=detail.prototype?.screens||[];s.personas=detail.personas;s.results=report.results;s.runs={act:report.act_run_id||undefined};if(s.runs.act){s.evidence=await api.getEvidence(s.runs.act);mergeEvidenceScreens(s);}return s;};
+    const load=async(sid:number)=>{const [detail,report,workflow]=await Promise.all([api.getStudy(sid),api.getReport(sid),api.getWorkflow(sid)]);const s=newStudy();s.serverId=sid;s.workflow=workflow;s.task=detail.task?.description||'';s.screens=detail.prototype?.screens||[];s.personas=detail.personas;s.results=report.results;s.runMeta=report.meta??null;s.runs={act:report.act_run_id||undefined};if(s.runs.act){s.evidence=await api.getEvidence(s.runs.act);mergeEvidenceScreens(s);}return s;};
     try{const [a,b]=await Promise.all([load(before),load(after)]);requireSession(owner,id);if(request===comparisonRequest)el('comparisonResult').innerHTML=comparisonMarkup(a,b);}
     catch(error){if(sameSession(owner,id)&&request===comparisonRequest)el('comparisonResult').textContent=message(error);}
   }

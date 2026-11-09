@@ -49,6 +49,15 @@ class PersonaResultOut(BaseModel):
     act: ActResultOut | None = None
 
 
+class RunMetaOut(BaseModel):
+    """이 실행이 어떤 조건으로 돌았는지. 회차 비교가 같은 조건인지 판단하고, 호출량을 보여 주는 데 쓴다."""
+    engine: Literal["rule", "llm"]
+    model: str | None = None
+    prompt_rev: str | None = None
+    usage: dict | None = None  # {calls, input_tokens, output_tokens}. 규칙 기반이면 None
+    failed_personas: int = 0
+
+
 class ReportOut(BaseModel):
     source:Literal["live","local-demo"] = "live"
     study_id: int
@@ -60,3 +69,4 @@ class ReportOut(BaseModel):
     # 탐색 판단 엔진: rule=AI 호출 없는 규칙 기반 체험 기록, llm=AI 페르소나 판단, 기록 없으면 None
     engine: Literal["rule", "llm"] | None = None
     saved_at: datetime | None = None
+    meta: RunMetaOut | None = None

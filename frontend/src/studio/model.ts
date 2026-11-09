@@ -6,6 +6,7 @@ export const DROP_LABELS: Record<string, string> = {
 export interface Product { name: string; description: string; features: string[]; price: string }
 export interface Screen { image?:string|null; id: string; label: string; description: string; elements: { text: string; to: string | null }[] }
 export interface Persona { id: number; attributes: { profile: { age: number; sex?: string; region?: string; job_group: string }; card_text: string; traits: Record<string, string | number>; source: { persona_id?: string; stub?: boolean; scoring_version?: string; match_level?: number; stand_in?: boolean; library_entry_id?: number; library_panel_id?: number; library_version?: string; panel_key?: string; nvidia_uuid?: string } } }
+export interface RunMeta { engine: "rule" | "llm"; model?: string | null; prompt_rev?: string | null; usage?: { calls: number; input_tokens: number; output_tokens: number } | null; failed_personas?: number }
 export interface Ask { usage_intention: number; willingness_to_pay: number; concern: string; needed_features: string[]; unneeded_features: string[]; reason: string }
 export interface Act { path: string[]; events: { turn: number; screen: string; action: "click" | "abandon" | "fill" | "scroll"; target: string | null; to?: string | null; reason?: string | null; drop_reason?: string | null }[]; end: { result: "complete" | "drop"; screen: string | null; drop_reason?: string | null } }
 export interface Result { id: number; persona_id: string; ask: Ask | null; act: Act | null }
@@ -43,6 +44,7 @@ export interface Study {
   conditions: { preset: string; age: string; price: string[] }; count: number; seed: number;
   workflow?: Workflow; evidence?: BrowserEvidence[];
   reportSource?: "ui-mock" | "local-demo";
+  runMeta?: RunMeta | null; // 이 결과를 만든 실행의 엔진·모델·프롬프트 개정·사용량
   panelSource?: 'library' | 'engine'; libraryPanelId?: number;
   personas: Persona[]; results: Result[]; serverId?: number; runs?: { ask?: number; act?: number };
 }

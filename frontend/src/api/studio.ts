@@ -1,8 +1,8 @@
-import type { AudienceDefinition, AudienceFilters, Persona, Result, Study, WorkspaceState, Workflow, WorkflowScope, BrowserEvidence, Revision } from "../studio/model";
+import type { AudienceDefinition, AudienceFilters, Persona, Result, RunMeta, Study, WorkspaceState, Workflow, WorkflowScope, BrowserEvidence, Revision } from "../studio/model";
 
 export interface Capabilities { audience_builder_ready?:boolean; workspace_management_ready?:boolean; workflow_ready?:boolean; browser_ready?:boolean; persona_ready: boolean; llm_ready: boolean; provider: string; missing: string[]; max_turns?: number; library_ready?: boolean; library_count?: number; model?: string; persona_transmission_allowed?: boolean; figma_ready?: boolean; local_tools_enabled?: boolean; interview_records_ready?: boolean; interview_llm_ready?: boolean; agent_engine?: 'rule'|'llm' }
 export interface Run { id: number; status: string; progress: number; mode: "ask" | "act" }
-export interface Report { source?: "live"|"local-demo"; study_id: number; ask_run_id: number | null; act_run_id: number | null; results: Result[] }
+export interface Report { source?: "live"|"local-demo"; study_id: number; ask_run_id: number | null; act_run_id: number | null; results: Result[]; engine?: "rule"|"llm"|null; meta?: RunMeta | null }
 export interface AuthUser { id: number; email: string }
 export class ApiError extends Error { constructor(message: string, public status: number) { super(message); this.name = 'ApiError'; } }
 

@@ -6,14 +6,14 @@ from collections.abc import Awaitable, Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import REPORT_RULES_VERSION, RUN_STATUS_DONE, RUN_STATUS_FAILED, RUN_STATUS_RUNNING, settings
+from app.core.config import OPENAI_DEFAULT_MODEL, PROMPT_REVISION, REPORT_RULES_VERSION, RUN_STATUS_DONE, RUN_STATUS_FAILED, RUN_STATUS_RUNNING, settings
 from app.core.db import SessionLocal
 from app.repositories import run as run_repo
 from app.repositories import study as study_repo
 from app.repositories import workflow as workflow_repo
 from app.services import browser, site_map
 from app.services.act.loop import agent_loop
-from app.services.llm import require_persona_transmission, FatalLLMError, LLMError
+from app.services.llm import require_persona_transmission, FatalLLMError, LLMError, start_usage
 from app.services.ask.answer import ask_persona, check_ask
 from app.services.report import build_results
 from app.services import rule_agent
@@ -68,16 +68,32 @@ async def save_report_snapshot(session: AsyncSession, run, outcome: str) -> None
         log.exception("결과 스냅샷 저장 실패 run_id=%s", run.id)
 
 
+async def persist_run_meta(session: AsyncSession, run, meta: dict, sink, failed: int) -> None:
+    """실행 조건과 사용량을 남긴다. 실패해도 실행 결과에는 영향이 없다."""
+    if run.mode != "act":
+        return
+    try:
+        data = {**meta, "usage": sink.snapshot() if meta["engine"] == "llm" else None, "failed_personas": failed}
+        await workflow_repo.save_run_meta(session, run.study_id, run.id, data)
+    except Exception:
+        await session.rollback()
+        log.exception("실행 조건 저장 실패 run_id=%s", run.id)
+
+
 async def execute_run(session: AsyncSession, run_id: int) -> None:
     run = await run_repo.claim_run(session, run_id)
     if run is None:
         return
+    sink = start_usage()
+    run_meta: dict = {"engine": "rule", "model": None, "prompt_rev": PROMPT_REVISION}
+    failures: list[tuple[int, str]] = []
     try:
         if await study_repo.study_source(session,run.study_id)=='local-demo':
             raise RuntimeError('로컬 점검 예시는 유료 실행에 사용하지 않습니다.')
         rule = rule_agent.use_rule_engine() and run.mode == 'act'
         if not rule:
             require_persona_transmission()
+            run_meta = {"engine": "llm", "model": settings.llm_model or OPENAI_DEFAULT_MODEL, "prompt_rev": PROMPT_REVISION}
         personas = await study_repo.list_personas(session, run.study_id)
         workflow=await workflow_repo.get(session,run.study_id)
         browser_source=workflow.source_json if workflow and workflow.source_json.get("kind") in ("web","html") else None
@@ -145,8 +161,6 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
 
         total=len(personas)
         concurrency=settings.run_concurrency if (run.mode=="act" and browser_source) else 1
-        failures: list[tuple[int, str]] = []
-
         async def guarded(sess, persona):
             """한 명의 일시적 실패가 나머지 사람의 실행까지 멈추지 않게 한다.
             취소·키/결제/권한 오류처럼 모두에게 해당하는 오류와 예상 못한 오류는 그대로 올려 실행 전체를 멈춘다."""
@@ -188,6 +202,7 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
         if failures and len(failures)>=total:
             raise LLMError(f"모든 페르소나의 실행이 실패했습니다. 첫 오류: {failures[0][1]}")
         await run_repo.set_run_state(session, run, status=RUN_STATUS_DONE)
+        await persist_run_meta(session, run, run_meta, sink, len(failures))
         if failures:
             await workflow_repo.set_control(session,run_id,error=f"{len(failures)}명은 실행 중 오류로 기록이 없습니다. 첫 오류: {failures[0][1]}")
         await save_report_snapshot(session, run, "done")
@@ -197,6 +212,7 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
         failed_run = await run_repo.get_run(session, run_id)
         if failed_run is not None:
             await run_repo.set_run_state(session, failed_run, status=RUN_STATUS_FAILED)
+            await persist_run_meta(session, failed_run, run_meta, sink, len(failures))
             await save_report_snapshot(session, failed_run, "cancelled" if isinstance(error, browser.BrowserCancelled) else "failed")
             await workflow_repo.set_control(session,run_id,error=str(error) if isinstance(error,(browser.BrowserError,LLMError)) else "실행을 완료하지 못했습니다. 연결 상태와 입력을 확인하세요.")
 

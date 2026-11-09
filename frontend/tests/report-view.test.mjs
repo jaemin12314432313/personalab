@@ -165,3 +165,25 @@ test('system-forced NAVIGATION_LOST is not a user drop, but a persona-chosen aba
   assert.equal(model.outcome(chosen),'drop');     // 페르소나가 직접 포기한 것: 사용자 이탈
   assert.equal(model.outcomeLabel(forced),'탐색 마침');
 }));
+
+test('comparison keeps neutral metrics neutral, flags AI noise and changed model, and uses arrivals as the denominator',async()=>withReport(async({fixture,workflow})=>{
+  const a=fixture(),b=structuredClone(a);
+  a.workflow={revision:1,source:{kind:'web'},scope:{goal_url:'https://example.com/done',goal_text:'',scenario:'탐색',viewport:'desktop',focus:''}};
+  b.workflow=structuredClone(a.workflow);b.workflow.revision=2;
+  // 시스템 종료만 늘어난 비교: 개선이 아니므로 good/bad 색이 붙으면 안 된다
+  const sys=(s,n)=>{s.results=s.results.map((r,i)=>i<n&&r.act?{...r,act:{...r.act,end:{result:'drop',screen:r.act.path.at(-1),drop_reason:'MAX_TURNS'}}}:r);};
+  sys(a,0);sys(b,2);
+  const rule=workflow.comparisonMarkup(a,b);
+  const systemCard=rule.split('<div class="cmp-card">').find(c=>c.includes('탐색 마침·한도'));
+  assert.ok(systemCard&&!/cmp-delta (good|bad)/.test(systemCard));
+  assert.ok(!rule.includes('오차 범위'));   // 규칙 기반은 같은 입력이면 같은 결과라 오차 경고가 없다
+  // AI(LLM) 실행: 작은 차이는 오차 범위, 모델·프롬프트가 달라지면 조건 변경 안내
+  a.runMeta={engine:'llm',model:'gpt-5.4-mini',prompt_rev:'r1'};b.runMeta={engine:'llm',model:'gpt-5.4-mini',prompt_rev:'r1'};
+  const ai=workflow.comparisonMarkup(a,b);
+  assert.ok(ai.includes('cmp-noise-note')&&ai.includes('같은 조건에서도 매번 조금씩'));
+  b.runMeta={engine:'llm',model:'other-model',prompt_rev:'r2'};
+  const changed=workflow.comparisonMarkup(a,b);
+  assert.ok(changed.includes('탐색 조건이 달라졌습니다.')&&changed.includes('AI 엔진·모델·프롬프트 개정이 달라서'));
+  // 문제 표의 분모는 전체 참여가 아니라 그 화면에 도착한 사람
+  assert.ok(/명 멈춤 \/ 도착 \d+명/.test(workflow.comparisonMarkup(a,b))||workflow.comparisonMarkup(a,b).includes('cmp-empty'));
+}));

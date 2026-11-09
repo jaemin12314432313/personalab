@@ -16,6 +16,17 @@ def copied_source(value,needs_reconnect=False):
 async def get(session, study_id):
     return await session.get(StudyWorkflow,study_id)
 
+async def run_meta(session, study_id, run_id):
+    row=await get(session,study_id)
+    return ((row.source_json or {}).get('run_meta') or {}).get(str(run_id)) if row else None
+
+async def save_run_meta(session, study_id, run_id, meta):
+    """실행 조건·사용량을 워크플로 source_json의 run_meta에 남긴다(DB 구조 변경 없이)."""
+    row=await ensure(session,study_id)
+    source=dict(row.source_json or {});metas=dict(source.get('run_meta') or {});metas[str(run_id)]=meta
+    source['run_meta']=metas;row.source_json=source
+    await session.commit()
+
 async def ensure(session, study_id):
     row=await get(session,study_id)
     if row is None:

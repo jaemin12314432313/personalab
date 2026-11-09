@@ -59,7 +59,9 @@ export function recordAnswer(study: Study, id: number, question: string): string
     return `확인한 화면은 ${r.act.path.map(label).join(', ')}입니다.\n${missing.length ? `방문하지 않은 화면: ${missing.map(s=>label(s.id)).join(', ')}. 이 화면의 경험은 기록으로 답할 수 없습니다.` : '등록된 모든 화면을 방문했지만, 모든 요소를 평가했다는 뜻은 아닙니다.'}\n\n근거: 이 페르소나의 저장된 탐색 경로.`;
   }
   if (/경로|들어|이동|눌|클릭/.test(question)) return `${p ? personaId(p) : r.persona_id}의 경로는 ${r.act.path.map(label).join(' → ')}입니다.\n${r.act.events.filter(e=>e.action==='click').map(e=>`${label(e.screen)}에서 “${e.target}” 선택${e.to ? ` → ${label(e.to)}` : ''}.`).join('\n')}\n\n근거: 저장된 이동 기록. 그 외의 행동은 기록에 없습니다.`;
-  if (outcome(r)==='system') return '탐색 횟수 한도에 도달해 종료됐습니다. 이를 페르소나의 불편이나 자발적인 이탈로 해석하지 않습니다.\n\n근거: 종료 코드 MAX_TURNS. 기록의 경로와 실행 범위를 다시 확인하세요.';
+  if (outcome(r)==='system') return r.act.end.drop_reason==='NAVIGATION_LOST'
+    ? '더 이동할 곳이 없거나 같은 화면을 맴돌아 탐색이 끝났습니다. 이를 페르소나의 불편이나 자발적인 이탈로 해석하지 않습니다.\n\n근거: 종료 코드 NAVIGATION_LOST(시스템 종료). 기록의 경로와 실행 범위를 다시 확인하세요.'
+    : '탐색 횟수 한도에 도달해 종료됐습니다. 이를 페르소나의 불편이나 자발적인 이탈로 해석하지 않습니다.\n\n근거: 종료 코드 MAX_TURNS. 기록의 경로와 실행 범위를 다시 확인하세요.';
   if (outcome(r)==='complete') return `이 페르소나는 ${label(r.act.end.screen || study.goal)}에 도달했습니다. 중단 이유는 없습니다.\n\n근거: 저장된 목표 도달 기록. 목표 도달만으로 만족도나 모든 화면의 사용성을 판단하지 않습니다.`;
   const event = [...r.act.events].reverse().find(e=>e.action==='abandon');
   return `${/왜|이유|중단|멈|불편|복잡/.test(question) ? '' : '새 답변은 생성하지 않습니다. 확인할 수 있는 기록을 보여드립니다.\n\n'}${label(r.act.end.screen || '')}에서 남긴 원문입니다.\n${event?.reason ? `“${event.reason}”` : '중단 이유 문장이 기록되지 않았습니다.'}\n\n분류: ${dropLabel(r.act.end.drop_reason)}. 근거: 저장된 중단 기록. 추가 해석이나 수정안의 효과는 확인하지 않았습니다.`;
