@@ -43,7 +43,9 @@ export function sampleMockResults(results: Result[], screens: Study['screens']):
 
 /** 샘플 사이트 실행이고 사용자 중단 기록이 하나도 없을 때만 예시 결과를 입힌다. */
 export function withSampleMock(study: Study, results: Result[]): { results: Result[]; mocked: boolean } {
-  if (!isSampleStudy(study) || results.some(r => r.act && outcome(r) === 'drop')) return { results, mocked: false };
+  // 규칙 기반 탐색(AI 없음)으로 돌린 기록일 때만 입힌다. LLM으로 돌린 진짜 결과는 이탈이 없어도 절대 덮지 않는다.
+  const ruleRun = results.some(r => r.act?.events.some(e => (e.reason || '').startsWith('규칙 기반 탐색')));
+  if (!isSampleStudy(study) || !ruleRun || results.some(r => r.act && outcome(r) === 'drop')) return { results, mocked: false };
   const mocked = sampleMockResults(results, study.screens);
   return { results: mocked, mocked: mocked.some((r, i) => r !== results[i]) };
 }
