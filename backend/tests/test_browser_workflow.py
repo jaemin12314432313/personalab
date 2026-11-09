@@ -422,3 +422,17 @@ async def test_all_personas_failing_marks_the_run_failed(client,session,monkeypa
     monkeypatch.setattr(browser,'explore',simulated)
     await runner.execute_run(session,run.id)
     assert (await run_repo.get_run(session,run.id)).status=='failed'
+
+
+async def test_shared_browser_is_launched_once_and_reused_then_closed():
+    async with browser.shared_browser() as holder:
+        assert holder._browser is None                    # 처음 쓰기 전에는 아무것도 띄우지 않는다
+        async with browser.open_page(bundle(),'desktop') as (page,base,blocked):
+            first=holder._browser
+            assert first is not None and await page.title() is not None
+        async with browser.open_page(bundle(),'desktop') as (page,base,blocked):
+            assert holder._browser is first               # 두 번째 사람도 같은 크로미움을 쓴다
+    assert holder._browser is None                        # 실행이 끝나면 닫힌다
+    # 공유 블록 밖에서는 이전처럼 호출마다 따로 띄운다
+    async with browser.open_page(bundle(),'desktop') as (page,base,blocked):
+        assert page is not None

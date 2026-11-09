@@ -12,7 +12,8 @@ import os
 import re
 import socket
 import threading
-from contextlib import asynccontextmanager, contextmanager
+import contextvars
+from contextlib import AsyncExitStack, asynccontextmanager, contextmanager
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import PurePosixPath
@@ -101,6 +102,48 @@ class BlockedRequests(list):
             self.stop_count += 1
 
 
+_SHARED=contextvars.ContextVar('personalab_shared_browser',default=None)
+
+
+class SharedBrowser:
+    """실행 하나 동안 크로미움을 한 번만 띄워 두고, 사람마다 격리된 컨텍스트만 새로 연다.
+    처음 쓸 때 띄우므로 브라우저를 안 쓰는 실행은 아무것도 시작하지 않는다. 죽었으면 다음 요청에서 다시 띄운다."""
+
+    def __init__(self):
+        self._lock=asyncio.Lock();self._pw=None;self._browser=None
+
+    async def get(self):
+        async with self._lock:
+            if self._browser is not None and self._browser.is_connected():return self._browser
+            await self._close()
+            os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH',str(BROWSER_RUNTIME))
+            from playwright.async_api import async_playwright
+            self._pw=await async_playwright().start()
+            self._browser=await self._pw.chromium.launch(headless=True)
+            return self._browser
+
+    async def aclose(self):
+        async with self._lock:await self._close()
+
+    async def _close(self):
+        browser,pw=self._browser,self._pw;self._browser=self._pw=None
+        if browser is not None:
+            try:await browser.close()
+            except Exception:pass
+        if pw is not None:
+            try:await pw.stop()
+            except Exception:pass
+
+
+@asynccontextmanager
+async def shared_browser():
+    """이 블록 안에서 열리는 open_page는 같은 크로미움을 공유한다(동시에 도는 작업에도 이어진다)."""
+    holder=SharedBrowser();token=_SHARED.set(holder)
+    try:yield holder
+    finally:
+        _SHARED.reset(token);await holder.aclose()
+
+
 @asynccontextmanager
 async def open_page(source,viewport='desktop',*,navigation_timeout_ms=None):
     os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH',str(BROWSER_RUNTIME))
@@ -112,8 +155,11 @@ async def open_page(source,viewport='desktop',*,navigation_timeout_ms=None):
         url=await validate_url(source['url']);trusted=None
     base=origin(url)
     try:
-        async with async_playwright() as p:
-            browser=await p.chromium.launch(headless=True)
+        async with AsyncExitStack() as stack:
+            holder=_SHARED.get();own=holder is None
+            if own:
+                p=await stack.enter_async_context(async_playwright());browser=await p.chromium.launch(headless=True)
+            else:browser=await holder.get()
             context=await browser.new_context(viewport={'width':390,'height':844} if viewport=='mobile' else {'width':1365,'height':900},is_mobile=viewport=='mobile',device_scale_factor=1,locale='ko-KR',accept_downloads=False,service_workers='block')
             context.set_default_timeout(BROWSER_TIMEOUT_MS)
             blocked=BlockedRequests()
@@ -137,7 +183,9 @@ async def open_page(source,viewport='desktop',*,navigation_timeout_ms=None):
                 if response and response.status>=400:raise BrowserError('대상 페이지가 오류를 반환했습니다. 주소와 접근 권한을 확인하세요.')
                 await page.wait_for_timeout(350)
                 yield page,base,blocked
-            finally:await context.close();await browser.close()
+            finally:
+                await context.close()
+                if own:await browser.close()
     except (BrowserError, LLMError):raise
     except Exception as exc:
         if isinstance(exc,NotImplementedError):raise BrowserError('브라우저 실행 프로세스를 시작하지 못했습니다. 서버 런타임을 확인하세요.') from None

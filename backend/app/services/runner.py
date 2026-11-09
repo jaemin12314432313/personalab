@@ -162,26 +162,28 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
                 failures.append((persona.id, str(error)))
                 log.warning("페르소나 실행 실패(다른 사람은 계속) run_id=%s persona_id=%s: %s", run_id, persona.id, error)
 
-        if concurrency<=1:
-            for i, persona in enumerate(personas, 1):
-                await guarded(session, persona)
-                await run_repo.set_run_state(session, run, progress=i / total)
-        else:
-            # 사람 수가 많을 때 한 명씩 돌면 너무 오래 걸려서, 정해 둔 인원만큼 동시에 돌린다
-            gate=asyncio.Semaphore(concurrency);lock=asyncio.Lock();finished=0
-            async def worker(persona):
-                nonlocal finished
-                async with gate:
-                    async with SessionLocal() as sess:
-                        await guarded(sess, persona)
-                    async with lock:
-                        finished+=1
-                        await run_repo.set_run_state(session, run, progress=finished / total)
-            try:
-                async with asyncio.TaskGroup() as group:
-                    for persona in personas:group.create_task(worker(persona))
-            except ExceptionGroup as group_error:
-                raise group_error.exceptions[0] from None
+        # 웹·HTML 탐색은 실행 하나에 크로미움을 한 번만 띄워 모두가 나눠 쓴다(사람마다 새로 띄우지 않는다)
+        async with browser.shared_browser():
+            if concurrency<=1:
+                for i, persona in enumerate(personas, 1):
+                    await guarded(session, persona)
+                    await run_repo.set_run_state(session, run, progress=i / total)
+            else:
+                # 사람 수가 많을 때 한 명씩 돌면 너무 오래 걸려서, 정해 둔 인원만큼 동시에 돌린다
+                gate=asyncio.Semaphore(concurrency);lock=asyncio.Lock();finished=0
+                async def worker(persona):
+                    nonlocal finished
+                    async with gate:
+                        async with SessionLocal() as sess:
+                            await guarded(sess, persona)
+                        async with lock:
+                            finished+=1
+                            await run_repo.set_run_state(session, run, progress=finished / total)
+                try:
+                    async with asyncio.TaskGroup() as group:
+                        for persona in personas:group.create_task(worker(persona))
+                except ExceptionGroup as group_error:
+                    raise group_error.exceptions[0] from None
         if await cancelled():raise browser.BrowserCancelled("사용자가 실행을 취소했습니다.")
         if failures and len(failures)>=total:
             raise LLMError(f"모든 페르소나의 실행이 실패했습니다. 첫 오류: {failures[0][1]}")
