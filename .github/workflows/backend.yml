@@ -32,6 +32,9 @@ jobs:
 
     env:
       DATABASE_URL: postgresql+asyncpg://personalab:password@localhost:5432/personalab
+      # 코드는 이 값이 없을 때만 .localtools/...(개발 PC 전용 폴더)에서 브라우저를 찾는다.
+      # CI에서는 아래 설치 단계가 이 경로에 크로미움을 받는다.
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.pw-browsers
 
     steps:
       - uses: actions/checkout@v4
@@ -57,6 +60,10 @@ jobs:
 
       - name: Model ↔ migration drift
         run: alembic check
+
+      # 화면을 실제 브라우저로 여는 테스트(test_browser_workflow, test_snapshots 등)가 크로미움을 쓴다.
+      - name: Install Chromium (Playwright)
+        run: playwright install --with-deps chromium
 
       - name: Test
         run: pytest -q
