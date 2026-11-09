@@ -132,3 +132,13 @@ async def test_pending_or_running_execution_cannot_open_or_send_interview_even_w
     run.status='failed';await session.commit()
     assert (await client.get(path)).status_code==200
     assert (await client.post(path,json={'question':'어떤 화면이었나요?'})).status_code==201
+
+
+async def test_interview_prompt_includes_product_intro_and_target_audience(client,session):
+    created,report=await demo(client);rid=created['run_id'];pid=report['results'][1]['id'];uid=(await client.get('/auth/me')).json()['id']
+    sid=created['study_id']
+    await repo.workflow_repo.save(session,sid,scope={'audience':{'description':'독서 습관을 만들고 싶은 직장인','context':''}})
+    ctx=await repo.context(session,rid,pid,uid)
+    data=json.loads(service.build_interview_prompt(ctx,'왜 멈췄나요?',[])['contents'][0])
+    assert data['product_intro']                       # 제품 이름·설명이 들어간다
+    assert data['target_audience']=='독서 습관을 만들고 싶은 직장인'

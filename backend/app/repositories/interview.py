@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import Run,Study,Persona,Prototype,Task,ActLog,InterviewThread,InterviewMessage,LocalDemoStudy
+from app.models import Run,Study,Persona,Prototype,Task,ActLog,InterviewThread,InterviewMessage,LocalDemoStudy,Product
 from app.core.config import INTERVIEW_HISTORY_LIMIT
 from app.repositories import workflow as workflow_repo
 
@@ -18,7 +18,10 @@ async def context(session:AsyncSession,run_id:int,persona_id:int,user_id:int):
     source='local-demo' if await session.get(LocalDemoStudy,run.study_id) else 'live'
     captured=await workflow_repo.evidence(session,run_id,persona_id)
     screens=list({s['id']:s for s in [*(proto.screens_json if proto else []),*[e.screen_json for e in captured]]}.values())
-    return {'run':run,'persona':persona,'screens':screens,'task':task.description if task else '', 'logs':rows,'source':source}
+    product=await session.scalar(select(Product).where(Product.study_id==run.study_id))
+    workflow=await workflow_repo.get(session,run.study_id)
+    audience=(((workflow.scope_json or {}).get('audience') or {}).get('description') or '') if workflow else ''
+    return {'run':run,'persona':persona,'screens':screens,'task':task.description if task else '', 'logs':rows,'source':source,'product':product.description if product else '','audience':audience}
 
 async def thread(session:AsyncSession,run_id:int,persona_id:int,lock=False):
     if lock:

@@ -162,6 +162,8 @@ SITE_SCAN_MAX_PRIORITIES = 50
 SITE_SCAN_PRIORITY_MAX_CHARS = 300
 SCOPE_FOCUS_MAX_CHARS = 4000
 SITE_DEFAULT_MAX_TURNS = 12
+# LLM 모드에서 한 화면을 판단할 수 있는 최대 횟수. 되돌아가기·스크롤은 허용하되 같은 화면을 맴도는 무한 반복과 비용을 막는다.
+BROWSER_MAX_VISITS_PER_SCREEN = 3
 
 # 연결 시 익명 브라우저에서 수행하는 모델 없는 사전 탐색
 PREFLIGHT_MAX_STATES = 20

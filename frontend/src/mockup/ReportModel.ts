@@ -12,7 +12,10 @@ export const screenTitle = (s: Study, id?: string | null) => s.screens.find(scre
 // 규칙 기반 탐색(AI 없음)에서 '더 누를 곳이 없어서' 또는 '이미 본 화면으로 돌아와서' 끝난 것은 사람이 포기한 것이 아니다.
 // 사용자 이탈(문제)로 세지 않고 '탐색 마침'으로 따로 둔다.
 const ruleBased = (r: Result) => Boolean(r.act?.events.some(e => (e.reason || '').startsWith('규칙 기반 탐색')));
-export const outcome = (r?: Result): Outcome => !r?.act ? 'pending' : r.act.end.result === 'complete' ? 'complete' : r.act.end.drop_reason === 'MAX_TURNS' || (r.act.end.drop_reason === 'NAVIGATION_LOST' && ruleBased(r)) ? 'system' : 'drop';
+// 같은 화면을 맴돌아 시스템이 끊은 NAVIGATION_LOST(마지막 행동이 포기가 아님)도 사람이 포기한 것이 아니다.
+// 페르소나가 직접 '길을 잃었다'며 포기(abandon)한 기록만 사용자 이탈로 센다.
+const forcedStop = (r: Result) => r.act?.end.drop_reason === 'NAVIGATION_LOST' && r.act.events.at(-1)?.action !== 'abandon';
+export const outcome = (r?: Result): Outcome => !r?.act ? 'pending' : r.act.end.result === 'complete' ? 'complete' : r.act.end.drop_reason === 'MAX_TURNS' || (r.act.end.drop_reason === 'NAVIGATION_LOST' && (ruleBased(r) || forcedStop(r))) ? 'system' : 'drop';
 export const outcomeLabel = (r?: Result) => outcome(r) === 'system' && r?.act?.end.drop_reason !== 'MAX_TURNS' ? '탐색 마침' : ({ complete:'목표 도달', drop:'탐색 중단', system:'탐색 한도', pending:'결과 없음' })[outcome(r)];
 export const dropLabel = (code?: string | null) => DROP_LABELS[code || ''] || '이유 미기록';
 export const checkHypothesis = (code: string) => ({

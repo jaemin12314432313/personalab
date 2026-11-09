@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import PurePosixPath
 from urllib.parse import urlsplit, urlunsplit, unquote
-from app.core.config import (settings, DROP_REASONS, BROWSER_TIMEOUT_MS, BROWSER_MAX_ELEMENTS,
+from app.core.config import (settings, DROP_REASONS, BROWSER_MAX_VISITS_PER_SCREEN, BROWSER_TIMEOUT_MS, BROWSER_MAX_ELEMENTS,
     BROWSER_MAX_TEXT, BROWSER_UPLOAD_BYTES, BROWSER_LOCAL_PORTS, BROWSER_RUNTIME, BROWSER_PREVIEW_READY_MS, BROWSER_SETTLE_MS, BROWSER_INTERACTIVE_SELECTOR, BROWSER_RECAPTURE_WAIT_MS, BROWSER_PREVIEW_FONT_MS, BROWSER_ACTION_READY_MS)
 from app.services.llm import call_llm, image_part, require_persona_transmission, LLMError
 
@@ -308,9 +308,9 @@ async def settle(page):
     try:await page.wait_for_function("(s) => document.querySelector(s) !== null",arg=BROWSER_INTERACTIVE_SELECTOR,timeout=BROWSER_SETTLE_MS)
     except Exception:pass
 
-async def explore(source,scope,persona,task,max_turns,save,cancelled,decide=decide_browser,tolerate_blocked=False):
+async def explore(source,scope,persona,task,max_turns,save,cancelled,decide=decide_browser,tolerate_blocked=False,allow_revisit=False):
     from app.services.site_map import site_mode
-    rows=[];visited=set();history=[]
+    rows=[];visited=set();visits={};history=[]
     general=site_mode(scope)
     async with open_page(source,scope.get('viewport','desktop')) as (page,base,blocked):
         start_url=scope.get('_start_url') if general else None
@@ -341,12 +341,12 @@ async def explore(source,scope,persona,task,max_turns,save,cancelled,decide=deci
             end=None
             actual={**screen,'url':page.url}
             if not general and turn>0 and goal_reached(actual,scope,base):end=('complete',None)
-            elif screen['id'] in visited:end=('stop','NAVIGATION_LOST')
+            elif screen['id'] in visited and not (allow_revisit and visits.get(screen['id'],0)<BROWSER_MAX_VISITS_PER_SCREEN):end=('stop','NAVIGATION_LOST')
             elif turn>=max_turns:end=('stop','MAX_TURNS')
             if end:
                 row={'turn':turn,'screen_id':screen['id'],'action':end[0],'target':None,'drop_reason':end[1],'reason':None}
                 await save(turn,screen,image,{'action':end[0],'drop_reason':end[1]},row);rows.append(row);break
-            visited.add(screen['id'])
+            visited.add(screen['id']);visits[screen['id']]=visits.get(screen['id'],0)+1
             decision=await asyncio.to_thread(decide,persona,task,screen,image,history)
             if await cancelled():raise BrowserCancelled('사용자가 실행을 취소했습니다.')
             action=decision['action'];target=None

@@ -38,7 +38,7 @@ export function mountReport(host: HTMLElement, initial: Study, options: ReportOp
   let identity=`${initial.id}:${initial.runs?.act||0}`,epoch=0,loadRequest=0,loading=0,asking=0,errorPerson=0,errorText='';
   const loaded=new Set<number>();
   const llmAllowed=new Map<number,boolean>();
-  let interviewMode:'records'|'llm'='records';
+  let interviewMode:'records'|'llm'='records',modeChosen=false; // modeChosen: 사용자가 답변 방식을 직접 골랐는지(고르기 전에는 LLM 허용 시 LLM이 기본)
   const allowsLlm=()=>Boolean(options.canUseLlm?.() && llmAllowed.get(person));
   const hasRecord=()=>Boolean(result()?.act);
   const result = () => study.results.find(r=>r.id===person);
@@ -202,12 +202,12 @@ export function mountReport(host: HTMLElement, initial: Study, options: ReportOp
   }
   function selectPerson(id:number, nextTab?:Tab) {
     if(!study.personas.some(p=>p.id===id)&&!study.results.some(r=>r.id===id)) return;
-    person=id; interviewMode='records'; finding=model.findings.findIndex(f=>f.records.some(r=>r.id===id)); options.onSelectPersona?.(id); if(nextTab) {tab=nextTab; options.onTabChange?.(tab);} resetEvidence(); render(); if(tab==='interview')void loadChats();
+    person=id; interviewMode='records'; modeChosen=false; finding=model.findings.findIndex(f=>f.records.some(r=>r.id===id)); options.onSelectPersona?.(id); if(nextTab) {tab=nextTab; options.onTabChange?.(tab);} resetEvidence(); render(); if(tab==='interview')void loadChats();
   }
   async function loadChats(force=false) {
     if(!options.loadInterview||!person||(!force&&(loaded.has(person)||loading===person)))return;
     const id=person,version=epoch,request=++loadRequest;loading=id;errorPerson=0;render();
-    try {const messages=await options.loadInterview(id);if(epoch!==version||request!==loadRequest)return;chats={...chats,[id]:Array.isArray(messages)?messages:messages.messages};llmAllowed.set(id,!Array.isArray(messages)&&messages.llm_allowed);loaded.add(id);}
+    try {const messages=await options.loadInterview(id);if(epoch!==version||request!==loadRequest)return;chats={...chats,[id]:Array.isArray(messages)?messages:messages.messages};llmAllowed.set(id,!Array.isArray(messages)&&messages.llm_allowed);if(!modeChosen&&person===id)interviewMode=allowsLlm()?'llm':'records';loaded.add(id);}
     catch(error){if(epoch===version&&request===loadRequest){errorPerson=id;errorText=error instanceof Error?error.message:'문답을 불러오지 못했습니다.';}}
     finally{if(epoch===version&&request===loadRequest){loading=0;render();}}
   }
@@ -250,11 +250,11 @@ export function mountReport(host: HTMLElement, initial: Study, options: ReportOp
     else if(b.hasAttribute('data-rv-replay'))options.onReplay?.();
     else if(b.hasAttribute('data-rv-next'))options.onNext?.();
   }
-  const change=(e:Event)=>{const target=e.target as HTMLSelectElement;if(target.hasAttribute('data-rv-select-person')){selectPerson(Number(target.value));return;}if(target.hasAttribute('data-rv-mode')){interviewMode=target.value==='llm'&&allowsLlm()?'llm':'records';render();return;}if(target.hasAttribute('data-rv-filter')){filter=target.value;recordsPage=0;render();host.querySelector<HTMLSelectElement>('[data-rv-filter]')?.focus({preventScroll:true});}};
+  const change=(e:Event)=>{const target=e.target as HTMLSelectElement;if(target.hasAttribute('data-rv-select-person')){selectPerson(Number(target.value));return;}if(target.hasAttribute('data-rv-mode')){modeChosen=true;interviewMode=target.value==='llm'&&allowsLlm()?'llm':'records';render();return;}if(target.hasAttribute('data-rv-filter')){filter=target.value;recordsPage=0;render();host.querySelector<HTMLSelectElement>('[data-rv-filter]')?.focus({preventScroll:true});}};
   const input=(e:Event)=>{const t=e.target as HTMLTextAreaElement;if(t.hasAttribute('data-rv-input'))draft[person]=t.value;};
   const submit=(e:SubmitEvent)=>{if((e.target as HTMLElement).hasAttribute('data-rv-form')){e.preventDefault();ask(draft[person]||'');}};
   const keydown=(e:KeyboardEvent)=>{const t=(e.target as Element).closest<HTMLElement>('[data-rv-tab]');if(!t||!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const tabs=reportTabs();const at=tabs.indexOf(tab);tab=tabs[e.key==='Home'?0:e.key==='End'?tabs.length-1:(at+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];options.onTabChange?.(tab);render(`tab-${tab}`);if(tab==='interview')void loadChats();};
   host.addEventListener('click',click);host.addEventListener('change',change);host.addEventListener('input',input);host.addEventListener('submit',submit);host.addEventListener('keydown',keydown);render();
-  return { selectPersona:selectPerson, showTab(next:Tab){tab=next;render();if(tab==='interview')void loadChats();}, update(next:Study){const nextIdentity=`${next.id}:${next.runs?.act||0}`,reset=identity!==nextIdentity;identity=nextIdentity;study=next;model=analyzeReport(study);finding=Math.min(finding,Math.max(0,model.findings.length-1));if(reset){epoch++;loadRequest++;loaded.clear();llmAllowed.clear();interviewMode='records';loading=0;asking=0;errorPerson=0;chats={};draft={};tab='overview';filter='all';findingPage=recordsPage=coveragePage=0;detailOpen=false;}if(reset||!study.personas.some(p=>p.id===person)||(model.records.length>0&&!study.results.find(r=>r.id===person)?.act)){person=model.findings[finding]?.records[0]?.id||model.records[0]?.id||study.personas[0]?.id||0;resetEvidence();}render();},
+  return { selectPersona:selectPerson, showTab(next:Tab){tab=next;render();if(tab==='interview')void loadChats();}, update(next:Study){const nextIdentity=`${next.id}:${next.runs?.act||0}`,reset=identity!==nextIdentity;identity=nextIdentity;study=next;model=analyzeReport(study);finding=Math.min(finding,Math.max(0,model.findings.length-1));if(reset){epoch++;loadRequest++;loaded.clear();llmAllowed.clear();interviewMode='records';modeChosen=false;loading=0;asking=0;errorPerson=0;chats={};draft={};tab='overview';filter='all';findingPage=recordsPage=coveragePage=0;detailOpen=false;}if(reset||!study.personas.some(p=>p.id===person)||(model.records.length>0&&!study.results.find(r=>r.id===person)?.act)){person=model.findings[finding]?.records[0]?.id||model.records[0]?.id||study.personas[0]?.id||0;resetEvidence();}render();},
     dispose(){epoch++;loadRequest++;host.removeEventListener('click',click);host.removeEventListener('change',change);host.removeEventListener('input',input);host.removeEventListener('submit',submit);host.removeEventListener('keydown',keydown);host.innerHTML='';} };
 }

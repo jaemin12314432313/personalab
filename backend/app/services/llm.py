@@ -30,15 +30,19 @@ class RetryableLLMError(LLMError):
     pass
 
 
+class FatalLLMError(LLMError):
+    """키·결제·권한·전송 허용처럼 모든 페르소나에게 똑같이 일어나는 오류. 실행 전체를 멈춘다."""
+
+
 def require_persona_transmission() -> None:
     if not settings.allow_persona_transmission:
-        raise LLMError(PERSONA_TRANSMISSION_BLOCKED)
+        raise FatalLLMError(PERSONA_TRANSMISSION_BLOCKED)
 
 
 @cache
 def get_client() -> genai.Client:
     if not settings.llm_api_key:
-        raise LLMError("서버에 LLM_API_KEY를 설정해 주세요.")
+        raise FatalLLMError("서버에 LLM_API_KEY를 설정해 주세요.")
     return genai.Client(api_key=settings.llm_api_key,
                         http_options=types.HttpOptions(timeout=settings.llm_timeout * 1000))
 
@@ -68,7 +72,7 @@ def strict_schema(schema: dict) -> dict:
 
 def openai_text(system: str, contents: list, schema: dict) -> str:
     if not settings.llm_api_key:
-        raise LLMError("서버에 LLM_API_KEY를 설정해 주세요.")
+        raise FatalLLMError("서버에 LLM_API_KEY를 설정해 주세요.")
     user_content = []
     for part in contents:
         if isinstance(part, str):
@@ -102,9 +106,9 @@ def openai_text(system: str, contents: list, schema: dict) -> str:
         error = body.get("error", {}) if isinstance(body, dict) else {}
         code = error.get("code") if isinstance(error, dict) else None
         if status == 429 and code == "insufficient_quota":
-            raise LLMError("OpenAI API 크레딧 또는 결제 한도를 확인해 주세요. (insufficient_quota)")
+            raise FatalLLMError("OpenAI API 크레딧 또는 결제 한도를 확인해 주세요. (insufficient_quota)")
         if status in (401, 403):
-            raise LLMError(f"OpenAI 키 또는 프로젝트의 모델 접근 권한을 확인해 주세요. (HTTP {status})")
+            raise FatalLLMError(f"OpenAI 키 또는 프로젝트의 모델 접근 권한을 확인해 주세요. (HTTP {status})")
         if status == 429 or status >= 500:
             raise RetryableLLMError(f"OpenAI 일시적 호출 제한 또는 서버 오류 (HTTP {status})")
         raise LLMError(f"OpenAI 요청 형식 또는 모델 설정을 확인해 주세요. (HTTP {status})")

@@ -13,7 +13,7 @@ from app.repositories import study as study_repo
 from app.repositories import workflow as workflow_repo
 from app.services import browser, site_map
 from app.services.act.loop import agent_loop
-from app.services.llm import require_persona_transmission, LLMError
+from app.services.llm import require_persona_transmission, FatalLLMError, LLMError
 from app.services.ask.answer import ask_persona, check_ask
 from app.services.report import build_results
 from app.services import rule_agent
@@ -127,7 +127,7 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
                 async def cancelled_here():return await cancelled_on(sess)
                 product_row = None if rule else await study_repo.get_product(sess, run.study_id)
                 task_text = task.description if rule else task_with_context(task.description, product_row.description if product_row else None, scope)
-                await browser.explore(browser_source,scope,attrs,task_text,max_turns,save,cancelled_here,**({'decide':rule_agent.decide_browser,'tolerate_blocked':True} if rule else {}))
+                await browser.explore(browser_source,scope,attrs,task_text,max_turns,save,cancelled_here,**({'decide':rule_agent.decide_browser,'tolerate_blocked':True} if rule else {'allow_revisit':True}))
             else:
                 product_row = None if rule else await study_repo.get_product(sess, run.study_id)
                 task_text = task.description if rule else task_with_context(task.description, product_row.description if product_row else None, dict(workflow.scope_json) if workflow else {})
@@ -145,9 +145,26 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
 
         total=len(personas)
         concurrency=settings.run_concurrency if (run.mode=="act" and browser_source) else 1
+        failures: list[tuple[int, str]] = []
+
+        async def guarded(sess, persona):
+            """한 명의 일시적 실패가 나머지 사람의 실행까지 멈추지 않게 한다.
+            취소·키/결제/권한 오류처럼 모두에게 해당하는 오류와 예상 못한 오류는 그대로 올려 실행 전체를 멈춘다."""
+            try:
+                await process(sess, persona)
+            except FatalLLMError:
+                raise
+            except (LLMError, browser.BrowserError) as error:
+                if isinstance(error, browser.BrowserCancelled):
+                    raise
+                if sess is not session:
+                    await sess.rollback()  # 사람마다 따로 연 세션만 되돌린다. 공유 세션의 run 객체는 건드리지 않는다
+                failures.append((persona.id, str(error)))
+                log.warning("페르소나 실행 실패(다른 사람은 계속) run_id=%s persona_id=%s: %s", run_id, persona.id, error)
+
         if concurrency<=1:
             for i, persona in enumerate(personas, 1):
-                await process(session, persona)
+                await guarded(session, persona)
                 await run_repo.set_run_state(session, run, progress=i / total)
         else:
             # 사람 수가 많을 때 한 명씩 돌면 너무 오래 걸려서, 정해 둔 인원만큼 동시에 돌린다
@@ -156,7 +173,7 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
                 nonlocal finished
                 async with gate:
                     async with SessionLocal() as sess:
-                        await process(sess, persona)
+                        await guarded(sess, persona)
                     async with lock:
                         finished+=1
                         await run_repo.set_run_state(session, run, progress=finished / total)
@@ -166,7 +183,11 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
             except ExceptionGroup as group_error:
                 raise group_error.exceptions[0] from None
         if await cancelled():raise browser.BrowserCancelled("사용자가 실행을 취소했습니다.")
+        if failures and len(failures)>=total:
+            raise LLMError(f"모든 페르소나의 실행이 실패했습니다. 첫 오류: {failures[0][1]}")
         await run_repo.set_run_state(session, run, status=RUN_STATUS_DONE)
+        if failures:
+            await workflow_repo.set_control(session,run_id,error=f"{len(failures)}명은 실행 중 오류로 기록이 없습니다. 첫 오류: {failures[0][1]}")
         await save_report_snapshot(session, run, "done")
     except Exception as error:
         log.exception("실행 실패 run_id=%s", run_id)

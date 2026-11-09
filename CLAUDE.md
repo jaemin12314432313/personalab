@@ -124,6 +124,12 @@ TRUST             FEATURE_MISSING  SWITCHING_COST NAVIGATION_LOST
 
 **`MAX_TURNS`와 `visited` 차단이 없으면 무한 루프로 API 비용이 소모된다.**
 
+> 2026-11-10 사용자 결정으로 `visited` 차단을 완화했다(네 조건은 모두 유지).
+> - 규칙 기반 탐색: 이전과 같다. 이미 본 화면에 다시 오면 즉시 `NAVIGATION_LOST`.
+> - LLM 모드: 되돌아가기·스크롤을 허용하되, **같은 화면을 최대 `BROWSER_MAX_VISITS_PER_SCREEN`(3)번 판단한 뒤**에만 `NAVIGATION_LOST`로 끊는다.
+> - 시스템이 끊은 `NAVIGATION_LOST`(마지막 행동이 abandon이 아님)는 사용자 이탈이 아니라 '탐색 마침'으로 집계한다. 페르소나가 직접 abandon한 `NAVIGATION_LOST`만 이탈이다.
+> - 구현: `backend/app/services/browser.py`의 `explore(allow_revisit=...)`, `frontend/src/mockup/ReportModel.ts`의 `outcome`.
+
 ### 4. 기존 Ask 가격 문항 형식
 
 새 UI·UX 흐름에 가격 문항을 추가하지 않는다. 기존 Ask 이력의 유지보수가 필요한 경우에만 Q6의 직접 금액 응답 형식을 보존한다.

@@ -42,7 +42,7 @@ def records_answer(context,question):
 def build_interview_prompt(context,question,history):
     act=build_act(context['logs'])
     if act is None:raise ValueError('완료된 탐색 기록이 필요합니다.')
-    data={'persona_card':context['persona'].attributes_json.get('card_text',''),'task':context['task'],'visited_screens':[s for s in context['screens'] if s['id'] in act.path],'logs':evidence_rows(context),'end':act.end.model_dump(),'recent_questions':[{'question':m.question,'answer':m.answer,'mode':m.mode} for m in history[-INTERVIEW_CONTEXT_LIMIT:]],'question':question}
+    data={'persona_card':context['persona'].attributes_json.get('card_text',''),'task':context['task'],'product_intro':context.get('product',''),'target_audience':context.get('audience',''),'visited_screens':[s for s in context['screens'] if s['id'] in act.path],'logs':evidence_rows(context),'end':act.end.model_dump(),'recent_questions':[{'question':m.question,'answer':m.answer,'mode':m.mode} for m in history[-INTERVIEW_CONTEXT_LIMIT:]],'question':question}
     return {'system':SYSTEM,'contents':[json.dumps(data,ensure_ascii=False)],'schema':ModelAnswer.model_json_schema()}
 
 def llm_answer(context,question,history):

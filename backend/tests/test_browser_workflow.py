@@ -125,7 +125,7 @@ async def test_runner_stores_browser_evidence_report_and_scoped_interview(client
     def decide(persona,task,screen,image,history):
         element=next(e for e in screen['elements'] if e['text']=='결과 보기')
         return {'action':'click','target':element['id'],'value':None,'drop_reason':None,'reason':'가상 인물이 완료 화면을 선택한 검증 기록'}
-    async def simulated(*args):return await original(*args,decide=decide)
+    async def simulated(*args,**kw):return await original(*args,decide=decide,**kw)
     monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
     monkeypatch.setattr(browser,'explore',simulated)
     monkeypatch.setattr(browser,'call_llm',lambda *a,**kw:pytest.fail('외부 모델 호출 금지'))
@@ -257,7 +257,7 @@ async def test_general_runner_assigns_unvisited_page_to_next_persona(client,sess
     run=await run_repo.create_run(session,sid,'act')
     original=browser.explore
     def decide(*a):return {'action':'abandon','reason':'fixture only','drop_reason':'UNCLEAR_PURPOSE'}
-    async def simulate(*args):return await original(*args,decide=decide)
+    async def simulate(*args,**kw):return await original(*args,decide=decide,**kw)
     monkeypatch.setattr(browser,'explore',simulate)
     monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
     monkeypatch.setattr(browser,'call_llm',lambda *a,**k:pytest.fail('No external model'))
@@ -336,7 +336,7 @@ async def test_runner_failed_action_keeps_owned_capture_without_inventing_report
     original=browser.explore
     def decide(persona,task,screen,image,history):
         return {'action':'click','target':screen['elements'][0]['id'],'reason':'검증용 이동'}
-    async def simulated(*args):return await original(*args,decide=decide)
+    async def simulated(*args,**kw):return await original(*args,decide=decide,**kw)
     async def denied(*args):raise browser.BrowserError('검증용 실행 차단')
     monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
     monkeypatch.setattr(browser,'explore',simulated)
@@ -350,3 +350,75 @@ async def test_runner_failed_action_keeps_owned_capture_without_inventing_report
     assert report['results'][0]['act'] is None
     pid=report['results'][0]['id']
     assert (await client.post(f'/runs/{run.id}/personas/{pid}/interview',json={'question':'왜?','mode':'records'})).status_code==409
+
+
+async def test_llm_mode_allows_revisit_up_to_the_screen_limit_but_rule_mode_stops_at_once():
+    async def cancelled():return False
+    async def save(*a):pass
+    calls=[]
+    def stay(persona,task,screen,image,history):
+        calls.append(1)
+        return {'action':'scroll','target':None,'value':None,'drop_reason':None,'reason':'가상 스크롤'}
+    rows=await browser.explore(bundle(),{'goal_url':'/missing.html'},{'card_text':'가상'},'검증',9,save,cancelled,stay,allow_revisit=True)
+    # 같은 화면에서 최대 3번까지 판단한 뒤에만 NAVIGATION_LOST로 막는다(무한 반복·비용 방지)
+    assert len(calls)==3
+    assert rows[-1]['action']=='stop' and rows[-1]['drop_reason']=='NAVIGATION_LOST' and rows[-1]['reason'] is None
+    calls.clear()
+    rows=await browser.explore(bundle(),{'goal_url':'/missing.html'},{'card_text':'가상'},'검증',9,save,cancelled,stay)
+    assert len(calls)==1 and rows[-1]['drop_reason']=='NAVIGATION_LOST'
+
+
+async def _two_persona_run(client,session):
+    sid=(await client.post('/studies',json={'name':'실패 격리 점검'})).json()['id']
+    source=bundle()
+    assert (await client.post(f'/studies/{sid}/sources/html',json={'files':source['files'],'entry':source['entry']})).status_code==200
+    await study_repo.set_product(session,sid,'가상 화면',['이동'],'')
+    await study_repo.replace_personas(session,sid,[
+        {'card_text':'A 가상 인물','profile':{'age':30},'traits':{},'source':{'persona_id':'FIX-A'}},
+        {'card_text':'B 가상 인물','profile':{'age':31},'traits':{},'source':{'persona_id':'FIX-B'}}])
+    assert (await client.post(f'/studies/{sid}/workflow',json={'scope':{'exploration':'journey','goal_url':'/done.html'}})).status_code==200
+    return sid,await run_repo.create_run(session,sid,'act')
+
+
+async def test_one_persona_failure_does_not_stop_the_others(client,session,monkeypatch):
+    from app.services import runner
+    sid,run=await _two_persona_run(client,session)
+    original=browser.explore
+    def decide(persona,task,screen,image,history):
+        element=next(e for e in screen['elements'] if e['text']=='결과 보기')
+        return {'action':'click','target':element['id'],'value':None,'drop_reason':None,'reason':'가상 인물의 선택'}
+    async def simulated(*args,**kw):
+        if args[2]['card_text'].startswith('A'):raise runner.LLMError('LLM 응답 실패 (3회 시도): 가상 일시 오류')
+        return await original(*args,decide=decide,**kw)
+    monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
+    monkeypatch.setattr(browser,'explore',simulated)
+    await runner.execute_run(session,run.id)
+    assert (await run_repo.get_run(session,run.id)).status=='done'
+    results=(await client.get(f'/runs/{run.id}/report')).json()['results']
+    by={r['persona_id']:r for r in results}
+    assert by['FIX-A']['act'] is None                      # 실패한 사람은 '결과 없음'으로 남는다
+    assert by['FIX-B']['act']['end']['result']=='complete'  # 나머지는 정상 완료
+    control=await repo.control(session,run.id)
+    assert '1명은 실행 중 오류' in control.error
+
+
+async def test_fatal_llm_error_still_stops_the_whole_run(client,session,monkeypatch):
+    from app.services import runner
+    from app.services.llm import FatalLLMError
+    sid,run=await _two_persona_run(client,session)
+    async def simulated(*args,**kw):raise FatalLLMError('OpenAI API 크레딧 또는 결제 한도를 확인해 주세요. (insufficient_quota)')
+    monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
+    monkeypatch.setattr(browser,'explore',simulated)
+    await runner.execute_run(session,run.id)
+    assert (await run_repo.get_run(session,run.id)).status=='failed'
+    assert 'insufficient_quota' in (await repo.control(session,run.id)).error
+
+
+async def test_all_personas_failing_marks_the_run_failed(client,session,monkeypatch):
+    from app.services import runner
+    sid,run=await _two_persona_run(client,session)
+    async def simulated(*args,**kw):raise runner.LLMError('LLM 응답 실패 (3회 시도): 가상 오류')
+    monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
+    monkeypatch.setattr(browser,'explore',simulated)
+    await runner.execute_run(session,run.id)
+    assert (await run_repo.get_run(session,run.id)).status=='failed'

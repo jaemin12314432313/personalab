@@ -48,18 +48,18 @@ test('empty report and untrusted text never fabricate completion or execute mark
   host.querySelector('[data-rv-tab="interview"]').click();const input=host.querySelector('[data-rv-input]');assert.equal(input.disabled,true);input.value='<script>alert(1)</script>';input.dispatchEvent(new dom.window.Event('input',{bubbles:true}));host.querySelector('[data-rv-form]').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));assert.equal(host.querySelectorAll('script').length,0);assert.ok(host.querySelector('.rv-messages').textContent.includes('아직 없습니다'));
 }));
 
-test('interviews default to records; LLM requires both grants and an explicit selection',async()=>withReport(async({fixture,dom,mount})=>{
+test('interviews default to LLM only when both grants allow it; records stay selectable and a manual choice sticks',async()=>withReport(async({fixture,dom,mount})=>{
   let permitted=true;const calls=[];
   const view=mount('a',fixture(),{canUseLlm:()=>permitted,loadInterview:async()=>({messages:[],llm_allowed:true}),askInterview:async(id,question,mode)=>{calls.push({id,mode});return {question,answer:'mock answer',mode,evidence:[{log_id:9,screen_id:'S02',screen_label:'회원가입'}]};}});
   view.showTab('interview');await new Promise(r=>setTimeout(r,0));const host=dom.window.document.getElementById('a');
-  assert.equal(host.querySelector('[data-rv-mode]').value,'records');
-  host.querySelector('[data-rv-question="0"]').click();await new Promise(r=>setTimeout(r,0));assert.equal(calls[0].mode,'records');
-  let select=host.querySelector('[data-rv-mode]');select.value='llm';select.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
-  host.querySelector('[data-rv-question="0"]').click();await new Promise(r=>setTimeout(r,0));assert.equal(calls[1].mode,'llm');
+  assert.equal(host.querySelector('[data-rv-mode]').value,'llm');   // 두 허용이 모두 있으면 LLM이 기본
+  host.querySelector('[data-rv-question="0"]').click();await new Promise(r=>setTimeout(r,0));assert.equal(calls[0].mode,'llm');
   assert.ok(host.querySelector('.rv-messages').textContent.includes('로그를 근거로 생성한 AI 답변'));
+  let select=host.querySelector('[data-rv-mode]');select.value='records';select.dispatchEvent(new dom.window.Event('change',{bubbles:true}));   // 직접 고른 방식은 유지된다
+  host.querySelector('[data-rv-question="0"]').click();await new Promise(r=>setTimeout(r,0));assert.equal(calls[1].mode,'records');
   permitted=false;host.querySelector('[data-rv-question="0"]').click();await new Promise(r=>setTimeout(r,0));assert.equal(calls[2].mode,'records');
   assert.equal(host.querySelector('[data-rv-mode] option[value="llm"]').disabled,true);
-  const blocked=mount('b',fixture(),{canUseLlm:()=>true,loadInterview:async()=>({messages:[],llm_allowed:false})});blocked.showTab('interview');await new Promise(r=>setTimeout(r,0));assert.equal(dom.window.document.querySelector('#b [data-rv-mode] option[value="llm"]').disabled,true);
+  const blocked=mount('b',fixture(),{canUseLlm:()=>true,loadInterview:async()=>({messages:[],llm_allowed:false})});blocked.showTab('interview');await new Promise(r=>setTimeout(r,0));assert.equal(dom.window.document.querySelector('#b [data-rv-mode] option[value="llm"]').disabled,true);assert.equal(dom.window.document.querySelector('#b [data-rv-mode]').value,'records');
 }));
 
 test('interview source identity change clears conversations and blocks a late answer',async()=>withReport(async({fixture,dom,mount})=>{
@@ -153,5 +153,15 @@ test('compact interview keeps one composer, preserves per-person history and exp
  const mode=host.querySelector('[data-rv-mode]');mode.value='llm';mode.dispatchEvent(new dom.window.Event('change',{bubbles:true}));assert.ok(host.querySelector('.rv-mode-warning').textContent.includes('모델에 전송'));assert.ok(host.querySelector('.rv-mode-warning').textContent.includes('토큰 사용'));
  const input=host.querySelector('[data-rv-input]');input.value='어디서 멈췄나요?';input.dispatchEvent(new dom.window.Event('input',{bubbles:true}));host.querySelector('form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));await new Promise(r=>setTimeout(r,0));
  assert.equal(sent.mode,'llm');assert.equal(sent.person,id);assert.ok(host.querySelector('.rv-messages').textContent.includes('저장된 맥락'));assert.equal(host.querySelector('.rv-question-chips'),null);assert.equal(host.querySelector('[data-rv-input]').value,'');
- const next=s.results.find(r=>r.act&&r.id!==id).id,select=host.querySelector('[data-rv-select-person]');select.value=String(next);select.dispatchEvent(new dom.window.Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,0));assert.ok(!host.querySelector('.rv-messages').textContent.includes('저장된 맥락'));assert.equal(host.querySelector('[data-rv-mode]').value,'records');
+ const next=s.results.find(r=>r.act&&r.id!==id).id,select=host.querySelector('[data-rv-select-person]');select.value=String(next);select.dispatchEvent(new dom.window.Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,0));assert.ok(!host.querySelector('.rv-messages').textContent.includes('저장된 맥락'));assert.equal(host.querySelector('[data-rv-mode]').value,'llm');
+}));
+
+test('system-forced NAVIGATION_LOST is not a user drop, but a persona-chosen abandon with the same code is',async()=>withReport(async({model})=>{
+  const act=(events,end)=>({id:1,persona_id:'P1',ask:null,act:{path:['S1','S2'],events,end}});
+  const click={turn:1,screen:'S1',action:'click',target:'다음',reason:'둘러보려고 눌렀어요'};
+  const forced=act([click,{turn:2,screen:'S2',action:'scroll',target:null,reason:'조금 더 내려 봤어요'}],{result:'drop',screen:'S2',drop_reason:'NAVIGATION_LOST'});
+  const chosen=act([click,{turn:2,screen:'S2',action:'abandon',target:null,reason:'어디로 가야 할지 모르겠어요',drop_reason:'NAVIGATION_LOST'}],{result:'drop',screen:'S2',drop_reason:'NAVIGATION_LOST'});
+  assert.equal(model.outcome(forced),'system');   // 시스템이 같은 화면 반복을 끊은 것: 탐색 마침
+  assert.equal(model.outcome(chosen),'drop');     // 페르소나가 직접 포기한 것: 사용자 이탈
+  assert.equal(model.outcomeLabel(forced),'탐색 마침');
 }));
