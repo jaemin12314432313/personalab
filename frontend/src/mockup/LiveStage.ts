@@ -81,15 +81,15 @@ export function mountLiveStage(host:HTMLElement){
   const ids=study.personas.map(p=>p.id);if(!ids.length)ids.push(0);const activeIndex=Math.max(0,ids.indexOf(person));
   const controls=el<HTMLButtonElement>('[data-ls-follow]');controls.setAttribute('aria-pressed',String(follow));controls.textContent=follow?(study.status==='running'?automatic?'● 실시간 따라가는 중':'● 이 사람을 실시간으로':'마지막 기록'):'최신 화면으로 →';el('[data-ls-all]').hidden=automatic||study.status!=='running';
   { const rs=(study.results||[]).filter(r=>r.act),n=study.personas.length;
-    const done=rs.filter(r=>outcome(r)==='complete').length,stopped=rs.filter(r=>outcome(r)==='drop').length,wrapped=rs.filter(r=>outcome(r)==='system').length,going=Math.max(0,n-rs.length);
+    const done=rs.filter(r=>outcome(r)==='complete').length,stopped=rs.filter(r=>outcome(r)==='drop').length,wrapped=rs.filter(r=>outcome(r)==='system').length,missing=Math.max(0,n-rs.length),ended=(study.status==='done'||study.status==='failed')&&rs.length>0,going=ended?0:missing,lost=ended?missing:0;
     const chip=(label:string,value:number,kind:string)=>`<div class="ls-stat" data-k="${kind}"><b>${value}</b><span>${label}</span></div>`;
-    const m=chip('탐색 중·대기',going,'run')+chip('끝까지 간 사람',done,'good')+chip('중간에 멈춘 사람',stopped,'bad')+chip('탐색 마침',wrapped,'end');
+    const m=chip('탐색 중·대기',going,'run')+chip('끝까지 간 사람',done,'good')+chip('중간에 멈춘 사람',stopped,'bad')+chip('탐색 마침',wrapped,'end')+(lost?chip('기록 없음',lost,'bad'):'');
     const box=el('.ls-stats');if(box.innerHTML!==m)box.innerHTML=m; }
   const terminal=(study.results||[]).filter(r=>r.act).length;el('[data-ls-count]').textContent=`${terminal} / ${study.personas.length}명 종료`;
-  { const total=study.personas.length,pct=total?Math.round(terminal/total*100):0,finished=total>0&&terminal>=total;
+  { const total=study.personas.length,pct=total?Math.round(terminal/total*100):0,lostPeople=(study.status==='done'||study.status==='failed')&&terminal>0?Math.max(0,total-terminal):0,finished=total>0&&(terminal>=total||lostPeople>0);
     el('[data-ls-title]').innerHTML=finished?'탐색을 <span class="ls-ul">마쳤어요</span>':study.status==='running'?'지금 <span class="ls-ul">탐색</span>하고 있어요':'저장된 <span class="ls-ul">탐색</span> 기록';
     const rs2=(study.results||[]).filter(r=>r.act),good=rs2.filter(r=>outcome(r)==='complete').length,bad=rs2.filter(r=>outcome(r)==='drop').length;
-    el('[data-ls-sub]').textContent=`${study.product?.name||study.name||'테스트'} · ${total}명 중 ${terminal}명이 끝냈어요${good?` · 목표 도달 ${good}명`:''}${bad?` · 중간에 멈춘 ${bad}명`:''}`;
+    el('[data-ls-sub]').textContent=`${study.product?.name||study.name||'테스트'} · ${total}명 중 ${terminal}명이 끝냈어요${good?` · 목표 도달 ${good}명`:''}${bad?` · 중간에 멈춘 ${bad}명`:''}${lostPeople?` · 오류로 기록이 없는 ${lostPeople}명`:''}`;
     const bar=el('.ls-progress');bar.setAttribute('aria-valuenow',String(pct));bar.querySelector<HTMLElement>('i')!.style.width=`${pct}%`; }
   const peopleMarkup=study.personas.map(p=>{const last=all.filter(e=>e.persona_id===p.id).at(-1),ended=(study!.results||[]).find(r=>r.id===p.id)?.act;return `<button type="button" data-ls-person="${p.id}" aria-pressed="${person===p.id}"><strong>${esc(personLabel(p.id))}</strong><small>${ended?ended.end.drop_reason==='MAX_TURNS'?'한도 종료':ended.end.result==='complete'?'목표 도달':'탐색 종료':last?actionName(last):'기록 대기'}</small></button>`;}).join('');
   if(el('.ls-people').innerHTML!==peopleMarkup)el('.ls-people').innerHTML=peopleMarkup;
@@ -122,12 +122,12 @@ export function mountLiveStage(host:HTMLElement){
   host.querySelectorAll<HTMLElement>('[data-ls-logmode]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.lsLogmode==='all')===logAll)));
   const logMarkup=shownItems.map(e=>`<li class="${shown?.id===e.id?'on':''}${e.action.action==='abandon'?' stop':''}"><button type="button" data-ls-log="${e.id}" aria-pressed="${shown?.id===e.id}">${(()=>{const lp=study!.personas.find(p=>p.id===e.persona_id);return lp?portraitMarkup(displayAttributes(lp.attributes),'ls-log-portrait'):'';})()}<b>${logAll?esc(personLabel(e.persona_id)):String(e.turn+1).padStart(2,'0')}</b><span><small>${esc(personLabel(e.persona_id))} · ${esc(e.screen.label)}</small><em>${esc(actionName(e))}</em>${e.action.reason?`<q>${esc(e.action.reason)}</q>`:''}</span></button></li>`).join('')||'<li class="empty">첫 행동이 저장되면 이유와 함께 여기에 쌓여요.</li>';
   if(log.innerHTML!==logMarkup){const keep=log.scrollTop;log.innerHTML=logMarkup;const on=log.querySelector<HTMLElement>('li.on');if(on&&!logAll)log.scrollTop=Math.max(0,on.offsetTop-log.clientHeight/2);else log.scrollTop=logAll?0:keep;}
-  const at=all.findIndex(e=>e.id===selected);el<HTMLButtonElement>('[data-ls-previous]').disabled=at<=0;el<HTMLButtonElement>('[data-ls-next]').disabled=at<0||at>=all.length-1;el<HTMLButtonElement>('[data-ls-play]').disabled=!all.length;el('[data-ls-play]').textContent=playing?'멈추기 Ⅱ':'처음부터 다시 보기 ▷';el('[data-ls-play]').setAttribute('aria-pressed',String(playing));el('[data-ls-position]').textContent=all.length?`${at+1}/${all.length}`:'기록 대기';
+  const at=all.findIndex(e=>e.id===selected),mine=all.filter(e=>e.persona_id===person),mineAt=mine.findIndex(e=>e.id===selected);el<HTMLButtonElement>('[data-ls-previous]').disabled=mineAt<=0;el<HTMLButtonElement>('[data-ls-next]').disabled=mineAt<0||mineAt>=mine.length-1;el<HTMLButtonElement>('[data-ls-play]').disabled=!all.length;el('[data-ls-play]').textContent=playing?'멈추기 Ⅱ':'처음부터 다시 보기 ▷';el('[data-ls-play]').setAttribute('aria-pressed',String(playing));el('[data-ls-position]').textContent=all.length?`${at+1}/${all.length}`:'기록 대기';
   el<HTMLButtonElement>('[data-ls-zoom]').disabled=!shown;
   const screenDialog=el<HTMLDialogElement>('.ls-screen-dialog');if(screenDialog.open&&shown){screenDialog.querySelector('img')!.src=frame!.image.src;el('[data-ls-zoom-label]').textContent=shown.screen.label;el('[data-ls-zoom-action]').textContent=`${personLabel(person)} · ${actionName(shown)} · ${fullReason}`;}
   followNext();
  }
- function move(delta:number){const all=events(),at=all.findIndex(e=>e.id===selected),next=all[Math.max(0,Math.min(all.length-1,at+delta))];if(next){selected=next.id;person=next.persona_id;follow=false;automatic=false;draw();}}
+ function move(delta:number,scope:'person'|'all'='all'){const all=events().filter(e=>scope==='all'||e.persona_id===person),at=all.findIndex(e=>e.id===selected),next=all[Math.max(0,Math.min(all.length-1,at+delta))];if(next){selected=next.id;person=next.persona_id;follow=false;automatic=false;draw();}}
  function schedule(){clearTimeout(replayTimer);if(!playing||disposed)return;replayTimer=setTimeout(()=>{if(frames.get(person)?.loading){schedule();return;}if(frames.get(person)?.error){stop();draw();return;}const all=events(),at=all.findIndex(e=>e.id===selected);if(at>=all.length-1){stop();draw();return;}move(1);schedule();},REPLAY_MS);}
  function click(event:Event){const b=(event.target as HTMLElement).closest<HTMLButtonElement>('button');if(!b||b.disabled)return;
   if(b.hasAttribute('data-ls-zoom')){stop();follow=false;el<HTMLDialogElement>('.ls-screen-dialog').showModal();draw();return;}
@@ -140,8 +140,8 @@ export function mountLiveStage(host:HTMLElement){
   else if(b.dataset.lsLogmode){logAll=b.dataset.lsLogmode==='all';}
   else if(b.hasAttribute('data-ls-follow')){stop();follow=!follow;if(follow)latest();}
   else if(b.hasAttribute('data-ls-all')){stop();automatic=true;follow=true;latest();}
-  else if(b.hasAttribute('data-ls-previous')){stop();move(-1);return;}
-  else if(b.hasAttribute('data-ls-next')){stop();move(1);return;}
+  else if(b.hasAttribute('data-ls-previous')){stop();move(-1,'person');return;}
+  else if(b.hasAttribute('data-ls-next')){stop();move(1,'person');return;}
   else if(b.hasAttribute('data-ls-play')){if(playing)stop();else{playing=true;follow=false;automatic=false;if(events().at(-1)?.id===selected&&events().length){selected=events()[0].id;person=events()[0].persona_id;}schedule();}}
   else if(b.hasAttribute('data-ls-retry')){const f=frames.get(person);if(f){f.requested='';f.error=false;}}
   else return;draw();

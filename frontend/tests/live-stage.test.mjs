@@ -70,8 +70,12 @@ test('selected persona stays pinned and playback only moves through actual recor
   stage.update(s);await load();assert.equal(d.querySelector('.ls-scroll-cue').hidden,false);
   d.querySelector('.ls-people [data-ls-person="1"]').click();s.evidence.push(make(2,2,'abandon'));stage.update(s);await load();
   assert.equal(d.querySelector('.ls-people [aria-pressed="true"]').dataset.lsPerson,'1');
-  d.querySelector('[data-ls-next]').click();await load();assert.equal(d.querySelector('.ls-people [aria-pressed="true"]').dataset.lsPerson,'2');assert.equal(d.querySelector('[data-ls-next]').disabled,true);
-  assert.ok([...d.querySelectorAll('.ls-scroll-cue')].every(e=>e.hidden));d.querySelector('[data-ls-previous]').click();await load();assert.equal(d.querySelector('[data-ls-previous]').disabled,true);
+  // 수동 이전/다음은 보고 있는 사람의 기록 안에서만 움직인다. 1번 사람은 기록이 하나라 갈 곳이 없고, 2번으로 넘어가지 않는다.
+  assert.equal(d.querySelector('[data-ls-next]').disabled,true);assert.equal(d.querySelector('[data-ls-previous]').disabled,true);
+  d.querySelector('[data-ls-next]').click();await load();assert.equal(d.querySelector('.ls-people [aria-pressed="true"]').dataset.lsPerson,'1');
+  // 다른 사람을 직접 고르면 그 사람의 기록으로 간다(그 사람도 기록이 하나라 이전/다음은 비활성)
+  d.querySelector('.ls-people [data-ls-person="2"]').click();await load();assert.equal(d.querySelector('.ls-people [aria-pressed="true"]').dataset.lsPerson,'2');
+  assert.ok([...d.querySelectorAll('.ls-scroll-cue')].every(e=>e.hidden));
   d.querySelector('[data-ls-play]').click();assert.equal(d.querySelector('[data-ls-play]').getAttribute('aria-pressed'),'true');d.querySelector('[data-ls-play]').click();assert.equal(d.querySelector('[data-ls-play]').getAttribute('aria-pressed'),'false');
  }finally{stage?.dispose();dom.window.close();await server.close();}
 });
@@ -113,5 +117,24 @@ test('live batches display every capture in order and keep decision, target and 
   s.evidence.push({...e(4),action:{action:'click',target:'b',status:'failed',reason:'planned',error:'blocked action'}});stage.update(s,4);await load();
   assert.equal(d.querySelector('.ls-reason').textContent,'blocked action');assert.equal(d.querySelector('.ls-marker:not([hidden])'),null);
   d.querySelector('[data-ls-zoom]').click();stage.update({...s,id:'other',runs:{act:9},evidence:[],personas:[],workflow:{source:{kind:'manual'},scope:{}}});assert.equal(d.querySelector('.ls-screen-dialog').open,false);assert.equal(d.querySelector('.ls-screen-dialog img').getAttribute('src'),null);assert.ok(!d.body.innerHTML.includes('/api/runs/8/'));
+ }finally{stage?.dispose();dom.window.close();await server.close();}
+});
+
+
+test('after the run ended, people without a record are shown as no-record, not as still waiting',async()=>{
+ const server=await createServer({server:{middlewareMode:true,hmr:false},appType:'custom'}),dom=new JSDOM('<section id="stage"></section>');let stage;
+ try{
+  const {mountLiveStage}=await server.ssrLoadModule('/src/mockup/LiveStage.ts');stage=mountLiveStage(dom.window.document.getElementById('stage'));
+  const act=(screen)=>({path:[screen],events:[{turn:1,screen,action:'click',target:'다음',reason:'둘러봤어요'}],end:{result:'complete',screen}});
+  const base={id:'one',runs:{act:8},personas:[1,2,3].map(id=>({id,attributes:{source:{},profile:{age:30,job_group:'worker'}}})),workflow:{source:{kind:'html'},scope:{}},evidence:[],results:[{id:1,persona_id:'P1',ask:null,act:act('S1')},{id:2,persona_id:'P2',ask:null,act:act('S1')}]};
+  const d=dom.window.document,chip=(k)=>Number(d.querySelector(`.ls-stat[data-k="${k}"] b`)?.textContent??-1);
+  // 실행 중이면 기록 없는 한 명은 아직 탐색 중·대기
+  stage.update({...base,status:'running'});assert.equal(chip('run'),1);assert.equal(d.querySelector('.ls-stat[data-k="bad"]')?.textContent.includes('기록 없음')??false,false);
+  // 실행이 끝났는데 한 명은 오류로 기록이 없다: 대기가 아니라 '기록 없음'
+  stage.update({...base,status:'done'});
+  assert.equal(chip('run'),0);
+  assert.ok([...d.querySelectorAll('.ls-stat')].some(e=>e.textContent.includes('기록 없음')&&e.querySelector('b').textContent==='1'));
+  assert.ok(d.querySelector('[data-ls-title]').textContent.includes('마쳤어요'));
+  assert.ok(d.querySelector('[data-ls-sub]').textContent.includes('오류로 기록이 없는 1명'));
  }finally{stage?.dispose();dom.window.close();await server.close();}
 });
