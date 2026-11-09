@@ -187,3 +187,18 @@ test('comparison keeps neutral metrics neutral, flags AI noise and changed model
   // 문제 표의 분모는 전체 참여가 아니라 그 화면에 도착한 사람
   assert.ok(/명 멈춤 \/ 도착 \d+명/.test(workflow.comparisonMarkup(a,b))||workflow.comparisonMarkup(a,b).includes('cmp-empty'));
 }));
+
+test('a persona who reached the goal still contributes recorded concerns, without counting as a drop',async()=>withReport(async({fixture,model,mount,dom})=>{
+  const s=fixture();
+  const done=s.results.find(r=>r.act&&model.outcome(r)==='complete');
+  assert.ok(done);
+  done.act.events[0]={...done.act.events[0],concern:{code:'PRIVACY',note:'왜 이 정보가 필요한지 설명이 없다'}};
+  const a=model.analyzeReport(s);
+  assert.equal(a.dropped.some(r=>r.id===done.id),false);                  // 이탈로는 세지 않는다
+  const o=a.observations.find(x=>x.code==='PRIVACY'&&x.screen===done.act.events[0].screen);
+  assert.ok(o&&o.people.some(p=>p.record.id===done.id));                  // 그래도 걱정은 남는다
+  const view=mount('a',s,{compact:true,independentInterview:true});const host=dom.window.document.getElementById('a');
+  view.showTab('overview');
+  assert.ok(host.querySelector('.rp-obs')&&host.querySelector('.rp-obs').textContent.includes('이탈로 세지 않아요'));
+  assert.ok(host.querySelector('.rp-obs').textContent.includes('왜 이 정보가 필요한지 설명이 없다'));
+}));

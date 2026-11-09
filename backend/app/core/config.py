@@ -165,7 +165,7 @@ SITE_DEFAULT_MAX_TURNS = 12
 # LLM 모드에서 한 화면을 판단할 수 있는 최대 횟수. 되돌아가기·스크롤은 허용하되 같은 화면을 맴도는 무한 반복과 비용을 막는다.
 BROWSER_MAX_VISITS_PER_SCREEN = 3
 # 모델에 보내는 프롬프트·응답 형식을 바꿀 때마다 올린다. 실행 기록에 남겨 회차 비교가 같은 조건인지 판단하는 데 쓴다.
-PROMPT_REVISION = "2026-11-10.1"
+PROMPT_REVISION = "2026-11-10.2"
 
 # 연결 시 익명 브라우저에서 수행하는 모델 없는 사전 탐색
 PREFLIGHT_MAX_STATES = 20

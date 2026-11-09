@@ -92,6 +92,14 @@ async def evidence(session,run_id,persona_id=None):
     if persona_id is not None:q=q.where(BrowserEvidence.persona_id==persona_id)
     return list(await session.scalars(q.order_by(BrowserEvidence.id)))
 
+async def concerns(session, run_id):
+    """행동 기록에 같이 남은 걱정(concern)만 가볍게 읽는다. 이미지 열은 읽지 않는다. 키: (persona_id, turn)."""
+    out={}
+    for persona_id,turn,action in (await session.execute(select(BrowserEvidence.persona_id,BrowserEvidence.turn,BrowserEvidence.action_json).where(BrowserEvidence.run_id==run_id))):
+        c=(action or {}).get('concern')
+        if isinstance(c,dict) and c.get('code') and str(c.get('note') or '').strip():out[(persona_id,turn)]={'code':c['code'],'note':str(c['note']).strip()}
+    return out
+
 async def add_evidence(session,run_id,persona_id,turn,screen,image,action):
     session.add(BrowserEvidence(run_id=run_id,persona_id=persona_id,turn=turn,screen_json=screen,image_data=image,action_json=action))
     await session.commit()

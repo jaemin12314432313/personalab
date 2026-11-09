@@ -20,6 +20,12 @@ class AskResultOut(BaseModel):
     reason: str = ""
 
 
+class ConcernOut(BaseModel):
+    """이탈 없이 지나가면서 남긴 걱정. code는 이탈 사유 8개 중 하나다(분류는 늘리지 않는다)."""
+    code: str
+    note: str
+
+
 class ActEventOut(BaseModel):
     turn: int  # 1부터. act_logs.turn 은 0부터라 +1 한다
     screen: str
@@ -28,6 +34,7 @@ class ActEventOut(BaseModel):
     reason: str | None = None
     to: str | None = None  # click 일 때 이동한 화면
     drop_reason: str | None = None
+    concern: ConcernOut | None = None  # 이 행동 직전 화면에서 남긴 걱정(없으면 None)
 
 
 class ActEndOut(BaseModel):

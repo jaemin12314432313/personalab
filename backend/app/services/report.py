@@ -36,7 +36,7 @@ def display_id(persona) -> str:
     return given or f"{PERSONA_ID_PREFIX}{persona.id:0{PERSONA_ID_WIDTH}d}"
 
 
-def build_act(rows: list) -> ActResultOut | None:
+def build_act(rows: list, concerns: dict | None = None) -> ActResultOut | None:
     """한 페르소나의 act_logs(id 순)를 events·path·end 로. 아직 안 끝났으면 None."""
     turns = [r for r in rows if r.action in (ACT_CLICK, ACT_ABANDON, "fill", "scroll")]
     last = rows[-1] if rows else None
@@ -56,6 +56,7 @@ def build_act(rows: list) -> ActResultOut | None:
             reason=t.reason,
             to=arrived if t.action in (ACT_CLICK, "fill", "scroll") else None,
             drop_reason=t.drop_reason,
+            concern=(concerns or {}).get(t.turn),
         )
         for t, arrived in zip(turns, arrivals, strict=True)
     ]
@@ -73,7 +74,7 @@ def build_act(rows: list) -> ActResultOut | None:
 
 
 def build_results(
-    personas: Iterable, ask_rows: Iterable, act_rows: Iterable
+    personas: Iterable, ask_rows: Iterable, act_rows: Iterable, concerns: dict | None = None
 ) -> list[PersonaResultOut]:
     """패널(personas) 순서대로, 각자의 Ask 응답과 Act 결과를 붙인다. 없는 쪽은 None."""
     asks = {r.persona_id: r.response_json for r in ask_rows}
@@ -86,7 +87,7 @@ def build_results(
             id=p.id,
             persona_id=display_id(p),
             ask=AskResultOut.model_validate(asks[p.id]) if p.id in asks else None,
-            act=build_act(acts[p.id]) if p.id in acts else None,
+            act=build_act(acts[p.id], {t: c for (pid, t), c in (concerns or {}).items() if pid == p.id}) if p.id in acts else None,
         )
         for p in personas
     ]

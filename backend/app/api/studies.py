@@ -252,7 +252,7 @@ async def get_report(
         source=await study_repo.study_source(session,study.id),
         ask_run_id=ask_run.id if ask_run else None,
         act_run_id=act_run.id if act_run else None,
-        results=build_results(personas, ask_rows, act_rows),
+        results=build_results(personas, ask_rows, act_rows, await workflow_repo.concerns(session, act_run.id) if act_run else None),
         meta=(RunMetaOut.model_validate(m) if act_run and (m := await workflow_repo.run_meta(session, study.id, act_run.id)) else None),
     )
 

@@ -45,9 +45,19 @@ export function analyzeReport(study: Study) {
     groups.get(key)!.records.push(r);
   }
   const findings = [...groups.values()].sort((a,b) => b.records.length-a.records.length);
+  // 이탈하지 않고 지나가면서 AI가 남긴 걱정. 목표에 도달했거나 탐색을 마친 사람의 불편도 여기서 보인다(이탈로는 세지 않는다).
+  const seen = new Map<string,{key:string;screen:string;code:string;people:{record:ActRecord;note:string}[]}>();
+  for (const r of records) for (const e of r.act.events) {
+    if (!e.concern?.code || !e.concern.note) continue;
+    const key = JSON.stringify([e.screen,e.concern.code]);
+    if (!seen.has(key)) seen.set(key,{key,screen:e.screen,code:e.concern.code,people:[]});
+    const entry = seen.get(key)!;
+    if (!entry.people.some(p => p.record.id === r.id)) entry.people.push({record:r,note:e.concern.note});
+  }
+  const observations = [...seen.values()].sort((a,b) => b.people.length-a.people.length);
   const coverage = study.screens.map(screen => ({screen, arrived:records.filter(r=>r.act.path.includes(screen.id)).length,
     stopped:dropped.filter(r=>r.act.end.screen===screen.id).length, system:system.filter(r=>r.act.end.screen===screen.id).length}));
-  return {records,complete,dropped,system,pending,total:ids.size,visited,findings,coverage};
+  return {records,complete,dropped,system,pending,total:ids.size,visited,findings,observations,coverage};
 }
 
 export function recordAnswer(study: Study, id: number, question: string): string {

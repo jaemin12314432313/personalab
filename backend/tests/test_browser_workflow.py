@@ -461,3 +461,41 @@ async def test_run_meta_records_engine_model_prompt_revision_and_usage(client,se
     assert meta['usage']=={'calls':4,'input_tokens':9200,'output_tokens':380}   # 두 사람 × 두 번
     live=(await client.get(f'/studies/{sid}/report')).json()
     assert live['meta']['usage']['calls']==4
+
+
+async def test_concern_is_saved_with_the_action_and_shows_up_in_the_report(client,session,monkeypatch):
+    from app.services import runner
+    sid,run=await _two_persona_run(client,session)
+    original=browser.explore
+    def decide(persona,task,screen,image,history):
+        element=next(e for e in screen['elements'] if e['text']=='결과 보기')
+        concern={'code':'PRIVACY','note':'왜 이 정보가 필요한지 화면에 설명이 없다'} if persona['card_text'].startswith('A') else None
+        return {'action':'click','target':element['id'],'value':None,'drop_reason':None,'reason':'가상 선택','concern':concern}
+    async def simulated(*args,**kw):return await original(*args,decide=decide,**kw)
+    monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
+    monkeypatch.setattr(browser,'explore',simulated)
+    await runner.execute_run(session,run.id)
+    results={r['persona_id']:r for r in (await client.get(f'/runs/{run.id}/report')).json()['results']}
+    first=results['FIX-A']['act']['events'][0]
+    assert first['concern']=={'code':'PRIVACY','note':'왜 이 정보가 필요한지 화면에 설명이 없다'}
+    assert results['FIX-A']['act']['end']['result']=='complete'     # 걱정은 있었지만 목표에는 도달했다
+    assert results['FIX-B']['act']['events'][0]['concern'] is None
+
+
+def test_browser_decision_schema_asks_for_concern_and_rejects_malformed_ones(monkeypatch):
+    seen={}
+    def fake(system,contents,schema,check=None):
+        seen.update(system=system,schema=schema,check=check);return {}
+    monkeypatch.setattr(browser,'require_persona_transmission',lambda:None)
+    monkeypatch.setattr(browser,'call_llm',fake);monkeypatch.setattr(browser,'image_part',lambda i:None)
+    screen={'id':'S','elements':[{'id':'pl-0','text':'다음','kind':'a','type':''}]}
+    browser.decide_browser({'card_text':'가상'},'과제',screen,None,[])
+    props=seen['schema']['properties']
+    assert 'concern' in props and 'concern' in seen['schema']['required']
+    assert 'concern' in seen['system']
+    check=seen['check']
+    ok={'action':'click','target':'pl-0','value':None,'drop_reason':None,'reason':'r'}
+    assert check({**ok,'concern':None}) is None
+    assert check({**ok,'concern':{'code':'PRICE','note':'가격이 비싸 보인다'}}) is None
+    assert check({**ok,'concern':{'code':'NOT_A_CODE','note':'x'}})
+    assert check({**ok,'concern':{'code':'PRICE','note':'  '}})
