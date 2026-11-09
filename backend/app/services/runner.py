@@ -24,6 +24,22 @@ log = logging.getLogger(__name__)
 Launcher = Callable[[int], Awaitable[None]]
 
 
+def task_with_context(task: str, product_description: str | None, scope: dict) -> str:
+    """LLM 판단에 쓸 과제 문장에, 사용자가 적은 제품 소개와 대상 사용자 설명을 덧붙인다.
+
+    제품 설명은 '이름\\n설명' 형태로 저장된다. 비어 있는 항목은 넣지 않는다.
+    """
+    parts = [task]
+    name, _, desc = (product_description or "").partition("\n")
+    name, desc = name.strip(), desc.strip()
+    if name or desc:
+        parts.append("제품 소개: " + name + (f" — {desc}" if desc else ""))
+    audience = ((scope.get("audience") or {}).get("description") or "").strip()
+    if audience:
+        parts.append("이 테스트의 대상 사용자: " + audience)
+    return "\n".join(parts)
+
+
 def _ask_with_retries(persona: dict, product: dict, questions: list[dict]) -> dict | None:
     """검증을 통과할 때까지 최대 llm_max_retries 번.
 
@@ -109,12 +125,16 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
                     await workflow_repo.add_evidence(sess,run.id,persona.id,turn,screen,image,action)
                     if row is not None:await run_repo.add_ai_act_logs(sess,run.id,persona.id,[row])
                 async def cancelled_here():return await cancelled_on(sess)
-                await browser.explore(browser_source,scope,attrs,task.description,max_turns,save,cancelled_here,**({'decide':rule_agent.decide_browser,'tolerate_blocked':True} if rule else {}))
+                product_row = None if rule else await study_repo.get_product(sess, run.study_id)
+                task_text = task.description if rule else task_with_context(task.description, product_row.description if product_row else None, scope)
+                await browser.explore(browser_source,scope,attrs,task_text,max_turns,save,cancelled_here,**({'decide':rule_agent.decide_browser,'tolerate_blocked':True} if rule else {}))
             else:
+                product_row = None if rule else await study_repo.get_product(sess, run.study_id)
+                task_text = task.description if rule else task_with_context(task.description, product_row.description if product_row else None, dict(workflow.scope_json) if workflow else {})
                 rows = await asyncio.to_thread(
                     agent_loop,
                     attrs,
-                    task.description,
+                    task_text,
                     screens,
                     start,
                     task.goal_screen_id,
