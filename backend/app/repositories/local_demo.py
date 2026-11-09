@@ -12,7 +12,10 @@ async def create_demo(session: AsyncSession, user_id: int, screens: list, record
             LocalDemoStudy(study_id=study.id),
             Product(
                 study_id=study.id,
-                description="로컬 연결 점검\n직접 구성한 가상 입력으로 DB 저장과 결과·후속 질문을 확인합니다.",
+                description=(
+                    "로컬 연결 점검\n직접 구성한 가상 입력으로 DB 저장과 결과·후속 질문을 "
+                    "확인합니다."
+                ),
                 features_json=["로컬 연결 점검"],
                 price="",
             ),

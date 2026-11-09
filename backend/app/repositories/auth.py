@@ -29,9 +29,7 @@ async def register_user(session: AsyncSession, email: str, password_hash: str) -
 async def create_session(
     session: AsyncSession, user_id: int, token_hash: str, expires_at: datetime
 ):
-    await session.execute(
-        delete(AuthSession).where(AuthSession.expires_at <= datetime.now(UTC))
-    )
+    await session.execute(delete(AuthSession).where(AuthSession.expires_at <= datetime.now(UTC)))
     session.add(AuthSession(user_id=user_id, token_hash=token_hash, expires_at=expires_at))
     await session.commit()
 

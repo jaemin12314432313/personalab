@@ -145,7 +145,8 @@ async def test_short_entry_fade_finishes_before_capture():
             {
                 "path": "index.html",
                 "data": base64.b64encode(
-                    b"<title>Fade fixture</title><body style='opacity:.4'><h1>Ready view</h1><script>setTimeout(()=>document.body.style.opacity=1,650)</script>"
+                    b"<title>Fade fixture</title><body style='opacity:.4'><h1>Ready "
+                    b"view</h1><script>setTimeout(()=>document.body.style.opacity=1,650)</script>"
                 ).decode(),
             }
         ],

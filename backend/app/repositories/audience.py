@@ -39,9 +39,9 @@ def matches(row, filters):
     a = row.attributes_json
     p = a.get("profile", {})
     age = p.get("age")
-    if filters.age_min is not None and (not isinstance(age, (int, float)) or age < filters.age_min):
+    if filters.age_min is not None and (not isinstance(age, int | float) or age < filters.age_min):
         return False
-    if filters.age_max is not None and (not isinstance(age, (int, float)) or age > filters.age_max):
+    if filters.age_max is not None and (not isinstance(age, int | float) or age > filters.age_max):
         return False
     for field, values in [("job_group", filters.jobs), ("region", filters.regions)]:
         if values and (
@@ -68,7 +68,7 @@ def varied_order(rows):
     bands = {}
     for row in rows:
         age = row.attributes_json.get("profile", {}).get("age")
-        band = int(age) // 10 if isinstance(age, (int, float)) else -1
+        band = int(age) // 10 if isinstance(age, int | float) else -1
         bands.setdefault(band, []).append(row)
     result = []
     while any(bands.values()):

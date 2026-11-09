@@ -41,7 +41,8 @@ def build_act_prompt(persona: dict, task: str, screen: dict, history: list[str])
     }
     if screen.get("image"):
         observation["visual_source"] = (
-            "사용자가 등록한 화면 이미지 첨부. 등록된 버튼만 선택하며 OS/키보드/실제 설치 앱 동작은 추정하지 않는다."
+            "사용자가 등록한 화면 이미지 첨부. 등록된 버튼만 선택하며 OS/키보드/실제 설치 "
+            "앱 동작은 추정하지 않는다."
         )
     contents = [
         f"Persona\n{persona['card_text']}",

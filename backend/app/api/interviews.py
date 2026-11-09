@@ -95,15 +95,15 @@ async def post_interview(
         raise HTTPException(409, "완료된 탐색 기록이 있어야 질문할 수 있습니다.")
     thread = await repo.thread(session, run_id, persona_id, lock=True)
     if body.mode == "llm":
-        # 같은 질문의 반복 전송(더블 클릭, 응답이 유실된 뒤의 재시도)은 유료 호출을 또 하지 않고 직전 답을 돌려준다.
+        # 같은 질문의 반복 전송(더블 클릭, 응답이 유실된 뒤의 재시도)은 유료 호출을 또 하지 않고
+        # 직전 답을 돌려준다.
         # 스레드 행을 잠근 뒤에 확인하므로 동시에 들어온 같은 요청도 하나만 호출된다.
         last = (await repo.messages(session, thread.id))[-1:]
         if (
             last
             and last[0].mode == "llm"
             and last[0].question == body.question
-            and datetime.now(UTC) - last[0].created_at
-            < timedelta(seconds=INTERVIEW_DEDUPE_SECONDS)
+            and datetime.now(UTC) - last[0].created_at < timedelta(seconds=INTERVIEW_DEDUPE_SECONDS)
         ):
             return message_out(last[0])
     try:

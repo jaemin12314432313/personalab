@@ -28,7 +28,8 @@ class ScopeIn(BaseModel):
     scenario: str = Field(default="", max_length=500)
     # 이번 회차를 구분하는 짧은 상세 설명 (예: 온보딩 v3 · 회원가입 흐름)
     round_note: str = Field(default="", max_length=200)
-    # 같은 앱·웹(제품)에 속한 테스트를 묶는 식별자와 테스트 이름. DB 스키마는 바꾸지 않고 워크플로 범위(JSONB)에 둔다
+    # 같은 앱·웹(제품)에 속한 테스트를 묶는 식별자와 테스트 이름. DB 스키마는 바꾸지 않고 워크플로
+    # 범위(JSONB)에 둔다
     product_id: str = Field(default="", max_length=64)
     test_title: str = Field(default="", max_length=120)
 
@@ -69,7 +70,8 @@ class SourceOut(WorkflowOut):
 
 class RevisionIn(BaseModel):
     note: str = Field(default="", max_length=200)
-    # False면 대상 사용자·참여 구성·탐색 범위를 비운 채 새 앱·웹처럼 시작한다. 이전 내용은 화면에서 골라 가져온다
+    # False면 대상 사용자·참여 구성·탐색 범위를 비운 채 새 앱·웹처럼 시작한다. 이전 내용은 화면에서
+    # 골라 가져온다
     carry: bool = True
 
 

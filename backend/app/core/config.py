@@ -21,9 +21,11 @@ class Settings(BaseSettings):
     llm_timeout: int = 30
     llm_max_output_tokens: int = 900
     allow_persona_transmission: bool = False
-    # auto: 모델 키와 카드 전송 허용이 모두 있을 때만 LLM, 아니면 규칙 기반(비용 없음). llm/rule로 고정할 수도 있다
+    # auto: 모델 키와 카드 전송 허용이 모두 있을 때만 LLM, 아니면 규칙 기반(비용 없음). llm/rule로
+    # 고정할 수도 있다
     agent_engine: Literal["auto", "llm", "rule"] = "auto"
-    # 규칙 기반 탐색도 실제 에이전트처럼 천천히 보이도록 판단마다 잠깐 "생각하는 시간"을 둔다(밀리초, 0이면 끔)
+    # 규칙 기반 탐색도 실제 에이전트처럼 천천히 보이도록 판단마다 잠깐 "생각하는 시간"을
+    # 둔다(밀리초, 0이면 끔)
     rule_step_delay_ms: int = 1800
     # 브라우저 탐색을 동시에 돌리는 사람 수(각자 브라우저를 따로 연다). 1이면 한 명씩
     run_concurrency: int = 4
@@ -98,7 +100,8 @@ RUN_STATUS_FAILED = "failed"
 REPORT_OUTCOMES = ("done", "cancelled", "failed")
 # build_results 의 묶음 규칙이 바뀌면 올린다. 저장된 보고서는 당시 버전 그대로 보존한다
 REPORT_RULES_VERSION = 1
-# 규칙 기반 탐색이 남기는 이유 문장의 머리말. 보고서가 판단 엔진을 구분할 때 쓴다(DB 스키마를 바꾸지 않기 위해)
+# 규칙 기반 탐색이 남기는 이유 문장의 머리말. 보고서가 판단 엔진을 구분할 때 쓴다(DB 스키마를 바꾸지
+# 않기 위해)
 RULE_REASON_PREFIX = "규칙 기반 탐색"
 RULE_ENGINE_INTERVIEW_NOTICE = (
     "지금은 AI 호출 없이 동작하는 모드라 인터뷰는 저장된 기록 조회만 제공합니다."
@@ -164,17 +167,22 @@ SITE_SCAN_MAX_PAGES = 20
 SITE_SCAN_MAX_DISCOVERED = 200
 SITE_SCAN_TIMEOUT_SECONDS = 40
 SITE_SCAN_PAGE_TIMEOUT_MS = 5000
-# 꼭 확인할 것(한 줄에 하나)과 추가로 알려줄 내용은 페르소나 지시문에 들어간다. 사용자가 자유롭게 쓰되 터무니없이 길어지지는 않게 한다
+# 꼭 확인할 것(한 줄에 하나)과 추가로 알려줄 내용은 페르소나 지시문에 들어간다. 사용자가 자유롭게
+# 쓰되 터무니없이 길어지지는 않게 한다
 SITE_SCAN_MAX_PRIORITIES = 50
 SITE_SCAN_PRIORITY_MAX_CHARS = 300
 SCOPE_FOCUS_MAX_CHARS = 4000
 SITE_DEFAULT_MAX_TURNS = 12
-# LLM 모드에서 한 화면을 판단할 수 있는 최대 횟수. 되돌아가기·스크롤은 허용하되 같은 화면을 맴도는 무한 반복과 비용을 막는다.
+# LLM 모드에서 한 화면을 판단할 수 있는 최대 횟수. 되돌아가기·스크롤은 허용하되 같은 화면을 맴도는
+# 무한 반복과 비용을 막는다.
 BROWSER_MAX_VISITS_PER_SCREEN = 3
-# 모델에 보내는 프롬프트·응답 형식을 바꿀 때마다 올린다. 실행 기록에 남겨 회차 비교가 같은 조건인지 판단하는 데 쓴다.
+# 모델에 보내는 프롬프트·응답 형식을 바꿀 때마다 올린다. 실행 기록에 남겨 회차 비교가 같은 조건인지
+# 판단하는 데 쓴다.
 # UX 관찰의 차원·방향·심각도. 이탈 사유 8개(DROP_REASONS)와 별개이며, 그 8개는 그대로 둔다.
-# 차원: 이해(목적·문구·정보) / 길찾기(메뉴·이동·현재 위치) / 시각(위계·가독성·대비·일관성) / 입력·피드백(폼·오류·상태)
-#       / 신뢰(요구 정보의 근거·안심) / 조작성(터치 크기·라벨) / 인상(첫인상·세련됨; AI 인상이라 신뢰가 낮다)
+# 차원: 이해(목적·문구·정보) / 길찾기(메뉴·이동·현재 위치) / 시각(위계·가독성·대비·일관성) /
+# 입력·피드백(폼·오류·상태)
+# / 신뢰(요구 정보의 근거·안심) / 조작성(터치 크기·라벨) / 인상(첫인상·세련됨; AI 인상이라 신뢰가
+# 낮다)
 OBS_DIMENSIONS: tuple[str, ...] = (
     "이해",
     "길찾기",
@@ -191,7 +199,8 @@ OBS_SEVERITIES: tuple[str, ...] = (
     "blocking",
 )  # blocking: 이 사람이라면 여기서 그만둘 만한 수준
 PROMPT_REVISION = "2026-11-10.4"
-# 같은 질문을 이 시간 안에 다시 보내면 유료 호출을 반복하지 않고 직전 답을 돌려준다(더블 클릭·응답 유실 뒤 재시도 방어).
+# 같은 질문을 이 시간 안에 다시 보내면 유료 호출을 반복하지 않고 직전 답을 돌려준다(더블 클릭·응답
+# 유실 뒤 재시도 방어).
 INTERVIEW_DEDUPE_SECONDS = 120
 
 # 연결 시 익명 브라우저에서 수행하는 모델 없는 사전 탐색
@@ -245,8 +254,9 @@ SNAPSHOT_CAPTURE_MS = 1500
 
 # 실행 중 진입 페이드가 끝나기 전 흰 화면을 저장하지 않도록 유한하게 기다린다.
 BROWSER_ACTION_READY_MS = 1200
-# 자바스크립트로 그려지는 앱은 페이지가 열린 직후 비어 있다. 관찰 전에 네트워크가 잠잠해지고 누를 수 있는 요소가 보일 때까지 최대 이만큼 기다린다
+# 자바스크립트로 그려지는 앱은 페이지가 열린 직후 비어 있다. 관찰 전에 네트워크가 잠잠해지고 누를 수
+# 있는 요소가 보일 때까지 최대 이만큼 기다린다
 BROWSER_SETTLE_MS = 3500
 # 첫 캡처가 비어 있으면(자바스크립트 앱이 아직 안 그려진 경우) 한 번 더 기다렸다가 다시 찍는다
 BROWSER_RECAPTURE_WAIT_MS = 2000
-BROWSER_INTERACTIVE_SELECTOR = "a[href],button,input,textarea,select,summary,[role=button],[role=link],[role=tab],[role=menuitem],[onclick]"
+BROWSER_INTERACTIVE_SELECTOR = "a[href],button,input,textarea,select,summary,[role=button],[role=link],[role=tab],[role=menuitem],[onclick]"  # noqa: E501

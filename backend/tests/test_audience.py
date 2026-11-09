@@ -6,6 +6,7 @@ from app.main import app
 from app.models import PersonaLibraryEntry, PersonaLibraryPanel
 from app.repositories import run as runs
 from app.repositories import workflow
+from app.services.llm import LLMError
 
 
 @pytest.fixture
@@ -113,8 +114,8 @@ async def test_selection_persists_exact_cards_context_and_revision(setup, sessio
 async def test_bad_selection_does_not_replace_existing_and_locked_run_denies(setup, session):
     c, sid, entries = setup
 
-    def body(ids, filters={}):
-        return {"audience": {"entry_ids": ids, "filters": filters}}
+    def body(ids, filters=None):
+        return {"audience": {"entry_ids": ids, "filters": {} if filters is None else filters}}
 
     assert (
         await c.post(f"/studies/{sid}/panel/select", json=body([entries[0].id]))
@@ -208,7 +209,7 @@ def test_current_uploaded_image_enters_mocked_model_only_after_permission(monkey
     decide.decide_step({"card_text": "가상 카드"}, "화면 확인", screen, [])
     assert calls[0][-1] == {"type": "input_image", "image_url": image}
     monkeypatch.setattr(settings, "allow_persona_transmission", False)
-    with pytest.raises(Exception):
+    with pytest.raises(LLMError):
         decide.decide_step({"card_text": "가상 카드"}, "화면 확인", screen, [])
     assert len(calls) == 1
 

@@ -7,8 +7,11 @@ from app.services import browser, site_map
 
 def source():
     files = {
-        "index.html": '<title>Home</title><h1>Home</h1><a href="catalog.html">목록</a><a href="#footer">아래</a><a href="https://example.com/">외부</a><a href="logout">로그아웃</a><a href="missing.html">없는 화면</a>',
-        "catalog.html": '<title>Catalog</title><h1>목록</h1><a href="detail.html">상세</a><input><button></button>',
+        "index.html": '<title>Home</title><h1>Home</h1><a href="catalog.html">목록</a><a href="#footer">아래</a><a href="https://example.com/">외부</a><a href="logout">로그아웃</a><a href="missing.html">없는 화면</a>',  # noqa: E501
+        "catalog.html": (
+            "<title>Catalog</title><h1>목록</h1><a "
+            'href="detail.html">상세</a><input><button></button>'
+        ),
         "detail.html": '<title>Detail</title><h1>상세</h1><a href="index.html">홈</a>',
         "orphan.html": "<title>Orphan</title><h1>독립 파일</h1>",
     }

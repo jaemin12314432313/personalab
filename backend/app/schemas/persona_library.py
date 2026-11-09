@@ -19,7 +19,10 @@ class LibraryPanelOut(BaseModel):
     def display_metadata(self, value):
         return {
             "synthetic": True,
-            "source_notice": "NVIDIA Nemotron-Personas-Korea · CC BY 4.0; 한국미디어패널 기반 특성은 별도 이용조건 확인 필요",
+            "source_notice": (
+                "NVIDIA Nemotron-Personas-Korea · CC BY 4.0; 한국미디어패널 기반 특성은 별도 "
+                "이용조건 확인 필요"
+            ),
         }
 
 

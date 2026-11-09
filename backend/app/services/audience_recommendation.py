@@ -10,7 +10,7 @@ def dimensions(row):
     profile = attributes.get("profile") or {}
     age = profile.get("age")
     return {
-        "age": int(age) // AUDIENCE_AGE_BAND_YEARS if isinstance(age, (int, float)) else None,
+        "age": int(age) // AUDIENCE_AGE_BAND_YEARS if isinstance(age, int | float) else None,
         "digital": (attributes.get("traits") or {}).get("digital"),
         "job": profile.get("job_group"),
     }

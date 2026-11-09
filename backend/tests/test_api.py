@@ -267,7 +267,8 @@ async def test_rule_engine_lets_act_start_without_transmission_or_a_key(
     caps = (await client.get("/capabilities")).json()
     assert caps["agent_engine"] == "rule" and not any("LLM API 키" in m for m in caps["missing"])
     sid = await make_study(client)
-    # 입력이 모자라면 규칙 기반이어도 먼저 입력을 요구한다(전송 보류로 막히지 않고 다음 검사로 넘어간다)
+    # 입력이 모자라면 규칙 기반이어도 먼저 입력을 요구한다(전송 보류로 막히지 않고 다음 검사로
+    # 넘어간다)
     response = await client.post(f"/studies/{sid}/runs", json={"mode": "act"})
     assert response.status_code == 409 and "전송이 보류" not in response.json()["detail"]
     # Ask(모델 호출)는 규칙 기반이 대신할 수 없으므로 여전히 막힌다

@@ -1,6 +1,6 @@
-import base64
-
 """스터디 입력 API 스키마 (계획서 3장 ①~⑤, 10장)."""
+
+import base64
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 

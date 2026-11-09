@@ -29,7 +29,10 @@ def make_local_records():
     for index, behavior in enumerate(("complete", "privacy", "limit", "navigation"), 1):
         attrs = {
             "profile": {"age": 20 + index, "job_group": "로컬 점검용 가상 프로필"},
-            "card_text": "DB 저장과 결과 조회를 점검하기 위해 직접 구성한 가상 카드입니다. 실제 페르소나나 실제 AI 응답이 아닙니다.",
+            "card_text": (
+                "DB 저장과 결과 조회를 점검하기 위해 직접 구성한 가상 카드입니다. 실제 "
+                "페르소나나 실제 AI 응답이 아닙니다."
+            ),
             "traits": {},
             "source": {"persona_id": f"LC{index:03}", "local_demo": True},
         }
@@ -47,7 +50,7 @@ def make_local_records():
                     "action": "abandon",
                     "target": None,
                     "drop_reason": "PRIVACY",
-                    "reason": "직접 구성한 예시: 휴대폰 인증이 필요한 이유를 확인하지 못해 멈춥니다.",
+                    "reason": "직접 구성한 예시: 휴대폰 인증이 필요한 이유를 확인하지 못해 멈춥니다.",  # noqa: E501
                 }
             return {
                 "action": "click",
@@ -58,7 +61,8 @@ def make_local_records():
                 "reason": "직접 구성한 연결 점검 예시입니다.",
             }
 
-        # limit 콜백은 목록 밖 선택을 하도록 하여 한도 종료를 검증한다. 유효한 제자리 클릭은 경로 반복 종료가 된다.
+        # limit 콜백은 목록 밖 선택을 하도록 하여 한도 종료를 검증한다. 유효한 제자리 클릭은 경로
+        # 반복 종료가 된다.
         if behavior == "limit":
 
             def decide(_persona, _task, _screen, _history):

@@ -61,7 +61,9 @@ def _ask_with_retries(persona: dict, product: dict, questions: list[dict]) -> di
 
 
 async def save_report_snapshot(session: AsyncSession, run, outcome: str) -> None:
-    """Act 실행이 끝나거나 중단된 순간의 결과를 한 번 저장한다. 실패해도 실행 상태는 바꾸지 않는다."""
+    """
+    Act 실행이 끝나거나 중단된 순간의 결과를 한 번 저장한다. 실패해도 실행 상태는 바꾸지 않는다.
+    """
     if run.mode != "act":
         return
     try:
@@ -145,7 +147,9 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
             return bool(control and control.cancel_requested)
 
         async def process(sess, persona):
-            """페르소나 한 명을 돌린다. 동시에 여러 명을 돌릴 때는 사람마다 따로 연 세션을 넘긴다."""
+            """
+            페르소나 한 명을 돌린다. 동시에 여러 명을 돌릴 때는 사람마다 따로 연 세션을 넘긴다.
+            """
             # LLM 호출은 동기라 스레드로 넘긴다. 이벤트 루프를 막지 않게
             if await cancelled_on(sess):
                 raise browser.BrowserCancelled("사용자가 실행을 취소했습니다.")
@@ -225,7 +229,8 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
 
         async def guarded(sess, persona):
             """한 명의 일시적 실패가 나머지 사람의 실행까지 멈추지 않게 한다.
-            취소·키/결제/권한 오류처럼 모두에게 해당하는 오류와 예상 못한 오류는 그대로 올려 실행 전체를 멈춘다."""
+            취소·키/결제/권한 오류처럼 모두에게 해당하는 오류와 예상 못한 오류는 그대로 올려 실행
+            전체를 멈춘다."""
             try:
                 await process(sess, persona)
             except FatalLLMError:
@@ -245,7 +250,8 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
                     error,
                 )
 
-        # 웹·HTML 탐색은 실행 하나에 크로미움을 한 번만 띄워 모두가 나눠 쓴다(사람마다 새로 띄우지 않는다)
+        # 웹·HTML 탐색은 실행 하나에 크로미움을 한 번만 띄워 모두가 나눠 쓴다(사람마다 새로 띄우지
+        # 않는다)
         async with browser.shared_browser():
             if concurrency <= 1:
                 for i, persona in enumerate(personas, 1):
@@ -282,7 +288,9 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
             await workflow_repo.set_control(
                 session,
                 run_id,
-                error=f"{len(failures)}명은 실행 중 오류로 기록이 없습니다. 첫 오류: {failures[0][1]}",
+                error=(
+                    f"{len(failures)}명은 실행 중 오류로 기록이 없습니다. 첫 오류: {failures[0][1]}"
+                ),
             )
         await save_report_snapshot(session, run, "done")
     except Exception as error:
@@ -301,7 +309,7 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
                 session,
                 run_id,
                 error=str(error)
-                if isinstance(error, (browser.BrowserError, LLMError))
+                if isinstance(error, browser.BrowserError | LLMError)
                 else "실행을 완료하지 못했습니다. 연결 상태와 입력을 확인하세요.",
             )
 

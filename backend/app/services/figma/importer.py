@@ -102,11 +102,15 @@ def convert_file(payload: dict, requested_node: str | None = None) -> tuple[list
         start = next((owner[s] for s in starts if s in owner), frames[0]["id"])
     frames.sort(key=lambda f: f["id"] != start)
     warnings = {
-        "화면 텍스트와 명시적인 클릭 이동만 가져옵니다. 이미지·조건 분기·오버레이·스크롤·애니메이션은 재현하지 않습니다."
+        (
+            "화면 텍스트와 명시적인 클릭 이동만 가져옵니다. 이미지·조건 "
+            "분기·오버레이·스크롤·애니메이션은 재현하지 않습니다."
+        )
     }
     if len(frames) > FIGMA_MAX_SCREENS:
         warnings.add(
-            f"화면이 많아 처음 {FIGMA_MAX_SCREENS}개만 가져왔습니다. 나머지는 별도 파일로 가져오세요."
+            f"화면이 많아 처음 {FIGMA_MAX_SCREENS}개만 가져왔습니다. 나머지는 별도 파일로 "
+            "가져오세요."
         )
     frames = frames[:FIGMA_MAX_SCREENS]
     mapping = {f["id"]: f"S{i + 1:02}" for i, f in enumerate(frames)}
@@ -186,7 +190,10 @@ async def import_file(url: str) -> tuple[list[dict], list[str]]:
     key, node = parse_figma_url(url)
     if not settings.figma_access_token:
         raise FigmaImportError(
-            "Figma 연결 키가 필요합니다. 서버 FIGMA_ACCESS_TOKEN을 설정하거나 아래 화면 편집을 사용해 주세요.",
+            (
+                "Figma 연결 키가 필요합니다. 서버 FIGMA_ACCESS_TOKEN을 설정하거나 아래 화면 "
+                "편집을 사용해 주세요."
+            ),
             503,
         )
     async with httpx.AsyncClient(timeout=FIGMA_TIMEOUT_SEC, follow_redirects=False) as client:
@@ -199,7 +206,10 @@ async def import_file(url: str) -> tuple[list[dict], list[str]]:
                 ) as response:
                     if response.status_code in {401, 403}:
                         raise FigmaImportError(
-                            "Figma 파일을 읽을 권한이 없습니다. 파일 공유와 연결 키의 file_content:read 권한을 확인해 주세요.",
+                            (
+                                "Figma 파일을 읽을 권한이 없습니다. 파일 공유와 연결 키의 "
+                                "file_content:read 권한을 확인해 주세요."
+                            ),
                             403,
                         )
                     if response.status_code == 404:

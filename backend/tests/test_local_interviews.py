@@ -199,13 +199,14 @@ async def test_runner_failure_persists_failed_after_transaction_rollback(client,
 
     created, _ = await demo(client)
     pending = await run_repo.create_run(session, created["study_id"], "act")
-    # 외부 전송 보류에서 실패한다. API 호출은 하지 않으며 만료된 ORM 객체도 다시 읽어 상태를 남겨야 한다.
+    # 외부 전송 보류에서 실패한다. API 호출은 하지 않으며 만료된 ORM 객체도 다시 읽어 상태를 남겨야
+    # 한다.
     await execute_run(session, pending.id)
     assert (await client.get(f"/runs/{pending.id}/status")).json()["status"] == "failed"
     assert (await client.get(f"/studies/{created['study_id']}")).json()["status"] == "failed"
 
 
-async def test_pending_or_running_execution_cannot_open_or_send_interview_even_with_a_saved_persona_end(
+async def test_pending_or_running_execution_cannot_open_or_send_interview_even_with_a_saved_persona_end(  # noqa: E501
     client, session
 ):
     created, report = await demo(client)

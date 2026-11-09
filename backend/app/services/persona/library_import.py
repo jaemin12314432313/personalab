@@ -42,7 +42,7 @@ def digest_json(value) -> str:
 def clean(value):
     if isinstance(value, dict):
         return {str(k): clean(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, list | tuple):
         return [clean(v) for v in value]
     if hasattr(value, "item"):
         return clean(value.item())

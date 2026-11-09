@@ -108,7 +108,9 @@ def test_sensitive_words_are_not_clicked(text):
 
 
 def test_browser_stays_on_the_same_site():
-    """다른 출처 링크와 로그인류 버튼을 누르면 허용 범위 밖 요청으로 실행이 멈추므로 고르지 않는다."""
+    """
+    다른 출처 링크와 로그인류 버튼을 누르면 허용 범위 밖 요청으로 실행이 멈추므로 고르지 않는다.
+    """
     screen = {
         "url": "https://app.example.com/home",
         "elements": [

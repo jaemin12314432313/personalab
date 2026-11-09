@@ -141,7 +141,9 @@ async def _run_job(study_id, job_id, session_factory):
                 fields={
                     "status": "failed",
                     "reason": "worker_error",
-                    "error": "구조 탐색이 중단됐어요. 저장한 기록을 보존했으며 이어서 탐색할 수 있어요.",
+                    "error": (
+                        "구조 탐색이 중단됐어요. 저장한 기록을 보존했으며 이어서 탐색할 수 있어요."
+                    ),
                 }
             )
         finally:

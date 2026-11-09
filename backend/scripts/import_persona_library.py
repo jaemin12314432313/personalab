@@ -1,4 +1,7 @@
-"""Usage: python scripts/import_persona_library.py --directory ../data/persona_engine/outputs --source-commit SHA"""
+"""
+Usage: python scripts/import_persona_library.py --directory ../data/persona_engine/outputs
+--source-commit SHA
+"""
 
 import argparse
 import asyncio

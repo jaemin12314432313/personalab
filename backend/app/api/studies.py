@@ -255,7 +255,10 @@ async def generate_panel(
     except (FileNotFoundError, ImportError, RuntimeError) as exc:
         raise HTTPException(
             status.HTTP_503_SERVICE_UNAVAILABLE,
-            "페르소나 엔진의 의존성과 원본 데이터를 준비해 주세요. 연결 상태에서 확인할 수 있습니다.",
+            (
+                "페르소나 엔진의 의존성과 원본 데이터를 준비해 주세요. 연결 상태에서 확인할 수 "
+                "있습니다."
+            ),
         ) from exc
     rows = await study_repo.replace_personas(session, study.id, attributes)
     return [PersonaOut(id=p.id, attributes=p.attributes_json) for p in rows]

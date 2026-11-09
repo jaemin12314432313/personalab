@@ -1,6 +1,7 @@
 """AI 호출 없는 규칙 기반 판단. 모델 비용이 들지 않고 페르소나 카드도 외부로 보내지 않는다.
 
-실제 AI 페르소나의 판단처럼 보이지 않도록 모든 판단에 engine='rule'을 남기고 이유 문장에 '규칙 기반'을 밝힌다.
+실제 AI 페르소나의 판단처럼 보이지 않도록 모든 판단에 engine='rule'을 남기고 이유 문장에 '규칙
+기반'을 밝힌다.
 감정·시선·체류 시간 같은 값은 만들지 않는다. 눌러 볼 요소를 고르는 기준만 설명한다.
 """
 
@@ -33,11 +34,13 @@ CTA_WORDS = (
 )
 NO_FILL_TYPES = {"file", "hidden", "checkbox", "radio", "submit", "button", "image", "reset"}
 FILL_KINDS = {"input", "textarea"}
-# 다른 사이트(예: 계정 로그인 창)로 나가 실행이 멈추는 일을 막는다. 버튼에는 주소가 없어 글자로 거른다
+# 다른 사이트(예: 계정 로그인 창)로 나가 실행이 멈추는 일을 막는다. 버튼에는 주소가 없어 글자로
+# 거른다
 LEAVES_SITE = re.compile(
     r"로그인|로그아웃|sign\s*in|log\s*in|login|continue\s+with|google\s*계정|계정\s*선택", re.I
 )
-# 더 눌러 볼 곳이 없을 때 쓰는 종료 코드(CLAUDE.md의 8개 중 하나). 규칙 기반에서는 길을 잃었다는 뜻이 아니라 탐색이 끝났다는 뜻이며, 이유 문장에 그렇게 적는다
+# 더 눌러 볼 곳이 없을 때 쓰는 종료 코드(CLAUDE.md의 8개 중 하나). 규칙 기반에서는 길을 잃었다는
+# 뜻이 아니라 탐색이 끝났다는 뜻이며, 이유 문장에 그렇게 적는다
 DROP_NOTHING_LEFT = "NAVIGATION_LOST"
 
 
@@ -57,7 +60,10 @@ def _seed(persona: dict) -> int:
 
 
 def _stays_on_site(element: dict, screen: dict) -> bool:
-    """같은 사이트 안에서 이어지는 요소만 고른다. 다른 출처 링크, 메일·전화·스크립트 링크, 로그인류 버튼은 제외."""
+    """
+    같은 사이트 안에서 이어지는 요소만 고른다. 다른 출처 링크, 메일·전화·스크립트 링크, 로그인류
+    버튼은 제외.
+    """
     # 같은 사이트 주소여도 눌러 보면 계정 로그인 창으로 넘어가는 링크가 흔해서 글자로도 거른다
     if LEAVES_SITE.search(element.get("text") or ""):
         return False
@@ -98,7 +104,10 @@ def _row(action: str, target, reason: str, drop_reason=None) -> dict:
 
 
 def _think() -> None:
-    """실제 에이전트처럼 한 번 판단하는 데 걸리는 시간을 흉내 낸다. 모두 같은 간격이면 기계처럼 보여서 조금씩 흔든다."""
+    """
+    실제 에이전트처럼 한 번 판단하는 데 걸리는 시간을 흉내 낸다. 모두 같은 간격이면 기계처럼 보여서
+    조금씩 흔든다.
+    """
     base = settings.rule_step_delay_ms
     if base > 0:
         time.sleep(random.uniform(base * 0.6, base * 1.4) / 1000)
@@ -116,7 +125,10 @@ def decide_screens(persona: dict, task: str, screen: dict, history: list) -> dic
         return _row(
             ACT_ABANDON,
             None,
-            f"{RULE_REASON_PREFIX}: 더 눌러 볼 버튼이 없어 탐색을 마쳤어요. 사람이 길을 잃은 것은 아니에요.",
+            (
+                f"{RULE_REASON_PREFIX}: 더 눌러 볼 버튼이 없어 탐색을 마쳤어요. 사람이 길을 "
+                "잃은 것은 아니에요."
+            ),
             DROP_NOTHING_LEFT,
         )
     words = _words(task)
@@ -165,11 +177,15 @@ def decide_browser(persona: dict, task: str, screen: dict, image, history: list)
         return _row(
             ACT_ABANDON,
             None,
-            f"{RULE_REASON_PREFIX}: 더 눌러 볼 요소가 없어 탐색을 마쳤어요. 사람이 길을 잃은 것은 아니에요.",
+            (
+                f"{RULE_REASON_PREFIX}: 더 눌러 볼 요소가 없어 탐색을 마쳤어요. 사람이 길을 "
+                "잃은 것은 아니에요."
+            ),
             DROP_NOTHING_LEFT,
         )
     words = _words(task)
-    # 같은 사이트 안의 링크는 이동이 GET이라 안전하게 이어진다. 버튼은 클릭하면 서비스가 데이터를 보내는 요청을 일으켜 실행이 멈추는 일이 잦아 뒤로 둔다
+    # 같은 사이트 안의 링크는 이동이 GET이라 안전하게 이어진다. 버튼은 클릭하면 서비스가 데이터를
+    # 보내는 요청을 일으켜 실행이 멈추는 일이 잦아 뒤로 둔다
     scored = [
         (
             _score(e["text"], words)

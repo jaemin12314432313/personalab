@@ -13,7 +13,10 @@ from app.core.config import settings
 
 @pytest.fixture(autouse=True)
 def pin_llm_engine(monkeypatch):
-    """기본 설정은 규칙 기반(비용 없음)이지만, 기존 테스트는 모델 경로를 가정한다. 규칙 기반은 따로 켠다."""
+    """
+    기본 설정은 규칙 기반(비용 없음)이지만, 기존 테스트는 모델 경로를 가정한다. 규칙 기반은 따로
+    켠다.
+    """
     from app.core.config import settings
 
     monkeypatch.setattr(settings, "agent_engine", "llm")

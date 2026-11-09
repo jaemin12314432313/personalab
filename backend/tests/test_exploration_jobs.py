@@ -19,7 +19,7 @@ HTML = """<meta charset='utf-8'><title>Resume fixture</title><main id='app'></ma
 function home(){app.innerHTML='<h1>Home</h1><button onclick="one()">Open one</button><button onclick="two()">Open two</button>';}
 function one(){app.innerHTML='<h2>One</h2><button onclick="home()">Back</button>';}
 function two(){app.innerHTML='<h2>Two</h2>';}
-home();</script>"""
+home();</script>"""  # noqa: E501
 
 
 def source():

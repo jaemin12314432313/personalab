@@ -29,7 +29,7 @@ READ_PAGE = r"""(limit) => {
  add('IMAGE_UNLOADED','이미지 로드 확인 필요',[...document.images].filter(e=>visible(e)&&e.complete&&!e.naturalWidth).length);
  add('OVERFLOW','가로 넘침 확인 필요',document.documentElement.scrollWidth>innerWidth+8?1:0);
  return {title:document.title,links,links_truncated:document.querySelectorAll('a[href]').length>limit,issues,controls:document.querySelectorAll('a[href],button,input,select,textarea,[role=button]').length};
-}"""
+}"""  # noqa: E501
 
 UNSAFE_PATH = re.compile(
     r"logout|signout|log-out|unsubscribe|delete|remove|checkout|purchase|결제|삭제|탈퇴|로그아웃",

@@ -105,7 +105,9 @@ async def test_duplicate_copies_inputs_to_an_independent_test_without_results(cl
 
     def shown(
         person,
-    ):  # 고객 응답은 원본 식별자를 숨기고 DB 번호로 표시 ID를 만들므로, 복제본과 표시 ID는 달라도 된다
+        # 고객 응답은 원본 식별자를 숨기고 DB 번호로 표시 ID를 만들므로, 복제본과 표시 ID는 달라도
+        # 된다
+    ):
         attrs = {**person["attributes"]}
         attrs["source"] = {k: v for k, v in attrs.get("source", {}).items() if k != "persona_id"}
         return attrs

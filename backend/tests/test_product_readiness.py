@@ -6,10 +6,10 @@ from app.repositories import study as study_repo
 from app.schemas.persona_library import LibraryPanelOut, LibraryPersonaOut
 from app.schemas.study import PersonaOut
 from app.services import browser, exploration
-from tests.test_exploration_jobs import connected
+from tests.test_exploration_jobs import client, connected  # noqa: F401  (client는 pytest 픽스처)
 
 
-async def test_preview_recapture_keeps_working_checkpoint_and_job(client, session):
+async def test_preview_recapture_keeps_working_checkpoint_and_job(client, session):  # noqa: F811  (pytest 픽스처)
     sid, value = await connected(client)
     jid = value["source"]["exploration"]["id"]
     await repo.claim(session, sid, jid, "worker")
@@ -31,7 +31,7 @@ async def test_preview_recapture_keeps_working_checkpoint_and_job(client, sessio
     ).status_code == 409
 
 
-async def test_scope_review_requires_stopped_work_and_only_applies_to_that_job(client, session):
+async def test_scope_review_requires_stopped_work_and_only_applies_to_that_job(client, session):  # noqa: F811  (pytest 픽스처)
     sid, value = await connected(client)
     jid = value["source"]["exploration"]["id"]
     assert (
@@ -50,7 +50,10 @@ async def test_scope_review_requires_stopped_work_and_only_applies_to_that_job(c
 
 
 async def test_capture_waits_for_page_entrance_fade():
-    html = "<meta charset='utf-8'><body style='opacity:0'><h1>Ready screen</h1><button>Open</button><script>setTimeout(()=>document.body.style.opacity=1,700)</script>"
+    html = (
+        "<meta charset='utf-8'><body style='opacity:0'><h1>Ready "
+        "screen</h1><button>Open</button><script>setTimeout(()=>document.body.style.opacity=1,700)</script>"
+    )
     source = {
         "kind": "html",
         "entry": "index.html",
@@ -111,7 +114,7 @@ def test_projection_hides_raw_values_across_response_models_and_preserves_select
     assert RAW["card_text"] == "PRIVATE_ORIGINAL_CARD"
 
 
-async def test_customer_apis_hide_raw_card_but_engine_database_keeps_it(client, session):
+async def test_customer_apis_hide_raw_card_but_engine_database_keeps_it(client, session):  # noqa: F811  (pytest 픽스처)
     sid, value = await connected(client)
     rows = await study_repo.replace_personas(session, sid, [RAW])
     pid = rows[0].id

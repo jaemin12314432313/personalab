@@ -13,7 +13,10 @@ from app.repositories import study as study_repo
 from app.repositories import workflow as repo
 from app.services import browser
 
-HTML = '<html lang="ko"><head><title>가상 화면 점검</title></head><body><h1>시작 화면</h1><a href="done.html">결과 보기</a><input aria-label="이름" /></body></html>'
+HTML = (
+    '<html lang="ko"><head><title>가상 화면 점검</title></head><body><h1>시작 화면</h1><a '
+    'href="done.html">결과 보기</a><input aria-label="이름" /></body></html>'
+)
 DONE = "<html><head><title>완료 화면</title></head><body><h1>점검 완료</h1></body></html>"
 
 
@@ -390,15 +393,27 @@ async def test_app_html_inspects_mobile_and_preserves_kind_in_revision(
     assert copied["scope"] == updated["scope"] and copied["source"]["kind"] == "html"
 
 
-async def test_source_inspection_reports_observed_structure_and_missing_content_without_input_values():
-    html = '<html lang="ko"><title>예약 관리</title><body><header><nav aria-label="주 메뉴"><a href="done.html">예약 확인</a></nav></header><main><h1>예약 관리</h1><h2>이름 입력</h2><input aria-label="이름" value="DO_NOT_EXPOSE_FIELD_VALUE"><button>다음</button><img src="missing.png" width="40" height="40"><iframe src="done.html" title="별도 화면" width="100" height="60"></iframe></main><footer>문의</footer></body></html>'
+async def test_source_inspection_reports_observed_structure_and_missing_content_without_input_values():  # noqa: E501
+    html = (
+        '<html lang="ko"><title>예약 관리</title><body><header><nav aria-label="주 메뉴"><a '
+        'href="done.html">예약 확인</a></nav></header><main><h1>예약 관리</h1><h2>이름 '
+        '입력</h2><input aria-label="이름" '
+        'value="DO_NOT_EXPOSE_FIELD_VALUE"><button>다음</button><img src="missing.png" '
+        'width="40" height="40"><iframe src="done.html" title="별도 화면" width="100" '
+        'height="60"></iframe></main><footer>문의</footer></body></html>'
+    )
     source = bundle()
     source["files"][0]["data"] = base64.b64encode(html.encode()).decode()
     result = await browser.inspect(source, "mobile")
     meta = result["inspection"]
     assert meta["viewport"] == {"width": 390, "height": 844}
     assert [h["text"] for h in meta["headings"]] == ["예약 관리", "이름 입력"]
-    assert {l["role"] for l in meta["landmarks"]} == {"banner", "navigation", "main", "contentinfo"}
+    assert {landmark["role"] for landmark in meta["landmarks"]} == {
+        "banner",
+        "navigation",
+        "main",
+        "contentinfo",
+    }
     assert meta["element_count"] == 3 and meta["elements_truncated"] is False
     assert (
         meta["image_count"] == 1 and meta["unloaded_image_count"] == 1 and meta["frame_count"] == 1
@@ -428,7 +443,7 @@ async def test_inspection_reports_element_limit_without_changing_actor_limits(mo
 
 
 async def test_checkbox_selection_and_history_are_real_observed_states():
-    html = """<meta charset="utf-8"><title>입력 검증</title><input type="checkbox" aria-label="안내 확인"><select aria-label="분류"><option value="a">전체</option><option value="b">책</option></select><a href="done.html">완료</a>"""
+    html = """<meta charset="utf-8"><title>입력 검증</title><input type="checkbox" aria-label="안내 확인"><select aria-label="분류"><option value="a">전체</option><option value="b">책</option></select><a href="done.html">완료</a>"""  # noqa: E501
     source = bundle()
     source["files"][0]["data"] = base64.b64encode(html.encode()).decode()
     histories = []
@@ -496,7 +511,6 @@ def test_scope_accepts_bounded_saved_turn_limit():
 async def test_new_connection_defaults_to_site_mode_and_runs_without_goal(
     client, session, monkeypatch
 ):
-
     sid = (await client.post("/studies", json={"name": "Whole site fixture"})).json()["id"]
     src = bundle()
     result = (
@@ -597,7 +611,8 @@ async def test_live_capture_waits_for_entry_fade_without_changing_agent_actions(
             {
                 "path": "index.html",
                 "data": base64.b64encode(
-                    b"<title>Action fade</title><body style='opacity:0'><h1>Ready screen</h1><script>setTimeout(()=>document.body.style.opacity=1,650)</script>"
+                    b"<title>Action fade</title><body style='opacity:0'><h1>Ready "
+                    b"screen</h1><script>setTimeout(()=>document.body.style.opacity=1,650)</script>"
                 ).decode(),
             }
         ],
@@ -648,7 +663,9 @@ def test_passive_blocks_never_expand_request_permissions():
         ("GET", "fetch", False),
     ]:
         blocks.record(
-            SimpleNamespace(method=method, resource_type=kind, is_navigation_request=lambda: nav)
+            SimpleNamespace(
+                method=method, resource_type=kind, is_navigation_request=lambda nav=nav: nav
+            )
         )
     assert len(blocks) == 8 and blocks.stop_count == 3
 
@@ -713,7 +730,7 @@ async def test_real_input_and_navigation_save_matching_preaction_screen():
         decide,
     )
     assert [row["action"] for row in rows] == ["fill", "click", "complete"]
-    for _, screen, image, action, row in saved[:2]:
+    for _, screen, _image, action, row in saved[:2]:
         target = next(e for e in screen["elements"] if e["id"] == action["target"])
         assert target["text"] == row["target"] and target["rect"]["width"] > 0
     assert next(e for e in saved[1][1]["elements"] if e["text"] == "이름")["filled"]
@@ -964,7 +981,8 @@ async def test_run_meta_records_engine_model_prompt_revision_and_usage(
         }
 
     async def simulated(*args, **kw):
-        # 실제 호출 없이 사용량 수집기에 두 번의 호출을 흉내 낸다(재시도도 과금되므로 호출마다 더한다)
+        # 실제 호출 없이 사용량 수집기에 두 번의 호출을 흉내 낸다(재시도도 과금되므로 호출마다
+        # 더한다)
         sink = llm._USAGE.get()
         sink.add(2000, 100)
         sink.add(2600, 90)

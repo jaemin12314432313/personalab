@@ -64,7 +64,10 @@ async def discard_revision(
     session: AsyncSession = Depends(get_session),
     user_id: int = Depends(current_user_id),
 ):
-    """수정 회차 하나를 지운다. 1회차는 테스트 전체의 기준이라 지울 수 없고, 실행 중이거나 휴지통에 있으면 거절한다."""
+    """
+    수정 회차 하나를 지운다. 1회차는 테스트 전체의 기준이라 지울 수 없고, 실행 중이거나 휴지통에
+    있으면 거절한다.
+    """
     study = await study_repo.get_study(session, study_id, user_id)
     if study is None:
         raise HTTPException(404, "테스트가 없습니다.")
@@ -75,7 +78,10 @@ async def discard_revision(
     if root == study.id:
         raise HTTPException(
             409,
-            "1회차는 테스트의 기준이라 따로 지울 수 없어요. 테스트 전체를 지우려면 휴지통으로 옮기세요.",
+            (
+                "1회차는 테스트의 기준이라 따로 지울 수 없어요. 테스트 전체를 지우려면 "
+                "휴지통으로 옮기세요."
+            ),
         )
     pref = await repo.state(session, root)
     if pref is not None and pref.trashed:

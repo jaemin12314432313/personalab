@@ -110,7 +110,10 @@ async def save_workflow(
     if source.get("kind") in ("web", "html"):
         task = scope["scenario"] or "화면의 목적과 주요 이동 경로를 살펴보세요."
         if site_map.site_mode(scope):
-            task = "사이트 전반의 화면 이해, 메뉴와 이동, 정보 탐색, 입력 안내와 오류 상태를 자신의 관점에서 살펴보세요. 한 경로의 성공으로 전체 점검을 끝내지 마세요."
+            task = (
+                "사이트 전반의 화면 이해, 메뉴와 이동, 정보 탐색, 입력 안내와 오류 상태를 "
+                "자신의 관점에서 살펴보세요. 한 경로의 성공으로 전체 점검을 끝내지 마세요."
+            )
         if scope["priorities"]:
             task += " 우선 확인할 항목: " + "; ".join(scope["priorities"])
         if scope["focus"]:
@@ -135,7 +138,6 @@ async def connect(source, viewport, study, session, background, launcher, produc
         raise HTTPException(409, "실행이 시작된 회차에는 화면을 다시 연결할 수 없습니다.")
     screens = [observed["observed_screen"]]
     await study_repo.set_prototype(session, study.id, None, screens)
-    suggestion = (observed.get("suggestions") or [{}])[0]
     current = await repo.get(session, study.id)
     previous_scope = current.scope_json if current else {}
     scope = {
@@ -153,7 +155,8 @@ async def connect(source, viewport, study, session, background, launcher, produc
         "reviewed_exploration_id": "",
     }
     if current and (current.source_json or {}).get("needs_reconnect"):
-        # 수정 회차에서 화면만 다시 받는 경우: 이전 회차에 적어 둔 탐색 범위·핵심 확인 항목은 그대로 이어받는다
+        # 수정 회차에서 화면만 다시 받는 경우: 이전 회차에 적어 둔 탐색 범위·핵심 확인 항목은 그대로
+        # 이어받는다
         for key in (
             "mode",
             "exploration",

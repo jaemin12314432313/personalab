@@ -40,7 +40,7 @@ READ_LABEL = r"""() => {
  const visible=e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden';
  const headings=[...document.querySelectorAll('[role=dialog] h1,[role=dialog] h2,h1,h2,h3')].filter(visible).map(e=>e.innerText.trim()).filter(Boolean);
  return {heading:headings[0]||'',title:document.title};
-}"""
+}"""  # noqa: E501
 
 READ_LABEL = READ_LABEL.replace(
     "const visible=e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden';",
@@ -59,7 +59,7 @@ async def observe(page, source):
       const covered=inside&&hit!==e&&!e.contains(hit),reveals=[];
       if(covered){for(let p=e.parentElement;p&&p!==document.body;p=p.parentElement){const a=[...p.children].find(n=>n!==e&&!n.contains(e)&&n.matches('a,button,[role=button],[role=menuitem]')&&n.hasAttribute('data-personalab-element'));if(a)reveals.unshift(a.getAttribute('data-personalab-element'));}}
       return [e.getAttribute('data-personalab-element'),{layer,role:e.getAttribute('role'),covered,reveals}];
-    }))""")
+    }))""")  # noqa: E501
     for e in screen["elements"]:
         details = layers.get(e["id"], {})
         e["_layer"] = details.get("layer", 0)
@@ -448,7 +448,8 @@ async def inspect_interactions(
             storage = saved.get(
                 "storage",
                 await page.evaluate(
-                    "() => ({local:Object.entries(localStorage),session:Object.entries(sessionStorage)})"
+                    "() => "
+                    "({local:Object.entries(localStorage),session:Object.entries(sessionStorage)})"
                 ),
             )
 
@@ -462,7 +463,11 @@ async def inspect_interactions(
                     root, wait_until="domcontentloaded", timeout=PREFLIGHT_ACTION_TIMEOUT_MS
                 )
                 await page.evaluate(
-                    "saved => {localStorage.clear();sessionStorage.clear();for(const [k,v] of saved.local)localStorage.setItem(k,v);for(const [k,v] of saved.session)sessionStorage.setItem(k,v);}",
+                    (
+                        "saved => {localStorage.clear();sessionStorage.clear();for(const [k,v] "
+                        "of saved.local)localStorage.setItem(k,v);for(const [k,v] of "
+                        "saved.session)sessionStorage.setItem(k,v);}"
+                    ),
                     storage,
                 )
                 await page.reload(

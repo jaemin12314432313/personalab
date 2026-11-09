@@ -8,7 +8,17 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api import auth, interviews, local, persona_library, runs, studies, workflow, workspace
+from app.api import (
+    audience,
+    auth,
+    interviews,
+    local,
+    persona_library,
+    runs,
+    studies,
+    workflow,
+    workspace,
+)
 from app.api.deps import check_csrf
 from app.core.config import BROWSER_RUNTIME, LLM_DEFAULT_MODEL, OPENAI_DEFAULT_MODEL, settings
 from app.core.db import SessionLocal, get_session
@@ -38,8 +48,6 @@ app.include_router(persona_library.router)
 app.include_router(interviews.router)
 app.include_router(local.router)
 app.include_router(workflow.router)
-from app.api import audience
-
 app.include_router(workspace.router)
 app.include_router(audience.router)
 

@@ -24,7 +24,7 @@ READ_SNAPSHOT = (
 READY = """() => {
  const body=document.body;if(!body||Number(getComputedStyle(body).opacity)<.98)return false;
  return [...document.images].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight;}).every(e=>e.complete);
-}"""
+}"""  # noqa: E501
 
 
 async def collect(

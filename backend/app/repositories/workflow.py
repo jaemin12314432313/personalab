@@ -155,7 +155,10 @@ async def evidence(session, run_id, persona_id=None):
 
 
 async def annotations(session, run_id):
-    """행동 기록에 같이 남은 걱정(예전 기록)과 UX 관찰(observations)만 가볍게 읽는다. 이미지 열은 읽지 않는다. 키: (persona_id, turn)."""
+    """
+    행동 기록에 같이 남은 걱정(예전 기록)과 UX 관찰(observations)만 가볍게 읽는다. 이미지 열은 읽지
+    않는다. 키: (persona_id, turn).
+    """
     from app.core.config import OBS_DIMENSIONS, OBS_POLARITIES, OBS_SEVERITIES
 
     out = {}

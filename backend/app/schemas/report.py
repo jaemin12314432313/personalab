@@ -68,7 +68,10 @@ class PersonaResultOut(BaseModel):
 
 
 class RunMetaOut(BaseModel):
-    """이 실행이 어떤 조건으로 돌았는지. 회차 비교가 같은 조건인지 판단하고, 호출량을 보여 주는 데 쓴다."""
+    """
+    이 실행이 어떤 조건으로 돌았는지. 회차 비교가 같은 조건인지 판단하고, 호출량을 보여 주는 데
+    쓴다.
+    """
 
     engine: Literal["rule", "llm"]
     model: str | None = None

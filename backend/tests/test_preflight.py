@@ -9,7 +9,7 @@ function root(){document.querySelector('#app').innerHTML='<h1>첫 화면</h1><bu
 function setup(){document.querySelector('#app').innerHTML='<h2>캐릭터 만들기</h2><input aria-label="이름"><button onclick="finish()">다음</button>';}
 function finish(){if(!document.querySelector('input').value)return;localStorage.setItem('progress','done');document.querySelector('#app').innerHTML='<h2>게임 진행</h2><button onclick="root()">처음으로</button>';}
 function about(){document.querySelector('#app').innerHTML='<h2>도움말 화면</h2><button onclick="root()">닫기</button>';}
-root();</script>"""
+root();</script>"""  # noqa: E501
 
 
 def source(html=HTML):
@@ -68,7 +68,7 @@ async def test_foreground_dialog_is_followed_before_covered_background_buttons(m
     html = """<meta charset='utf-8'><title>Dialog fixture</title><h1>선택</h1><div id='choices'></div><script>
  for(let i=0;i<20;i++)choices.insertAdjacentHTML('beforeend',`<button onclick="openDialog()">선택 ${i}</button>`);
  function openDialog(){if(document.querySelector('[role=dialog]'))return;const d=document.createElement('div');d.role='dialog';d.style='position:fixed;inset:0;z-index:1000;background:white';d.innerHTML='<h2>현재 팝업</h2><button>다음</button>';d.querySelector('button').onclick=()=>{document.body.innerHTML='<h1>도착 화면</h1>';};document.body.append(d);}
- </script>"""
+ </script>"""  # noqa: E501
     result = await preflight.inspect_interactions(source(html))
     assert any(s["label"] == "도착 화면" for s in result["states"])
     assert any(
@@ -87,7 +87,7 @@ async def test_primary_navigation_is_swept_after_setup_even_when_base_state_budg
  function render(){if(step<3){app.innerHTML='<h1>준비 '+step+'</h1><button onclick="step++;render()">다음</button>';return;}
  const tabs=['진행','내 정보','정계','브리핑','설정'];
  app.innerHTML='<h1>'+active+'</h1><button onclick="document.querySelector(\\'h1\\').textContent+=\\'세부 내용\\'">세부 내용 보기</button><nav aria-label="주 메뉴">'+tabs.map(t=>'<div role="tab" tabindex="0" aria-selected="'+(active===t)+'" onclick="active=this.textContent;render()">'+t+'</div>').join('')+'</nav>';}
- render();</script>"""
+ render();</script>"""  # noqa: E501
     result = await preflight.inspect_interactions(source(html))
     covered = {n["label"]: n for n in result["navigation"]}
     assert set(covered) == {"진행", "내 정보", "정계", "브리핑", "설정"}, result
@@ -106,7 +106,7 @@ async def test_observation_keeps_custom_navigation_when_content_exceeds_element_
     html = (
         """<title>Many controls</title><h1>Content</h1>"""
         + "".join("<button>본문 " + str(i) + "</button>" for i in range(90))
-        + """<nav><div role='tab' tabindex='0' onclick='void 0'>Overview</div><div role='tab' tabindex='0' onclick='void 0'>Settings</div></nav>"""
+        + """<nav><div role='tab' tabindex='0' onclick='void 0'>Overview</div><div role='tab' tabindex='0' onclick='void 0'>Settings</div></nav>"""  # noqa: E501
     )
     async with browser.open_page(source(html)) as (page, base, blocked):
         screen, image = await browser.observe(page)
@@ -118,14 +118,14 @@ async def test_observation_keeps_custom_navigation_when_content_exceeds_element_
 
 
 async def test_selected_action_buttons_without_global_navigation_are_not_misclassified_as_tabs():
-    html = """<title>Actions</title><h1>Start</h1><div style='display:grid'><button class='on'>Start</button><button>Ranking</button></div>"""
+    html = """<title>Actions</title><h1>Start</h1><div style='display:grid'><button class='on'>Start</button><button>Ranking</button></div>"""  # noqa: E501
     async with browser.open_page(source(html)) as (page, base, blocked):
         screen = await preflight.observe(page, source(html))
         assert not any(e.get("navigation") for e in screen["elements"])
 
 
 async def test_secondary_tabs_keep_their_parent_context():
-    html = """<title>Tabs</title><h1>View</h1><div style='display:grid'><button class='on'>One</button><button>Two</button></div><nav><button class='on'>World</button><button>News</button></nav>"""
+    html = """<title>Tabs</title><h1>View</h1><div style='display:grid'><button class='on'>One</button><button>Two</button></div><nav><button class='on'>World</button><button>News</button></nav>"""  # noqa: E501
     async with browser.open_page(source(html)) as (page, base, blocked):
         screen = await preflight.observe(page, source(html))
         children = [e for e in screen["elements"] if e.get("nav_kind") == "section"]
@@ -134,7 +134,7 @@ async def test_secondary_tabs_keep_their_parent_context():
 
 
 async def test_closed_fixed_sidebar_is_not_clickable_but_main_menu_and_scrolled_content_remain():
-    html = """<meta charset='utf-8'><title>Closed panel</title><h1>Start</h1><nav id='main'><button onclick="document.querySelector('h1').textContent='Main view'">Main menu</button></nav><button onclick="document.querySelector('#drawer').style.left='0'">Open drawer</button><aside id='drawer' style='position:fixed;left:100%;top:0;width:260px;height:100vh;z-index:1002'><nav><button onclick="void 0">Hidden sidebar item</button></nav></aside><div style='opacity:0'><button>Transparent item</button></div><div aria-hidden='true'><button>Aria hidden item</button></div><div style='margin-top:1500px'><button>Below fold</button></div>"""
+    html = """<meta charset='utf-8'><title>Closed panel</title><h1>Start</h1><nav id='main'><button onclick="document.querySelector('h1').textContent='Main view'">Main menu</button></nav><button onclick="document.querySelector('#drawer').style.left='0'">Open drawer</button><aside id='drawer' style='position:fixed;left:100%;top:0;width:260px;height:100vh;z-index:1002'><nav><button onclick="void 0">Hidden sidebar item</button></nav></aside><div style='opacity:0'><button>Transparent item</button></div><div aria-hidden='true'><button>Aria hidden item</button></div><div style='margin-top:1500px'><button>Below fold</button></div>"""  # noqa: E501
     src = source(html)
     async with browser.open_page(src) as (page, base, blocked):
         screen = await preflight.observe(page, src)
@@ -149,7 +149,7 @@ async def test_closed_fixed_sidebar_is_not_clickable_but_main_menu_and_scrolled_
 
 
 async def test_exact_safe_link_can_be_followed_when_live_content_changes_before_action():
-    html = """<meta charset='utf-8'><title>Live page</title><h1 id='clock'>0</h1><a href='done.html'>Open result</a><script>let n=0;setInterval(()=>clock.textContent=++n,5)</script>"""
+    html = """<meta charset='utf-8'><title>Live page</title><h1 id='clock'>0</h1><a href='done.html'>Open result</a><script>let n=0;setInterval(()=>clock.textContent=++n,5)</script>"""  # noqa: E501
     src = source(html)
     src["files"].append(
         {
@@ -168,7 +168,10 @@ async def test_exact_safe_link_can_be_followed_when_live_content_changes_before_
 
 async def test_scrolling_observation_replaces_old_locator_tokens_instead_of_duplicating_them():
     html = "<title>Tokens</title>" + "".join(
-        '<div style="height:34px"><button onclick="document.documentElement.dataset.picked=this.textContent">Item '
+        (
+            '<div style="height:34px"><button '
+            'onclick="document.documentElement.dataset.picked=this.textContent">Item '
+        )
         + str(i)
         + "</button></div>"
         for i in range(190)
@@ -188,7 +191,7 @@ async def test_scrolling_observation_replaces_old_locator_tokens_instead_of_dupl
 
 
 async def test_covered_submenu_is_revealed_by_its_safe_observed_parent_before_clicking():
-    html = """<meta charset='utf-8'><title>Hover menu</title><style>nav{height:45px;position:relative;z-index:1}nav:hover{z-index:3}nav li{list-style:none}nav .submenu{position:absolute;top:50px;left:0}main{position:relative;z-index:2;height:100px;background:white;display:flow-root}</style><nav><li><button>서비스</button><div class='submenu'><a href='done.html'>시작하기</a></div></li></nav><main><h1>Start</h1></main>"""
+    html = """<meta charset='utf-8'><title>Hover menu</title><style>nav{height:45px;position:relative;z-index:1}nav:hover{z-index:3}nav li{list-style:none}nav .submenu{position:absolute;top:50px;left:0}main{position:relative;z-index:2;height:100px;background:white;display:flow-root}</style><nav><li><button>서비스</button><div class='submenu'><a href='done.html'>시작하기</a></div></li></nav><main><h1>Start</h1></main>"""  # noqa: E501
     src = source(html)
     src["files"].append(
         {
@@ -207,7 +210,7 @@ async def test_covered_submenu_is_revealed_by_its_safe_observed_parent_before_cl
 
 
 async def test_repeated_unconfirmed_paths_are_preserved_for_explicit_resume():
-    html = """<title>Covered</title><nav><button onclick="document.querySelector('h1').textContent='Reached';this.remove()">Open view</button></nav><h1>Start</h1><div id='cover' style='position:fixed;inset:0;z-index:10;background:white'></div>"""
+    html = """<title>Covered</title><nav><button onclick="document.querySelector('h1').textContent='Reached';this.remove()">Open view</button></nav><h1>Start</h1><div id='cover' style='position:fixed;inset:0;z-index:10;background:white'></div>"""  # noqa: E501
     src = source(html)
     checkpoints = []
 
@@ -237,10 +240,10 @@ async def test_repeated_unconfirmed_paths_are_preserved_for_explicit_resume():
     assert resumed["pending_actions"] == 0 and not resumed["limited"]
 
 
-async def test_unchanged_sibling_actions_reuse_the_replayed_origin_without_replaying_setup_each_time():
+async def test_unchanged_sibling_actions_reuse_the_replayed_origin_without_replaying_setup_each_time():  # noqa: E501
     html = """<meta charset='utf-8'><title>Reuse origin</title><main id='app'></main><script>
  let step=0;function child(){app.innerHTML='<h1>Child</h1>';}function render(){if(step<4){app.innerHTML='<h1>Setup '+step+'</h1><button onclick="step++;render()">다음</button>';return;}
- app.innerHTML='<h1>Workspace</h1><button onclick="child()">계속 보기</button>'+Array.from({length:6},(_,i)=>'<button>Inspect '+i+'</button>').join('');}render();</script>"""
+ app.innerHTML='<h1>Workspace</h1><button onclick="child()">계속 보기</button>'+Array.from({length:6},(_,i)=>'<button>Inspect '+i+'</button>').join('');}render();</script>"""  # noqa: E501
     result = await preflight.inspect_interactions(
         source(html),
         limits={"states": 20, "attempts": 40, "seconds": 30, "clicks": 100, "images": 0},
