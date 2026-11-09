@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · Focus</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="./pj.css">
+<style>
+/* E · Focus — 지금 가장 먼저 볼 프로젝트 하나를 크게, 나머지는 조용히 */
+:root{
+  --bg:#fff;--surface:#fff;--surface-2:#f5f6f9;--bar-bg:#ffffffd9;
+  --fg:#10111a;--fg-2:#42445a;--fg-3:#7a7d90;
+  --line:#e8e9f0;--line-2:#d5d7e3;
+  --accent:#10111a;--btn-bg:#10111a;--btn-fg:#fff;--btn-line:#10111a;--btn-hover:#2a2c3c;
+  --radius:14px;--radius-sm:10px;
+  --c-setup:#6b6f85;--c-ready:#b45309;--c-run:#4f5bff;--c-done:#0e9f6e;
+}
+.head{padding:50px 0 22px}
+.head h1{font-size:34px;letter-spacing:-.05em}
+.sum{display:none}
+.cols,.count{display:none}
+.slot-t{font-size:13px;color:var(--fg-3);font-weight:600;margin:6px 4px 12px;display:flex;align-items:center;gap:8px}
+.slot-t::before{content:"";width:6px;height:6px;border-radius:50%;background:#4f5bff;box-shadow:0 0 0 4px #4f5bff22}
+.rest-t{margin-top:38px}.rest-t::before{background:var(--line-2);box-shadow:none}
+/* 히어로 */
+.row.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:30px;padding:38px 40px;border:0;border-radius:26px;color:#fff;overflow:hidden;
+  background:radial-gradient(520px 340px at 88% -10%,#5a5cff66,transparent 70%),radial-gradient(420px 300px at 0% 110%,#b04bff33,transparent 70%),linear-gradient(135deg,#0d0f1c,#14172d);
+  box-shadow:0 30px 70px #14172d3d;--fg:#fff;--fg-2:#d5d8f5;--fg-3:#a3a8d6;--line:#ffffff1f}
+.row.hero{grid-template-areas:none}
+.row.hero:hover{transform:none}
+.row.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(360px circle at var(--mx,70%) var(--my,30%),#7a7dff2e,transparent 70%);pointer-events:none}
+.row.hero>*{position:relative}
+.h-left{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.hero .stt{font-size:13px;padding:4px 12px 4px 10px;border-radius:99px;background:#ffffff14;border:1px solid #ffffff22;color:#c9ccff}
+.hero .stt.done{color:#8df0c6}.hero .stt.ready{color:#ffd28a}.hero .stt.setup{color:#cfd2ee}
+.hero h2{font-size:46px;line-height:1.2;letter-spacing:-.055em;font-weight:750;margin:18px 0 6px;color:#fff}
+.hero p{font-size:16px;color:#c3c6ea}
+.h-meta{display:flex;gap:6px 22px;flex-wrap:wrap;margin-top:22px;font-size:14px;color:#a3a8d6}.h-meta b{color:#fff;font-weight:600}
+.h-act{display:flex;gap:8px;margin-top:30px;align-items:center}
+.hero .btn.solid{background:#fff;color:#10111a;border-color:#fff;height:46px;padding:0 24px;font-size:15px;box-shadow:0 10px 30px #0006}
+.hero .btn.solid:hover{background:#e9eaff}
+.hero .more{color:#a3a8d6;border:1px solid #ffffff22}.hero .more:hover,.hero .more[aria-expanded=true]{background:#ffffff14;color:#fff}
+.hero .menu{top:auto;bottom:-6px;left:210px;right:auto;--fg:#10111a;--fg-2:#42445a;--surface:#fff;--surface-2:#f5f6f9;--line:#e8e9f0}
+.h-right{display:flex;gap:22px;align-items:center;justify-content:flex-end;min-width:0}
+.ring{width:150px;height:150px;position:relative;flex:none;display:grid;place-items:center;text-align:center}
+.ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:8}
+.ring .rt{stroke:#ffffff1c}.ring .rv{stroke:url(#none);stroke:#8b93ff;stroke-linecap:round;filter:drop-shadow(0 0 8px #7a7dff99);animation:ringIn 1.4s var(--ease) both .3s}
+@keyframes ringIn{from{stroke-dasharray:0 100}}
+.ring b{font-size:42px;font-weight:700;letter-spacing:-.05em;line-height:1;color:#fff;margin-top:-10px}.ring b small{font-size:18px;color:#a3a8d6;margin-left:1px}
+.ring span{position:absolute;bottom:34px;left:0;right:0;font-size:12px;color:#a3a8d6}
+.ring.idle{border:1px dashed #ffffff33;border-radius:50%}.ring.idle b{font-size:24px;margin:0}.ring.idle span{position:static;margin-top:6px}
+.ring.idle{display:flex;flex-direction:column;justify-content:center}
+.ev{flex:1;min-width:0;display:grid;gap:8px}
+.ev li{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px;color:#d5d8f5;padding:10px 12px;border-radius:12px;background:#ffffff0f;border:1px solid #ffffff14;backdrop-filter:blur(4px);animation:rise .7s var(--ease) both}
+.ev li:nth-child(2){animation-delay:.12s}.ev li:nth-child(3){animation-delay:.24s}
+.ev li i{width:7px;height:7px;border-radius:50%;background:#8b93ff}.ev li:first-child i{background:#ff8a8a;box-shadow:0 0 0 3px #ff8a8a2e}
+.ev li b{color:#fff;margin-right:4px;font-weight:650}.ev time{font-size:11.5px;color:#8f94c6;white-space:nowrap}
+/* 나머지: 조용한 목록 */
+.rest{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;margin-bottom:60px}
+.rest .row{padding:16px 22px;border-bottom:1px solid var(--line)}.rest .row:last-child{border-bottom:0}
+.rest .row:hover{background:#f8f8fc}
+.rest .p-name b{font-size:16px}
+.rest .stt{font-size:13px}
+.first h2{font-size:36px}
+@media(max-width:1000px){.row.hero{grid-template-columns:1fr;padding:30px 26px;gap:26px}.h-right{justify-content:flex-start;flex-wrap:wrap}.hero h2{font-size:36px}.hero .menu{left:auto;right:0;bottom:-6px}.rest .row{padding:16px 14px}}
+@media(max-width:560px){.ring{width:140px;height:140px}.ring b{font-size:34px}.ring span{bottom:26px}.ev{flex:1 0 100%}}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL={layout:'focus',tiles:true,searchHint:'/',newHint:'N',keys:'<span class="kbd">/</span> 검색 · <span class="kbd">N</span> 새 프로젝트'};</script>
+<script src="./pj.js"></script>
+</body></html>

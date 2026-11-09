@@ -1,0 +1,374 @@
+/* Workspace home — pastel app shell (design M6, docs/design-shell10-v11.html).
+   Sidebar = test list · top tabs = board / rounds / list / calendar · selected test as a persona board.
+   Earlier card-grid / master-detail experiments are backed up in scratch/workspace-bento-backup/. */
+#v-workspace{--bg:#fbf6ef;--sb:#f6efe5;--ln:#eadfce;--ink:#1d1a16;--mu:#6f6454;--ac:#f26a4b;--acs:#ffe6de;--blue:#4d7cf2;--green:#35a56c;--red:#e5484d;
+  --f:var(--sans);background:var(--bg);color:var(--ink);font-family:var(--f)}
+
+/* ---------- sidebar ---------- */
+#v-workspace .ws-sidebar{background:var(--sb);border-right:1px solid var(--ln)}
+@media(min-width:768px){
+  #v-workspace .ws-sidebar{width:272px;padding:20px 12px 14px;transform:none}
+  #v-workspace .ws-content{margin-left:272px}
+  #v-workspace .workspace-main{max-width:none;margin:0;padding:0}
+  /* the tests page has its own tab bar, so the generic page header is not shown */
+  #v-workspace:has(#workspaceTestsPanel:not([hidden])) .workspace-topbar{display:none}
+  #v-workspace:not(:has(#workspaceTestsPanel:not([hidden]))) .workspace-topbar{padding:22px 32px 6px}
+  #v-workspace:not(:has(#workspaceTestsPanel:not([hidden]))) .workspace-main>section{padding:0 32px 32px}
+}
+#v-workspace .ws-owner{background:#fff;border:1px solid var(--ln);border-radius:12px;margin-bottom:10px;min-height:38px;padding:8px 12px}
+#v-workspace .ws-navigation{gap:2px}
+#v-workspace .ws-navigation button{border-radius:12px;color:#6f6558;height:42px;font:600 13.5px var(--f)}
+#v-workspace .ws-navigation button:hover{background:#fff;color:var(--ink)}
+#v-workspace .ws-navigation button[aria-current=page]{background:var(--acs);color:var(--ink);box-shadow:none;font-weight:700}
+#v-workspace .ws-nav-count{background:#0000000d}
+#v-workspace .ws-side-tests{display:flex;flex-direction:column;gap:3px;min-height:0;flex:1;overflow-y:auto;margin-top:8px;padding-top:12px;border-top:1px solid var(--ln)}
+#v-workspace .ws-side-sec{display:flex;justify-content:space-between;align-items:center;padding:0 8px 4px;font:600 10.5px 'JetBrains Mono',var(--f);letter-spacing:.1em;color:var(--mu)}
+#v-workspace .ws-side-add{width:22px;height:22px;border-radius:7px;background:transparent;color:var(--mu);font-size:15px;line-height:1;cursor:pointer;border:0}
+#v-workspace .ws-side-add:hover{background:#fff;color:var(--ink)}
+#v-workspace .ws-side-tests .wm-filters{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 8px}
+#v-workspace .ws-side-tests .wm-views{display:flex;gap:2px;width:100%}
+#v-workspace .ws-side-tests .wm-views button{flex:1;border:0;background:transparent;border-radius:8px;padding:5px 4px;font:600 12px var(--f);color:var(--mu)}
+#v-workspace .ws-side-tests .wm-views button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 2px #5a3d1a14}
+#v-workspace .ws-side-tests .wm-filters label{flex:1 1 calc(50% - 4px);min-width:0}
+#v-workspace .ws-side-tests .wm-filters .btn.sm{flex:1 1 100%}
+#v-workspace .workspace-footer{display:none}
+#v-workspace .ws-side-tests .wm-filters select{width:100%;height:30px;font-size:12px;border:1px solid var(--ln);border-radius:9px;background:#fff;padding:0 22px 0 8px}
+#v-workspace .ws-side-tests .wm-filters .btn.sm{height:30px;min-height:30px;font-size:12px;border-radius:9px;background:#fff;border:1px solid var(--ln);padding:0 10px}
+#v-workspace .ws-side-note{margin:6px 10px;font-size:12px;color:var(--mu)}
+#v-workspace .ws-it{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:0 10px;align-items:center;padding:10px 10px;border-radius:12px;cursor:pointer;border:1px solid transparent;color:var(--ink)}
+#v-workspace .ws-it:hover{background:#fff9}
+#v-workspace .ws-it:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+#v-workspace .ws-it.sel{background:#fff;border-color:var(--ln);box-shadow:0 1px 2px #5a3d1a14}
+#v-workspace .ws-dot{width:8px;height:8px;border-radius:50%;background:#a79f92}
+#v-workspace .ws-it[data-state=running] .ws-dot{background:var(--blue);animation:ws-live 1.6s ease-in-out infinite}
+#v-workspace .ws-it[data-state=done] .ws-dot{background:var(--green)}
+#v-workspace .ws-it[data-state=failed] .ws-dot{background:var(--red)}
+#v-workspace .ws-it[data-state=ready] .ws-dot{background:#e8b84a}
+#v-workspace .ws-it-name{font:700 14px/1.35 var(--f);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+#v-workspace .ws-it .wm-menu{opacity:.55;transition:opacity .15s}
+#v-workspace .ws-it:hover .wm-menu,#v-workspace .ws-it:focus-within .wm-menu,#v-workspace .ws-it .wm-menu[open]{opacity:1}
+#v-workspace .ws-sidebar-bottom{margin-top:8px;padding-top:10px}
+@keyframes ws-live{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ---------- top tab bar ---------- */
+#v-workspace .ws-tabbar{display:flex;align-items:center;gap:6px;height:68px;padding:0 28px;border-bottom:1px solid var(--ln);background:var(--bg);position:sticky;top:0;z-index:20}
+#v-workspace .ws-tabs{display:flex;align-items:stretch;height:100%}
+#v-workspace .ws-tabs{flex:none}
+#v-workspace .ws-tabs button{white-space:nowrap;flex:none;display:inline-flex;align-items:center;gap:8px;padding:0 16px;border:0;background:transparent;color:var(--mu);font:600 13.5px var(--f);cursor:pointer;box-shadow:inset 0 -2px 0 transparent}
+#v-workspace .ws-tabs button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#v-workspace .ws-tabs button:hover{color:var(--ink)}
+#v-workspace .ws-tabs button[aria-selected=true]{color:var(--ac);box-shadow:inset 0 -2px 0 var(--ac)}
+#v-workspace .ws-tools{margin-left:auto;display:flex;gap:8px}
+#v-workspace .workspace-search{width:260px;height:38px;background:#fff;border:1px solid var(--ln);border-radius:99px;box-shadow:none;max-width:none}
+#v-workspace .workspace-search:focus-within{border-color:var(--ink)}
+#workspaceTestsPanel{display:block}
+#workspaceStudies{padding:22px 28px 90px}
+#workspaceDraft{padding:0 28px}
+
+/* ---------- selected test: header ---------- */
+#v-workspace .ws-detail{display:flex;flex-direction:column;gap:18px;min-width:0;position:relative}
+#v-workspace .ws-bc{font-size:12.5px;color:var(--mu)}
+#v-workspace .ws-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+#v-workspace .ws-hd-l{min-width:0}
+#v-workspace .ws-hd h2{margin:0;font:800 clamp(32px,2.8vw,44px)/1.15 var(--f);letter-spacing:-.05em;overflow-wrap:anywhere}
+#v-workspace .ws-dt-desc{margin:8px 0 0;font-size:14px;line-height:1.65;color:#6f6558;max-width:72ch;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#v-workspace .ws-hd-r{display:flex;align-items:center;gap:10px;flex:none;padding-top:6px}
+#v-workspace .ws-state{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;color:#6f6558;background:none;padding:0 6px}
+#v-workspace .ws-state::before{content:"";width:7px;height:7px;border-radius:50%;background:#a79f92}
+#v-workspace .ws-state[data-state=running]{color:var(--blue)}
+#v-workspace .ws-state[data-state=running]::before{background:var(--blue);animation:ws-live 1.6s ease-in-out infinite}
+#v-workspace .ws-state[data-state=done]{color:#23784a}#v-workspace .ws-state[data-state=done]::before{background:var(--green)}
+#v-workspace .ws-state[data-state=failed]{color:#c0392b}#v-workspace .ws-state[data-state=failed]::before{background:var(--red)}
+#v-workspace .ws-state[data-state=ready]{color:#8a6200}#v-workspace .ws-state[data-state=ready]::before{background:#e8b84a}
+#v-workspace .ws-dt-act .ws-open{height:42px;min-height:42px;padding:0 22px;border-radius:12px;background:var(--ac);color:#fff;border:0;font:800 13.5px var(--f);box-shadow:none}
+#v-workspace .ws-dt-act .ws-open:hover{background:#e65a3b;color:#fff}
+#v-workspace .ws-detail:has(.ws-hd .ws-state[data-state=failed]) .ws-dt-act .ws-open{background:var(--red)}
+#v-workspace .ws-revise{height:42px;padding:0 20px;border-radius:12px;border:1px solid var(--ln);background:#fff;color:var(--ink);font:800 13.5px var(--f);cursor:pointer}
+#v-workspace .ws-revise:hover{border-color:var(--ink)}
+#v-workspace .ws-hd-menu .wm-menu summary{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid var(--ln);background:#fff;color:var(--ink);cursor:pointer;list-style:none}
+#v-workspace .ws-hd-menu .wm-menu summary::-webkit-details-marker{display:none}
+#v-workspace .ws-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#v-workspace .ws-faces{display:inline-flex}
+#v-workspace .ws-faces .ws-pc-face{width:34px;height:34px;border:3px solid var(--bg);margin-left:-9px}
+#v-workspace .ws-faces .ws-pc-face:first-child{margin-left:0}
+#v-workspace .ws-more{width:34px;height:34px;border-radius:50%;border:3px solid var(--bg);margin-left:-9px;background:#efe8dc;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--mu)}
+#v-workspace .ws-chip{border:1px solid var(--ln);border-radius:11px;padding:7px 14px;background:#fff;font:700 13px var(--f);color:var(--ink);cursor:default}
+#v-workspace button.ws-chip{cursor:pointer}
+#v-workspace .ws-chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+#v-workspace .ws-sub{font-size:12.5px;color:var(--mu);margin-left:4px}
+#v-workspace .ws-dt-note{margin:2px 0 0;font-size:11.5px;color:var(--mu)}
+#v-workspace .ws-ic{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;margin-right:5px}
+
+/* ---------- board ---------- */
+#v-workspace .ws-board{display:grid;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:18px;align-items:start}
+#v-workspace .ws-lane{--lc:#a79f92;--lb:#f3f1ec;display:flex;flex-direction:column;gap:12px;min-width:0}
+#v-workspace .ws-lane[data-lane="1"]{--lc:var(--blue);--lb:#e8efff}
+#v-workspace .ws-lane[data-lane="2"]{--lc:var(--green);--lb:#e4f5ec}
+#v-workspace .ws-lane[data-lane="3"]{--lc:var(--red);--lb:#fde9e8}
+#v-workspace .ws-round{--lb:#f3f1ec}
+#v-workspace .ws-round[data-round=running]{--lc:var(--blue);--lb:#e8efff}
+#v-workspace .ws-round[data-round=done]{--lc:var(--green);--lb:#e4f5ec}
+#v-workspace .ws-round[data-round=failed]{--lc:var(--red);--lb:#fde9e8}
+#v-workspace .ws-round[data-round=partial]{--lc:#8a63d2;--lb:#f0e9fb}
+#v-workspace .ws-round[data-round=ready]{--lc:#e8b84a;--lb:#fff5da}
+#v-workspace .ws-round-new{--lc:var(--ln);--lb:transparent}
+#v-workspace .ws-lane-hd{display:flex;align-items:center;gap:10px;font:800 12.5px var(--f);letter-spacing:.05em;padding-bottom:10px;border-bottom:2px solid var(--lc)}
+#v-workspace .ws-lane-hd b{background:#fff;border:1px solid var(--ln);border-radius:99px;padding:0 9px;font-size:11.5px;font-weight:700;color:var(--mu);letter-spacing:0}
+#v-workspace .ws-lane-body{display:flex;flex-direction:column;gap:12px;background:var(--lb);border-radius:24px;padding:10px;min-height:120px}
+#v-workspace .ws-lane-empty{margin:auto;padding:30px 0;color:var(--mu);font-size:12.5px;text-align:center}
+#v-workspace .ws-pc{background:#fff;border-radius:22px;padding:16px 16px 12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px #5a3d1a0f;border:1px solid #f0e6d6;transition:transform .2s,box-shadow .2s}
+#v-workspace .ws-pc h3{margin:0;font:700 15.5px/1.4 var(--f);letter-spacing:-.02em}
+#v-workspace .ws-pc p{margin:0;font-size:12.5px;line-height:1.6;color:#7a7060;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+#v-workspace .ws-tag{align-self:flex-start;display:inline-block;border-radius:8px;padding:2px 10px;font-size:11.5px;font-weight:700;background:var(--acs);color:#c4472a}
+#v-workspace .ws-pc-ft{display:flex;align-items:center;gap:14px;border-top:1px solid #f0e6d6;padding-top:10px;font-size:12px;color:var(--mu)}
+#v-workspace .ws-pc-ft .ws-pc-face{margin-left:auto}
+#v-workspace .ws-pc-face{display:inline-block;width:28px;height:28px;border-radius:50%;overflow:hidden;flex:none;background:#d8d3ca}
+#v-workspace .ws-face-img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+#v-workspace .ws-face-strip{display:block;width:100%;height:100%;background:#d8d3ca url('/concepts/people/assets/personas-strip.png') no-repeat;background-size:900% auto;background-position:var(--x) 28%}
+#v-workspace .ws-pc-face .persona-no-photo{display:grid;place-items:center;width:100%;height:100%;font-size:10px;font-weight:700;color:#77776f}
+#v-workspace .ws-kind{align-self:flex-start;border-radius:8px;padding:2px 10px;font-size:11.5px;font-weight:700}
+#v-workspace .ws-kind[data-kind=rep]{background:#fff1e0;color:#d9822b}
+#v-workspace .ws-kind[data-kind=new]{background:#e8eeff;color:var(--blue)}
+#v-workspace .ws-kind[data-kind=gone]{background:#eef0f3;color:#6b7280}
+#v-workspace .ws-new-round{border:2px dashed var(--ln);background:transparent;border-radius:22px;min-height:140px;color:var(--mu);font:700 13.5px var(--f);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+#v-workspace .ws-new-round:hover{border-color:var(--ink);color:var(--ink)}
+#v-workspace .ws-empty-board{background:#fff;border:1px dashed var(--ln);border-radius:24px;padding:48px 24px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;color:var(--mu)}
+#v-workspace .ws-empty-board b{color:var(--ink);font-size:16px}
+
+/* ---------- list view ---------- */
+#v-workspace .ws-ptable{background:#fff;border:1px solid var(--ln);border-radius:22px;overflow:hidden}
+#v-workspace .ws-pt-h,#v-workspace .ws-pt-r{display:grid;grid-template-columns:1.6fr 1fr 2.6fr 1.2fr 70px;gap:14px;align-items:center;padding:13px 20px}
+#v-workspace .ws-pt-h{font:600 11px 'JetBrains Mono',var(--f);letter-spacing:.08em;color:var(--mu);background:#faf4ea;border-bottom:1px solid var(--ln)}
+#v-workspace .ws-pt-r{border-bottom:1px solid #f3eadb}#v-workspace .ws-pt-r:last-child{border:0}
+#v-workspace .ws-pt-who{display:flex;align-items:center;gap:10px;min-width:0}
+#v-workspace .ws-pt-who em{font-style:normal;color:var(--mu);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-workspace .ws-pt-who .ws-pc-face{width:32px;height:32px}
+#v-workspace .ws-pt-q{font-size:13px;color:#6f6558}
+#v-workspace .ws-pt-n{text-align:right;color:var(--mu);font-variant-numeric:tabular-nums}
+#v-workspace .ws-lane-chip{display:inline-block;justify-self:start;border-radius:99px;padding:2px 11px;font-size:12px;font-weight:700;background:#f3f1ec;color:#6f6558}
+#v-workspace .ws-lane-chip[data-lane="1"]{background:#e8efff;color:var(--blue)}
+#v-workspace .ws-lane-chip[data-lane="2"]{background:#e4f5ec;color:#23784a}
+#v-workspace .ws-lane-chip[data-lane="3"]{background:#fde9e8;color:#c0392b}
+
+/* ---------- calendar ---------- */
+#v-workspace .ws-cal{background:#fff;border:1px solid var(--ln);border-radius:22px;overflow:hidden}
+#v-workspace .ws-cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+#v-workspace .ws-cal-h{padding:12px 14px;font:600 11px 'JetBrains Mono',var(--f);letter-spacing:.06em;color:var(--mu);border-bottom:1px solid var(--ln);border-left:1px solid var(--ln);background:#faf4ea}
+#v-workspace .ws-cal-h:first-child,#v-workspace .ws-cal-d:nth-child(8){border-left:0}
+#v-workspace .ws-cal-h.td{color:var(--ac)}
+#v-workspace .ws-cal-d{min-height:300px;border-left:1px solid var(--ln);padding:10px;display:flex;flex-direction:column;gap:8px}
+#v-workspace .ws-cal-d.td{background:var(--acs)}
+#v-workspace .ws-cal-e{border-radius:10px;padding:8px 10px;font-weight:700;font-size:12.5px;background:#f6efe5;border-left:3px solid #a79f92}
+#v-workspace .ws-cal-e small{display:block;color:var(--mu);font-weight:400;font-size:11.5px}
+#v-workspace .ws-cal-e[data-round=running]{border-color:var(--blue)}#v-workspace .ws-cal-e[data-round=done]{border-color:var(--green)}#v-workspace .ws-cal-e[data-round=failed]{border-color:var(--red)}#v-workspace .ws-cal-e[data-round=partial]{border-color:#8a63d2}#v-workspace .ws-cal-e[data-round=ready]{border-color:#e8b84a}
+
+/* ---------- floating new-round button ---------- */
+#v-workspace .ws-fab{position:fixed;right:28px;bottom:26px;z-index:30;height:46px;border-radius:99px;border:0;background:var(--ac);color:#fff;display:inline-flex;align-items:center;gap:8px;padding:0 22px;font:800 14px var(--f);cursor:pointer;box-shadow:0 14px 28px -10px var(--ac)}
+#v-workspace .ws-fab:hover{background:#e65a3b}
+#v-workspace .ws-fab .ws-ic{stroke-width:2.2;width:16px;height:16px;margin:0}
+
+/* ---------- responsive ---------- */
+@media(max-width:1250px){#v-workspace .ws-board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){#v-workspace .ws-tabbar{padding:0 14px;overflow-x:auto}#v-workspace .workspace-search{width:180px}#v-workspace .ws-hd{flex-direction:column}#v-workspace .ws-pt-h,#v-workspace .ws-pt-r{grid-template-columns:1.4fr 1fr 70px}#v-workspace .ws-pt-q,#v-workspace .ws-pt-h span:nth-child(3),#v-workspace .ws-pt-h span:nth-child(4),#v-workspace .ws-pt-r span:nth-child(4){display:none}#workspaceStudies{padding:18px 14px 90px}}
+@media(max-width:640px){#v-workspace .ws-board{grid-template-columns:1fr}#v-workspace .ws-tools{display:none}}
+@media(prefers-reduced-motion:reduce){#v-workspace .ws-dot,#v-workspace .ws-state[data-state=running]::before{animation:none}#v-workspace .ws-pc{transition:none}}
+
+/* ---------- persona library / run history pages (same shell, other panels) ---------- */
+#v-workspace .btn.solid.ws-create{height:42px;min-height:42px;padding:0 22px;border-radius:99px;background:var(--ac);border:0;color:#fff;font:800 13px var(--f);box-shadow:0 10px 22px -10px var(--ac)}
+#v-workspace .btn.solid.ws-create:hover{background:#e65a3b;transform:none}
+#v-workspace .ws-page-heading h1{font:800 clamp(30px,2.6vw,42px)/1.2 var(--f);letter-spacing:-.05em;color:var(--ink)}
+#v-workspace .ws-page-heading p{color:#7a7060}
+#v-workspace .workspace-topbar{border-bottom:0}
+#v-workspace .ws-empty.workspace-empty{background:#fff;border:1px dashed var(--ln);border-radius:24px}
+#v-workspace .ws-empty strong{font:800 20px var(--f);letter-spacing:-.03em;color:var(--ink)}
+#v-workspace .ws-empty p{color:var(--mu)}
+#v-workspace .ws-empty .btn{border-radius:99px;border:1px solid var(--ln);background:#fff;font-weight:700}
+#v-workspace .ws-empty .btn.solid{background:var(--ac);border-color:var(--ac);color:#fff}
+#v-workspace .ws-message{border-radius:16px;background:var(--acs);color:#8a3b25}
+#v-workspace .ws-panel-card,#v-workspace .ws-persona-card,#v-workspace .ws-history-list{background:#fff;border:1px solid var(--ln);border-radius:24px;box-shadow:0 1px 2px #5a3d1a0d}
+#v-workspace .ws-panel-card h2{font:800 20px var(--f);letter-spacing:-.03em}
+#v-workspace .ws-panel-card .btn,#v-workspace .ws-pagination .btn,#v-workspace .ws-library-heading .btn{border-radius:99px;border:1px solid var(--ln);background:#fff;font-weight:700}
+#v-workspace .ws-persona-card:hover{border-color:var(--ink)}
+#v-workspace .ws-history-row:hover{background:#fbf3e6}
+#v-workspace .ws-history-row .ws-state,#v-workspace .ws-panel-kicker{font-weight:800}
+#workspacePersonaDialog{border-radius:28px;border:1px solid var(--ln);background:#fff}
+
+/* ---------- cleanup pass: sidebar, filters, honest empty states (laptop / desktop only) ---------- */
+#v-workspace .ws-guide,#v-workspace .ws-connection{font-size:12.5px;color:#6f6454;padding:7px 10px;border-radius:9px}
+#v-workspace .ws-guide:hover,#v-workspace .ws-connection:hover{background:#fff;color:var(--ink)}
+#v-workspace .ws-side-tests .wm-filters{flex-direction:column;align-items:stretch;gap:6px;padding:0 4px 8px}
+#v-workspace .ws-filter-pop{position:relative}
+#v-workspace .ws-filter-pop>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;height:32px;padding:0 12px;border:1px solid var(--ln);border-radius:9px;background:#fff;font:600 12.5px var(--f);color:#6f6454}
+#v-workspace .ws-filter-pop>summary::-webkit-details-marker{display:none}
+#v-workspace .ws-filter-pop>summary::after{content:'▾';font-size:11px}
+#v-workspace .ws-filter-pop[open]>summary{border-color:var(--ink);color:var(--ink)}
+#v-workspace .ws-filter-box{margin-top:6px;padding:10px;border:1px solid var(--ln);border-radius:12px;background:#fff;display:flex;flex-direction:column;gap:8px;box-shadow:0 12px 28px -14px #5a3d1a40}
+#v-workspace .ws-filter-box label{display:block}
+#v-workspace .ws-filter-box select{width:100%}
+#v-workspace .ws-filter-box .btn.sm{width:100%}
+#v-workspace .ws-it-name{font-size:14px}
+#v-workspace .ws-tab-note{margin:0 0 14px;padding:12px 16px;border-radius:14px;background:#fff;border:1px solid var(--ln);font-size:13px;color:#6f6454}
+#v-workspace .ws-sub{font-size:13px}
+#v-workspace .ws-dt-note,#v-workspace .ws-side-note{font-size:12.5px}
+#v-workspace .ws-pc-ft{font-size:12.5px}
+#v-workspace .ws-pc-ft span:not(.ws-pc-face){display:inline-flex;align-items:center}
+#v-workspace .ws-chip{font-size:13px}
+#v-workspace .ws-lane-hd{font-size:13px}
+
+/* ---------- laptop: keep the board readable at 1280–1440px ---------- */
+@media(min-width:768px) and (max-width:1500px){
+  #v-workspace .ws-board{gap:14px}
+  #workspaceStudies{padding:20px 22px 90px}
+  #v-workspace .ws-tabbar{padding:0 22px}
+}
+
+/* ---------- landing alignment: logo + typography (titles in the landing serif) ---------- */
+#v-workspace .ws-brand{display:inline-flex;align-items:center;gap:8px;margin:0 0 16px;padding:0 6px;font-size:21px;color:var(--ink)}
+#v-workspace .ws-brand .brand-symbol{width:28px;height:28px}
+#v-workspace .ws-hd h2,#v-workspace .ws-page-heading h1{font-family:var(--serif);font-weight:800;letter-spacing:-.045em}
+#v-workspace .ws-empty strong,#v-workspace .ws-panel-card h2{font-family:var(--serif);letter-spacing:-.03em}
+
+/* ---------- overview (default tab): what to do next, by state ---------- */
+#v-workspace .ws-ov{display:flex;flex-direction:column;gap:18px}
+#v-workspace .ws-flow{display:flex;gap:6px;list-style:none;margin:0;padding:0}
+#v-workspace .ws-flow li{flex:1;max-width:190px;padding:9px 14px;border-radius:12px;background:#efe8dc;color:#6f6454;font:700 13px var(--f);position:relative}
+#v-workspace .ws-flow li.done{background:#e4f5ec;color:#23784a}
+#v-workspace .ws-flow li.done::before{content:'✓ '}
+#v-workspace .ws-flow li.cur{background:var(--ink);color:#fff}
+#v-workspace .ws-ov-next{background:#fff;border:1px solid var(--ln);border-radius:24px;padding:26px 30px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px #5a3d1a0d}
+#v-workspace .ws-ov-next h3{margin:0;font:800 26px/1.3 var(--serif);letter-spacing:-.04em}
+#v-workspace .ws-ov-next p{margin:0;color:#5e5446;font-size:15px;line-height:1.7;max-width:62ch}
+#v-workspace .ws-ov-btns{display:flex;gap:10px;margin-top:6px}
+#v-workspace .ws-ov-btns .ws-open{height:46px;padding:0 26px;border-radius:99px;background:var(--ac);border:0;color:#fff;font:800 14px var(--f)}
+#v-workspace .ws-ov-btns .ws-open:hover{background:#e65a3b}
+#v-workspace .ws-ov-btns .ws-revise{height:46px}
+#v-workspace .ws-steps{display:flex;gap:8px;list-style:none;margin:10px 0 0;padding:0;flex-wrap:wrap}
+#v-workspace .ws-steps li{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:99px;background:#f6efe5;color:#6f6454;font:600 13px var(--f)}
+#v-workspace .ws-steps li i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;background:#fff;border:1px solid var(--ln2,#dccfb9)}
+#v-workspace .ws-steps li.done{color:#23784a}#v-workspace .ws-steps li.done i{background:var(--green);border-color:var(--green);color:#fff}
+#v-workspace .ws-steps li.cur{background:var(--acs);color:var(--ink);font-weight:800}#v-workspace .ws-steps li.cur i{background:var(--ac);border-color:var(--ac);color:#fff}
+#v-workspace .ws-ov-lanes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+#v-workspace .ws-ov-lanes div{border-radius:18px;padding:14px 18px;background:#f3f1ec;display:flex;flex-direction:column}
+#v-workspace .ws-ov-lanes div[data-lane="1"]{background:#e8efff}#v-workspace .ws-ov-lanes div[data-lane="2"]{background:#e4f5ec}#v-workspace .ws-ov-lanes div[data-lane="3"]{background:#fde9e8}
+#v-workspace .ws-ov-lanes b{font:800 30px var(--f);letter-spacing:-.04em}
+#v-workspace .ws-ov-lanes span{font-size:13px;color:#5e5446}
+#v-workspace .ws-ov-look{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+
+/* ---------- calendar: a real month view with the start date of every round ---------- */
+#v-workspace .ws-calx{display:flex;flex-direction:column;gap:14px}
+#v-workspace .ws-cal-bar{display:flex;align-items:center;justify-content:space-between}
+#v-workspace .ws-cal-bar b{font:800 22px var(--serif);letter-spacing:-.03em}
+#v-workspace .ws-cal-bar span{display:flex;gap:6px}
+#v-workspace .ws-cal-bar button{height:36px;min-width:36px;padding:0 14px;border:1px solid var(--ln);border-radius:99px;background:#fff;font:700 13px var(--f);cursor:pointer;color:var(--ink)}
+#v-workspace .ws-cal-bar button:hover{border-color:var(--ink)}
+#v-workspace .ws-cal-g{grid-template-columns:repeat(7,minmax(0,1fr))}
+#v-workspace .ws-cal-d{min-height:112px;padding:8px;gap:5px}
+#v-workspace .ws-cal-d.out{background:#fdfaf5}#v-workspace .ws-cal-d.out .ws-cal-n{color:#b8ad9b}
+#v-workspace .ws-cal-n{font:600 12px var(--f);color:#6f6454;align-self:flex-end}
+#v-workspace .ws-cal-d.td .ws-cal-n{background:var(--ac);color:#fff;border-radius:99px;padding:1px 8px}
+#v-workspace .ws-cal-e b{display:block;font-size:12.5px}
+#v-workspace .ws-cal-more{color:#6f6454;font-size:12px}
+#v-workspace .ws-cal-list{background:#fff;border:1px solid var(--ln);border-radius:22px;padding:16px 20px}
+#v-workspace .ws-cal-r{display:grid;grid-template-columns:70px 1fr 110px auto;gap:14px;align-items:center;padding:10px 0;border-top:1px solid #f3eadb;font-size:13.5px}
+#v-workspace .ws-cal-r:first-of-type{border-top:0}
+#v-workspace .ws-cal-k{color:#6f6454}
+#v-workspace .ws-lane-chip[data-round=running]{background:#e8efff;color:var(--blue)}
+#v-workspace .ws-lane-chip[data-round=done]{background:#e4f5ec;color:#23784a}
+#v-workspace .ws-lane-chip[data-round=failed],#v-workspace .ws-lane-chip[data-round=partial]{background:#fde9e8;color:#c0392b}
+#v-workspace .ws-lane-chip[data-round=ready]{background:#fff0cd;color:#8a6200}
+
+/* 사이드바는 테스트 목록이 중심. 전체 실행 기록은 하단의 작은 링크로 둔다 */
+#v-workspace .ws-navigation[hidden]{display:none}
+#v-workspace .ws-side-sec .ws-nav-count{margin-left:6px;font-weight:600}
+#v-workspace .ws-side-link{display:flex;align-items:center;gap:8px;width:100%;height:36px;padding:0 6px;border:0;border-radius:10px;background:none;color:#6f6558;font:600 13px var(--f);cursor:pointer;text-align:left}
+#v-workspace .ws-side-link svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#v-workspace .ws-side-link:hover{background:#fff;color:var(--ink)}
+#v-workspace .ws-side-link[aria-current=page]{background:var(--acs);color:var(--ink)}
+#v-workspace .ws-side-sec>span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+#v-workspace .ws-side-sec .ws-nav-count{margin-left:0;padding:1px 8px;border-radius:99px;background:#0000000d;font-size:11px}
+
+/* ================= 정리: 색 통일(검정 버튼 · Greige), 사이드바 간소화 ================= */
+#v-workspace{--bg:#f4f1ec;--sb:#efebe4;--ln:#dedad2;--ink:#17161a;--mu:#5f584d;--ac:#17161a;--acs:#e7e4de}
+#v-workspace .ws-open:hover,#v-workspace .ws-fab:hover,#v-workspace .btn.solid.ws-create:hover{background:#2f2e33}
+#v-workspace .btn.solid.ws-create{box-shadow:0 10px 22px -12px #17161a66}
+#v-workspace .ws-tag{background:#e7e4de;color:#4d443a}
+/* 비어 있는 열은 문제가 없다는 뜻이므로 붉은 면 대신 중립 회색 */
+#v-workspace .ws-lane-body:has(.ws-lane-empty){background:#ebe8e2}
+/* 목록 행 높이를 맞춘다(관리 메뉴가 있는 행이 더 커지던 문제) */
+#v-workspace .ws-it{min-height:42px;padding-top:6px;padding-bottom:6px}
+#v-workspace .ws-it .wm-menu>summary{display:grid;place-items:center;width:26px;height:26px;padding:0;line-height:1;list-style:none;cursor:pointer;border-radius:8px}
+#v-workspace .ws-it .wm-menu>summary::-webkit-details-marker{display:none}
+/* 필터는 제목 줄의 아이콘으로 */
+#v-workspace .ws-side-sec{position:relative}
+#v-workspace .ws-side-tools{display:inline-flex;align-items:center;gap:2px}
+#v-workspace .ws-side-tools .ws-filter-pop{position:static}
+#v-workspace .ws-side-tools .ws-filter-pop>summary{width:22px;height:22px;padding:0;border:0;border-radius:7px;background:transparent;display:grid;place-items:center;color:var(--mu)}
+#v-workspace .ws-side-tools .ws-filter-pop>summary::after{content:none}
+#v-workspace .ws-side-tools .ws-filter-pop>summary svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+#v-workspace .ws-side-tools .ws-filter-pop>summary:hover,#v-workspace .ws-side-tools .ws-filter-pop[open]>summary{background:#fff;color:var(--ink)}
+#v-workspace .ws-side-tools .ws-filter-box{position:absolute;left:8px;right:8px;top:calc(100% + 4px);z-index:30;margin:0}
+/* 화면을 연결하지 않은 초안은 접어서 묶는다 */
+#v-workspace .ws-drafts{margin-top:10px;border-top:1px solid var(--ln);padding-top:8px}
+#v-workspace .ws-drafts>summary{display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;padding:6px 10px;border-radius:9px;font:600 12px var(--f);color:var(--mu)}
+#v-workspace .ws-drafts>summary::-webkit-details-marker{display:none}
+#v-workspace .ws-drafts>summary::before{content:'▸';font-size:10px}
+#v-workspace .ws-drafts[open]>summary::before{content:'▾'}
+#v-workspace .ws-drafts>summary b{margin-left:auto;padding:1px 8px;border-radius:99px;background:#0000000d;font-size:11px;font-weight:600}
+#v-workspace .ws-drafts>summary:hover{background:#fff9;color:var(--ink)}
+/* 계정 메뉴에 들어간 가이드·연결 상태 */
+#v-workspace .c10-account-menu .ws-guide,#v-workspace .c10-account-menu .ws-connection{display:flex;justify-content:space-between;width:100%;box-sizing:border-box;padding:10px 12px;font-size:13px;color:inherit;text-decoration:none;border:0;background:none;border-radius:8px;cursor:pointer;text-align:left}
+#v-workspace .c10-account-menu .ws-guide:hover,#v-workspace .c10-account-menu .ws-connection:hover{background:#faf9f5}
+#v-workspace .ws-filter-box select{width:100%;height:34px;border:1px solid var(--ln);border-radius:9px;background:#fff;font:600 12.5px var(--f);padding:0 10px;color:var(--ink)}
+
+/* 앱·웹별 묶음 */
+#v-workspace .ws-prod{margin:6px 0;border-radius:12px}
+#v-workspace .ws-prod-hd{display:flex;align-items:center;gap:8px;padding:6px 10px 4px;font:700 12px var(--f);color:var(--mu)}
+#v-workspace .ws-prod-hd b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#v-workspace .ws-prod-hd span{margin-left:auto;padding:1px 8px;border-radius:99px;background:#0000000d;font-size:11px}
+#v-workspace .ws-it.nested{margin-left:10px;min-height:38px}
+#v-workspace .ws-it-name small{font-weight:500;color:var(--mu);font-size:12px}
+#v-workspace .ws-dt-test{margin:4px 0 0;font:600 13px var(--f);color:var(--mu)}
+
+/* 검색은 왼쪽 사이드바 목록 위에 둔다 */
+#v-workspace .ws-side-tests>.workspace-search{display:flex;align-items:center;gap:8px;width:auto;max-width:none;height:36px;margin:2px 4px 8px;padding:0 10px;border-radius:10px;background:#fff;border:1px solid var(--ln)}
+#v-workspace .ws-side-tests>.workspace-search input{width:100%;font-size:13px;color:var(--ink)}
+#v-workspace .ws-side-tests>.workspace-search svg{flex:none;width:15px;height:15px}
+#v-workspace .ws-side-tests>.workspace-search kbd{flex:none}
+
+/* ================= 사이드바 타이포·간격 정리: 한 글꼴(Noto Sans KR)·한 크기 체계 ================= */
+#v-workspace{--side-fs:13px;--side-fs-sm:12px}
+/* 제목줄: 고정폭 영문 글꼴과 넓은 자간을 걷고 다른 곳과 같은 글꼴로 */
+#v-workspace .ws-side-sec{padding:2px 6px 8px;font:700 var(--side-fs)/1.4 var(--f);letter-spacing:0;color:var(--ink)}
+#v-workspace .ws-side-sec>span{font:inherit;letter-spacing:inherit;color:inherit}
+#v-workspace .ws-side-sec .ws-nav-count{margin-left:6px;padding:1px 8px;font:600 11.5px/1.5 var(--f);letter-spacing:0;color:var(--mu);background:#0000000d;border-radius:99px}
+/* 검색·분류 */
+#v-workspace .ws-side-tests>.workspace-search{margin:0 2px 8px;height:38px}
+#v-workspace .ws-side-tests>.workspace-search input{font:500 var(--side-fs) var(--f)}
+#v-workspace .ws-side-tests .wm-filters{margin:0 0 6px;padding:0 2px}
+#v-workspace .ws-side-tests .wm-views{padding:3px;gap:2px;background:#e6e2da;border-radius:11px}
+#v-workspace .ws-side-tests .wm-views button{padding:6px 4px;border-radius:9px;font:600 var(--side-fs-sm)/1.3 var(--f);color:var(--mu)}
+#v-workspace .ws-side-tests .wm-views button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 2px #17161a14}
+/* 목록 */
+#v-workspace #workspaceSideList{margin-top:4px}
+#v-workspace .ws-it-name{font:600 14px/1.4 var(--f)}
+#v-workspace .ws-it.nested .ws-it-name{font-size:13.5px}
+#v-workspace .ws-it-name small{font:500 var(--side-fs-sm) var(--f)}
+#v-workspace .ws-prod{margin:10px 0 4px}
+#v-workspace .ws-prod-hd{padding:4px 10px;font:700 var(--side-fs-sm)/1.4 var(--f);letter-spacing:0;color:var(--mu)}
+#v-workspace .ws-drafts{margin-top:12px;padding-top:6px}
+#v-workspace .ws-drafts>summary{font:600 var(--side-fs-sm)/1.4 var(--f)}
+/* 하단 */
+#v-workspace .ws-side-link{font:600 var(--side-fs) var(--f)}
+#v-workspace .ws-user-copy strong{font:700 var(--side-fs) var(--f)}
+#v-workspace .ws-user-copy span{font:500 11.5px var(--f);color:#6f685d}
+#v-workspace .c10-account .ws-user-copy [data-auth-user],#v-workspace .ws-user-copy>span{font:500 11.5px/1.4 var(--f)!important;color:#6f685d!important}
+
+/* 사이드바 '새 앱·웹' 글자 버튼, 묶음 머리글의 '테스트 추가' */
+#v-workspace .ws-side-new{height:28px;padding:0 11px;border:1px solid var(--ln);border-radius:99px;background:#fff;font:600 12px var(--f);color:var(--ink);cursor:pointer;white-space:nowrap}
+#v-workspace .ws-side-new:hover{border-color:var(--ink)}
+#v-workspace .ws-prod-add{border:0;background:none;padding:2px 8px;border-radius:7px;font:600 11.5px var(--f);color:var(--mu);cursor:pointer;white-space:nowrap}
+#v-workspace .ws-prod-add:hover{background:#fff;color:var(--ink)}
+#v-workspace .ws-prod-hd span{margin-left:auto}
+#v-workspace .ws-prod-hd .ws-prod-add{margin-left:2px}
+#v-product .wf-desc-hint{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
+#v-product .wf-desc-file{height:30px;min-height:30px;padding:0 12px;font-size:12px}

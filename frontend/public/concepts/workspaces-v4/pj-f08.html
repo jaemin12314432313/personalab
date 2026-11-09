@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · F08 Midnight Focus</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="./pj.css"><link rel="stylesheet" href="./pj2.css">
+<style>
+/* F08 · Midnight Focus — 전체 다크. 글로우가 번지는 히어로 + 가는 선 목록. */
+:root{--bg:#09090d;--surface:#111116;--surface-2:#17171d;--bar-bg:#09090dd9;--fg:#ededf0;--fg-2:#b3b4bf;--fg-3:#7c7d89;--line:#ffffff13;--line-2:#ffffff22;--accent:#8b7dff;--btn-bg:#7a6bf5;--btn-fg:#fff;--btn-line:#7a6bf5;--btn-hover:#8b7dff;--c-run:#7aa8ff;--c-done:#52c98a;--c-ready:#e8b04a;--c-setup:#8a8b97;--danger:#ff7070;--danger-soft:#ff70701f;--shadow:0 20px 60px #000b;
+ --h-bg:radial-gradient(480px 300px at 85% -5%,#7a6bf599,transparent 70%),radial-gradient(380px 260px at 0 110%,#2563eb55,transparent 70%),linear-gradient(135deg,#12122a,#171436);--h-shadow:0 30px 80px #6a58f233,0 0 0 1px #ffffff14}
+body{background:radial-gradient(800px 320px at 50% -160px,#8b7dff2a,transparent),var(--bg)}
+.btn:not(.solid){background:transparent;border-color:var(--line-2)}.btn:not(.solid):hover{background:#ffffff0a}
+.search,.sort,.ws,.acct>button{background:transparent;border-color:var(--line)}.sort option{background:#17171d}
+.head h1{color:#fff}.rest.as-list{background:transparent}.as-list .row:hover{background:#ffffff06}
+.tile{background:color-mix(in srgb,var(--c) 15%,#111116);border-color:color-mix(in srgb,var(--c) 30%,#111116)}
+.kbd{background:#ffffff0c;border-color:#ffffff1f}.dlg{background:#111116;border-color:#ffffff1f}.dlg input{background:#ffffff08}.toast{background:#ededf0;color:#09090d}
+.act:not(.solid){background:transparent}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL=Object.assign({"layout":"focus","tiles":true,"rest":"list","searchHint":"/","newHint":"N","deco":""},{keys:"<span class=\"kbd\">/</span> 검색 · <span class=\"kbd\">N</span> 새 프로젝트"});</script>
+<script src="./pj.js"></script>
+</body></html>

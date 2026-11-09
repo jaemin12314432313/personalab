@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · B09 Sticker</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+<link rel="stylesheet" href="./pj.css"><link rel="stylesheet" href="./pj2.css">
+<style>
+/* B09 · Sticker — 두꺼운 잉크 테두리, 하드 섀도, 살짝 기운 스티커 상태 표시. 가장 장난스러운 버전. */
+
+:root{--serif:"Noto Serif KR","Nanum Myeongjo",serif;
+ --bg:#f5f0e6;--surface:#fffdf8;--surface-2:#f1eadd;--bar-bg:#f5f0e6e8;
+ --fg:#1f1a15;--fg-2:#4d443a;--fg-3:#857a6a;--line:#e6dccb;--line-2:#d6c9b2;
+ --accent:#1f1a15;--btn-bg:#1f1a15;--btn-fg:#fffdf8;--btn-line:#1f1a15;--btn-hover:#3a3128;
+ --c-setup:#857a6a;--c-ready:#b86e0a;--c-run:#2f5fd0;--c-done:#2f7d4f;--danger:#c8452f;--danger-soft:#f9e4de;
+ --radius:14px;--radius-sm:9px;--shadow:0 16px 44px #4a3a2a26;--grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .13  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.ul{position:relative;display:inline-block;white-space:nowrap}
+.ul svg{position:absolute;left:-1%;bottom:-.14em;width:102%;height:.22em;overflow:visible;fill:none;stroke:#d06d5b;stroke-width:2.6;stroke-linecap:round;pointer-events:none}
+body::after{content:"";position:fixed;inset:0;background:var(--grain);opacity:.55;mix-blend-mode:multiply;pointer-events:none;z-index:3}
+.head h1{font:800 36px/1.4 var(--serif);letter-spacing:-.04em}
+.eyebrow{color:var(--fg-3)}
+.search,.sort,.ws,.acct>button{background:var(--surface);border-color:var(--line-2)}
+.btn.solid{box-shadow:0 6px 16px #1f1a1526}
+.dlg{background:var(--surface)}.dlg input{background:var(--surface-2)}
+.me{background:var(--surface-2)}
+.tabs a[aria-current=page]::after{background:var(--accent)}
+.kbd{background:var(--surface-2)}
+
+:root{--bg:#f3ecdc;--surface:#fffdf6;--surface-2:#efe6d2;--bar-bg:#f3ecdce8;--fg:#14110d;--fg-2:#3a342b;--fg-3:#6e6454;--line:#14110d;--line-2:#14110d;--btn-bg:#14110d;--btn-fg:#fff;--btn-line:#14110d;--btn-hover:#2a251d;--c-run:#2f5fd0;--c-done:#1a7a4a;--c-ready:#b25a00;--c-setup:#6e6454;--radius:16px;--radius-sm:10px;--shadow:6px 6px 0 #14110d;
+ --h-bg:#fffdf6;--h-fg:#14110d;--h-fg2:#3a342b;--h-fg3:#6e6454;--h-line:#14110d;--h-chip:#ffd84d;--h-chip-fg:#14110d;--h-done:#14110d;--h-ready:#14110d;--h-setup:#14110d;
+ --h-btn-bg:#14110d;--h-btn-fg:#fff;--h-btn-hover:#2a251d;--h-btn-shadow:3px 3px 0 #ff5b3a;--h-track:#e9dfc6;--h-ring:#ff5b3a;--h-ring-glow:transparent;--h-ev:#fff;--h-ev-line:#14110d;--h-ev-fg:#3a342b;--h-ev-b:#14110d;
+ --h-shadow:9px 9px 0 #14110d;--h-spot:0;--h-radius:20px;--h-title-weight:850;--h-title:56px;--h-pad:38px 40px}
+body::after{opacity:.4}
+.head h1{font:850 40px/1.3 var(--font);letter-spacing:-.06em}
+.mk{background:linear-gradient(transparent 58%,#ffd84d 58% 92%,transparent 92%);padding:0 4px;margin:0 -4px}
+.bar{border-bottom:2px solid #14110d}
+.search,.sort,.ws,.acct>button{border:2px solid #14110d;background:#fffdf6;border-radius:10px}
+.ws i{background:#ff5b3a;color:#14110d;border:2px solid #14110d}
+.tabs a[aria-current=page]::after{height:4px;background:#ff5b3a;bottom:-2px}
+.btn{border:2px solid #14110d;box-shadow:3px 3px 0 #14110d;border-radius:10px;font-weight:700}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 #14110d}.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #14110d}
+.btn.solid{background:#14110d;color:#fff;box-shadow:3px 3px 0 #ff5b3a}.btn.solid:hover{box-shadow:4px 4px 0 #ff5b3a}
+.row.hero{border:2.5px solid #14110d}
+.hero .stt{background:#ffd84d;color:#14110d;border:2px solid #14110d;transform:rotate(-2deg);font-weight:700;padding:3px 12px 3px 10px}
+.hero .stt.done{background:#8fe0b0;color:#14110d}.hero .stt.ready{background:#ffb36b;color:#14110d}.hero .stt.setup{background:#fff;color:#14110d}
+.hero h2{letter-spacing:-.065em}
+.ring circle{stroke-width:11}.ring .rv{stroke-linecap:butt}
+.ev li{border:2px solid #14110d;border-radius:10px;background:#fff}
+.ev li:first-child i{background:#ff5b3a;box-shadow:none}
+.h-insight{background:#fff3b8;border:2px solid #14110d;border-radius:10px;font-weight:600;color:#14110d}.h-insight i{background:#ff5b3a;box-shadow:none}
+.hero .more{border:2px solid #14110d;color:#14110d}
+.slot-t::before{border-radius:2px;background:#ff5b3a;box-shadow:none}
+.as-tiles .row{border:2.5px solid #14110d;box-shadow:5px 5px 0 #14110d;border-radius:18px;background:#fffdf6}
+.as-tiles .row:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 #14110d}
+.as-tiles .row:has(.stt.ready){background:#ffb36b}
+.as-tiles .row:has(.stt.done):nth-child(odd){background:#8fe0b0}
+.as-tiles .row:has(.stt.done):nth-child(even){background:#c4b5ff}
+.as-tiles .row:has(.stt.setup){background:#fffdf6}
+.as-tiles .stt{background:#fff;border:2px solid #14110d;transform:rotate(-2deg);font-weight:700;color:#14110d}
+.as-tiles .p-name b{font-weight:850;font-size:22px}
+.as-tiles .act:not(.solid){background:#fff}.as-tiles .row:has(.stt.ready) .act.solid,.as-tiles .row:has(.stt.setup) .act.solid{box-shadow:3px 3px 0 #ff5b3a}
+.pop,.menu,.dlg{border:2px solid #14110d;box-shadow:6px 6px 0 #14110d;border-radius:14px}
+.toast{border-radius:8px;box-shadow:4px 4px 0 #ff5b3a}
+.dlg input{border:2px solid #14110d;background:#fffdf6}
+
+</style></head>
+<body><div id="app"></div>
+<script>window.PL=Object.assign({"layout":"focus","rest":"tiles","title":"<span class=\"mk\">프로젝트</span>"},{searchHint:'/',newHint:'N',keys:"<span class=\"kbd\">/</span> 검색 · <span class=\"kbd\">N</span> 새 프로젝트"});</script>
+<script src="./pj.js"></script>
+</body></html>

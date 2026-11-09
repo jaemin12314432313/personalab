@@ -6,12 +6,18 @@ from collections.abc import Awaitable, Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import RUN_STATUS_DONE, RUN_STATUS_FAILED, RUN_STATUS_RUNNING, settings
+from app.core.config import REPORT_RULES_VERSION, RUN_STATUS_DONE, RUN_STATUS_FAILED, RUN_STATUS_RUNNING, settings
 from app.core.db import SessionLocal
 from app.repositories import run as run_repo
 from app.repositories import study as study_repo
+from app.repositories import workflow as workflow_repo
+from app.services import browser, site_map
 from app.services.act.loop import agent_loop
+from app.services.llm import require_persona_transmission, LLMError
 from app.services.ask.answer import ask_persona, check_ask
+from app.services.report import build_results
+from app.services import rule_agent
+from app.services.act.decide import decide_step
 
 log = logging.getLogger(__name__)
 
@@ -32,11 +38,37 @@ def _ask_with_retries(persona: dict, product: dict, questions: list[dict]) -> di
     return None
 
 
-async def execute_run(session: AsyncSession, run_id: int) -> None:
-    run = await run_repo.get_run(session, run_id)
-    await run_repo.set_run_state(session, run, status=RUN_STATUS_RUNNING)
+async def save_report_snapshot(session: AsyncSession, run, outcome: str) -> None:
+    """Act 실행이 끝나거나 중단된 순간의 결과를 한 번 저장한다. 실패해도 실행 상태는 바꾸지 않는다."""
+    if run.mode != "act":
+        return
     try:
         personas = await study_repo.list_personas(session, run.study_id)
+        acts = await run_repo.list_act_logs(session, run.id)
+        results = [r.model_dump(mode="json") for r in build_results(personas, [], acts)]
+        await run_repo.save_run_report(session, run.id, outcome, REPORT_RULES_VERSION, results)
+    except Exception:
+        await session.rollback()
+        log.exception("결과 스냅샷 저장 실패 run_id=%s", run.id)
+
+
+async def execute_run(session: AsyncSession, run_id: int) -> None:
+    run = await run_repo.claim_run(session, run_id)
+    if run is None:
+        return
+    try:
+        if await study_repo.study_source(session,run.study_id)=='local-demo':
+            raise RuntimeError('로컬 점검 예시는 유료 실행에 사용하지 않습니다.')
+        rule = rule_agent.use_rule_engine() and run.mode == 'act'
+        if not rule:
+            require_persona_transmission()
+        personas = await study_repo.list_personas(session, run.study_id)
+        workflow=await workflow_repo.get(session,run.study_id)
+        browser_source=workflow.source_json if workflow and workflow.source_json.get("kind") in ("web","html") else None
+        max_turns=(workflow.scope_json.get("max_turns") if workflow else None) or settings.max_turns
+        async def cancelled():
+            control=await workflow_repo.control(session,run_id)
+            return bool(control and control.cancel_requested)
         if run.mode == "ask":
             p = await study_repo.get_product(session, run.study_id)
             product = {"description": p.description, "features": p.features_json, "price": p.price}
@@ -50,13 +82,34 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
             screens = {s["id"]: s for s in proto.screens_json}
             start = proto.screens_json[0]["id"]
 
-        for i, persona in enumerate(personas, 1):
+        seen_pages=set()
+        assigned=set()
+
+        async def cancelled_on(sess):
+            control=await workflow_repo.control(sess,run_id)
+            return bool(control and control.cancel_requested)
+
+        async def process(sess, persona):
+            """페르소나 한 명을 돌린다. 동시에 여러 명을 돌릴 때는 사람마다 따로 연 세션을 넘긴다."""
             # LLM 호출은 동기라 스레드로 넘긴다. 이벤트 루프를 막지 않게
+            if await cancelled_on(sess):raise browser.BrowserCancelled("사용자가 실행을 취소했습니다.")
             attrs = persona.attributes_json
             if run.mode == "ask":
                 out = await asyncio.to_thread(_ask_with_retries, attrs, product, questions)
                 if out is not None:
-                    await run_repo.add_ask_response(session, run.id, persona.id, out)
+                    await run_repo.add_ask_response(sess, run.id, persona.id, out)
+            elif browser_source:
+                scope=dict(workflow.scope_json)
+                if site_map.site_mode(scope):
+                    start_url=site_map.next_start(browser_source,seen_pages|assigned)
+                    scope['_start_url']=start_url
+                    if start_url:assigned.add(site_map.page_key(start_url))  # 동시에 도는 사람과 같은 시작점을 받지 않게
+                async def save(turn,screen,image,action,row):
+                    seen_pages.add(site_map.page_key(screen.get('url','')))
+                    await workflow_repo.add_evidence(sess,run.id,persona.id,turn,screen,image,action)
+                    if row is not None:await run_repo.add_ai_act_logs(sess,run.id,persona.id,[row])
+                async def cancelled_here():return await cancelled_on(sess)
+                await browser.explore(browser_source,scope,attrs,task.description,max_turns,save,cancelled_here,**({'decide':rule_agent.decide_browser,'tolerate_blocked':True} if rule else {}))
             else:
                 rows = await asyncio.to_thread(
                     agent_loop,
@@ -65,15 +118,44 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
                     screens,
                     start,
                     task.goal_screen_id,
-                    settings.max_turns,
+                    max_turns,
+                    decide=rule_agent.decide_screens if rule else decide_step,
                 )
-                await run_repo.add_ai_act_logs(session, run.id, persona.id, rows)
-            await run_repo.set_run_state(session, run, progress=i / len(personas))
+                await run_repo.add_ai_act_logs(sess, run.id, persona.id, rows)
+
+        total=len(personas)
+        concurrency=settings.run_concurrency if (run.mode=="act" and browser_source) else 1
+        if concurrency<=1:
+            for i, persona in enumerate(personas, 1):
+                await process(session, persona)
+                await run_repo.set_run_state(session, run, progress=i / total)
+        else:
+            # 사람 수가 많을 때 한 명씩 돌면 너무 오래 걸려서, 정해 둔 인원만큼 동시에 돌린다
+            gate=asyncio.Semaphore(concurrency);lock=asyncio.Lock();finished=0
+            async def worker(persona):
+                nonlocal finished
+                async with gate:
+                    async with SessionLocal() as sess:
+                        await process(sess, persona)
+                    async with lock:
+                        finished+=1
+                        await run_repo.set_run_state(session, run, progress=finished / total)
+            try:
+                async with asyncio.TaskGroup() as group:
+                    for persona in personas:group.create_task(worker(persona))
+            except ExceptionGroup as group_error:
+                raise group_error.exceptions[0] from None
+        if await cancelled():raise browser.BrowserCancelled("사용자가 실행을 취소했습니다.")
         await run_repo.set_run_state(session, run, status=RUN_STATUS_DONE)
-    except Exception:
+        await save_report_snapshot(session, run, "done")
+    except Exception as error:
         log.exception("실행 실패 run_id=%s", run_id)
         await session.rollback()
-        await run_repo.set_run_state(session, run, status=RUN_STATUS_FAILED)
+        failed_run = await run_repo.get_run(session, run_id)
+        if failed_run is not None:
+            await run_repo.set_run_state(session, failed_run, status=RUN_STATUS_FAILED)
+            await save_report_snapshot(session, failed_run, "cancelled" if isinstance(error, browser.BrowserCancelled) else "failed")
+            await workflow_repo.set_control(session,run_id,error=str(error) if isinstance(error,(browser.BrowserError,LLMError)) else "실행을 완료하지 못했습니다. 연결 상태와 입력을 확인하세요.")
 
 
 async def execute_in_background(run_id: int) -> None:

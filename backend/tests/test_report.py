@@ -81,6 +81,7 @@ def persona(pid, attrs=None):
 
 def test_display_id_prefers_given_name_then_db_number():
     assert display_id(persona(7, {"persona_id": "P938"})) == "P938"
+    assert display_id(persona(7, {"source": {"persona_id": "ENGINE007"}})) == "ENGINE007"
     assert display_id(persona(7)) == "P007"
 
 
@@ -106,3 +107,10 @@ def test_results_follow_panel_order_and_fill_missing_sides_with_none():
     assert results[0].ask is None and results[0].act.end.result == "complete"
     assert results[1].ask.usage_intention == 3 and results[1].ask.reason == ""
     assert results[1].act is None
+
+
+def test_all_invalid_turns_still_return_a_system_end_without_fake_events():
+    act=build_act([row(3,'S01',ACT_STOP,drop='MAX_TURNS',reason=None)])
+    assert act.events==[]
+    assert act.path==['S01']
+    assert act.end.drop_reason=='MAX_TURNS'

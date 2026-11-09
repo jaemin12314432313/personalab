@@ -1,0 +1,352 @@
+import base64
+import pytest
+from httpx import ASGITransport, AsyncClient
+from app.main import app
+from app.core.db import get_session
+from app.core.config import settings
+from app.services import browser
+from app.repositories import workflow as repo, run as run_repo, study as study_repo
+from app.api.studies import run_launcher
+from app.api.workflow import exploration_launcher
+
+HTML='<html lang="ko"><head><title>가상 화면 점검</title></head><body><h1>시작 화면</h1><a href="done.html">결과 보기</a><input aria-label="이름" /></body></html>'
+DONE='<html><head><title>완료 화면</title></head><body><h1>점검 완료</h1></body></html>'
+def bundle():return {'kind':'html','entry':'index.html','files':[{'path':name,'data':base64.b64encode(content.encode()).decode()} for name,content in [('index.html',HTML),('done.html',DONE)]]}
+
+async def test_real_html_observation_and_scoped_navigation_without_model():
+    source=bundle();preview=await browser.inspect(source,'desktop')
+    assert preview['title']=='가상 화면 점검'
+    assert preview['preview'].startswith('data:image/jpeg;base64,')
+    assert preview['suggestions'][0]['url']=='/done.html'
+    saved=[]
+    async def save(*args):saved.append(args)
+    async def cancelled():return False
+    def decide(persona,task,screen,image,history):
+        target=next(e for e in screen['elements'] if e['text']=='결과 보기')
+        return {'action':'click','target':target['id'],'value':None,'drop_reason':None,'reason':'검증용 가상 판단'}
+    rows=await browser.explore(source,{'viewport':'desktop','goal_url':'/done.html'}, {'card_text':'원본 카드가 아닌 단위 검증용 가상 인물'},'완료 화면 열기',3,save,cancelled,decide)
+    assert [r['action'] for r in rows]==['click','complete']
+    assert len(saved)==2 and '점검 완료' in saved[-1][1]['description']
+    assert saved[0][2].startswith('data:image/jpeg;base64,')
+
+async def test_browser_cancellation_never_calls_model():
+    async def cancelled():return True
+    async def save(*a):pytest.fail('Cancellation must happen before observation')
+    def decide(*a):pytest.fail('No model after cancellation')
+    with pytest.raises(browser.BrowserCancelled):await browser.explore(bundle(),{'viewport':'mobile','goal_url':'/done.html'},{'card_text':'가상'},'검증',3,save,cancelled,decide)
+
+async def test_browser_loop_and_turn_guards():
+    async def cancelled():return False
+    async def save(*a):pass
+    def stay(persona,task,screen,image,history):return {'action':'scroll','target':None,'value':None,'drop_reason':None,'reason':'가상 스크롤'}
+    rows=await browser.explore(bundle(),{'goal_url':'/missing.html'},{'card_text':'가상'},'검증',3,save,cancelled,stay)
+    assert rows[-1]['drop_reason']=='NAVIGATION_LOST'
+    rows=await browser.explore(bundle(),{'goal_url':'/missing.html'},{'card_text':'가상'},'검증',0,save,cancelled,stay)
+    assert rows[-1]['drop_reason']=='MAX_TURNS'
+    def abandon(*args):return {'action':'abandon','target':None,'value':None,'drop_reason':'PRIVACY','reason':'검증용 중단'}
+    rows=await browser.explore(bundle(),{}, {'card_text':'가상'},'검증',3,save,cancelled,abandon)
+    assert rows[-1]['action']=='abandon' and rows[-1]['drop_reason']=='PRIVACY'
+
+async def test_source_validation_blocks_private_targets_and_bad_files(monkeypatch):
+    monkeypatch.setattr(settings,'local_tools_enabled',False)
+    for url in ['http://127.0.0.1:8000/','file:///C:/secrets','http://user:pass@example.com','http://169.254.169.254/']:
+        with pytest.raises(browser.BrowserError):await browser.validate_url(url)
+    for name in ['../index.html','/index.html','C:/index.html','run.exe']:
+        with pytest.raises(browser.BrowserError):browser.decode_files([{'path':name,'data':'YQ=='}],name)
+
+@pytest.fixture
+async def client(session,monkeypatch):
+    monkeypatch.setattr(settings,'allow_persona_transmission',False)
+    app.dependency_overrides[get_session]=lambda:session
+    async def queue_only(*args):pass
+    app.dependency_overrides[exploration_launcher]=lambda:queue_only
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app),base_url='http://test',headers={'X-Requested-With':'PersonaLab'}) as c:
+            assert (await c.post('/auth/register',json={'email':'workflow-check@example.com','password':'1234'})).status_code==201
+            yield c
+    finally:app.dependency_overrides.clear()
+
+async def test_authenticated_source_revisions_and_frozen_evidence(client,session,monkeypatch):
+    sid=(await client.post('/studies',json={'name':'회차 검증'})).json()['id']
+    source=bundle();body={k:source[k] for k in ('files','entry')}
+    response=await client.post(f'/studies/{sid}/sources/html',json=body)
+    assert response.status_code==200,response.text
+    saved=response.json();assert saved['source']['kind']=='html' and 'files' not in saved['source']
+    scope={'mode':'focused','focus':'안내 확인','goal_url':'/done.html','viewport':'desktop','scenario':'완료 화면 보기'}
+    assert (await client.post(f'/studies/{sid}/workflow',json={'scope':scope})).status_code==200
+    await study_repo.set_product(session,sid,'제품\n화면 검증',['이동'],'')
+    await study_repo.replace_personas(session,sid,[{'card_text':'가상의 테스트 인물','profile':{'age':30,'job_group':'검증'},'traits':{},'source':{'persona_id':'FIXTURE'}}])
+    assert (await client.post(f'/studies/{sid}/runs',json={'mode':'act'})).status_code==409
+    run=await run_repo.create_run(session,sid,'act');await run_repo.set_run_state(session,run,status='done',progress=1)
+    assert (await client.post(f'/studies/{sid}/workflow',json={'scope':scope})).status_code==409
+    child=(await client.post(f'/studies/{sid}/revisions',json={})).json()['id']
+    rows=(await client.get(f'/studies/{child}/revisions')).json();assert [r['revision'] for r in rows]==[2,1]
+    assert len((await client.get(f'/studies/{child}')).json()['personas'])==1
+    assert (await client.get(f'/studies/{child}')).json()['runs']==[]
+    assert (await client.get(f'/studies/{child}/workflow')).json()['root_study_id']==sid
+    # 수정 회차는 화면을 다시 받아야 하고, 다시 받아도 이전 회차의 탐색 범위는 그대로 이어진다
+    carried=(await client.get(f'/studies/{child}/workflow')).json();assert carried['source']['needs_reconnect'] is True
+    redo=await client.post(f'/studies/{child}/sources/recapture');assert redo.status_code==200,redo.text
+    assert 'needs_reconnect' not in redo.json()['source'] and redo.json()['scope']['focus']=='안내 확인' and redo.json()['screens']
+    assert (await client.post(f'/studies/{sid}/sources/recapture')).status_code==409  # 실행한 회차는 다시 연결할 수 없다
+    renamed=await client.post(f'/studies/{child}/name',json={'name':'바뀐 테스트 이름'})
+    assert renamed.status_code==200 and renamed.json()['name']=='바뀐 테스트 이름'
+    assert (await client.post(f'/studies/{sid}/name',json={'name':'기록 변경 금지'})).status_code==409
+    persona=(await study_repo.list_personas(session,sid))[0]
+    await repo.add_evidence(session,run.id,persona.id,0,saved['screens'][0],saved['source']['preview'],{'action':'complete'})
+    evidence=(await client.get(f'/runs/{run.id}/evidence')).json()[0]
+    image=(await client.get(evidence['image'].removeprefix('/api')))
+    assert image.status_code==200 and image.headers['content-type']=='image/jpeg'
+    assert image.headers['cache-control']=='private, no-store'
+    pending=await run_repo.create_run(session,child,'act')
+    assert (await client.post(f'/runs/{pending.id}/cancel',json={})).json()['cancel_requested'] is True
+    await client.post('/auth/logout',json={})
+    await client.post('/auth/register',json={'email':'workflow-other@example.com','password':'1234'})
+    for path in [f'/studies/{sid}/workflow',f'/studies/{sid}/revisions',f'/runs/{pending.id}/evidence',f'/runs/{pending.id}/control', evidence['image'].removeprefix('/api')]:
+        assert (await client.get(path)).status_code==404
+    assert (await client.post(f'/studies/{sid}/revisions',json={})).status_code==404
+    assert (await client.post(f'/runs/{pending.id}/cancel',json={})).status_code==404
+
+
+async def test_runner_stores_browser_evidence_report_and_scoped_interview(client,session,monkeypatch):
+    from app.services import runner
+    from app.repositories import interview as interview_repo
+    # 실제 패널이나 외부 모델을 사용하지 않는 독립 가상 데이터 경로다.
+    sid=(await client.post('/studies',json={'name':'브라우저 실행 연결 점검'})).json()['id']
+    source=bundle()
+    response=await client.post(f'/studies/{sid}/sources/html',json={'files':source['files'],'entry':source['entry']})
+    assert response.status_code==200
+    await study_repo.set_product(session,sid,'가상 화면',['이동'],'')
+    await study_repo.replace_personas(session,sid,[{'card_text':'자체 검증용 가상 인물','profile':{'age':30},'traits':{},'source':{'persona_id':'FIXTURE'}}])
+    persona=(await study_repo.list_personas(session,sid))[0]
+    assert (await client.post(f'/studies/{sid}/workflow',json={'scope':{'exploration':'journey','goal_url':'/done.html'}})).status_code==200
+    run=await run_repo.create_run(session,sid,'act')
+    original=browser.explore
+    def decide(persona,task,screen,image,history):
+        element=next(e for e in screen['elements'] if e['text']=='결과 보기')
+        return {'action':'click','target':element['id'],'value':None,'drop_reason':None,'reason':'가상 인물이 완료 화면을 선택한 검증 기록'}
+    async def simulated(*args):return await original(*args,decide=decide)
+    monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
+    monkeypatch.setattr(browser,'explore',simulated)
+    monkeypatch.setattr(browser,'call_llm',lambda *a,**kw:pytest.fail('외부 모델 호출 금지'))
+    await runner.execute_run(session,run.id)
+    assert (await run_repo.get_run(session,run.id)).status=='done'
+    evidence=(await client.get(f'/runs/{run.id}/evidence')).json()
+    assert len(evidence)==2 and evidence[-1]['screen']['label']=='완료 화면'
+    report=(await client.get(f'/runs/{run.id}/report')).json()
+    assert report['results'][0]['act']['end']['result']=='complete'
+    owner=(await client.get('/auth/me')).json()['id']
+    context=await interview_repo.context(session,run.id,persona.id,owner)
+    assert any(s['label']=='완료 화면' for s in context['screens'])
+    answer=await client.post(f'/runs/{run.id}/personas/{persona.id}/interview',json={'question':'어느 화면을 보았나요?','mode':'records'})
+    assert answer.status_code==201 and answer.json()['evidence']
+    assert (await client.post(f'/runs/{run.id}/personas/{persona.id}/interview',json={'question':'왜?','mode':'llm'})).status_code==409
+
+
+@pytest.mark.parametrize('product_kind',['ios','android'])
+async def test_app_html_inspects_mobile_and_preserves_kind_in_revision(client,product_kind,monkeypatch):
+    sid=(await client.post('/studies',json={'name':'App prototype fixture'})).json()['id']
+    source=bundle();observed_viewports=[];inspect=browser.inspect
+    async def record_viewport(source,viewport):
+        observed_viewports.append(viewport)
+        return await inspect(source,viewport)
+    monkeypatch.setattr(browser,'inspect',record_viewport)
+    response=await client.post(f'/studies/{sid}/sources/html',json={'files':source['files'],'entry':source['entry'],'product_kind':product_kind,'viewport':'desktop'})
+    assert response.status_code==200,response.text
+    result=response.json()
+    assert observed_viewports==['mobile']
+    assert result['source']['kind']=='html' and result['source']['preview'].startswith('data:image/jpeg;base64,')
+    assert result['scope']['product_kind']==product_kind and result['scope']['viewport']=='mobile'
+    scope={**result['scope'],'viewport':'desktop','goal_url':'/done.html'}
+    updated=(await client.post(f'/studies/{sid}/workflow',json={'scope':scope})).json()
+    assert updated['scope']['viewport']=='mobile'
+    child=(await client.post(f'/studies/{sid}/revisions',json={})).json()['id']
+    copied=(await client.get(f'/studies/{child}/workflow')).json()
+    assert copied['scope']==updated['scope'] and copied['source']['kind']=='html'
+
+
+async def test_source_inspection_reports_observed_structure_and_missing_content_without_input_values():
+    html='<html lang="ko"><title>예약 관리</title><body><header><nav aria-label="주 메뉴"><a href="done.html">예약 확인</a></nav></header><main><h1>예약 관리</h1><h2>이름 입력</h2><input aria-label="이름" value="DO_NOT_EXPOSE_FIELD_VALUE"><button>다음</button><img src="missing.png" width="40" height="40"><iframe src="done.html" title="별도 화면" width="100" height="60"></iframe></main><footer>문의</footer></body></html>'
+    source=bundle();source['files'][0]['data']=base64.b64encode(html.encode()).decode()
+    result=await browser.inspect(source,'mobile');meta=result['inspection']
+    assert meta['viewport']=={'width':390,'height':844}
+    assert [h['text'] for h in meta['headings']]==['예약 관리','이름 입력']
+    assert {l['role'] for l in meta['landmarks']}=={'banner','navigation','main','contentinfo'}
+    assert meta['element_count']==3 and meta['elements_truncated'] is False
+    assert meta['image_count']==1 and meta['unloaded_image_count']==1 and meta['frame_count']==1
+    assert meta['html_documents']==['index.html','done.html'] and meta['captured_at']
+    assert result['observed_screen']['elements'][0]['href']=='/done.html'
+    import json
+    assert 'DO_NOT_EXPOSE_FIELD_VALUE' not in json.dumps(meta)+json.dumps(result['observed_screen'])
+    assert '127.0.0.1' not in json.dumps(result['observed_screen'])
+
+
+async def test_inspection_reports_element_limit_without_changing_actor_limits(monkeypatch):
+    monkeypatch.setattr(browser,'BROWSER_MAX_ELEMENTS',2)
+    source=bundle();source['files'][0]['data']=base64.b64encode(b'<html><title>Limits</title><body><button>A</button><button>B</button><button>C</button></body></html>').decode()
+    result=await browser.inspect(source,'desktop')
+    assert result['inspection']['element_count']==3 and result['inspection']['elements_truncated'] is True
+    assert len(result['observed_screen']['elements'])==2
+
+
+async def test_checkbox_selection_and_history_are_real_observed_states():
+    html='''<meta charset="utf-8"><title>입력 검증</title><input type="checkbox" aria-label="안내 확인"><select aria-label="분류"><option value="a">전체</option><option value="b">책</option></select><a href="done.html">완료</a>'''
+    source=bundle();source['files'][0]['data']=base64.b64encode(html.encode()).decode()
+    histories=[];saved=[]
+    def decide(persona,task,screen,image,history):
+        histories.append(list(history));elements=screen['elements']
+        checkbox=next(e for e in elements if e['type']=='checkbox')
+        selector=next(e for e in elements if e['kind']=='select')
+        if not checkbox['checked']:target=checkbox;action='click';value=None
+        elif selector['selected_options']!=['b']:target=selector;action='fill';value='b'
+        else:target=next(e for e in elements if e['text']=='완료');action='click';value=None
+        return {'action':action,'target':target['id'],'value':value,'reason':'가상 상태 검증','drop_reason':None}
+    async def save(*args):saved.append(args)
+    async def cancelled():return False
+    rows=await browser.explore(source,{'goal_url':'/done.html'},{'card_text':'단위 검증용'},'입력',3,save,cancelled,decide)
+    assert [r['action'] for r in rows]==['click','fill','click','complete']
+    assert histories[1][0]['action']=='click' and histories[2][1]['target']=='분류'
+    assert saved[0][1]['viewport']=={'width':1365,'height':900}
+    assert saved[0][1]['elements'][0]['rect']['width']>0
+
+
+def test_scope_accepts_bounded_saved_turn_limit():
+    from app.schemas.workflow import ScopeIn
+    from pydantic import ValidationError
+    assert ScopeIn(max_turns=12).max_turns==12
+    assert ScopeIn().max_turns is None
+    for value in (0,31):
+        with pytest.raises(ValidationError):ScopeIn(max_turns=value)
+
+
+async def test_new_connection_defaults_to_site_mode_and_runs_without_goal(client,session,monkeypatch):
+    from app.api.studies import run_launcher
+    sid=(await client.post('/studies',json={'name':'Whole site fixture'})).json()['id']
+    src=bundle()
+    result=(await client.post(f'/studies/{sid}/sources/html',json={'files':src['files'],'entry':src['entry']})).json()
+    assert result['scope']['exploration']=='site' and not result['scope']['goal_url']
+    assert result['source']['exploration']['status']=='queued'
+    assert 'preflight' not in result['source'] and 'site_map' not in result['source']
+    assert result['scope']['max_turns']==12
+    saved=await client.post(f'/studies/{sid}/workflow',json={'scope':{'exploration':'site','goal_url':'old-hidden-goal','priorities':['메뉴 이해']}})
+    assert saved.status_code==200 and saved.json()['scope']['priorities']==['메뉴 이해']
+    await study_repo.replace_personas(session,sid,[{'card_text':'fixture','profile':{'age':30},'traits':{},'source':{}}])
+    launched=[]
+    async def launch(run_id):launched.append(run_id)
+    app.dependency_overrides[run_launcher]=lambda:launch
+    monkeypatch.setattr(settings,'allow_persona_transmission',True)
+    assert (await client.post(f'/studies/{sid}/runs',json={'mode':'act'})).status_code==409
+    await client.post(f'/studies/{sid}/exploration',json={'action':'pause'})
+    assert (await client.post(f'/studies/{sid}/exploration/review',json={'job_id':result['source']['exploration']['id']})).status_code==200
+    response=await client.post(f'/studies/{sid}/runs',json={'mode':'act'})
+    assert response.status_code==202,response.text
+    assert launched==[response.json()['id']]
+
+async def test_general_runner_assigns_unvisited_page_to_next_persona(client,session,monkeypatch):
+    from app.services import runner
+    sid=(await client.post('/studies',json={'name':'Coverage fixture'})).json()['id']
+    src=bundle()
+    await client.post(f'/studies/{sid}/sources/html',json={'files':src['files'],'entry':src['entry']})
+    from contextlib import asynccontextmanager
+    from app.services import exploration
+    @asynccontextmanager
+    async def job_session():yield session
+    connected=await repo.get(session,sid)
+    await exploration.run_job(sid,connected.source_json['exploration']['id'],job_session)
+    await study_repo.replace_personas(session,sid,[{'card_text':'fixture','profile':{'age':30},'traits':{},'source':{}} for _ in range(2)])
+    run=await run_repo.create_run(session,sid,'act')
+    original=browser.explore
+    def decide(*a):return {'action':'abandon','reason':'fixture only','drop_reason':'UNCLEAR_PURPOSE'}
+    async def simulate(*args):return await original(*args,decide=decide)
+    monkeypatch.setattr(browser,'explore',simulate)
+    monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
+    monkeypatch.setattr(browser,'call_llm',lambda *a,**k:pytest.fail('No external model'))
+    await runner.execute_run(session,run.id)
+    records=(await client.get(f'/runs/{run.id}/evidence')).json()
+    assert [r['screen']['url'] for r in records]==['/index.html','/done.html']
+    assert records[1]['screen']['exploration']['entry']=='assigned'
+    assert (await run_repo.get_run(session,run.id)).status=='done'
+
+
+async def test_live_capture_waits_for_entry_fade_without_changing_agent_actions():
+    import base64
+    src={'kind':'html','entry':'index.html','files':[{'path':'index.html','data':base64.b64encode(b"<title>Action fade</title><body style='opacity:0'><h1>Ready screen</h1><script>setTimeout(()=>document.body.style.opacity=1,650)</script>").decode()}]}
+    saved=[]
+    async def save(*args):saved.append(args)
+    async def cancelled():return False
+    def decide(*args):return {'action':'abandon','target':None,'reason':'fixture end','drop_reason':'PRIVACY'}
+    rows=await browser.explore(src,{'exploration':'site'},{'card_text':'self-authored fixture'},'fixture',1,save,cancelled,decide)
+    assert saved[0][1]['capture_ready'] is True
+    assert saved[0][2].startswith('data:image/jpeg;base64,')
+    assert [row['action'] for row in rows]==['abandon']
+
+
+def test_passive_blocks_never_expand_request_permissions():
+    from types import SimpleNamespace
+    blocks=browser.BlockedRequests()
+    for kind in ('image','font','stylesheet','media','script'):
+        blocks.record(SimpleNamespace(method='GET',resource_type=kind,is_navigation_request=lambda:False))
+    assert len(blocks)==5 and blocks.stop_count==0
+    for method,kind,nav in [('POST','image',False),('GET','document',True),('GET','fetch',False)]:
+        blocks.record(SimpleNamespace(method=method,resource_type=kind,is_navigation_request=lambda:nav))
+    assert len(blocks)==8 and blocks.stop_count==3
+
+
+async def test_failed_browser_action_preserves_capture_without_success_log(monkeypatch):
+    saved=[]
+    async def save(*args):saved.append(args)
+    async def cancelled():return False
+    async def denied(*args):raise browser.BrowserError('검증용 차단')
+    def decide(persona,task,screen,image,history):
+        return {'action':'fill','target':screen['elements'][0]['id'],'value':'must-not-be-saved','reason':'검증용 판단'}
+    monkeypatch.setattr(browser,'act',denied)
+    with pytest.raises(browser.BrowserError,match='검증용 차단'):
+        await browser.explore(bundle(),{}, {'card_text':'자체 작성 가상 카드'},'검증',3,save,cancelled,decide)
+    assert len(saved)==1 and saved[0][2].startswith('data:image/jpeg;base64,')
+    assert saved[0][3]['status']=='failed' and saved[0][3]['error']=='검증용 차단'
+    assert 'value' not in saved[0][3] and saved[0][4] is None
+
+
+async def test_real_input_and_navigation_save_matching_preaction_screen():
+    saved=[]
+    async def save(*args):saved.append(args)
+    async def cancelled():return False
+    def decide(persona,task,screen,image,history):
+        label='이름' if not history else '결과 보기'
+        target=next(e for e in screen['elements'] if e['text']==label)
+        return {'action':'fill' if not history else 'click','target':target['id'],'value':'Synthetic name','reason':label}
+    rows=await browser.explore(bundle(),{'goal_url':'/done.html','exploration':'journey'},{'card_text':'자체 작성 가상 카드'},'검증',3,save,cancelled,decide)
+    assert [row['action'] for row in rows]==['fill','click','complete']
+    for _,screen,image,action,row in saved[:2]:
+        target=next(e for e in screen['elements'] if e['id']==action['target'])
+        assert target['text']==row['target'] and target['rect']['width']>0
+    assert next(e for e in saved[1][1]['elements'] if e['text']=='이름')['filled']
+    assert len({r[2] for r in saved})==3
+    assert saved[-1][1]['label']=='완료 화면'
+
+
+async def test_runner_failed_action_keeps_owned_capture_without_inventing_report(client,session,monkeypatch):
+    from app.services import runner
+    sid=(await client.post('/studies',json={'name':'자체 실패 검증'})).json()['id']
+    source=bundle()
+    assert (await client.post(f'/studies/{sid}/sources/html',json={'files':source['files'],'entry':source['entry']})).status_code==200
+    await study_repo.set_product(session,sid,'자체 가상 화면',['이동'],'')
+    await study_repo.replace_personas(session,sid,[{'card_text':'검증용 가상 인물','profile':{'age':30},'traits':{},'source':{'persona_id':'FIXTURE'}}])
+    run=await run_repo.create_run(session,sid,'act')
+    original=browser.explore
+    def decide(persona,task,screen,image,history):
+        return {'action':'click','target':screen['elements'][0]['id'],'reason':'검증용 이동'}
+    async def simulated(*args):return await original(*args,decide=decide)
+    async def denied(*args):raise browser.BrowserError('검증용 실행 차단')
+    monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
+    monkeypatch.setattr(browser,'explore',simulated)
+    monkeypatch.setattr(browser,'act',denied)
+    await runner.execute_run(session,run.id)
+    assert (await run_repo.get_run(session,run.id)).status=='failed'
+    evidence=(await client.get(f'/runs/{run.id}/evidence')).json()
+    assert len(evidence)==1 and evidence[0]['action']['status']=='failed'
+    assert (await client.get(evidence[0]['image'].removeprefix('/api'))).status_code==200
+    report=(await client.get(f'/runs/{run.id}/report')).json()
+    assert report['results'][0]['act'] is None
+    pid=report['results'][0]['id']
+    assert (await client.post(f'/runs/{run.id}/personas/{pid}/interview',json={'question':'왜?','mode':'records'})).status_code==409

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>스코어보드 · PersonaLab 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@800&display=swap">
+<style>
+:root{--bg:#eeebe6;--surface:#fffdf9;--surface-2:#e7e4de;--fg:#1f1a15;--fg-2:#4d443a;--fg-3:#7f7b74;--line:#dedad2;--line-2:#cdc8be;--ink:#17161a;--run:#2f5fd0;--coral:#d06d5b;--green:#2f8f5b;--amber:#b9852f;--red:#c4473a;--serif:"Noto Serif KR","Nanum Myeongjo",serif;--sans:"Pretendard Variable",Pretendard,"Noto Sans KR",system-ui,sans-serif;--r:16px}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--fg);font:500 14px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}
+.top{display:flex;align-items:center;gap:20px;height:58px;padding:0 28px;border-bottom:1px solid var(--line);background:#eeebe6d9;backdrop-filter:blur(10px);position:sticky;top:0;z-index:20}
+.logo{font:800 20px var(--serif);letter-spacing:-.04em}.crumb{color:var(--fg-3);font-size:13px}.crumb b{color:var(--fg);font-weight:700}
+.tabs{display:flex;gap:4px;margin-left:auto}.tabs a{padding:8px 14px;border-radius:99px;font-size:13px;font-weight:650;color:var(--fg-2)}.tabs a.on{background:var(--ink);color:#fff}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;background:#fff;border:1px solid var(--line);font-size:12px;font-weight:650;color:var(--fg-2)}
+.tag.rule{background:#fff6e8;border-color:#ecd7b2;color:#8a5d10}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 18px;border-radius:99px;border:1px solid var(--line-2);background:#fff;font-weight:650;color:var(--fg)}
+.btn.solid{background:var(--ink);border-color:var(--ink);color:#fff}
+.serif{font-family:var(--serif);font-weight:800;letter-spacing:-.04em}
+.ul{position:relative;display:inline-block}.ul::after{content:"";position:absolute;left:-1%;right:-1%;bottom:-.08em;height:.14em;background:var(--coral);border-radius:99px;opacity:.9}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.muted{color:var(--fg-3)}.pt{width:44px;height:44px;border-radius:50%;object-fit:cover;object-position:50% 20%;background:var(--surface-2);flex:none}
+.pt.lg{width:96px;height:96px}.pt.xl{width:160px;height:160px}.pt.sm{width:30px;height:30px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--fg-3)}.dot.run{background:var(--run);box-shadow:0 0 0 4px #2f5fd01f;animation:pulse 1.4s infinite}.dot.done{background:var(--green)}.dot.stop{background:var(--red)}.dot.queue{background:var(--line-2)}
+@keyframes pulse{50%{box-shadow:0 0 0 8px #2f5fd000}}
+.sev{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:750;color:#fff}
+/* 앱 화면 목업 */
+.mk{position:relative;width:15em;font-size:12px;background:#fff;border:1px solid var(--line-2);border-radius:1.6em;box-shadow:0 10px 30px #2f251c14;overflow:hidden}
+.mk-bar{display:flex;gap:.35em;padding:.8em 1em;border-bottom:1px solid var(--line)}.mk-bar i{width:.6em;height:.6em;border-radius:50%;background:var(--line-2)}
+.mk-body{min-height:23em;padding:1.1em;display:flex;flex-direction:column;gap:.8em}
+.mk-t{font:800 1.4em var(--serif);letter-spacing:-.03em}.mk-l{display:block;height:.7em;border-radius:99px;background:var(--surface-2)}
+.w50{width:50%}.w60{width:60%}.w70{width:70%}.w80{width:80%}
+.mk-in{display:block;height:2.4em;border-radius:.8em;border:1px solid var(--line-2);background:#fbfaf7}
+.mk-btn{margin-top:auto;display:block;text-align:center;padding:.8em;border-radius:99px;background:var(--ink);color:#fff;font-weight:700}.mk-btn.dim{background:var(--line-2)}
+.mk-hero{height:8em;border-radius:1em;background:linear-gradient(120deg,#f6f4f0,#e8e5df)}
+.mk-chk{display:flex;gap:.6em;align-items:center}.mk-chk u{width:1.1em;height:1.1em;border:1.5px solid var(--line-2);border-radius:.3em;flex:none}.mk-chk .mk-l{flex:1;width:auto}
+.mk-row{display:flex;justify-content:space-between;align-items:center}.mk-dot{width:1.6em;height:1.6em;border-radius:50%;background:var(--surface-2)}
+.mk-week,.mk-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.3em}.mk-week i{height:.6em;border-radius:99px;background:var(--surface-2)}.mk-grid i{aspect-ratio:1;border-radius:.4em;background:#f6f3ee}
+.mk-ev{display:block;height:2.2em;border-radius:.7em;background:#dfe7fb}.mk-ev.s{background:#fbe3dd;width:70%}
+.mk-fab{position:absolute;right:1em;bottom:1em;width:2.4em;height:2.4em;border-radius:50%;background:#d9d5cc;color:#fff;display:grid;place-items:center;font-weight:700}
+.mk.pin .mk-fab::after{content:"";position:absolute;inset:-.5em;border:2px solid var(--coral);border-radius:50%;animation:pulse2 1.6s infinite}
+@keyframes pulse2{50%{transform:scale(1.2);opacity:.4}}
+.mk-wheel{display:flex;gap:.4em;justify-content:center}.mk-wheel i{width:2.2em;height:5em;border-radius:.8em;background:var(--surface-2)}
+.mk-sw{display:flex;justify-content:space-between;align-items:center;gap:1em}.mk-sw .mk-l{flex:1;width:auto}.mk-sw u{width:2.4em;height:1.3em;border-radius:99px;background:var(--line-2)}
+.mk-av{display:flex;gap:.4em}.mk-av i{width:2.4em;height:2.4em;border-radius:50%;background:var(--surface-2)}
+.mk-label{position:absolute;left:.8em;bottom:.8em;font-style:normal;font-size:1em;font-weight:700;background:#17161aE6;color:#fff;border-radius:99px;padding:.2em .8em}
+.rh{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;max-width:1280px;margin:0 auto;padding:30px 28px 18px}.rh h1{margin:0;font-size:32px;line-height:1.3}.rh p{margin:4px 0 0}.rh-r{display:flex;gap:10px;align-items:center}.wrap{max-width:1280px;margin:0 auto;padding:0 28px 60px}
+.sb{display:grid;grid-template-columns:420px minmax(0,1fr);gap:22px}.ring{display:grid;place-items:center;padding:36px}.rg{width:260px;aspect-ratio:1;border-radius:50%;background:conic-gradient(var(--ink) 0 40%,var(--line) 0);display:grid;place-items:center}.rg div{width:78%;aspect-ratio:1;border-radius:50%;background:var(--surface);display:grid;place-items:center;text-align:center}.rg b{font:800 64px/1 var(--serif);letter-spacing:-.05em}.rg span{display:block;color:var(--fg-3)}
+.tk{padding:28px}.tk h3{margin:0 0 14px;font-size:15px}.ti{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:14px;padding:16px 0;border-top:1px solid var(--line);align-items:center}.ti .no{font:800 22px var(--serif)}.ti b{display:block;font-size:15px}.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}.cols div{padding:16px;border-radius:14px;background:var(--surface-2)}.cols b{display:block;font:800 30px var(--serif)}
+</style></head><body><header class="top"><span class="logo">PersonaLab</span><span class="crumb">워크스페이스 / <b>일정메이트</b> · R2</span><nav class="tabs"><a class="" href="#">테스트 설정</a><a class="on" href="#">실행</a><a class="" href="#">리포트</a><a class="" href="#">1대1 인터뷰</a></nav></header><div class="rh"><div><h1 class="serif"><span class="ul">40%</span> 지나왔어요</h1><p class="muted">지금까지 가장 많이 막힌 곳을 바로 알려드려요</p></div><div class="rh-r"><span class="tag rule">규칙 기반 탐색 · 체험용</span><span class="tag"><i class="dot run"></i> 실행 중 · 03:42</span><button class="btn">실행 취소</button></div></div><div class="wrap"><div class="sb"><section class="card ring"><div class="rg"><div><b>12<small style="font-size:22px">/30</small></b><span>명이 끝냈어요</span></div></div></section>
+<section class="card tk"><div class="cols"><div><b>7</b><span class="muted">막힌 사람</span></div><div><b>4</b><span class="muted">탐색 중</span></div><div><b>14</b><span class="muted">대기</span></div></div><h3>지금까지 발견한 것</h3><div class="ti"><span class="no">1</span><div><b>“일정 추가” 버튼을 찾지 못했어요</b><span class="muted">S03 · 디지털 친숙도 낮음 중심</span></div><span class="tag">11명</span></div><div class="ti"><span class="no">2</span><div><b>약관 동의 항목이 많아 가입에서 멈췄어요</b><span class="muted">S02 · 50대 이상</span></div><span class="tag">9명</span></div><div class="ti"><span class="no">3</span><div><b>“푸시 알림”이라는 말이 낯설어요</b><span class="muted">S05 · 60대 이상</span></div><span class="tag">8명</span></div></section></div></div></body></html>

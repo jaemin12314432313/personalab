@@ -1,0 +1,55 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+/* 랜딩(marketing.css)의 따뜻한 흰색 + 갈색 포인트 + 손그림 밑줄 모티프를 그대로 이어받는다. */
+:root{
+  --paper:#fff;--warm:#faf9f6;--warm-2:#f4f1ec;
+  --line:#e7e3de;--line-2:#d6d0c8;
+  --ink:#16161a;--ink-2:#44464f;--ink-3:#6a6c76;
+  --brown:#8c5d49;--brown-soft:#fff9f4;--brown-line:#dab7a7;
+  --stop:#d6453a;--stop-soft:#fbeceb;
+  --ok:#14724c;--ok-soft:#e8f4ee;
+  --blue:#2a63c4;
+  --sans:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 var(--sans);-webkit-font-smoothing:antialiased;letter-spacing:-.01em;word-break:keep-all;overflow-wrap:break-word}
+a{color:inherit;text-decoration:none}
+button,select,input{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer}
+h1,h2,h3,h4,p,ol,ul,blockquote,figure{margin:0;padding:0}
+ol,ul{list-style:none}
+:focus-visible{outline:3px solid #b49a8c;outline-offset:3px;border-radius:4px}
+
+/* 상단바: 고정 사이드바 없이 얇은 한 줄 */
+.bar{height:60px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:20px;padding:0 clamp(16px,4vw,40px);background:#fffe;backdrop-filter:blur(8px);position:sticky;top:0;z-index:20}
+.logo{font-weight:750;font-size:17px;letter-spacing:-.04em;display:flex;align-items:center;gap:10px}
+.logo i{width:18px;height:18px;border-radius:5px;background:var(--ink);display:inline-block;position:relative}
+.logo i::after{content:"";position:absolute;left:4px;right:4px;bottom:4px;height:2px;background:var(--brown-line);border-radius:2px}
+.crumb{font-size:13px;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.crumb b{color:var(--ink);font-weight:600}
+.crumb::before{content:"/";color:var(--line-2)}
+.sp{flex:1}
+.me{width:30px;height:30px;border-radius:50%;background:var(--warm-2);border:1px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:650;color:var(--brown)}
+.btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border:1px solid var(--line-2);background:#fff;border-radius:8px;font-size:14px;font-weight:550;transition:background .2s,border-color .2s,transform .2s var(--ease)}
+.btn:hover{background:var(--warm);border-color:var(--ink-3)}
+.btn:active{transform:translateY(1px)}
+.btn.solid{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.solid:hover{background:#34343b}
+.btn.sm{height:32px;padding:0 12px;font-size:13px;border-radius:7px}
+.btn.quiet{border-color:transparent}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;line-height:1.6;padding:2px 8px;border-radius:5px;border:1px solid var(--line);color:var(--ink-2);background:#fff;white-space:nowrap}
+.tag.demo{color:#776557;border-color:#e5dbce;background:#fffaf0}
+.tag.stop{color:#a3281e;border-color:#efc4c0;background:var(--stop-soft)}
+.tag.ok{color:var(--ok);border-color:#bfdfce;background:var(--ok-soft)}
+.eyebrow{font-size:12.5px;font-weight:650;color:var(--brown);letter-spacing:0}
+.ul{position:relative;display:inline-block;white-space:nowrap}
+.ul svg{position:absolute;left:-2%;bottom:-.16em;width:104%;height:.3em;overflow:visible;pointer-events:none}
+.ul svg path{fill:none;stroke:var(--brown);stroke-width:2.4;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .9s .25s var(--ease) forwards}
+.ul svg path+path{stroke-width:1.6;opacity:.55;animation-delay:.45s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.foot-note{max-width:1120px;margin:64px auto 40px;padding:0 clamp(16px,4vw,40px);font-size:12px;color:var(--ink-3);line-height:1.8}
+.foot-note::before{content:"";display:block;border-top:1px solid var(--line);margin-bottom:18px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--ink);color:#fff;font-size:13.5px;padding:11px 18px;border-radius:9px;opacity:0;pointer-events:none;transition:.35s var(--ease);z-index:50;max-width:calc(100vw - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}.ul svg path{stroke-dashoffset:0}}

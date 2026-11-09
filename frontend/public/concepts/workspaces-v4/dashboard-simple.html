@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · 워크스페이스</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="./base.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@800&display=swap">
+<style>
+/* 랜딩(mockup.css) 토큰 */
+:root{--serif:"Noto Serif KR","Nanum Myeongjo",serif;--brown:#d06d5b;--line:#e3e4e8;--line-2:#cfd2d8;--ink:#16161a;--ink-2:#44464f;--ink-3:#5b5e69;--warm:#f5f6f8;--warm-2:#eceef2}
+body{background:#fff}
+.brand-symbol{width:28px;height:28px;display:block;flex:none}
+.logo{gap:8px;font-size:21px}.brand-wordmark{font-weight:700;line-height:1}
+.bar{height:64px;gap:8px}
+.tabs{display:flex;height:100%;margin-left:28px;gap:4px}
+.tabs a{display:flex;align-items:center;padding:0 14px;font-size:15px;font-weight:540;color:var(--ink-3);position:relative}
+.tabs a:hover{color:var(--ink)}
+.tabs a[aria-current=page]{color:var(--ink)}
+.tabs a[aria-current=page]::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;background:var(--ink)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:56px 0 22px}
+.head h1{font:800 34px/1.4 var(--serif);letter-spacing:-.04em}
+.tools{display:flex;gap:10px;align-items:center}
+.search{display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;border:1px solid var(--line-2);border-radius:10px;min-width:240px;color:var(--ink-3);background:#fff}
+.search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font-size:14.5px;color:var(--ink)}
+.search:focus-within{border-color:var(--ink);box-shadow:0 0 0 3px #16161a14}
+.btn{border-radius:8px;height:42px;font-weight:650}
+.btn.solid{background:var(--ink);border-color:var(--ink)}
+.filters{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:28px;overflow-x:auto;scrollbar-width:none}
+.filters button{border:0;background:none;padding:10px 0 12px;font-size:14.5px;color:var(--ink-3);position:relative;white-space:nowrap}
+.filters button[aria-pressed=true]{color:var(--ink);font-weight:620}
+.filters button[aria-pressed=true]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink)}
+.filters span{color:#9a9ca6;margin-left:4px;font-weight:450}
+/* 카드: 이름 · 한 줄 요약 · 상태 한 줄 · 날짜 */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;padding-bottom:60px}
+.t{position:relative;border:1px solid var(--line);border-radius:12px;background:#fff;transition:border-color .2s,box-shadow .3s,transform .3s var(--ease)}
+.t:hover{border-color:var(--line-2);box-shadow:0 12px 30px #16161a12;transform:translateY(-2px)}
+.open{display:block;width:100%;text-align:left;border:0;background:none;padding:22px 22px 46px;cursor:pointer;border-radius:12px;min-height:178px}
+.st{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;margin-bottom:14px}
+.st i{width:8px;height:8px;border-radius:50%;background:var(--line-2)}
+.st.run{color:#2a63c4}.st.run i{background:#2a63c4;animation:bl 1.3s infinite}
+.st.done{color:var(--ok)}.st.done i{background:var(--ok)}
+.st.draft{color:var(--ink-3)}.st.draft i{background:#fff;border:1.5px solid var(--ink-3)}
+.st.arch{color:#8a8d98}
+@keyframes bl{50%{opacity:.25}}
+.t h2{font-size:18px;letter-spacing:-.035em;line-height:1.45;font-weight:700;margin-bottom:3px;padding-right:30px}
+.sub{font-size:14px;color:var(--ink-3)}
+.line{margin-top:18px;font-size:14px;color:var(--ink-2)}
+.line b{font-weight:650;color:var(--ink)}
+.prog{height:4px;border-radius:9px;background:var(--warm-2);margin-top:12px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ink);border-radius:9px}
+.date{position:absolute;right:22px;bottom:18px;font-size:12.5px;color:#9a9ca6}
+
+.more{position:absolute;top:14px;right:12px;width:34px;height:34px;border:0;background:transparent;border-radius:8px;color:var(--ink-3);display:grid;place-items:center;opacity:0;transition:.2s}
+.t:hover .more,.more:focus-visible,.more[aria-expanded=true]{opacity:1}
+.more:hover{background:var(--warm)}
+@media(hover:none){.more{opacity:1}}
+.menu{position:absolute;top:48px;right:12px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 36px #16161a1f;padding:5px;z-index:10;min-width:150px;display:none}
+.menu.on{display:block}
+.menu button{display:block;width:100%;text-align:left;border:0;background:none;padding:9px 12px;border-radius:7px;font-size:14px;color:var(--ink-2)}
+.menu button:hover{background:var(--warm);color:var(--ink)}
+.menu .del:hover{background:var(--stop-soft);color:var(--stop)}
+.t.arch{opacity:.7}
+.none{grid-column:1/-1;text-align:center;padding:70px 0;color:var(--ink-3)}
+.none b{display:block;color:var(--ink);font-size:17px;margin-bottom:4px}
+/* 첫 이용 */
+.first{text-align:center;padding:90px 0 110px}
+.first h2{font:800 36px/1.55 var(--serif);letter-spacing:-.04em}
+.first p{color:var(--ink-3);margin:12px 0 28px;font-size:16px}
+.first .btn{height:46px;padding:0 24px;font-size:15.5px}
+.first ol{display:flex;gap:30px;justify-content:center;margin-top:44px;font-size:13.5px;color:var(--ink-3);flex-wrap:wrap}
+.first ol li::before{content:attr(data-n);display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--warm-2);color:var(--ink-2);font-weight:650;font-size:12px;margin-right:8px}
+.hide{display:none!important}
+.scrim{position:fixed;inset:0;background:#16161a55;display:none;place-items:center;z-index:60;padding:16px}.scrim.on{display:grid}
+.dlg{background:#fff;border-radius:14px;padding:26px;width:min(440px,100%);box-shadow:0 30px 80px #0004}
+.dlg h3{font:800 20px var(--serif);margin-bottom:16px}
+.dlg input{width:100%;height:44px;border:1px solid var(--line-2);border-radius:9px;padding:0 12px;font-size:15px}
+.dlg input:focus{outline:0;border-color:var(--ink);box-shadow:0 0 0 3px #16161a14}
+.dlg .row{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.err{color:var(--stop);font-size:13px;margin-top:6px;min-height:18px}
+@media(max-width:640px){.tabs{margin-left:6px}.tabs a{padding:0 9px;font-size:14px}.head{padding:36px 0 18px}.head h1{font-size:28px}.tools{width:100%}.search{flex:1;min-width:0}.me{display:none}}
+</style></head>
+<body>
+<header class="bar">
+  <a class="logo" href="./index.html"><svg class="brand-symbol" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M5 3h12c7 0 11 4 11 10S24 23 17 23h-6v6H5V3Zm6 6v8h6c3.3 0 5-1.3 5-4s-1.7-4-5-4h-6Z"/></svg><span class="brand-wordmark">PersonaLab</span></a>
+  <nav class="tabs" aria-label="메뉴"><a href="#" aria-current="page">테스트</a><a href="#" data-toast="디자인 예시: 페르소나 패널">페르소나</a><a href="#" data-toast="디자인 예시: 1대1 인터뷰">인터뷰</a></nav>
+  <span class="sp"></span><span class="me" title="member@example.com">나</span>
+</header>
+
+<main class="wrap">
+  <section class="head" id="head"><h1>내 테스트</h1>
+    <div class="tools"><label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="검색" aria-label="테스트 검색"></label><button class="btn solid" data-new>+ 새 테스트</button></div>
+  </section>
+  <div class="filters" id="filters" role="group" aria-label="상태"></div>
+  <section class="cards" id="cards" aria-live="polite"></section>
+  <section class="first hide" id="first"><h2><span class="ul">첫 테스트를 만들어 볼까요?<svg viewBox="0 0 300 18" preserveAspectRatio="none"><path pathLength="1" d="M3 11 Q85 1 153 8 T296 6"/></svg></span></h2><p>화면 몇 장과 버튼 연결만 있으면 돼요.</p><button class="btn solid" data-new>테스트 시작하기 →</button><ol><li data-n="1">프로토타입 등록</li><li data-n="2">페르소나 선택</li><li data-n="3">탐색 실행</li><li data-n="4">근거 확인</li></ol></section>
+</main>
+
+<div class="scrim" id="scrim"><form class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dt"><h3 id="dt">새 테스트</h3><input id="fn" maxlength="40" placeholder="테스트 이름 (예: 일정메이트 결제 흐름)" autocomplete="off" aria-label="테스트 이름"><div class="err" id="err" role="alert"></div><div class="row"><button type="button" class="btn" id="cancel">취소</button><button class="btn solid" type="submit">만들기</button></div></form></div>
+<div class="toast" id="toast" role="status"></div>
+<p class="foot-note" style="max-width:1120px">디자인 비교용 예시입니다. 모든 테스트와 수치는 가상이며 실제 계정·패널·DB·API·LLM과 연결되어 있지 않아요. 첫 이용 화면은 <a href="?state=empty" style="text-decoration:underline">?state=empty</a>.</p>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let tm;const toast=m=>{const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tm);tm=setTimeout(()=>e.classList.remove('on'),2600)};
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let tests=new URLSearchParams(location.search).get('state')==='empty'?[]:[
+ {id:1,name:'일정메이트 온보딩 v3',st:'run',panel:'27–34세 직장인',n:20,done:13,screens:5,upd:'11월 5일'},
+ {id:2,name:'일정메이트 온보딩 v2',st:'done',panel:'27–34세 직장인',n:5,stop:3,screens:5,found:3,upd:'11월 4일'},
+ {id:3,name:'결제 화면 점검',st:'draft',screens:3,upd:'10월 30일'},
+ {id:4,name:'일정메이트 온보딩 v1',st:'done',panel:'27–34세 직장인',n:5,stop:5,screens:5,found:1,upd:'10월 28일'},
+ {id:5,name:'홈 화면 탐색 · 부모 패널',st:'done',panel:'40–50대 부모',n:20,stop:8,screens:4,found:2,upd:'10월 22일'},
+ {id:6,name:'캘린더 연동 화면',st:'arch',panel:'20대 대학생',n:50,stop:19,screens:3,found:4,upd:'10월 9일'},
+];
+let nid=7,filter='all',query='';
+const LBL={run:'탐색 중',done:'완료',draft:'초안',arch:'보관됨'};
+function body(t){
+  const sub=t.panel?`${esc(t.panel)} ${t.n}명 · 화면 ${t.screens}개`:`화면 ${t.screens}개`;
+  let line='';
+  if(t.st==='run')line=`<div class="line"><b>${t.done}</b> / ${t.n}명 탐색 중<div class="prog"><i style="width:${t.done/t.n*100}%"></i></div></div>`;
+  else if(t.st==='draft')line=`<div class="line">페르소나를 고르면 시작할 수 있어요</div>`;
+  else line=`<div class="line">${t.n}명 중 <b>${t.stop}명</b>이 멈췄어요${t.found?` · 발견 ${t.found}`:''}</div>`;
+  return `<button class="open" data-open><div class="st ${t.st}"><i></i>${t.st==='run'?'탐색 중':LBL[t.st]}</div><h2>${esc(t.name)}</h2><div class="sub">${sub}</div>${line}</button>`;
+}
+function render(){
+  const live=tests.filter(t=>t.st!=='arch'),first=!tests.length;
+  $('#first').classList.toggle('hide',!first);
+  $('#head').classList.toggle('hide',first);$('#filters').classList.toggle('hide',first);$('#cards').classList.toggle('hide',first);
+  if(first)return;
+  const cnt=k=>k==='all'?live.length:tests.filter(t=>t.st===k).length;
+  $('#filters').innerHTML=[['all','전체'],['run','진행 중'],['done','완료'],['draft','초안'],['arch','보관']].map(([k,l])=>`<button data-f="${k}" aria-pressed="${filter===k}">${l}<span>${cnt(k)}</span></button>`).join('');
+  const list=tests.filter(t=>(filter==='all'?t.st!=='arch':t.st===filter)&&(!query||t.name.toLowerCase().includes(query.toLowerCase())));
+  $('#cards').innerHTML=list.map(t=>`<article class="t ${t.st==='arch'?'arch':''}" data-id="${t.id}">${body(t)}<span class="date">${t.upd}</span><button class="more" data-more aria-label="더 보기" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button><div class="menu" role="menu"><button data-a="copy">복제</button><button data-a="edit">이름 바꾸기</button><button data-a="arch">${t.st==='arch'?'보관 해제':'보관'}</button><button class="del" data-a="del">삭제</button></div></article>`).join('')
+   +(list.length?'':`<div class="none"><b>${query?'검색 결과가 없어요':'이 상태의 테스트가 없어요'}</b>${query?'다른 이름으로 찾아보세요.':''}</div>`);
+}
+const closeMenus=()=>$$('.menu.on').forEach(m=>{m.classList.remove('on');m.parentElement.querySelector('.more').setAttribute('aria-expanded','false')});
+document.addEventListener('click',e=>{
+  const T=e.target.closest('[data-toast]');if(T){e.preventDefault();toast(T.dataset.toast);return}
+  if(e.target.closest('[data-new]')){closeMenus();$('#err').textContent='';$('#fn').value='';$('#scrim').classList.add('on');setTimeout(()=>$('#fn').focus(),30);return}
+  const f=e.target.closest('[data-f]');if(f){filter=f.dataset.f;render();return}
+  const mo=e.target.closest('[data-more]');
+  if(mo){const m=mo.parentElement.querySelector('.menu'),was=m.classList.contains('on');closeMenus();if(!was){m.classList.add('on');mo.setAttribute('aria-expanded','true')}return}
+  const a=e.target.closest('[data-a]');
+  if(a){const t=tests.find(x=>x.id===+a.closest('.t').dataset.id),k=a.dataset.a;closeMenus();
+    if(k==='copy'){tests.push({...t,id:nid++,name:t.name+' (복사본)',st:'draft',done:0,upd:'11월 5일'});toast('초안으로 복제했어요')}
+    if(k==='edit'){const n=prompt('테스트 이름',t.name);if(n&&n.trim()){t.name=n.trim().slice(0,40);t.upd='11월 5일';toast('이름을 바꿨어요')}}
+    if(k==='arch'){t.st=t.st==='arch'?'done':'arch';toast(t.st==='arch'?'보관했어요':'보관을 해제했어요')}
+    if(k==='del'&&confirm(`“${t.name}”을(를) 삭제할까요? (예시라 실제 데이터는 지워지지 않아요)`)){tests=tests.filter(x=>x!==t);toast('삭제했어요')}
+    render();return}
+  const o=e.target.closest('[data-open]');
+  if(o){const t=tests.find(x=>x.id===+o.closest('.t').dataset.id);toast({run:'디자인 예시: 실시간 탐색 화면으로',done:'디자인 예시: 결과·근거 화면으로',draft:'디자인 예시: 설정 단계로 이어서',arch:'디자인 예시: 보관된 결과 보기'}[t.st]);return}
+  if(!e.target.closest('.menu'))closeMenus();
+});
+$('#q').addEventListener('input',e=>{query=e.target.value.trim();render()});
+const sc=$('#scrim'),close=()=>sc.classList.remove('on');
+$('#cancel').onclick=close;sc.addEventListener('mousedown',e=>{if(e.target===sc)close()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){close();closeMenus()}});
+$('#dlg').addEventListener('submit',e=>{e.preventDefault();const n=$('#fn').value.trim();
+  if(!n){$('#err').textContent='테스트 이름을 입력해 주세요.';return}
+  if(tests.some(t=>t.name===n)){$('#err').textContent='같은 이름의 테스트가 있어요.';return}
+  tests.unshift({id:nid++,name:n,st:'draft',screens:0,upd:'11월 5일'});filter='all';query='';$('#q').value='';close();render();toast('초안을 만들었어요');});
+render();
+</script>
+</body></html>

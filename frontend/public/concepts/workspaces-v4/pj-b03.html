@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · B03 Terracotta</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;800&display=swap">
+<link rel="stylesheet" href="./pj.css"><link rel="stylesheet" href="./pj2.css">
+<style>
+/* B03 · Terracotta — 랜딩 배너를 테라코타 그라데이션 가로 배너로. 크림 카드가 받쳐요. */
+
+:root{--serif:"Noto Serif KR","Nanum Myeongjo",serif;
+ --bg:#f5f0e6;--surface:#fffdf8;--surface-2:#f1eadd;--bar-bg:#f5f0e6e8;
+ --fg:#1f1a15;--fg-2:#4d443a;--fg-3:#857a6a;--line:#e6dccb;--line-2:#d6c9b2;
+ --accent:#1f1a15;--btn-bg:#1f1a15;--btn-fg:#fffdf8;--btn-line:#1f1a15;--btn-hover:#3a3128;
+ --c-setup:#857a6a;--c-ready:#b86e0a;--c-run:#2f5fd0;--c-done:#2f7d4f;--danger:#c8452f;--danger-soft:#f9e4de;
+ --radius:14px;--radius-sm:9px;--shadow:0 16px 44px #4a3a2a26;--grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .13  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.ul{position:relative;display:inline-block;white-space:nowrap}
+.ul svg{position:absolute;left:-1%;bottom:-.14em;width:102%;height:.22em;overflow:visible;fill:none;stroke:#d06d5b;stroke-width:2.6;stroke-linecap:round;pointer-events:none}
+body::after{content:"";position:fixed;inset:0;background:var(--grain);opacity:.55;mix-blend-mode:multiply;pointer-events:none;z-index:3}
+.head h1{font:800 36px/1.4 var(--serif);letter-spacing:-.04em}
+.eyebrow{color:var(--fg-3)}
+.search,.sort,.ws,.acct>button{background:var(--surface);border-color:var(--line-2)}
+.btn.solid{box-shadow:0 6px 16px #1f1a1526}
+.dlg{background:var(--surface)}.dlg input{background:var(--surface-2)}
+.me{background:var(--surface-2)}
+.tabs a[aria-current=page]::after{background:var(--accent)}
+.kbd{background:var(--surface-2)}
+
+:root{--h-bg:radial-gradient(520px 300px at 100% 0,#f6c29aaa,transparent 70%),linear-gradient(110deg,#b94c36,#d36f53 58%,#e69a74);
+ --h-fg:#fffaf3;--h-fg2:#ffe9da;--h-fg3:#ffd3bb;--h-line:#ffffff30;--h-chip:#ffffff26;--h-chip-fg:#fff;--h-done:#fff;--h-ready:#fff;--h-setup:#fff;
+ --h-btn-bg:#fffaf3;--h-btn-fg:#7a2a18;--h-btn-hover:#fff;--h-track:#ffffff33;--h-ring:#fff;--h-ring-glow:#ffffff66;--h-ev:#ffffff24;--h-ev-line:#ffffff33;--h-ev-fg:#fff4ea;--h-ev-b:#fff;
+ --h-shadow:0 24px 50px #b94c3640;--h-spot:.7;--h-title-font:var(--serif);--h-title-weight:800;--h-title:40px;--h-pad:32px 40px;--h-radius:24px}
+.row.hero{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:center}
+.hero .ring{width:140px;height:140px}.hero .ring b{font-size:34px}.hero .ring span{bottom:26px}
+.hero h2{margin:14px 0 4px}.hero .h-meta{margin-top:14px}
+.h-insight{background:#00000022;border-color:#ffffff22;color:#fff}.h-insight i{background:#fff;box-shadow:0 0 0 3px #ffffff33}
+.hero .more{border-color:#ffffff44}
+.as-cards .row{box-shadow:0 1px 2px #4a3a2a10}.as-cards .row:hover{box-shadow:0 14px 30px #4a3a2a1f;border-color:var(--line-2)}
+.as-cards .p-last{background:var(--surface-2)}
+.tile{background:color-mix(in srgb,var(--c) 14%,#fffdf8)}
+
+@media(max-width:1000px){.rest.as-list .row,.rest.as-cards .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name more" "stt stt" "last last" "date date" "act act"}}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL=Object.assign({"layout":"focus","tiles":true,"rest":"cards","title":"<span class=\"ul\">프로젝트<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path pathLength=\"1\" d=\"M3 11 Q85 1 153 8 T296 6\"/></svg></span>"},{searchHint:'/',newHint:'N',keys:"<span class=\"kbd\">/</span> 검색 · <span class=\"kbd\">N</span> 새 프로젝트"});</script>
+<script src="./pj.js"></script>
+</body></html>

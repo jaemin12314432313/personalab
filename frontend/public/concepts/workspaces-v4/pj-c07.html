@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · C07 Mocha</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@800&display=swap">
+<link rel="stylesheet" href="./pj.css"><link rel="stylesheet" href="./pj2.css">
+<style>
+/* F01 · Landing Focus — 랜딩 톤 그대로. 연한 그라데이션 히어로(세리프 제목) + 흰 목록. */
+
+:root{--serif:"Noto Serif KR","Nanum Myeongjo",serif;--bg:#fff;--surface:#fff;--surface-2:#f5f6f8;--bar-bg:#ffffffd9;--fg:#16161a;--fg-2:#44464f;--fg-3:#6a6c76;--line:#e3e4e8;--line-2:#cfd2d8;--accent:#16161a;--btn-bg:#16161a;--btn-hover:#2c2c33;--c-run:#2a63c4;--radius:12px;--radius-sm:8px}
+.ul{position:relative;display:inline-block;white-space:nowrap}.ul svg{position:absolute;left:-1%;bottom:-.14em;width:102%;height:.22em;overflow:visible;fill:none;stroke:#d06d5b;stroke-width:2.6;stroke-linecap:round;pointer-events:none}
+.head h1{font:800 34px/1.4 var(--serif);letter-spacing:-.04em}
+.tabs a[aria-current=page]::after{background:#16161a}
+.btn{font-weight:650}
+
+:root{--h-bg:linear-gradient(120deg,#eaf0f8 0%,#f4eff6 60%,#f9eeee 100%);--h-fg:#1e1e24;--h-fg2:#44464f;--h-fg3:#6a6c76;--h-line:#dcdee7;--h-chip:#fff;--h-chip-fg:#2a63c4;--h-done:#14724c;--h-ready:#a05a00;--h-setup:#5b5e69;
+ --h-btn-bg:#16161a;--h-btn-fg:#fff;--h-btn-hover:#2c2c33;--h-btn-shadow:0 8px 20px #16161a2a;--h-track:#d9dcec;--h-ring:#16161a;--h-ring-glow:transparent;
+ --h-ev:#ffffffcc;--h-ev-line:#ffffff;--h-ev-fg:#44464f;--h-ev-b:#16161a;--h-shadow:0 1px 2px #16161a0d;--h-spot:0;--h-title-font:var(--serif);--h-title-weight:800;--h-title:42px;--h-radius:20px}
+.row.hero{border:1px solid #e1e3ea}
+.ev li:first-child i{box-shadow:none}
+
+
+/* C07 · Mocha — 구조는 f01(랜딩 포커스) 그대로, 색 조합만 교체 */
+:root{--bg:#eee6db;--surface:#fffdf9;--surface-2:#e7ddd0;--bar-bg:#eee6dbd9;--fg:#1f1a15;--fg-2:#4d443a;--fg-3:#8a7a68;--line:#ded3c3;--line-2:#cdbfab;
+ --accent:#2a1f19;--btn-bg:#2a1f19;--btn-hover:#43322a;--c-run:#b8492f}
+.search,.sort{background:#ffffffb8;border-color:#cdbfab}
+.tabs a[aria-current=page]::after{background:#2a1f19}
+.ul svg{stroke:#d06d5b}
+
+:root{--h-bg:radial-gradient(520px 340px at 92% -8%,#d06d5b59,transparent 70%),radial-gradient(380px 260px at 0 110%,#e8a56a2e,transparent 70%),linear-gradient(135deg,#3b2c22,#241a14);
+ --h-fg:#fbf3e8;--h-fg2:#e6d5c0;--h-fg3:#bfa58c;--h-line:#ffffff22;--h-chip:#ffffff14;--h-chip-fg:#f3b79c;--h-done:#a9e6c0;--h-ready:#ffd28a;--h-setup:#e0cdb6;
+ --h-btn-bg:#fbf3e8;--h-btn-fg:#2a1f19;--h-btn-hover:#fff;--h-btn-shadow:0 10px 30px #0006;--h-track:#ffffff1c;--h-ring:#ee9272;--h-ring-glow:#ee927288;--h-ev:#ffffff10;--h-ev-line:#ffffff14;--h-ev-fg:#e6d5c0;--h-ev-b:#fff;
+ --h-shadow:0 30px 70px #2a1f1944;--h-spot:.8}
+.row.hero{border:0}
+.h-insight{background:#ffffff14;border-color:#ffffff22}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL=Object.assign({"layout":"focus","tiles":true,"rest":"list","title":"<span class=\"ul\">프로젝트<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path pathLength=\"1\" d=\"M3 11 Q85 1 153 8 T296 6\"/></svg></span>","searchHint":"/","newHint":"N"},{keys:"<span class=\"kbd\">/</span> 검색 · <span class=\"kbd\">N</span> 새 프로젝트"});</script>
+<script src="./pj.js"></script>
+</body></html>

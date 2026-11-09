@@ -32,13 +32,13 @@ from app.schemas.report import (
 
 def display_id(persona) -> str:
     """페르소나 데이터에 persona_id 가 있으면 그것, 없으면 DB 번호로 만든다."""
-    given = persona.attributes_json.get("persona_id")
+    given = persona.attributes_json.get("persona_id") or persona.attributes_json.get("source", {}).get("persona_id")
     return given or f"{PERSONA_ID_PREFIX}{persona.id:0{PERSONA_ID_WIDTH}d}"
 
 
 def build_act(rows: list) -> ActResultOut | None:
     """한 페르소나의 act_logs(id 순)를 events·path·end 로. 아직 안 끝났으면 None."""
-    turns = [r for r in rows if r.action in (ACT_CLICK, ACT_ABANDON)]
+    turns = [r for r in rows if r.action in (ACT_CLICK, ACT_ABANDON, "fill", "scroll")]
     last = rows[-1] if rows else None
     closing = last if last is not None and last.action in (ACT_COMPLETE, ACT_STOP) else None
     gave_up = bool(turns) and turns[-1].action == ACT_ABANDON
@@ -46,7 +46,7 @@ def build_act(rows: list) -> ActResultOut | None:
         return None
 
     # click 다음에 도착한 화면: 다음 턴의 화면, 마지막 click 이면 종료 화면
-    arrivals = [t.screen_id for t in turns[1:]] + [closing.screen_id if closing else None]
+    arrivals = ([t.screen_id for t in turns[1:]] + [closing.screen_id if closing else None]) if turns else []
     events = [
         ActEventOut(
             turn=t.turn + TURN_NUMBER_OFFSET,
@@ -54,7 +54,7 @@ def build_act(rows: list) -> ActResultOut | None:
             action=t.action,
             target=t.target,
             reason=t.reason,
-            to=arrived if t.action == ACT_CLICK else None,
+            to=arrived if t.action in (ACT_CLICK, "fill", "scroll") else None,
             drop_reason=t.drop_reason,
         )
         for t, arrived in zip(turns, arrivals, strict=True)
@@ -90,3 +90,16 @@ def build_results(
         )
         for p in personas
     ]
+
+
+def detect_engine(results: list) -> str | None:
+    """행동 이유 문장으로 판단 엔진을 구분한다. 규칙 기반 기록이 하나라도 섞이면 rule."""
+    from app.core.config import RULE_REASON_PREFIX
+
+    found = False
+    for result in results:
+        for event in (result.act.events if result.act else []):
+            found = True
+            if event.reason and event.reason.startswith(RULE_REASON_PREFIX):
+                return "rule"
+    return "llm" if found else None

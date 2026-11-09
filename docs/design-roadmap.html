@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PersonaLab 디자인 로드맵</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: 읽는 영역(로드맵)은 좁은 단일 열, 시안 영역은 넓은 프레임을 세로로 나열 */
+:root{
+  --bg:#f7f6f3; --fg:#1d1b1f; --mute:#6b665f; --line:#e0dcd3; --card:#ffffff; --accent:#c4533f; --soft:#efece6;
+  --serif:'Noto Serif KR','Nanum Myeongjo',Georgia,serif; --sans:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  /* 시안 화면 전용 팔레트 (확정 c10 Greige 기조). 시안은 항상 밝은 화면으로 보여 준다 */
+  --m-bg:#eeebe6; --m-surface:#fffdf9; --m-line:#dedad2; --m-ink:#17161a; --m-mute:#6f6a62; --m-hero1:#f6f4f0; --m-hero2:#e8e5df;
+  --m-blue:#2f5fd0; --m-coral:#d06d5b; --m-red:#b3382c; --m-green:#3d7a52;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151417;--fg:#efece6;--mute:#a09a90;--line:#2e2c31;--card:#1e1c21;--accent:#e58a76;--soft:#242227;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151417;--fg:#efece6;--mute:#a09a90;--line:#2e2c31;--card:#1e1c21;--accent:#e58a76;--soft:#242227;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.65;margin:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 80px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--serif);text-wrap:balance;margin:0;letter-spacing:-.03em;line-height:1.3}
+h1{font-size:clamp(28px,5vw,40px);font-weight:800}
+h2{font-size:26px;font-weight:800}
+h3{font-size:18px;font-weight:700}
+p{margin:0}
+.u{background:linear-gradient(transparent 82%,var(--accent) 82%,var(--accent) 90%,transparent 90%)}
+.lead{color:var(--mute);max-width:62ch}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--mute);font-weight:700}
+nav.top{display:flex;gap:6px;flex-wrap:wrap}
+nav.top a{font-size:13px;padding:6px 12px;border:1px solid var(--line);border-radius:99px;color:var(--fg);text-decoration:none;background:var(--card)}
+nav.top a:hover,nav.top a:focus-visible{border-color:var(--fg);outline:none}
+section{display:flex;flex-direction:column;gap:20px}
+.note{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.note b{font-weight:700}
+.note ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.scroll{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+table.t th{text-align:left;font-size:12px;letter-spacing:.04em;color:var(--mute);padding:8px 12px;border-bottom:1px solid var(--fg)}
+table.t td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td:first-child{font-weight:700;white-space:nowrap}
+.phases{display:flex;flex-direction:column;gap:12px}
+.phase{display:grid;grid-template-columns:120px 1fr;gap:20px;padding:18px 0;border-top:1px solid var(--line)}
+.phase .w{font-family:var(--serif);font-weight:800;font-size:18px}
+.phase .w small{display:block;font-family:var(--sans);font-weight:400;font-size:12px;color:var(--mute)}
+.phase ul{margin:8px 0 0;padding-left:18px;color:var(--mute);display:flex;flex-direction:column;gap:3px}
+.phase .done{margin-top:10px;font-size:13px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--mute);vertical-align:2px;margin-left:6px;background:var(--card)}
+.tag.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+@media(max-width:640px){.phase{grid-template-columns:1fr;gap:6px}}
+
+/* 시안 카드 */
+.variant{display:flex;flex-direction:column;gap:12px}
+.vhead{display:flex;flex-direction:column;gap:4px}
+.vhead h3 .k{font-family:var(--sans);font-size:12px;letter-spacing:.06em;color:var(--accent);display:block;margin-bottom:2px}
+.vmeta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;font-size:13px;color:var(--mute)}
+.vmeta b{display:block;color:var(--fg);font-size:12px;letter-spacing:.04em;margin-bottom:2px}
+@media(max-width:720px){.vmeta{grid-template-columns:1fr}}
+.frame{border:1px solid var(--line);border-radius:14px;overflow-x:auto;background:var(--m-bg)}
+.screen{min-width:920px;background:var(--m-bg);color:var(--m-ink);font-family:var(--sans);font-size:14px;line-height:1.5;color-scheme:light}
+
+/* 시안 내부 공통 */
+.screen *{box-sizing:border-box}
+.m-top{display:flex;align-items:center;gap:22px;padding:14px 24px;border-bottom:1px solid var(--m-line);background:var(--m-surface)}
+.m-logo{font-family:var(--serif);font-weight:800;font-size:18px;letter-spacing:-.04em}
+.m-nav{display:flex;gap:18px;color:var(--m-mute);font-size:14px}
+.m-nav .on{color:var(--m-ink);font-weight:700}
+.m-acc{margin-left:auto;font-size:13px;color:var(--m-mute);display:flex;gap:8px;align-items:center}
+.m-av{width:26px;height:26px;border-radius:50%;background:var(--m-ink);color:#fff;display:grid;place-items:center;font-size:12px}
+.m-body{padding:24px;display:flex;flex-direction:column;gap:18px}
+.m-title{font-family:var(--serif);font-weight:800;font-size:26px;letter-spacing:-.05em;line-height:1.25}
+.m-title .u{background:linear-gradient(transparent 80%,var(--m-coral) 80%,var(--m-coral) 90%,transparent 90%)}
+.m-tools{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}
+.m-in{height:36px;border:1px solid var(--m-line);background:var(--m-surface);border-radius:10px;padding:0 12px;display:flex;align-items:center;color:var(--m-mute);font-size:13px;white-space:nowrap}
+.m-in.grow{flex:1;min-width:0}
+.m-btn{height:36px;padding:0 16px;border-radius:99px;border:1px solid var(--m-ink);background:var(--m-ink);color:#fff;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.m-btn.ghost{background:transparent;color:var(--m-ink);border-color:var(--m-line)}
+.m-btn.blue{background:var(--m-blue);border-color:var(--m-blue)}
+.m-btn.sm{height:30px;padding:0 13px;font-size:12px}
+.m-btn.lg{height:44px;padding:0 24px;font-size:14px}
+.m-card{background:var(--m-surface);border:1px solid var(--m-line);border-radius:14px}
+.m-st{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;white-space:nowrap}
+.m-st i{width:7px;height:7px;border-radius:50%;background:var(--m-mute);display:inline-block}
+.m-st.run{color:var(--m-blue)} .m-st.run i{background:var(--m-blue)}
+.m-st.bad{color:var(--m-red)} .m-st.bad i{background:var(--m-red)}
+.m-st.ok{color:var(--m-green)} .m-st.ok i{background:var(--m-green)}
+.m-sub{color:var(--m-mute);font-size:12.5px}
+.m-name{font-weight:700;font-size:15px}
+.m-chip{font-size:11.5px;border:1px solid var(--m-line);border-radius:99px;padding:1px 9px;color:var(--m-mute);white-space:nowrap;background:var(--m-surface)}
+.m-chip.on{background:var(--m-ink);border-color:var(--m-ink);color:#fff}
+.m-more{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--m-mute);letter-spacing:1px}
+.m-bar{height:6px;border-radius:9px;background:var(--m-line);overflow:hidden}
+.m-bar i{display:block;height:100%;background:var(--m-blue)}
+.m-faces{display:flex}
+.m-faces i{width:26px;height:26px;border-radius:50%;border:2px solid var(--m-surface);margin-left:-8px;display:block}
+.m-faces i:first-child{margin-left:0}
+.m-hero{border-radius:20px;background:linear-gradient(160deg,var(--m-hero1),var(--m-hero2));border:1px solid var(--m-line);padding:28px 30px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+.m-row{display:grid;align-items:center;gap:16px;padding:14px 18px;border-top:1px solid var(--m-line)}
+.m-row:first-child{border-top:0}
+.m-th{display:grid;gap:16px;padding:10px 18px;font-size:11.5px;letter-spacing:.05em;color:var(--m-mute);font-weight:700;border-bottom:1px solid var(--m-ink)}
+.m-side{width:208px;flex:none;border-right:1px solid var(--m-line);background:var(--m-surface);padding:18px 14px;display:flex;flex-direction:column;gap:4px}
+.m-side a{padding:8px 12px;border-radius:9px;color:var(--m-mute);font-size:14px}
+.m-side a.on{background:var(--m-bg);color:var(--m-ink);font-weight:700}
+.m-sec{display:flex;align-items:baseline;gap:8px;font-weight:700;font-size:14px}
+.m-sec span{font-weight:400;color:var(--m-mute);font-size:12.5px}
+.thumb{aspect-ratio:16/10;border-radius:10px 10px 0 0;background:var(--m-hero2);border-bottom:1px solid var(--m-line);padding:12px;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.thumb b{height:8px;border-radius:3px;background:rgba(23,22,26,.18);display:block}
+.thumb em{flex:1;border-radius:6px;background:rgba(23,22,26,.08);display:block}
+.thumb u{height:14px;width:34%;border-radius:99px;background:var(--m-ink);opacity:.8;display:block}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start}
+.col{background:rgba(255,253,249,.5);border:1px solid var(--m-line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.col h4{margin:0;font-size:13px;display:flex;justify-content:space-between}
+.col h4 span{color:var(--m-mute);font-weight:400}
+.mini{padding:14px;display:flex;flex-direction:column;gap:8px}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.gal .m-card{overflow:hidden;display:flex;flex-direction:column}
+.gal .in{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.rounds{display:flex;gap:6px;flex-wrap:wrap}
+.hist{margin:0 18px 14px;padding:12px 14px;background:var(--m-bg);border-radius:10px;display:flex;flex-direction:column;gap:8px}
+.hist .h{display:grid;grid-template-columns:70px 1fr auto auto;gap:14px;align-items:center;font-size:13px}
+.empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px 20px;text-align:center}
+.empty .m-title{font-size:20px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pair .screen{min-width:0}
+@media(max-width:720px){.pair{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:no-preference){nav.top a{transition:border-color .15s}}
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:14px">
+    <span class="eyebrow">PRODUCT_SCREEN_SPEC · 2026-11-07 기준</span>
+    <h1>PersonaLab <span class="u">디자인 로드맵</span>과 워크스페이스 홈 시안 6종</h1>
+    <p class="lead">화면 명세를 읽고, 어떤 순서로 어떤 화면을 몇 가지 방향으로 만들지 정리했습니다. 첫 번째 대상은 워크스페이스 홈입니다. 시안의 이름·수치는 모두 예시입니다.</p>
+    <nav class="top" aria-label="이 페이지의 구역">
+      <a href="#conflict">먼저 정할 것</a><a href="#roadmap">로드맵</a><a href="#screens">화면별 시안 계획</a><a href="#home">워크스페이스 홈 시안</a><a href="#pick">고르는 기준</a>
+    </nav>
+  </header>
+
+  <section id="conflict">
+    <h2>시안 전에 맞춰야 할 충돌 2가지</h2>
+    <div class="note">
+      <b>1. 단위가 ‘프로젝트’인가 ‘테스트’인가</b>
+      <p>기억해 둔 확정안(c10)은 프로젝트 단위 홈입니다. 새 명세는 프로젝트 계층을 강제하지 않고, 같은 테스트를 여러 회차로 반복하게 합니다. 이번 시안은 <b>명세를 따라 ‘테스트 + 최신 회차 대표’</b>로 그렸습니다. 프로젝트로 가려면 상위 묶음 한 단계가 늘어나므로 선택이 필요합니다.</p>
+      <b>2. 사이드바</b>
+      <p>명세의 홈 구성은 사이드바를 포함하지만, 이전에 사이드바가 별로라고 하셨습니다. 시안 B만 사이드바이고 나머지는 상단 메뉴입니다. 상단 메뉴가 되면 명세의 메뉴 3개(내 테스트, 페르소나 보관함, 전체 실행 기록)는 그대로 유지됩니다.</p>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <h2>로드맵</h2>
+    <p class="lead">명세 16장의 우선순위(흐름의 모호함 해결 → 끝까지 쓰는 경험 → 공개 운영)를 따르되, 맨 앞에 토대 작업을 두고 워크스페이스 홈부터 시작합니다. 기간은 한 사람이 시안을 만들고 검수하는 기준의 추정치입니다.</p>
+    <div class="phases">
+      <div class="phase"><div class="w">0단계<small>1~2일</small></div><div>
+        <h3>결정 정리와 토큰 고정</h3>
+        <ul><li>프로젝트/테스트 단위, 사이드바 유무 결정</li><li>c10 Greige 팔레트와 랜딩 글꼴(세리프 제목·산세리프 본문)을 토큰 파일로 고정</li><li>상태 6종(작성 중·실행 준비 완료·실행 중·완료·중단·부분 기록)의 이름, 색, 버튼 문구 표 확정</li></ul>
+        <p class="done"><b>끝났다는 기준:</b> 상태→문구→버튼 표 한 장이 승인되고, 이후 모든 시안이 이 표를 씁니다.</p></div></div>
+      <div class="phase"><div class="w">1단계<small>3~5일</small></div><div>
+        <h3>워크스페이스 홈 (이 문서의 시안)</h3>
+        <ul><li>시안 6종 비교 → 1종 선택 → 선택안의 빈 상태·검색 결과 없음·서버 연결 실패·로딩 상태까지 완성</li><li>관리 메뉴(이름 변경·복제·수정 회차·보관·휴지통·회차 이력)의 위치와 적용 범위 문구</li><li>공통 부품 추출: 앱 셸, 상태 표시, 상태별 버튼, 목록 행</li></ul>
+        <p class="done"><b>끝났다는 기준:</b> 6개 상태 모두에서 한 번의 클릭으로 올바른 화면에 도착하고, 개요 화면을 거치지 않습니다.</p></div></div>
+      <div class="phase"><div class="w">2단계<small>1~2주</small></div><div>
+        <h3>1순위: 실행과 3D 관찰, 실행 이후 행동</h3>
+        <ul><li>실행 중·기록 재생·중단·완료·기록 없음 5가지 상태의 제목과 주요 버튼 분리</li><li>사람 전환(좌우)과 화면 이동 경로(아래)를 분리한 조작</li><li>작성용 ‘이전·다음’ 막대를 ‘결과 보기·부분 기록 보기·설정 수정’으로 교체</li></ul>
+        <p class="done"><b>끝났다는 기준:</b> 화면을 보고 지금 진행 중인지, 왜 멈췄는지, 누가 어느 화면인지, 다음 행동이 무엇인지 답할 수 있습니다.</p></div></div>
+      <div class="phase"><div class="w">3단계<small>1~2주</small></div><div>
+        <h3>2순위: 끝까지 쓰는 경험</h3>
+        <ul><li>리포트: 발견 목록과 근거 화면, 부분 기록 표시, 확인 범위 탭</li><li>1대1 인터뷰: 기록 모드와 AI 대화 모드 구분, 근거 열기</li><li>수정 회차 만들기와 두 회차 비교</li></ul>
+        <p class="done"><b>끝났다는 기준:</b> 발견 하나에서 근거 화면, 해당 페르소나 인터뷰, 수정 회차까지 막힘없이 이어집니다.</p></div></div>
+      <div class="phase"><div class="w">4단계<small>1주</small></div><div>
+        <h3>새 테스트 설정 6단계 정리</h3>
+        <ul><li>단계 표시줄과 이전·다음 공통화, 단계마다 한 가지 일만 남기기</li><li>기술 정보(DOM, 요청 차단)를 상세 탭으로 이동</li></ul></div></div>
+      <div class="phase"><div class="w">5단계<small>1주</small></div><div>
+        <h3>3순위: 랜딩 정합성, 가입·로그인, 공개 샘플, 운영 상태</h3>
+        <ul><li>기능 범위와 문구 일치 점검, 공개 샘플의 출처 표시</li><li>사용량·결제·팀 기능은 실제로 만든 뒤에만 노출</li></ul></div></div>
+      <div class="phase"><div class="w">상시<small>매 단계 끝</small></div><div>
+        <h3>검수</h3>
+        <ul><li>명세 16장 체크리스트 18개 중 해당 항목 확인</li><li>1280·1024·390px 폭, 키보드 이동, 모션 감소, 확대 보기에서 실제 렌더링 확인 후 ‘시각 검수 완료’ 기록</li></ul></div></div>
+    </div>
+  </section>
+
+  <section id="screens">
+    <h2>화면별로 몇 가지 시안을 만들까</h2>
+    <p class="lead">방향이 갈리는 화면에만 시안을 여러 개 만듭니다. 나머지는 1~2개로 충분합니다.</p>
+    <div class="scroll"><table class="t">
+      <thead><tr><th>화면</th><th>시안 수</th><th>시안이 갈리는 질문</th></tr></thead>
+      <tbody>
+        <tr><td>워크스페이스 홈</td><td>6 (아래)</td><td>무엇을 가장 크게 보여 줄까: 이어할 일 하나, 전체 표, 상태 보드, 할 일 순서, 캡처 갤러리, 회차 이력</td></tr>
+        <tr><td>실행·3D 관찰</td><td>3</td><td>3D를 중심에 두는 형태 / 사람 목록을 왼쪽에 두는 형태 / 경로 타임라인을 크게 두는 형태</td></tr>
+        <tr><td>리포트</td><td>3</td><td>발견 목록+근거 2단 / 페르소나별 행 / 화면 지도 중심</td></tr>
+        <tr><td>1대1 인터뷰</td><td>2</td><td>대화 중심 / 근거 화면을 항상 옆에 둔 형태</td></tr>
+        <tr><td>회차 비교</td><td>2</td><td>좌우 비교 / 발견 단위 표</td></tr>
+        <tr><td>새 테스트 설정</td><td>2</td><td>가로 단계 표시줄 / 왼쪽 세로 단계 목록 (화면 연결 단계만 먼저 시안)</td></tr>
+        <tr><td>랜딩·가입·로그인</td><td>1</td><td>기존 승인 스타일 유지, 문구와 범위만 점검</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section id="home" style="gap:48px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <h2>워크스페이스 홈 시안 6종</h2>
+      <p class="lead">같은 예시 데이터 6건(상태 6종을 하나씩)을 다른 구조로 배치했습니다. 모두 명세의 필수 요소를 갖췄습니다: 검색·상태 필터·정렬, 상단 도구 영역의 새 테스트 버튼, 최신 회차 대표 표시, 상태에 맞는 버튼, ⋯ 메뉴. 인사말, 종합 점수, 엽서형 카드는 넣지 않았습니다. 시안은 정지 화면입니다.</p>
+    </div>
+    <div id="variants" style="display:flex;flex-direction:column;gap:48px"></div>
+    <div class="variant">
+      <div class="vhead"><h3><span class="k">공통 상태</span>빈 워크스페이스와 검색 결과 없음 (모든 시안 공통)</h3>
+        <p class="lead">명세 6장: 첫 가입 직후에는 문장 하나와 버튼 하나만 보여 줍니다. 가짜 프로젝트는 채우지 않습니다.</p></div>
+      <div class="pair" id="empties"></div>
+    </div>
+  </section>
+
+  <section id="pick">
+    <h2>고르는 기준과 추천</h2>
+    <div class="note">
+      <ul>
+        <li><b>가장 안전한 선택:</b> 시안 A. 확정했던 c10과 랜딩 포커스 구조를 이어받아 달라지는 부분이 용어(프로젝트→테스트)뿐입니다.</li>
+        <li><b>테스트가 10개 이상 쌓일 때 유리한 선택:</b> 시안 B(표)나 D(할 일 순서). 이어서 할 일을 찾는 시간이 줄어듭니다.</li>
+        <li><b>캡처를 보고 제품을 기억하는 사용자에게 유리한 선택:</b> 시안 E. 다만 명세가 말한 ‘정보 밀도’는 가장 낮습니다.</li>
+        <li><b>수정 회차를 자주 돌릴 때 유리한 선택:</b> 시안 F. 회차 이력이 홈에서 바로 보입니다.</li>
+        <li><b>제 추천:</b> A를 기본 틀로 쓰고, 테스트가 6개를 넘으면 목록 아래쪽이 D처럼 ‘확인할 것 / 이어서 할 것 / 결과 본 것’으로 묶이게 하는 조합. 히어로가 하나뿐이라 사용자가 먼저 볼 것이 분명합니다.</li>
+      </ul>
+    </div>
+    <p class="lead">마음에 드는 시안 하나(또는 조합)를 알려 주시면 1단계로 넘어가 상태별 화면과 부품까지 완성하겠습니다. 실제 앱(frontend/src/mockup)에는 아직 옮기지 않았습니다.</p>
+  </section>
+</div>
+
+<script>
+/* 예시 데이터: 상태 6종을 하나씩 */
+var T=[
+ {n:'동네예약 앱',d:'iOS 앱 · 모바일 프로토타입',r:3,s:'run',st:'실행 중',info:'5명 중 2명 종료',t:'12분 전',btn:'실행 보기',p:40,c:'#c9b8a6'},
+ {n:'쇼핑몰 결제 개선',d:'웹 서비스 · 데스크톱',r:3,s:'ok',st:'완료',info:'6명 모두 종료 · 발견 8건',t:'어제',btn:'결과 보기',c:'#b7c4d6'},
+ {n:'온보딩 프로토타입',d:'Figma 시안 · 모바일',r:1,s:'',st:'작성 중',info:'마지막 단계: 대상 사용자',t:'오늘 09:40',btn:'이어서 설정',c:'#d6c7b0'},
+ {n:'학원 관리 대시보드',d:'웹 서비스 · 데스크톱',r:1,s:'bad',st:'중단',info:'로그인 화면에서 차단 · 기록 3/6 저장',t:'3일 전',btn:'중단 위치 보기',c:'#d9b9b2'},
+ {n:'병원 예약 웹',d:'웹 서비스 · 모바일 보기',r:2,s:'',st:'실행 준비 완료',info:'6명 구성 · 화면 14개 확보',t:'2일 전',btn:'실행 확인',c:'#bfd0c3'},
+ {n:'가계부 앱',d:'Android 앱 · 모바일 프로토타입',r:1,s:'bad',st:'부분 기록',info:'종료 기록 4/6',t:'5일 전',btn:'부분 결과 보기',c:'#cfc6dd'}
+];
+function st(x){return '<span class="m-st '+x.s+'"><i></i>'+x.st+'</span>'}
+function faces(n){var cs=['#d6b9a0','#a9b9cf','#c7a8b0','#b5c9b3','#d9cf9f'],h='<span class="m-faces">';for(var i=0;i<n;i++)h+='<i style="background:'+cs[i%5]+'"></i>';return h+'</span>'}
+function topbar(on){return '<div class="m-top"><span class="m-logo">PersonaLab</span><span class="m-nav"><span class="'+(on===0?'on':'')+'">내 테스트</span><span>페르소나 보관함</span><span>전체 실행 기록</span></span><span class="m-acc">내 워크스페이스<span class="m-av">김</span></span></div>'}
+function tools(){return '<div class="m-tools"><div class="m-in grow">테스트 이름 검색</div><div class="m-in">상태: 전체 ▾</div><div class="m-in">최근 수정순 ▾</div><div class="m-in">보관함 · 휴지통</div><span class="m-btn">+ 새 테스트 만들기</span></div>'}
+function more(){return '<span class="m-more">⋯</span>'}
+function b(x,sm){var cls=x.s==='run'?'blue':(x.s===''&&x.st==='실행 준비 완료'?'':(x.s==='ok'||x.st==='작성 중'?'':'ghost'));return '<span class="m-btn sm '+(x.s==='run'?'blue':(x.s==='bad'?'ghost':''))+'">'+x.btn+'</span>'}
+
+var V=[];
+
+/* A 랜딩 포커스 */
+V.push({k:'시안 A · 확정 기조 계승',h:'랜딩 포커스: 히어로 1개 + 얇은 목록',
+ meta:['컨셉','지금 이어서 해야 할 테스트 하나를 크게, 나머지는 한 줄 목록으로.','강점','랜딩과 톤이 이어지고 첫 시선이 한 곳에 모입니다. 명세의 ‘상태별 이어서 하기’에 가장 직접적입니다.','약점','히어로로 뽑는 규칙(실행 중→중단→작성 중…)을 정해야 합니다. 테스트가 1~2개면 목록이 비어 보입니다.'],
+ html:function(){var x=T[0],rest=T.slice(1);
+  var h=topbar(0)+'<div class="m-body"><div class="m-hero"><div style="display:flex;flex-direction:column;gap:12px"><span class="m-sub">이어서 보기 · 회차 '+x.r+'</span><div class="m-title">'+x.n+'은<br><span class="u">'+x.info+'</span>했어요</div><div class="m-sub">'+x.d+' · 마지막 확인 '+x.t+'</div><div style="display:flex;gap:10px;align-items:center;margin-top:6px"><span class="m-btn lg blue">'+x.btn+'</span>'+faces(5)+'</div></div><div style="width:220px;display:flex;flex-direction:column;gap:8px">'+st(x)+'<div class="m-bar"><i style="width:'+x.p+'%"></i></div><span class="m-sub">확인된 종료 기록 기준</span></div></div>'+tools()+'<div class="m-card">';
+  rest.forEach(function(r){h+='<div class="m-row" style="grid-template-columns:1.5fr 1fr 1.6fr 80px 130px 30px"><div><div class="m-name">'+r.n+'</div><div class="m-sub">'+r.d+'</div></div>'+st(r)+'<span class="m-sub">'+r.info+'</span><span class="m-sub">'+r.t+'</span><span style="justify-self:end">'+b(r)+'</span>'+more()+'</div>'});
+  return h+'</div></div>'}});
+
+/* B 사이드바 + 표 */
+V.push({k:'시안 B · 명세 그대로',h:'사이드바 + 밀도 높은 표',
+ meta:['컨셉','명세 6장의 첫 화면 구성을 그대로 옮긴 관리자형 표.','강점','많은 테스트를 한눈에 비교하고 정렬할 수 있습니다. 구현이 가장 단순하고 예측 가능합니다.','약점','사이드바를 싫어하셨던 점과 부딪힙니다. 첫 시선이 갈 곳이 없어 ‘이어서 할 일’이 눈에 안 띕니다.'],
+ html:function(){
+  var h='<div style="display:flex;min-height:520px"><div class="m-side"><span class="m-logo" style="padding:4px 12px 14px">PersonaLab</span><a class="on">내 테스트</a><a>페르소나 보관함</a><a>전체 실행 기록</a><span style="flex:1"></span><a>계정 · 설정</a></div><div class="m-body" style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;align-items:center"><div class="m-title">내 테스트</div></div>'+tools()+'<div class="m-card"><div class="m-th" style="grid-template-columns:1.5fr .6fr 1fr 1.6fr 80px 130px 30px"><span>테스트</span><span>회차</span><span>상태</span><span>마지막 작업</span><span>수정</span><span></span><span></span></div>';
+  T.forEach(function(r){h+='<div class="m-row" style="grid-template-columns:1.5fr .6fr 1fr 1.6fr 80px 130px 30px"><div><div class="m-name">'+r.n+'</div><div class="m-sub">'+r.d+'</div></div><span>회차 '+r.r+'</span>'+st(r)+'<span class="m-sub">'+r.info+'</span><span class="m-sub">'+r.t+'</span><span style="justify-self:end">'+b(r)+'</span>'+more()+'</div>'});
+  return h+'</div></div></div>'}});
+
+/* C 보드 */
+V.push({k:'시안 C',h:'상태 보드: 단계별 열',
+ meta:['컨셉','테스트가 지금 어느 단계인지 열로 보여 주는 보드.','강점','전체 진행 상황이 한 장에 보입니다. 중단·부분 기록을 ‘확인 필요’ 열로 모아 놓칠 일이 줄어듭니다.','약점','열이 비면 공허합니다. 드래그로 상태를 바꾸는 것처럼 오해될 수 있고(상태는 서버가 정함), 모바일에서 불리합니다.'],
+ html:function(){
+  function card(r){return '<div class="m-card mini"><div class="m-name">'+r.n+'</div><div class="m-sub">'+r.d+' · 회차 '+r.r+'</div>'+(r.p?'<div class="m-bar"><i style="width:'+r.p+'%"></i></div>':'')+'<div class="m-sub">'+r.info+'</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="m-sub">'+r.t+'</span>'+b(r)+'</div></div>'}
+  function col(t,list){return '<div class="col"><h4>'+t+'<span>'+list.length+'</span></h4>'+list.map(card).join('')+'</div>'}
+  return topbar(0)+'<div class="m-body"><div style="display:flex;justify-content:space-between;align-items:center"><div class="m-title">내 테스트</div></div>'+tools()+'<div class="board">'+col('준비 중',[T[2],T[4]])+col('실행 중',[T[0]])+col('결과 있음',[T[1]])+col('확인 필요',[T[3],T[5]])+'</div></div>'}});
+
+/* D 할 일 순서 */
+V.push({k:'시안 D',h:'할 일 순서: 확인할 것 / 이어서 할 것 / 결과 본 것',
+ meta:['컨셉','검색을 맨 위에 두고, 목록을 사용자가 할 일 기준으로 묶는다.','강점','테스트가 많아져도 우선순위가 자동으로 정리됩니다. 중단·부분 기록이 가장 위에 오릅니다.','약점','같은 테스트가 상태가 바뀌면 다른 묶음으로 옮겨 가 위치 기억이 약해집니다. 묶음 기준을 설명해야 합니다.'],
+ html:function(){
+  function grp(t,s,list){var h='<div style="display:flex;flex-direction:column;gap:8px"><div class="m-sec">'+t+'<span>'+s+' · '+list.length+'건</span></div><div class="m-card">';list.forEach(function(r){h+='<div class="m-row" style="grid-template-columns:1.4fr 2fr 80px 130px 30px"><div><div class="m-name">'+r.n+'</div><div class="m-sub">'+r.d+' · 회차 '+r.r+'</div></div><div style="display:flex;flex-direction:column;gap:2px">'+st(r)+'<span class="m-sub">'+r.info+'</span></div><span class="m-sub">'+r.t+'</span><span style="justify-self:end">'+b(r)+'</span>'+more()+'</div>'});return h+'</div></div>'}
+  return topbar(0)+'<div class="m-body" style="gap:20px"><div style="display:flex;gap:10px;align-items:center"><div class="m-in grow" style="height:46px;font-size:14px">테스트 이름으로 찾기</div><span class="m-btn lg">+ 새 테스트 만들기</span></div>'+grp('지금 확인할 것','실행 중이거나 멈춘 테스트',[T[0],T[3],T[5]])+grp('이어서 할 것','설정을 마치지 못했거나 실행 전',[T[2],T[4]])+grp('결과를 본 것','종료된 최신 회차',[T[1]])+'</div>'}});
+
+/* E 갤러리 */
+V.push({k:'시안 E',h:'캡처 갤러리: 시작 화면 카드',
+ meta:['컨셉','연결한 시작 화면 캡처로 제품을 기억하게 하는 카드 격자.','강점','사람은 이름보다 화면 모양으로 제품을 알아봅니다. 가장 친근하고 시각적입니다.','약점','정보 밀도가 가장 낮고 한 화면에 6~9개가 한계입니다. 작성 중인 테스트는 캡처가 없어 빈 카드가 생깁니다.'],
+ html:function(){
+  var h=topbar(0)+'<div class="m-body"><div style="display:flex;justify-content:space-between;align-items:center"><div class="m-title">내 테스트</div></div>'+tools()+'<div class="gal">';
+  T.forEach(function(r){var has=r.st!=='작성 중';h+='<div class="m-card"><div class="thumb" style="background:'+(has?r.c:'var(--m-bg)')+'">'+(has?'<b style="width:40%"></b><b style="width:70%"></b><em></em><u></u>':'<span class="m-sub" style="margin:auto">화면 연결 전</span>')+'</div><div class="in"><div style="display:flex;justify-content:space-between;align-items:center"><span class="m-name">'+r.n+'</span>'+more()+'</div>'+st(r)+'<span class="m-sub">'+r.info+'</span><div style="display:flex;justify-content:space-between;align-items:center"><span class="m-sub">회차 '+r.r+' · '+r.t+'</span>'+b(r)+'</div></div></div>'});
+  return h+'</div><div class="m-sub">시작 화면 캡처는 예시 그림입니다.</div></div>'}});
+
+/* F 회차 이력 */
+V.push({k:'시안 F',h:'회차 이력 노출: 행을 펼치면 회차별 상태',
+ meta:['컨셉','테스트마다 회차 칩을 보여 주고, 펼치면 회차별 결과·비교로 바로 간다.','강점','수정 회차 반복이 제품의 핵심 루프라는 점을 홈에서 드러냅니다. 비교 진입이 가장 가깝습니다.','약점','처음 쓰는 사람에게는 회차 개념이 먼저 나와 무겁습니다. 회차가 1개뿐인 테스트에는 이점이 없습니다.'],
+ html:function(){
+  var h=topbar(0)+'<div class="m-body"><div style="display:flex;justify-content:space-between;align-items:center"><div class="m-title">내 테스트</div></div>'+tools()+'<div class="m-card">';
+  T.forEach(function(r,i){var chips='';for(var k=1;k<=r.r;k++){chips+='<span class="m-chip'+(k===r.r?' on':'')+'">회차 '+k+'</span>'}
+   h+='<div class="m-row" style="grid-template-columns:1.4fr 1.3fr 1fr 80px 130px 30px"><div><div class="m-name">'+r.n+'</div><div class="m-sub">'+r.d+'</div></div><div class="rounds">'+chips+'</div>'+st(r)+'<span class="m-sub">'+r.t+'</span><span style="justify-self:end">'+b(r)+'</span>'+more()+'</div>';
+   if(i===1)h+='<div class="hist"><div class="h"><b>회차 3</b><span class="m-sub">결제 단계 문구 수정 후 · 6명</span><span class="m-st ok"><i></i>완료</span><span class="m-btn sm">결과 보기</span></div><div class="h"><b>회차 2</b><span class="m-sub">버튼 위치 변경 후 · 6명</span><span class="m-st ok"><i></i>완료</span><span class="m-btn sm ghost">회차 3과 비교</span></div><div class="h"><b>회차 1</b><span class="m-sub">최초 검토 · 6명</span><span class="m-st ok"><i></i>완료</span><span class="m-btn sm ghost">결과 보기</span></div><div class="m-sub">비교는 종료가 확인된 회차끼리만 가능합니다.</div></div>'});
+  return h+'</div></div>'}});
+
+var out='';
+V.forEach(function(v){var m=v.meta;
+ out+='<div class="variant"><div class="vhead"><h3><span class="k">'+v.k+'</span>'+v.h+'</h3></div><div class="vmeta"><div><b>'+m[0]+'</b>'+m[1]+'</div><div><b>'+m[2]+'</b>'+m[3]+'</div><div><b>'+m[4]+'</b>'+m[5]+'</div></div><div class="frame"><div class="screen">'+v.html()+'</div></div></div>'});
+document.getElementById('variants').innerHTML=out;
+
+document.getElementById('empties').innerHTML=
+ '<div class="frame"><div class="screen"><div class="m-top"><span class="m-logo">PersonaLab</span><span class="m-acc"><span class="m-av">김</span></span></div><div class="empty"><div class="m-title">아직 테스트가 없어요</div><p class="m-sub" style="max-width:300px">웹 링크, HTML 파일, Figma 시안 중 하나를 연결하면 시작할 수 있어요.</p><span class="m-btn lg">+ 새 테스트 만들기</span></div></div></div>'+
+ '<div class="frame"><div class="screen"><div class="m-top"><span class="m-logo">PersonaLab</span><span class="m-acc"><span class="m-av">김</span></span></div><div class="empty"><div class="m-title">‘결제’와 맞는 테스트가 없어요</div><p class="m-sub" style="max-width:300px">검색어나 상태 필터를 바꿔 보세요.</p><span class="m-btn lg ghost">검색 조건 초기화</span></div></div></div>';
+</script>
+
+</html>

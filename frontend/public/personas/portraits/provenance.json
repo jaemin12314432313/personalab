@@ -1,0 +1,22 @@
+{
+  "type": "AI-generated representative portraits",
+  "tool": "built-in image_gen",
+  "subjects": "fictional Korean adults; no original persona cards or respondent details used",
+  "ages": [
+    24,
+    35,
+    49,
+    67
+  ],
+  "notice": "Representative images may be shared by multiple personas and are not respondent photographs.",
+  "files": [
+    "young-female.png",
+    "young-male.png",
+    "adult-female.png",
+    "adult-male.png",
+    "mature-female.png",
+    "mature-male.png",
+    "senior-female.png",
+    "senior-male.png"
+  ]
+}

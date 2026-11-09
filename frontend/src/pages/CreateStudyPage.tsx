@@ -26,7 +26,7 @@ export default function CreatePage({ setPage, finish }: { setPage: Navigate; fin
   return (
     <>
       <Header
-        title="새 스터디 만들기"
+        title="새 테스트 만들기"
         subtitle="검증할 제품과 과제를 설정하세요."
       />
       <main className="create">
@@ -48,7 +48,7 @@ export default function CreatePage({ setPage, finish }: { setPage: Navigate; fin
               <span>
                 <Check size={27} />
               </span>
-              <h2>스터디가 준비됐어요</h2>
+              <h2>테스트가 준비됐어요</h2>
               <p>잠긴 설정으로 첫 AI 실행을 시작할 수 있습니다.</p>
             </div>
           ) : (
@@ -70,7 +70,7 @@ export default function CreatePage({ setPage, finish }: { setPage: Navigate; fin
               {step === 1 && (
                 <div className="fields">
                   <label>
-                    스터디 이름 <em>*</em>
+                    테스트 이름 <em>*</em>
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -210,7 +210,7 @@ export default function CreatePage({ setPage, finish }: { setPage: Navigate; fin
                   {step === 1 ? "취소" : "이전"}
                 </button>
                 <button className="primary" onClick={next}>
-                  {step === 4 ? "스터디 만들기" : "다음"}{" "}
+                  {step === 4 ? "테스트 만들기" : "다음"}{" "}
                   <ArrowRight size={15} />
                 </button>
               </footer>

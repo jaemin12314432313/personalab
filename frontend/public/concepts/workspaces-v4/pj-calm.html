@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><meta name="robots" content="noindex"><title>PersonaLab · A− Calm</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="./pj.css">
+<style>
+/* A− Calm — Midnight에서 덜어낸 버전. 어두운 바탕은 그대로, 효과는 한 군데(상단 빛, 호버, 주 버튼)만 */
+:root{
+  --bg:#0a0a0d;--surface:#111116;--surface-2:#17171d;--bar-bg:#0a0a0dd9;
+  --fg:#ededf0;--fg-2:#b3b4bf;--fg-3:#7c7d89;
+  --line:#ffffff13;--line-2:#ffffff22;
+  --accent:#8b7dff;--btn-bg:#7a6bf5;--btn-fg:#fff;--btn-line:#7a6bf5;--btn-hover:#8b7dff;
+  --radius:10px;--radius-sm:8px;
+  --c-setup:#8a8b97;--c-ready:#e8b04a;--c-run:#7aa8ff;--c-done:#52c98a;--danger:#ff7070;--danger-soft:#ff70701f;
+  --shadow:0 20px 60px #000b;
+}
+body{background:radial-gradient(760px 300px at 50% -150px,#8b7dff26,transparent),var(--bg)}
+.btn:not(.solid){background:transparent;border-color:var(--line-2)}
+.btn:not(.solid):hover{background:#ffffff0a;border-color:#ffffff38}
+.search,.sort,.ws,.acct>button{background:transparent;border-color:var(--line)}
+.sort option{background:#17171d}
+.head h1{font-size:40px;font-weight:700;letter-spacing:-.05em;color:#fff}
+.eyebrow{color:var(--fg-3);font-weight:500}
+.sum{gap:4px 18px}.sum span::before{content:"";}
+.ws i{background:#7a6bf5}
+/* 목록: 카드 대신 얇은 선 행. 호버에서만 살짝 반응한다 */
+.cols{border-bottom-color:var(--line-2)}
+.row{border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+.row::before{content:"";position:absolute;inset:0;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),#8b7dff17,transparent 70%);opacity:0;transition:opacity .3s;pointer-events:none}
+.row:hover::before{opacity:1}
+.row:hover{background:#ffffff05}
+.row>*{position:relative;z-index:1}
+.prog{background:#ffffff14}.prog i{background:var(--c-run)}
+.stt.run i{box-shadow:0 0 0 3px #7aa8ff22}
+.act:not(.solid){background:transparent}
+.tile{background:color-mix(in srgb,var(--c) 15%,#111116);border-color:color-mix(in srgb,var(--c) 30%,#111116)}
+.kbd{background:#ffffff0c;border-color:#ffffff1f}
+.first h2{color:#fff}
+.dlg{background:#111116;border-color:#ffffff1f}
+.dlg input{background:#ffffff08}
+.scrim{background:#000b}
+.toast{background:#ededf0;color:#0a0a0d}
+</style></head>
+<body><div id="app"></div>
+<script>window.PL={tiles:true,searchHint:'/',newHint:'N',keys:'<span class="kbd">/</span> 검색 · <span class="kbd">N</span> 새 프로젝트'};</script>
+<script src="./pj.js"></script>
+</body></html>

@@ -1,0 +1,2 @@
+const observer=new ResizeObserver(entries=>{for(const {target,contentRect} of entries){target.querySelector('iframe').style.transform=`scale(${contentRect.width/1440})`;}});
+document.querySelectorAll('.preview-wrap').forEach(frame=>observer.observe(frame));

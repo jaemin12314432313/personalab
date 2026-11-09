@@ -1,6 +1,8 @@
 """AI 패널과 실행 결과 (계획서 9장: personas, runs, ask_responses, act_logs)."""
 
-from sqlalchemy import Float, ForeignKey, Integer, String, Text
+from datetime import datetime
+
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -70,3 +72,19 @@ class ActLog(Base):
     target: Mapped[str | None] = mapped_column(Text)
     drop_reason: Mapped[str | None] = mapped_column(String(30))
     reason: Mapped[str | None] = mapped_column(Text)
+
+
+class RunReport(Base):
+    """실행이 끝나거나 중단되는 순간 한 번 저장하는 결과 스냅샷.
+
+    act_logs 에서 매번 다시 계산하면 집계 규칙이 바뀔 때 과거 보고서도 달라진다.
+    outcome 은 done(정상 종료) / cancelled(사용자 취소) / failed(오류 중단, 부분 기록).
+    """
+
+    __tablename__ = "run_reports"
+
+    run_id: Mapped[int] = mapped_column(ForeignKey("runs.id", ondelete="CASCADE"), primary_key=True)
+    outcome: Mapped[str] = mapped_column(String(10))
+    rules_version: Mapped[int] = mapped_column(Integer)
+    results_json: Mapped[list] = mapped_column(JSONB)
+    built_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · 워크스페이스 4가지 새 방향</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="./base.css">
+<style>
+body{background:var(--warm)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.h{padding:60px 0 36px}
+.h h1{font-size:clamp(32px,5vw,50px);letter-spacing:-.05em;line-height:1.25;font-weight:650;margin:12px 0 14px}
+.h p{color:var(--ink-3);max-width:56ch}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px}
+.c{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .3s,border-color .2s}
+.c:hover{border-color:var(--line-2);box-shadow:0 16px 40px #16161a10}
+.shot{position:relative;aspect-ratio:1.5;overflow:hidden;border-bottom:1px solid var(--line);background:#fff}
+.shot iframe{border:0;position:absolute;top:0;left:0;width:1440px;height:960px;transform-origin:0 0;pointer-events:none}
+.shot a{position:absolute;inset:0;z-index:2}
+.t{padding:22px 24px 26px}
+.t small{font-size:12px;color:var(--brown);font-weight:650}
+.t h2{font-size:24px;letter-spacing:-.04em;margin:4px 0 8px;font-weight:650}
+.t p{color:var(--ink-2);font-size:15px}
+.t em{display:block;font-style:normal;font-size:13px;color:var(--ink-3);margin-top:10px}
+.t .btn{margin-top:16px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header class="bar"><a class="logo" href="../workspaces-v3/index.html"><i></i>PersonaLab</a><span class="crumb"><b>워크스페이스</b> 새 방향 4가지</span><span class="sp"></span><a class="btn sm quiet" href="../workspaces-v3/index.html">이전 A/B/C 보기</a></header>
+<main class="wrap">
+  <section class="h"><span class="eyebrow">이전 시안은 모두 “테스트 목록을 어떻게 보여줄까”였어요</span><h1>이번엔 첫 화면의 <span class="ul">중심축<svg viewBox="0 0 300 18" preserveAspectRatio="none"><path pathLength="1" d="M3 11 Q85 1 153 8 T296 6"/><path pathLength="1" d="M21 16 Q150 8 277 13"/></svg></span>을 바꿨어요.</h1><p>테스트 대신 발견, 문장, 시간, 사람. 같은 데이터(일정메이트·P563 등 공개 데모 5명)로 만든 서로 다른 첫 화면입니다. 모두 눌러볼 수 있어요.</p></section>
+  <p style="margin:0 0 28px"><a class="btn solid" href="./workspace.html">D의 디자인으로 만든 워크스페이스 열기 →</a></p>
+  <section class="grid">
+    <article class="c"><div class="shot"><iframe src="./findings.html" title="D1 발견 미리보기" tabindex="-1" loading="lazy"></iframe><a href="./findings.html" aria-label="D1 열기"></a></div><div class="t"><small>D1 · 발견 먼저</small><h2>손볼 곳 3가지</h2><p>“테스트 3개”가 아니라 “고칠 곳 3가지”로 시작. 가장 많은 사람이 멈춘 순서로 정리하고, 근거·인터뷰·재실행까지 한 카드에서 이어져요.</p><em>생각해 볼 점: 첫 사용자는 아직 발견이 없어요 → 빈 상태 별도 필요</em><a class="btn" href="./findings.html">열기 ↗</a></div></article>
+    <article class="c"><div class="shot"><iframe src="./sentence.html" title="D2 문장 미리보기" tabindex="-1" loading="lazy"></iframe><a href="./sentence.html" aria-label="D2 열기"></a></div><div class="t"><small>D2 · 문장으로 시작</small><h2>빈칸 채우기</h2><p>폼 대신 한 문장. 화면·페르소나·인원·목표를 빈칸에서 고르면 시간과 비용이 바로 계산돼요. 이어서 하기는 아래 한 줄씩.</p><em>생각해 볼 점: 처음 쓰는 사람에게 가장 친절하지만, 쌓인 결과가 뒤로 밀려요</em><a class="btn" href="./sentence.html">열기 ↗</a></div></article>
+    <article class="c"><div class="shot"><iframe src="./logbook.html" title="D3 기록장 미리보기" tabindex="-1" loading="lazy"></iframe><a href="./logbook.html" aria-label="D3 열기"></a></div><div class="t"><small>D3 · 기록장</small><h2>버전마다 이어 보기</h2><p>같은 페르소나가 v1에서 v2로 어디까지 갔는지 점으로 쌓아 보여줘요. 탐색과 인터뷰가 한 타임라인에 섞이고, 여백 메모가 변화를 한 줄로 알려줘요.</p><em>생각해 볼 점: “수정 후 재실행” 흐름이 가장 자연스러워요</em><a class="btn" href="./logbook.html">열기 ↗</a></div></article>
+    <article class="c"><div class="shot"><iframe src="./roster.html" title="D4 패널 미리보기" tabindex="-1" loading="lazy"></iframe><a href="./roster.html" aria-label="D4 열기"></a></div><div class="t"><small>D4 · 패널 중심</small><h2>돌아오는 다섯 사람</h2><p>사람이 곧 자산. 누가 어디서 멈췄는지 보고, 몇 명을 골라 아래 바에서 바로 다시 보내거나 함께 인터뷰해요.</p><em>생각해 볼 점: 페르소나가 수백 명이 되면 검색·그룹 설계가 필요해요</em><a class="btn" href="./roster.html">열기 ↗</a></div></article>
+  </section>
+</main>
+<p class="foot-note" style="max-width:1200px">디자인 비교용 예시입니다. 실제 계정·패널·DB·API·LLM과 연결되어 있지 않고, 기존 앱과 workspaces-v3는 수정하지 않았어요.</p>
+<script>
+function fit(){document.querySelectorAll('.shot').forEach(s=>{const i=s.querySelector('iframe'),k=s.clientWidth/1440;i.style.transform=`scale(${k})`;s.style.aspectRatio='1.5'});}
+addEventListener('resize',fit);addEventListener('load',fit);fit();
+</script>
+</body></html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · Aurora</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="./pj.css">
+<style>
+/* B · Aurora — Stripe · Vercel 계열. 밝은 바탕, 부드러운 오로라 그라데이션, 카드 배치 */
+:root{
+  --bg:#fbfbfe;--surface:#fff;--surface-2:#f3f3fa;--bar-bg:#fbfbfecc;
+  --fg:#0b0b1a;--fg-2:#3f3f55;--fg-3:#7a7a92;
+  --line:#e7e7f1;--line-2:#d5d5e4;
+  --accent:#5b4bf5;--btn-bg:#0b0b1a;--btn-fg:#fff;--btn-line:#0b0b1a;--btn-hover:#262640;
+  --radius:18px;--radius-sm:10px;
+  --c-setup:#7a7a92;--c-ready:#c2750a;--c-run:#4338ca;--c-done:#0f8a5f;
+  --shadow:0 18px 50px #2b1f6a22;
+}
+.deco{height:640px}
+.deco i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
+.deco i:nth-child(1){width:520px;height:420px;left:-4%;top:-160px;background:#7c6cff}
+.deco i:nth-child(2){width:480px;height:380px;left:34%;top:-190px;background:#ff8ab8;animation-delay:-6s}
+.deco i:nth-child(3){width:460px;height:360px;right:-2%;top:-150px;background:#ffc36b;animation-delay:-11s}
+.deco i:nth-child(4){width:380px;height:300px;left:58%;top:-110px;background:#6fe3ff;opacity:.4;animation-delay:-3s}
+.deco::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,var(--bg) 100%)}
+@keyframes drift{to{transform:translate(40px,30px) scale(1.08)}}
+.head{padding-top:72px}
+.head h1{font-size:48px;font-weight:750;letter-spacing:-.055em}
+.head h1 em{font-style:normal;background:linear-gradient(95deg,#4338ca,#db2777 55%,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:4px 12px 4px 8px;border-radius:99px;background:#ffffffb0;border:1px solid #ffffff;box-shadow:0 2px 10px #5b4bf518;color:var(--fg-2);font-weight:550}
+.eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#7c6cff,#ff8ab8)}
+.sum span{padding:3px 11px;border-radius:99px;background:#ffffffb8;border:1px solid #fff;box-shadow:0 1px 6px #5b4bf514;font-size:12.5px}
+.search,.sort,.ws,.acct>button{background:#ffffffd0;border-color:#e3e3f1;backdrop-filter:blur(6px)}
+.btn.solid{box-shadow:0 8px 22px #0b0b1a33}
+.btn.solid:hover{transform:translateY(-1px)}
+/* 카드 */
+.row{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 1px 2px #2b1f6a0d,0 10px 30px #2b1f6a0a;overflow:hidden}
+.row::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--bar,var(--line));opacity:.9}
+.row:has(.stt.run){--bar:linear-gradient(90deg,#6366f1,#ec4899,#f59e0b);}
+.row:has(.stt.done){--bar:linear-gradient(90deg,#10b981,#6ee7b7)}
+.row:has(.stt.ready){--bar:linear-gradient(90deg,#f59e0b,#fcd34d)}
+.row:has(.stt.setup){--bar:linear-gradient(90deg,#cbd0dc,#e5e7ef)}
+.row:hover{transform:translateY(-4px);box-shadow:0 2px 4px #2b1f6a10,0 24px 50px #2b1f6a24;border-color:#d8d4f7}
+.row:has(.stt.run)::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,#ffffffb0 50%,transparent 60%);transform:translateX(-120%);animation:shine 3.6s ease-in-out infinite;pointer-events:none}
+@keyframes shine{60%,100%{transform:translateX(120%)}}
+.p-name b{font-size:19px;letter-spacing:-.045em}
+.stt{padding:3px 11px 3px 9px;border-radius:99px;width:max-content;background:color-mix(in srgb,currentColor 10%,#fff);border:1px solid color-mix(in srgb,currentColor 22%,#fff);font-size:12.5px}
+.p-last{padding:12px 14px;border-radius:12px;background:var(--surface-2);margin:2px 0}
+.prog{max-width:none;background:#e1e1f1;height:5px}.prog i{background:linear-gradient(90deg,#6366f1,#ec4899);border-radius:9px}
+.act{width:auto;height:38px;padding:0 18px}
+.act:not(.solid){background:#fff}
+.count{text-align:center;padding-top:30px}
+.first h2{font-size:42px;background:linear-gradient(95deg,#4338ca,#db2777 55%,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.scrim{background:#1b134a66}
+.dlg{border-radius:20px}
+</style></head>
+<body class="cards"><div id="app"></div>
+<script>window.PL={title:'<em>프로젝트</em>',searchHint:'',newHint:'',keys:'<span style="font-family:monospace">/</span> 검색 · <span style="font-family:monospace">N</span> 새 프로젝트',deco:'<i></i><i></i><i></i><i></i>'};</script>
+<script src="./pj.js"></script>
+</body></html>

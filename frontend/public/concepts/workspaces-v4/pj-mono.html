@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>PersonaLab · Mono</title><link rel="icon" href="/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="./pj.css">
+<style>
+/* C · Mono — Vercel · Resend 계열. 흑백, 점 격자, 모노 폰트, 키보드 중심 */
+:root{
+  --bg:#fff;--surface:#fff;--surface-2:#fafafa;--bar-bg:#ffffffd9;
+  --fg:#0a0a0a;--fg-2:#404040;--fg-3:#737373;
+  --line:#e5e5e5;--line-2:#d4d4d4;
+  --accent:#0a0a0a;--btn-bg:#0a0a0a;--btn-fg:#fff;--btn-line:#0a0a0a;--btn-hover:#262626;
+  --radius:6px;--radius-sm:6px;
+  --c-setup:#737373;--c-ready:#b45309;--c-run:#0070f3;--c-done:#00a86b;--shadow:0 12px 40px #0000001f;
+}
+body{background-image:radial-gradient(#d4d4d4 1px,transparent 1.2px);background-size:22px 22px;background-position:0 0}
+body::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 50% at 50% 0,transparent,#fff 90%),linear-gradient(180deg,transparent 55%,#fff 100%);pointer-events:none;z-index:0}
+.bar{border-bottom-color:#0a0a0a}
+.logo{letter-spacing:-.05em}
+.ws{border-radius:6px;font-family:var(--mono);font-size:12px;font-weight:500;background:#fff}
+.ws i{border-radius:4px;font-family:var(--mono)}
+.tabs a{font-size:14px}
+.acct>button{border-radius:6px;font-family:var(--mono);font-size:12px;background:#fff}.me{border-radius:4px}
+.head{padding-top:56px;align-items:flex-end}
+.head .left{display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap}
+.head h1{font-size:34px;font-weight:700;letter-spacing:-.055em}
+.eyebrow{font:500 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--fg-3)}
+.eyebrow::before{content:"";width:7px;height:7px;background:#00a86b;border-radius:50%;box-shadow:0 0 0 3px #00a86b2a}
+.sum{font-family:var(--mono);font-size:12px;margin-top:12px;gap:4px 18px}
+.sum span{color:var(--fg-3)}.sum b{color:var(--fg)}
+.count-big{font:300 84px/0.85 var(--mono);letter-spacing:-.06em;color:#0a0a0a;padding-bottom:4px;display:flex;align-items:flex-start;gap:6px}
+.count-big small{font:500 11px/1.4 var(--mono);color:var(--fg-3);letter-spacing:.06em;margin-top:6px}
+.search,.sort{border-radius:6px;background:#fff}
+.sort{font-family:var(--mono);font-size:12.5px}
+.btn{border-radius:6px;font-weight:600}
+.btn.solid .kbd{background:#ffffff22;border-color:#ffffff44;color:#fff}
+/* 표: 모서리 십자 표시 + 왼쪽 강조선 */
+#list{position:relative;border:1px solid var(--line-2);background:#fff;margin-top:6px}
+#list::before,#list::after{content:"+";position:absolute;font:400 16px/1 var(--mono);color:#0a0a0a;background:#fff;width:18px;text-align:center}
+#list::before{left:-9px;top:-9px}#list::after{right:-9px;bottom:-9px}
+.cols{padding:12px 18px;font:500 11.5px var(--mono);text-transform:uppercase;letter-spacing:.05em;background:var(--surface-2);border-bottom:1px solid var(--line-2)}
+.row{padding:18px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row::before{content:"";position:absolute;left:0;top:-1px;bottom:-1px;width:2px;background:#0a0a0a;transform:scaleY(0);transition:transform .35s var(--ease)}
+.row:hover{background:#fafafa}.row:hover::before{transform:scaleY(1)}
+.p-name b{font-size:16px;letter-spacing:-.04em}
+.p-last{font-size:13.5px}.p-last small{font-family:var(--mono);font-size:11.5px}
+.stt{font:500 11.5px/1 var(--mono);padding:5px 9px 5px 8px;border:1px solid color-mix(in srgb,currentColor 35%,#fff);border-radius:4px;width:max-content;background:color-mix(in srgb,currentColor 7%,#fff)}
+.stt i{width:6px;height:6px}
+.stt.run i{box-shadow:0 0 0 3px #0070f333}
+.p-date{font:400 12px var(--mono)}
+.prog{border-radius:0;height:2px;max-width:140px}.prog i{border-radius:0;background:#0070f3}
+.act{border-radius:6px;height:34px;font-size:13px}
+.act:not(.solid){background:#fff}
+.count{font:400 12px var(--mono);padding:16px 18px 26px}
+.first h2{font-size:38px}
+.first{border:1px dashed var(--line-2);background:#ffffffd0;margin-top:40px;padding:80px 20px}
+.dlg{border-radius:10px}
+.toast{font-family:var(--mono);font-size:12.5px;border-radius:6px}
+.kbd{font-weight:500}
+</style></head>
+<body><div id="app"></div>
+<script>
+window.PL={searchHint:'/',newHint:'N',keys:'<span class="kbd">/</span> 검색 · <span class="kbd">N</span> 새 프로젝트',deco:''};
+</script>
+<script src="./pj.js"></script>
+<script>
+/* 큰 숫자: 프로젝트 개수 */
+const h=document.querySelector('.head');
+if(h){const inner=document.createElement('div');while(h.firstElementChild&&!h.firstElementChild.classList.contains('tools')){inner.appendChild(h.firstElementChild)}
+ // 원래 첫 자식(제목 묶음)의 내용을 그대로 사용
+ const first=inner.firstElementChild;const wrap=document.createElement('div');wrap.className='ttl';wrap.appendChild(first);
+ const b=document.createElement('div');b.className='count-big';b.setAttribute('aria-hidden','true');b.innerHTML='<span></span><small>PROJECTS</small>';
+ const left=document.createElement('div');left.className='left';left.append(b,wrap);h.prepend(left);
+ const upd=()=>{b.firstChild.textContent=String(document.querySelectorAll('#sum b').length?[...document.querySelectorAll('#sum b')].reduce((a,x)=>a+ +x.textContent,0):0).padStart(2,'0')};
+ upd();new MutationObserver(upd).observe(document.getElementById('sum'),{childList:true});}
+</script>
+</body></html>

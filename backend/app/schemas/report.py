@@ -5,6 +5,7 @@ ActEvent)에 맞췄다. 프론트는 가짜 엔진 대신 이 응답으로 바�
 실제 참가자 칸은 아직 없다. 참가자 뷰(6단계)가 생기면 필드를 더한다.
 """
 
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel
@@ -22,7 +23,7 @@ class AskResultOut(BaseModel):
 class ActEventOut(BaseModel):
     turn: int  # 1부터. act_logs.turn 은 0부터라 +1 한다
     screen: str
-    action: Literal["click", "abandon"]
+    action: Literal["click", "abandon", "fill", "scroll"]
     target: str | None = None
     reason: str | None = None
     to: str | None = None  # click 일 때 이동한 화면
@@ -49,7 +50,13 @@ class PersonaResultOut(BaseModel):
 
 
 class ReportOut(BaseModel):
+    source:Literal["live","local-demo"] = "live"
     study_id: int
     ask_run_id: int | None = None  # 가장 최근에 끝난 실행
     act_run_id: int | None = None
     results: list[PersonaResultOut]
+    # 저장된 스냅샷이면 종료 구분(done/cancelled/failed), 아직 저장 전이면 None
+    outcome: Literal["done", "cancelled", "failed"] | None = None
+    # 탐색 판단 엔진: rule=AI 호출 없는 규칙 기반 체험 기록, llm=AI 페르소나 판단, 기록 없으면 None
+    engine: Literal["rule", "llm"] | None = None
+    saved_at: datetime | None = None

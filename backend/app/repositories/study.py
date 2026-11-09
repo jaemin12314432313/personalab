@@ -108,3 +108,16 @@ async def replace_personas(
 async def list_personas(session: AsyncSession, study_id: int) -> list[Persona]:
     query = select(Persona).where(Persona.study_id == study_id).order_by(Persona.id)
     return list(await session.scalars(query))
+
+
+async def lock_study(session:AsyncSession,study_id:int):
+    return await session.scalar(select(Study).where(Study.id==study_id).with_for_update())
+
+async def study_source(session:AsyncSession,study_id:int)->str:
+    from app.models import LocalDemoStudy
+    return 'local-demo' if await session.get(LocalDemoStudy,study_id) else 'live'
+
+async def rename_study(session:AsyncSession,study:Study,name:str):
+    study.name=name
+    await session.commit()
+    return study
