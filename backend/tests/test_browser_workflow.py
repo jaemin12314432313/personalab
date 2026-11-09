@@ -521,3 +521,16 @@ def test_llm_only_sees_and_may_choose_elements_that_are_on_screen(monkeypatch):
     # 보이는 요소가 하나도 없으면(예: 측정 실패) 막히지 않도록 전체를 보여 준다
     seen.clear();browser.decide_browser({'card_text':'가상'},'과제',{'id':'S','elements':[{'id':'pl-9','text':'x','kind':'a','type':'','in_view':False}]},None,[])
     assert [e['id'] for e in json.loads(seen['contents'][0])['current_screen']['elements']]==['pl-9']
+
+
+async def test_workflow_without_images_drops_capture_data_but_keeps_settings(client,session):
+    sid=(await client.post('/studies',json={'name':'이미지 제외 점검'})).json()['id']
+    source=bundle()
+    assert (await client.post(f'/studies/{sid}/sources/html',json={'files':source['files'],'entry':source['entry']})).status_code==200
+    full=await client.get(f'/studies/{sid}/workflow')
+    light=await client.get(f'/studies/{sid}/workflow?images=0')
+    assert full.status_code==200 and light.status_code==200
+    assert full.json()['source'].get('preview','').startswith('data:image')   # 기본은 지금까지와 똑같이 이미지를 준다
+    assert 'preview' not in light.json()['source']                             # 설정값만 필요한 호출에는 이미지를 뺀다
+    assert light.json()['source']['kind']=='html' and light.json()['scope']==full.json()['scope']
+    assert len(light.content)<len(full.content)

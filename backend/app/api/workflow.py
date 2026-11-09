@@ -19,9 +19,19 @@ def output(row,study_id):
     source=exploration_repo.public_source(row.source_json) if row else {}
     return WorkflowOut(study_id=study_id,root_study_id=row.root_study_id if row else study_id,revision=row.revision if row else 1,source=source,scope=row.scope_json if row else {})
 
+def without_images(out:WorkflowOut)->WorkflowOut:
+    """설정값만 필요한 호출용. 화면 캡처(미리보기·페이지별·상태별 이미지)는 용량이 커서 뺀다."""
+    source=dict(out.source);source.pop('preview',None)
+    if isinstance(source.get('site_map'),dict):
+        source['site_map']={**source['site_map'],'pages':[{k:v for k,v in p.items() if k!='image'} for p in source['site_map'].get('pages',[])]}
+    if isinstance(source.get('preflight'),dict):
+        source['preflight']={**source['preflight'],'states':[{**s,'image':None} for s in source['preflight'].get('states',[])]}
+    return out.model_copy(update={'source':source})
+
 @router.get('/studies/{study_id}/workflow',response_model=WorkflowOut)
-async def get_workflow(study:Study=Depends(owned_study),session:AsyncSession=Depends(get_session)):
-    return output(await repo.get(session,study.id),study.id)
+async def get_workflow(images:bool=True,study:Study=Depends(owned_study),session:AsyncSession=Depends(get_session)):
+    out=output(await repo.get(session,study.id),study.id)
+    return out if images else without_images(out)
 
 @router.post('/studies/{study_id}/workflow',response_model=WorkflowOut)
 async def save_workflow(body:WorkflowIn,study:Study=Depends(editable_study),session:AsyncSession=Depends(get_session)):

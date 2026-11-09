@@ -285,7 +285,7 @@ export function mountMockup(root: HTMLElement) {
     const local = localStudies().find(s => s.id === from.local || (from.server && s.serverId === from.server));
     if (local) { url = local.workflow?.source.url || ''; viewport = local.workflow?.scope.viewport || ''; kind = local.workflow?.scope.product_kind || ''; audience = local.workflow?.scope.audience; description = local.product.description; }
     else if (from.server) {
-      try { const [wf, detail] = await Promise.all([api.getWorkflow(from.server), api.getStudy(from.server)]); url = wf.source.url || ''; viewport = wf.scope.viewport || ''; kind = wf.scope.product_kind || ''; audience = wf.scope.audience; const d = detail.product?.description || ''; description = d.includes('\n') ? d.slice(d.indexOf('\n') + 1) : ''; } catch { return; }
+      try { const [wf, detail] = await Promise.all([api.getWorkflow(from.server,false), api.getStudy(from.server)]); url = wf.source.url || ''; viewport = wf.scope.viewport || ''; kind = wf.scope.product_kind || ''; audience = wf.scope.audience; const d = detail.product?.description || ''; description = d.includes('\n') ? d.slice(d.indexOf('\n') + 1) : ''; } catch { return; }
     }
     if (!sameSession(owner, draftId) || study.id !== draftId || hasExecution() || study.screens.length) return;
     study.workflow = { study_id: 0, root_study_id: 0, revision: 1, source: { kind: 'manual' }, scope: { ...defaultScope(), ...(kind ? { product_kind: kind as WorkflowScope['product_kind'] } : {}), ...(viewport ? { viewport: viewport as WorkflowScope['viewport'] } : {}), ...(audience ? { audience } : {}), product_id: study.productId, test_title: study.testTitle, round_note: study.roundNote } };
@@ -376,7 +376,7 @@ export function mountMockup(root: HTMLElement) {
         const counts = await Promise.all(people.map((p, i) => i < 24 && p.state && p.state !== 'pending' && p.pid ? api.getInterview(latestAct.id, p.pid).then(r => r.messages.length).catch(() => 0) : Promise.resolve(0)));
         people.forEach((p, i) => { p.asked = counts[i]; });
       }
-      const wfScope = await api.getWorkflow(id).then(w => w.scope).catch(() => undefined);
+      const wfScope = await api.getWorkflow(id,false).then(w => w.scope).catch(() => undefined);
       const siteRound = wfScope ? (wfScope.exploration ? wfScope.exploration === 'site' : !(wfScope.goal_url || wfScope.goal_text)) : false;
       const sortedRevisions = [...revisions].sort((a, b) => a.revision - b.revision);
       const allStats = await Promise.all(sortedRevisions.map(statsOf));
@@ -423,7 +423,7 @@ export function mountMockup(root: HTMLElement) {
     const id = Number(button.dataset.roundNoteSave), area = wrap.querySelector<HTMLTextAreaElement>('textarea'), err = wrap.querySelector<HTMLElement>('.ws-rnote-err');
     if (!area || !id) return; const note = area.value.trim().slice(0, 200); (button as HTMLButtonElement).disabled = true;
     try {
-      const wf = await api.getWorkflow(id); await api.saveWorkflow(id, { ...wf.scope, round_note: note });
+      const wf = await api.getWorkflow(id,false); await api.saveWorkflow(id, { ...wf.scope, round_note: note });
       for (const d of serverDetail.values()) for (const r of d.roundList) if (r.studyId === id) r.note = note || undefined;
       if (study.serverId === id) { study.roundNote = note; if (study.workflow) study.workflow.scope.round_note = note; }
       renderWorkspace();
@@ -1088,7 +1088,7 @@ export function mountMockup(root: HTMLElement) {
     try{
       const list=await api.getRevisions(study.serverId);
       const prev=[...list].filter(r=>r.revision<rev).sort((a,b)=>b.revision-a.revision)[0];
-      if(prev&&carryKey()===key){const flow=await api.getWorkflow(prev.study_id);if(carryKey()===key)carrySource={key,prev:{revision:prev.revision,scope:flow.scope}};}
+      if(prev&&carryKey()===key){const flow=await api.getWorkflow(prev.study_id,false);if(carryKey()===key)carrySource={key,prev:{revision:prev.revision,scope:flow.scope}};}
     }catch{/* 이전 내용을 읽지 못해도 새로 입력할 수 있다 */}
     renderCarryOffer();
   }
@@ -1324,7 +1324,7 @@ export function mountMockup(root: HTMLElement) {
     const before=Number(input('compareBefore').value),after=Number(input('compareAfter').value);
     if(before===after){el('comparisonResult').textContent='서로 다른 회차를 선택하세요.';return;}
     el('comparisonResult').textContent='각 회차의 기록과 조건을 불러오고 있습니다.';
-    const load=async(sid:number)=>{const [detail,report,workflow]=await Promise.all([api.getStudy(sid),api.getReport(sid),api.getWorkflow(sid)]);const s=newStudy();s.serverId=sid;s.workflow=workflow;s.task=detail.task?.description||'';s.screens=detail.prototype?.screens||[];s.personas=detail.personas;s.results=report.results;s.runMeta=report.meta??null;s.runs={act:report.act_run_id||undefined};if(s.runs.act){s.evidence=await api.getEvidence(s.runs.act);mergeEvidenceScreens(s);}return s;};
+    const load=async(sid:number)=>{const [detail,report,workflow]=await Promise.all([api.getStudy(sid),api.getReport(sid),api.getWorkflow(sid,false)]);const s=newStudy();s.serverId=sid;s.workflow=workflow;s.task=detail.task?.description||'';s.screens=detail.prototype?.screens||[];s.personas=detail.personas;s.results=report.results;s.runMeta=report.meta??null;s.runs={act:report.act_run_id||undefined};if(s.runs.act){s.evidence=await api.getEvidence(s.runs.act);mergeEvidenceScreens(s);}return s;};
     try{const [a,b]=await Promise.all([load(before),load(after)]);requireSession(owner,id);if(request===comparisonRequest)el('comparisonResult').innerHTML=comparisonMarkup(a,b);}
     catch(error){if(sameSession(owner,id)&&request===comparisonRequest)el('comparisonResult').textContent=message(error);}
   }

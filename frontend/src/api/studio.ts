@@ -90,7 +90,8 @@ export interface LibraryPage { total: number; limit: number; offset: number; ite
 export const listLibraryPersonas = (panelId: number, offset = 0) => request<LibraryPage>(`/persona-library/panels/${panelId}/personas?limit=12&offset=${offset}`);
 
 export const createDraft = (name:string) => request<{id:number}>('/studies',{name});
-export const getWorkflow = (id:number) => request<Workflow>(`/studies/${id}/workflow`);
+// images=false: 설정값만 필요한 호출은 화면 캡처 이미지를 빼고 받는다(응답이 수백 KB 줄어든다).
+export const getWorkflow = (id:number, images = true) => request<Workflow>(`/studies/${id}/workflow${images ? '' : '?images=0'}`);
 export const saveWorkflow = (id:number,scope:WorkflowScope) => request<Workflow>(`/studies/${id}/workflow`,{scope});
 export const connectWeb = (id:number,url:string,viewport:string,product_kind:'web'|'ios'|'android'='web') => request<Workflow & {screens:Study['screens']}>(`/studies/${id}/sources/web`,{url,viewport,product_kind});
 export const connectHtml = (id:number,files:{path:string;data:string}[],entry:string,viewport:string,product_kind:'web'|'ios'|'android'='web') => request<Workflow & {screens:Study['screens']}>(`/studies/${id}/sources/html`,{files,entry,viewport,product_kind});
