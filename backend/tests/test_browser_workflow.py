@@ -463,42 +463,50 @@ async def test_run_meta_records_engine_model_prompt_revision_and_usage(client,se
     assert live['meta']['usage']['calls']==4
 
 
-async def test_concern_is_saved_with_the_action_and_shows_up_in_the_report(client,session,monkeypatch):
+async def test_observations_are_saved_with_the_action_and_show_up_in_the_report(client,session,monkeypatch):
     from app.services import runner
     sid,run=await _two_persona_run(client,session)
     original=browser.explore
     def decide(persona,task,screen,image,history):
         element=next(e for e in screen['elements'] if e['text']=='결과 보기')
-        concern={'code':'PRIVACY','note':'왜 이 정보가 필요한지 화면에 설명이 없다'} if persona['card_text'].startswith('A') else None
-        return {'action':'click','target':element['id'],'value':None,'drop_reason':None,'reason':'가상 선택','concern':concern}
+        obs=[{'dimension':'신뢰','polarity':'issue','severity':'moderate','note':'왜 이 정보가 필요한지 화면에 설명이 없다'},
+             {'dimension':'시각','polarity':'good','severity':None,'note':'버튼이 눈에 잘 띈다'}] if persona['card_text'].startswith('A') else []
+        return {'action':'click','target':element['id'],'value':None,'drop_reason':None,'reason':'가상 선택','observations':obs}
     async def simulated(*args,**kw):return await original(*args,decide=decide,**kw)
     monkeypatch.setattr(runner,'require_persona_transmission',lambda:None)
     monkeypatch.setattr(browser,'explore',simulated)
     await runner.execute_run(session,run.id)
     results={r['persona_id']:r for r in (await client.get(f'/runs/{run.id}/report')).json()['results']}
     first=results['FIX-A']['act']['events'][0]
-    assert first['concern']=={'code':'PRIVACY','note':'왜 이 정보가 필요한지 화면에 설명이 없다'}
-    assert results['FIX-A']['act']['end']['result']=='complete'     # 걱정은 있었지만 목표에는 도달했다
-    assert results['FIX-B']['act']['events'][0]['concern'] is None
+    assert first['observations']==[
+        {'dimension':'신뢰','polarity':'issue','severity':'moderate','note':'왜 이 정보가 필요한지 화면에 설명이 없다'},
+        {'dimension':'시각','polarity':'good','severity':None,'note':'버튼이 눈에 잘 띈다'}]
+    assert results['FIX-A']['act']['end']['result']=='complete'     # 문제가 있었지만 목표에는 도달했다
+    assert results['FIX-B']['act']['events'][0]['observations']==[]
 
 
-def test_browser_decision_schema_asks_for_concern_and_rejects_malformed_ones(monkeypatch):
+def test_browser_decision_schema_asks_for_observations_and_rejects_malformed_ones(monkeypatch):
     seen={}
     def fake(system,contents,schema,check=None):
         seen.update(system=system,schema=schema,check=check);return {}
     monkeypatch.setattr(browser,'require_persona_transmission',lambda:None)
     monkeypatch.setattr(browser,'call_llm',fake);monkeypatch.setattr(browser,'image_part',lambda i:None)
-    screen={'id':'S','elements':[{'id':'pl-0','text':'다음','kind':'a','type':''}]}
+    screen={'id':'S','elements':[{'id':'pl-0','text':'다음','kind':'a','type':'','in_view':True}]}
     browser.decide_browser({'card_text':'가상'},'과제',screen,None,[])
-    props=seen['schema']['properties']
-    assert 'concern' in props and 'concern' in seen['schema']['required']
-    assert 'concern' in seen['system']
+    assert 'observations' in seen['schema']['properties'] and 'observations' in seen['schema']['required']
+    assert 'observations' in seen['system'] and 'blocking' in seen['system']
     check=seen['check']
     ok={'action':'click','target':'pl-0','value':None,'drop_reason':None,'reason':'r'}
-    assert check({**ok,'concern':None}) is None
-    assert check({**ok,'concern':{'code':'PRICE','note':'가격이 비싸 보인다'}}) is None
-    assert check({**ok,'concern':{'code':'NOT_A_CODE','note':'x'}})
-    assert check({**ok,'concern':{'code':'PRICE','note':'  '}})
+    good={'dimension':'시각','polarity':'good','severity':None,'note':'위계가 분명하다'}
+    issue={'dimension':'이해','polarity':'issue','severity':'blocking','note':'무슨 서비스인지 알 수 없다'}
+    assert check({**ok,'observations':[]}) is None
+    assert check({**ok,'observations':[good,issue]}) is None
+    assert check({**ok})                                                        # 목록이 없으면 다시 요청
+    assert check({**ok,'observations':[{**issue,'dimension':'없는차원'}]})
+    assert check({**ok,'observations':[{**issue,'severity':None}]})              # 문제인데 심각도 없음
+    assert check({**ok,'observations':[{**good,'severity':'minor'}]})            # 잘 된 점에 심각도
+    assert check({**ok,'observations':[{**issue,'note':'  '}]})
+    assert check({**ok,'observations':[issue,issue,issue,issue]})                # 최대 3개
 
 
 def test_llm_only_sees_and_may_choose_elements_that_are_on_screen(monkeypatch):
@@ -514,10 +522,10 @@ def test_llm_only_sees_and_may_choose_elements_that_are_on_screen(monkeypatch):
     import json
     shown=json.loads(seen['contents'][0])['current_screen']
     assert [e['id'] for e in shown['elements']]==['pl-0'] and shown['below_fold_elements']==1
-    ok={'action':'click','value':None,'drop_reason':None,'reason':'r','concern':None}
+    ok={'action':'click','value':None,'drop_reason':None,'reason':'r','observations':[]}
     assert seen['check']({**ok,'target':'pl-0'}) is None
     assert seen['check']({**ok,'target':'pl-1'})                 # 화면 밖 요소는 스크롤하기 전에는 고를 수 없다
-    assert seen['check']({'action':'scroll','target':None,'value':None,'drop_reason':None,'reason':'내려 본다','concern':None}) is None
+    assert seen['check']({'action':'scroll','target':None,'value':None,'drop_reason':None,'reason':'내려 본다','observations':[]}) is None
     # 보이는 요소가 하나도 없으면(예: 측정 실패) 막히지 않도록 전체를 보여 준다
     seen.clear();browser.decide_browser({'card_text':'가상'},'과제',{'id':'S','elements':[{'id':'pl-9','text':'x','kind':'a','type':'','in_view':False}]},None,[])
     assert [e['id'] for e in json.loads(seen['contents'][0])['current_screen']['elements']]==['pl-9']

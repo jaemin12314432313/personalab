@@ -3,6 +3,7 @@ import { pageKey, siteMode, siteCoverage, siteCoverageMarkup } from './SiteCover
 import { studyTitle } from '../studio/model';
 import { DEMO, personaId } from '../studio/model';
 import type { Study, Result } from '../studio/model';
+import { OBS_DIMENSIONS } from '../studio/model';
 import { analyzeReport, observationBasis, checkHypothesis, dropLabel, outcome, outcomeLabel, RECORD_QUESTIONS, recordAnswer, screenTitle, sourceTitle } from './ReportModel';
 import { downloadReport } from './ReportExport';
 import './report.css';
@@ -153,15 +154,19 @@ export function mountReport(host: HTMLElement, initial: Study, options: ReportOp
       <div class="rp-fix"><b>일반 점검 제안</b><p>${esc(checkHypothesis(f.code))}</p><small>이 화면에 맞춘 처방이 아니라 이탈 사유별 일반 안내예요. 수정 효과는 다시 실행해서 확인하세요.</small></div>
       <div class="rp-actions"><button type="button" class="btn solid" data-rv-interview="${lead.id}">이 사람에게 물어보기 →</button><button type="button" class="btn" data-rv-record="${lead.id}">근거 보기</button></div></aside>`;
   }
-  // 이탈 없이 지나갔지만 AI가 걱정을 남긴 곳. 이탈 집계와 섞지 않고 따로 보여 준다.
-  function observationsMarkup(){
-    if(!model.observations.length)return '';
-    const items=model.observations.slice(0,8).map(o=>{
+  // 차원별 UX 평가: 이탈과 별개로 AI가 단계마다 남긴 관찰(문제·잘 된 점·심각도). 이탈 집계와 섞지 않는다.
+  function evaluationMarkup(){
+    if(!model.evaluation.length)return '';
+    const SEV:Record<string,string>={blocking:'막힘',moderate:'보통',minor:'가벼움'};
+    const LOW=new Set(['시각','인상']);   // 모델이 캡처를 보고 하는 인상 판단은 근거가 약하다
+    const groups=OBS_DIMENSIONS.map(dim=>({dim,items:model.evaluation.filter(x=>x.dimension===dim)})).filter(g=>g.items.length);
+    const body=groups.map(g=>`<div class="rp-dim"><h3>${esc(g.dim)}${LOW.has(g.dim)?' <small>AI 인상 · 확인 필요</small>':''}</h3>${g.items.slice(0,6).map(o=>{
       const target=o.people.find(p=>study.results.find(x=>x.id===p.record.id)?.act)?.record;
       const quotes=o.people.slice(0,2).map(p=>{const ps=study.personas.find(x=>x.id===p.record.id);return `<blockquote>“${esc(p.note)}”<cite>${esc(ps?personaId(ps):p.record.persona_id)}${ps?` · ${ps.attributes.profile.age}세 ${esc(ps.attributes.profile.job_group)}`:''}</cite></blockquote>`;}).join('');
-      return `<article class="rp-obs-item"><h3>${esc(screenTitle(study,o.screen))}에서 ${o.people.length}명이 걱정했어요</h3><p class="rp-why"><span>이유</span>${esc(dropLabel(o.code))}</p>${quotes}${target?`<button type="button" class="rv-text-link" data-rv-interview="${target.id}">이 사람에게 물어보기 →</button>`:''}</article>`;
-    }).join('');
-    return `<section class="rp-obs" aria-label="이탈 없이 남긴 걱정"><div class="rp-obs-head"><h2>이탈 없이 지나갔지만, 걱정이 남은 곳</h2><p>목표에 도달했거나 탐색을 마친 사람도 중간에 망설일 수 있어요. AI가 남긴 메모이며 이탈로 세지 않아요.</p></div><div class="rp-obs-list">${items}</div></section>`;
+      const chip=o.polarity==='good'?'<span class="rp-sev good">잘 된 점</span>':`<span class="rp-sev ${esc(o.severity||'minor')}">${esc(SEV[o.severity||'minor']||'가벼움')}</span>`;
+      return `<article class="rp-obs-item">${chip}<h4>${esc(screenTitle(study,o.screen))} · ${o.people.length}명</h4>${quotes}${target?`<button type="button" class="rv-text-link" data-rv-interview="${target.id}">이 사람에게 물어보기 →</button>`:''}</article>`;
+    }).join('')}</div>`).join('');
+    return `<section class="rp-obs" aria-label="차원별 평가"><div class="rp-obs-head"><h2>차원별 평가</h2><p>끝까지 간 사람도 중간에 불편하거나 좋았던 점을 남겨요. AI가 남긴 관찰이며 이탈로 세지 않아요.</p></div>${body}</section>`;
   }
   function compactOverview(){
     const empty=`<div class="rv-empty-small"><strong>사용자 중단 기록 없음</strong><p>${model.system.length?'탐색 한도로 끝난 기록이 있어요.':'저장된 종료 기록에서 중단은 확인되지 않았어요.'} UI·UX 문제 없음으로 해석하지 않습니다.</p></div>`;
@@ -169,7 +174,7 @@ export function mountReport(host: HTMLElement, initial: Study, options: ReportOp
     const compare=revisionNo>1?`<a class="rp-compare" href="#compare"><b>이전 회차와 비교</b><span>같은 문제가 반복되는지, 사라졌는지, 새로 생겼는지 확인하세요 →</span></a>`:'';
     const active=Math.min(Math.max(finding,0),model.findings.length-1),total=Math.max(1,model.total);
     const rows=model.findings.map((f,i)=>{const [lv,color]=impact(f.records.length);return `<button type="button" class="rp-row" data-rv-finding="${i}" data-rv-focus="finding-${i}" aria-pressed="${i===active}"><span class="rp-no">${String(i+1).padStart(2,'0')}</span><span class="rp-what"><strong>${esc(screenTitle(study,f.screen))}에서 ${f.records.length}명이 멈췄어요</strong><small>${esc(dropLabel(f.code))}</small></span><span class="rp-sev" style="--s:${color}">${lv}</span><span class="rp-bar" aria-hidden="true"><i style="width:${Math.max(4,Math.round(f.records.length/total*100))}%"></i></span><b class="rp-n">${f.records.length}</b></button>`;}).join('');
-    const obs=observationsMarkup();
+    const obs=evaluationMarkup();
     return `<div class="rp-wrap">${rows?`<div class="rp-filterbar"><span>문제 ${model.findings.length}개</span><em>영향받은 사람 많은 순</em></div><div class="rp-layout"><section class="rp-table" aria-label="문제 목록"><div class="rp-row rp-head" aria-hidden="true"><span></span><span>문제</span><span>영향 규모</span><span>영향받은 사람</span><span>인원</span></div>${rows}</section>${detailCard(model.findings[active],active)}</div>`:obs?'':empty}${obs}${compare}</div>`;
   }
   function compactRecords(){

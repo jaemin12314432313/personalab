@@ -165,7 +165,13 @@ SITE_DEFAULT_MAX_TURNS = 12
 # LLM 모드에서 한 화면을 판단할 수 있는 최대 횟수. 되돌아가기·스크롤은 허용하되 같은 화면을 맴도는 무한 반복과 비용을 막는다.
 BROWSER_MAX_VISITS_PER_SCREEN = 3
 # 모델에 보내는 프롬프트·응답 형식을 바꿀 때마다 올린다. 실행 기록에 남겨 회차 비교가 같은 조건인지 판단하는 데 쓴다.
-PROMPT_REVISION = "2026-11-10.3"
+# UX 관찰의 차원·방향·심각도. 이탈 사유 8개(DROP_REASONS)와 별개이며, 그 8개는 그대로 둔다.
+# 차원: 이해(목적·문구·정보) / 길찾기(메뉴·이동·현재 위치) / 시각(위계·가독성·대비·일관성) / 입력·피드백(폼·오류·상태)
+#       / 신뢰(요구 정보의 근거·안심) / 조작성(터치 크기·라벨) / 인상(첫인상·세련됨; AI 인상이라 신뢰가 낮다)
+OBS_DIMENSIONS: tuple[str, ...] = ("이해", "길찾기", "시각", "입력·피드백", "신뢰", "조작성", "인상")
+OBS_POLARITIES: tuple[str, ...] = ("issue", "good")
+OBS_SEVERITIES: tuple[str, ...] = ("minor", "moderate", "blocking")  # blocking: 이 사람이라면 여기서 그만둘 만한 수준
+PROMPT_REVISION = "2026-11-10.4"
 # 같은 질문을 이 시간 안에 다시 보내면 유료 호출을 반복하지 않고 직전 답을 돌려준다(더블 클릭·응답 유실 뒤 재시도 방어).
 INTERVIEW_DEDUPE_SECONDS = 120
 

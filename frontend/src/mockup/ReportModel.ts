@@ -1,5 +1,5 @@
 import { DROP_LABELS, personaId } from '../studio/model';
-import type { Study, Result, Act } from '../studio/model';
+import type { Study, Result, Act, Observation } from '../studio/model';
 
 export type ActRecord = Result & { act: Act };
 export type Outcome = 'complete' | 'drop' | 'system' | 'pending';
@@ -45,19 +45,29 @@ export function analyzeReport(study: Study) {
     groups.get(key)!.records.push(r);
   }
   const findings = [...groups.values()].sort((a,b) => b.records.length-a.records.length);
-  // 이탈하지 않고 지나가면서 AI가 남긴 걱정. 목표에 도달했거나 탐색을 마친 사람의 불편도 여기서 보인다(이탈로는 세지 않는다).
-  const seen = new Map<string,{key:string;screen:string;code:string;people:{record:ActRecord;note:string}[]}>();
+  // 이탈과 별개로 AI가 단계마다 남긴 UX 관찰(차원·문제/잘 된 점·심각도). 목표에 도달했거나 탐색을 마친 사람의 불편도 여기서 보인다.
+  // 예전 기록의 걱정(concern)은 가까운 차원의 '보통' 문제로 읽는다.
+  const LEGACY_DIM: Record<string,string> = {UNCLEAR_PURPOSE:'이해',FEATURE_MISSING:'이해',PRICE:'이해',NAVIGATION_LOST:'길찾기',TOO_MANY_STEPS:'길찾기',PRIVACY:'신뢰',TRUST:'신뢰',SWITCHING_COST:'신뢰'};
+  const sevRank = (s?: string | null) => s === 'blocking' ? 3 : s === 'moderate' ? 2 : s === 'minor' ? 1 : 0;
+  type Entry = {key:string;dimension:string;screen:string;polarity:'issue'|'good';severity:string|null;people:{record:ActRecord;note:string}[]};
+  const seen = new Map<string,Entry>();
   for (const r of records) for (const e of r.act.events) {
-    if (!e.concern?.code || !e.concern.note) continue;
-    const key = JSON.stringify([e.screen,e.concern.code]);
-    if (!seen.has(key)) seen.set(key,{key,screen:e.screen,code:e.concern.code,people:[]});
-    const entry = seen.get(key)!;
-    if (!entry.people.some(p => p.record.id === r.id)) entry.people.push({record:r,note:e.concern.note});
+    const items: Observation[] = [...(e.observations||[])];
+    if (!items.length && e.concern?.code && e.concern.note) items.push({dimension:LEGACY_DIM[e.concern.code]||'이해',polarity:'issue',severity:'moderate',note:e.concern.note});
+    for (const o of items) {
+      if (!o.dimension || !o.note) continue;
+      const key = JSON.stringify([o.dimension,e.screen,o.polarity]);
+      if (!seen.has(key)) seen.set(key,{key,dimension:o.dimension,screen:e.screen,polarity:o.polarity,severity:null,people:[]});
+      const entry = seen.get(key)!;
+      if (sevRank(o.severity) > sevRank(entry.severity)) entry.severity = o.severity || null;
+      if (!entry.people.some(p => p.record.id === r.id)) entry.people.push({record:r,note:o.note});
+    }
   }
-  const observations = [...seen.values()].sort((a,b) => b.people.length-a.people.length);
+  // 문제가 먼저, 그 안에서는 심각한 순·언급한 사람 많은 순. 잘 된 점은 그 뒤.
+  const evaluation = [...seen.values()].sort((a,b) => Number(b.polarity==='issue')-Number(a.polarity==='issue') || sevRank(b.severity)-sevRank(a.severity) || b.people.length-a.people.length);
   const coverage = study.screens.map(screen => ({screen, arrived:records.filter(r=>r.act.path.includes(screen.id)).length,
     stopped:dropped.filter(r=>r.act.end.screen===screen.id).length, system:system.filter(r=>r.act.end.screen===screen.id).length}));
-  return {records,complete,dropped,system,pending,total:ids.size,visited,findings,observations,coverage};
+  return {records,complete,dropped,system,pending,total:ids.size,visited,findings,evaluation,coverage};
 }
 
 export function recordAnswer(study: Study, id: number, question: string): string {

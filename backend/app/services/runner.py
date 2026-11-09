@@ -61,8 +61,8 @@ async def save_report_snapshot(session: AsyncSession, run, outcome: str) -> None
     try:
         personas = await study_repo.list_personas(session, run.study_id)
         acts = await run_repo.list_act_logs(session, run.id)
-        concerns = await workflow_repo.concerns(session, run.id)
-        results = [r.model_dump(mode="json") for r in build_results(personas, [], acts, concerns)]
+        notes = await workflow_repo.annotations(session, run.id)
+        results = [r.model_dump(mode="json") for r in build_results(personas, [], acts, notes)]
         await run_repo.save_run_report(session, run.id, outcome, REPORT_RULES_VERSION, results)
     except Exception:
         await session.rollback()

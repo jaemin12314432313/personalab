@@ -26,6 +26,14 @@ class ConcernOut(BaseModel):
     note: str
 
 
+class ObservationOut(BaseModel):
+    """화면에서 눈에 띈 UX 관찰 하나. 문제(issue)와 잘 된 점(good)을 함께 담는다."""
+    dimension: str
+    polarity: Literal["issue", "good"]
+    severity: str | None = None  # issue일 때만: minor / moderate / blocking
+    note: str
+
+
 class ActEventOut(BaseModel):
     turn: int  # 1부터. act_logs.turn 은 0부터라 +1 한다
     screen: str
@@ -34,7 +42,8 @@ class ActEventOut(BaseModel):
     reason: str | None = None
     to: str | None = None  # click 일 때 이동한 화면
     drop_reason: str | None = None
-    concern: ConcernOut | None = None  # 이 행동 직전 화면에서 남긴 걱정(없으면 None)
+    concern: ConcernOut | None = None  # 예전 기록의 걱정(새 기록은 observations를 쓴다)
+    observations: list[ObservationOut] = []  # 이 행동 직전 화면에서 남긴 UX 관찰
 
 
 class ActEndOut(BaseModel):

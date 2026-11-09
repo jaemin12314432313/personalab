@@ -92,12 +92,19 @@ async def evidence(session,run_id,persona_id=None):
     if persona_id is not None:q=q.where(BrowserEvidence.persona_id==persona_id)
     return list(await session.scalars(q.order_by(BrowserEvidence.id)))
 
-async def concerns(session, run_id):
-    """행동 기록에 같이 남은 걱정(concern)만 가볍게 읽는다. 이미지 열은 읽지 않는다. 키: (persona_id, turn)."""
+async def annotations(session, run_id):
+    """행동 기록에 같이 남은 걱정(예전 기록)과 UX 관찰(observations)만 가볍게 읽는다. 이미지 열은 읽지 않는다. 키: (persona_id, turn)."""
+    from app.core.config import OBS_DIMENSIONS,OBS_POLARITIES,OBS_SEVERITIES
     out={}
     for persona_id,turn,action in (await session.execute(select(BrowserEvidence.persona_id,BrowserEvidence.turn,BrowserEvidence.action_json).where(BrowserEvidence.run_id==run_id))):
-        c=(action or {}).get('concern')
-        if isinstance(c,dict) and c.get('code') and str(c.get('note') or '').strip():out[(persona_id,turn)]={'code':c['code'],'note':str(c['note']).strip()}
+        a=action or {}
+        c=a.get('concern');concern={'code':c['code'],'note':str(c['note']).strip()} if isinstance(c,dict) and c.get('code') and str(c.get('note') or '').strip() else None
+        obs=[]
+        for o in (a.get('observations') if isinstance(a.get('observations'),list) else []):
+            if not isinstance(o,dict) or o.get('dimension') not in OBS_DIMENSIONS or o.get('polarity') not in OBS_POLARITIES or not str(o.get('note') or '').strip():continue
+            severity=o.get('severity') if o.get('polarity')=='issue' and o.get('severity') in OBS_SEVERITIES else None
+            obs.append({'dimension':o['dimension'],'polarity':o['polarity'],'severity':severity,'note':str(o['note']).strip()})
+        if concern or obs:out[(persona_id,turn)]={'concern':concern,'observations':obs}
     return out
 
 async def add_evidence(session,run_id,persona_id,turn,screen,image,action):
