@@ -60,6 +60,10 @@ async def client(session, monkeypatch):
     monkeypatch.setattr(studies, "sample_personas", sample)
     monkeypatch.setattr(runner, "ask_persona", ask)
     monkeypatch.setattr(runner, "agent_loop", partial(agent_loop, decide=decide))
+    # runner는 decide를 직접 넘기므로 위의 partial만으로는 가짜가 덮어써진다.
+    # (.env에 키가 있으면 진짜 AI를 호출했다.) 실제 호출 지점을 가짜로 바꿔,
+    # 키·.env와 무관하게 유료 호출이 나가지 않게 한다.
+    monkeypatch.setattr(runner, "decide_step", decide)
     started: list[int] = []
 
     async def record(run_id: int) -> None:
