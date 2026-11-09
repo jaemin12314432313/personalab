@@ -150,7 +150,7 @@ export function mountReport(host: HTMLElement, initial: Study, options: ReportOp
       <div class="rp-shot">${image?`<img src="${esc(image)}" alt="${esc(screenTitle(study,f.screen))} 화면">`:'<span>저장된 캡처가 없어요</span>'}</div>
       ${ev?.reason?`<blockquote>“${esc(ev.reason)}”</blockquote>`:'<blockquote class="is-empty">이 화면에서 남긴 발화가 기록되지 않았어요.</blockquote>'}
       <p class="rp-who">${who(lead)}</p>${records.length>1?`<div class="rp-chips" aria-label="같은 곳에서 멈춘 사람">${others}</div>`:''}
-      <div class="rp-fix"><b>이렇게 확인해 보세요</b><p>${esc(checkHypothesis(f.code))}</p></div>
+      <div class="rp-fix"><b>일반 점검 제안</b><p>${esc(checkHypothesis(f.code))}</p><small>이 화면에 맞춘 처방이 아니라 이탈 사유별 일반 안내예요. 수정 효과는 다시 실행해서 확인하세요.</small></div>
       <div class="rp-actions"><button type="button" class="btn solid" data-rv-interview="${lead.id}">이 사람에게 물어보기 →</button><button type="button" class="btn" data-rv-record="${lead.id}">근거 보기</button></div></aside>`;
   }
   // 이탈 없이 지나갔지만 AI가 걱정을 남긴 곳. 이탈 집계와 섞지 않고 따로 보여 준다.

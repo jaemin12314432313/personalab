@@ -499,3 +499,25 @@ def test_browser_decision_schema_asks_for_concern_and_rejects_malformed_ones(mon
     assert check({**ok,'concern':{'code':'PRICE','note':'가격이 비싸 보인다'}}) is None
     assert check({**ok,'concern':{'code':'NOT_A_CODE','note':'x'}})
     assert check({**ok,'concern':{'code':'PRICE','note':'  '}})
+
+
+def test_llm_only_sees_and_may_choose_elements_that_are_on_screen(monkeypatch):
+    seen={}
+    def fake(system,contents,schema,check=None):
+        seen.update(contents=contents,check=check,system=system);return {}
+    monkeypatch.setattr(browser,'require_persona_transmission',lambda:None)
+    monkeypatch.setattr(browser,'call_llm',fake);monkeypatch.setattr(browser,'image_part',lambda i:None)
+    screen={'id':'S','elements':[
+        {'id':'pl-0','text':'지금 보이는 버튼','kind':'button','type':'','in_view':True},
+        {'id':'pl-1','text':'화면 아래 숨은 버튼','kind':'button','type':'','in_view':False}]}
+    browser.decide_browser({'card_text':'가상'},'과제',screen,None,[])
+    import json
+    shown=json.loads(seen['contents'][0])['current_screen']
+    assert [e['id'] for e in shown['elements']]==['pl-0'] and shown['below_fold_elements']==1
+    ok={'action':'click','value':None,'drop_reason':None,'reason':'r','concern':None}
+    assert seen['check']({**ok,'target':'pl-0'}) is None
+    assert seen['check']({**ok,'target':'pl-1'})                 # 화면 밖 요소는 스크롤하기 전에는 고를 수 없다
+    assert seen['check']({'action':'scroll','target':None,'value':None,'drop_reason':None,'reason':'내려 본다','concern':None}) is None
+    # 보이는 요소가 하나도 없으면(예: 측정 실패) 막히지 않도록 전체를 보여 준다
+    seen.clear();browser.decide_browser({'card_text':'가상'},'과제',{'id':'S','elements':[{'id':'pl-9','text':'x','kind':'a','type':'','in_view':False}]},None,[])
+    assert [e['id'] for e in json.loads(seen['contents'][0])['current_screen']['elements']]==['pl-9']

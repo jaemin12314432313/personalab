@@ -142,3 +142,22 @@ async def test_interview_prompt_includes_product_intro_and_target_audience(clien
     data=json.loads(service.build_interview_prompt(ctx,'왜 멈췄나요?',[])['contents'][0])
     assert data['product_intro']                       # 제품 이름·설명이 들어간다
     assert data['target_audience']=='독서 습관을 만들고 싶은 직장인'
+
+
+async def test_repeating_the_same_llm_question_does_not_charge_twice(client,session,monkeypatch):
+    created,report=await demo(client);rid=created['run_id'];pid=report['results'][1]['id'];uid=(await client.get('/auth/me')).json()['id']
+    ctx=await repo.context(session,rid,pid,uid)
+    await session.execute(delete(LocalDemoStudy).where(LocalDemoStudy.study_id==created['study_id']));await session.commit()
+    monkeypatch.setattr(settings,'allow_persona_transmission',True);monkeypatch.setattr(settings,'llm_api_key','unit-test-key')
+    calls=[]
+    def model(system,contents,schema,check):
+        calls.append(1);return {'answer':'기록에 근거한 답변입니다.','evidence_log_ids':[ctx['logs'][-1].id],'unverified':False}
+    monkeypatch.setattr(service,'call_llm',model)
+    path=f'/runs/{rid}/personas/{pid}/interview'
+    base=await session.scalar(select(func.count()).select_from(InterviewMessage))
+    first=await client.post(path,json={'question':'왜 멈췄나요?','mode':'llm'});assert first.status_code==201
+    again=await client.post(path,json={'question':'왜 멈췄나요?','mode':'llm'});assert again.status_code==201
+    assert len(calls)==1 and again.json()['id']==first.json()['id']        # 유료 호출은 한 번뿐, 같은 답을 돌려준다
+    other=await client.post(path,json={'question':'어디가 가장 헷갈렸나요?','mode':'llm'});assert other.status_code==201
+    assert len(calls)==2 and other.json()['id']!=first.json()['id']        # 다른 질문은 정상적으로 호출한다
+    assert await session.scalar(select(func.count()).select_from(InterviewMessage))==base+2   # 저장된 문답은 두 개뿐

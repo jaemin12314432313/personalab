@@ -1,9 +1,10 @@
 import asyncio
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter,Depends,HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import current_user_id
 from app.core.db import get_session
-from app.core.config import settings,PERSONA_TRANSMISSION_BLOCKED,INTERVIEW_HISTORY_LIMIT
+from app.core.config import settings,PERSONA_TRANSMISSION_BLOCKED,INTERVIEW_HISTORY_LIMIT,INTERVIEW_DEDUPE_SECONDS
 from app.repositories import interview as repo
 from app.schemas.interview import InterviewIn,InterviewOut,InterviewMessageOut
 from app.services import interview as service
@@ -42,6 +43,12 @@ async def post_interview(run_id:int,persona_id:int,body:InterviewIn,session:Asyn
         if not settings.llm_api_key:raise HTTPException(503,'LLM 키 설정이 필요합니다.')
     if build_act(ctx['logs']) is None:raise HTTPException(409,'완료된 탐색 기록이 있어야 질문할 수 있습니다.')
     thread=await repo.thread(session,run_id,persona_id,lock=True)
+    if body.mode=='llm':
+        # 같은 질문의 반복 전송(더블 클릭, 응답이 유실된 뒤의 재시도)은 유료 호출을 또 하지 않고 직전 답을 돌려준다.
+        # 스레드 행을 잠근 뒤에 확인하므로 동시에 들어온 같은 요청도 하나만 호출된다.
+        last=(await repo.messages(session,thread.id))[-1:]
+        if last and last[0].mode=='llm' and last[0].question==body.question and datetime.now(timezone.utc)-last[0].created_at<timedelta(seconds=INTERVIEW_DEDUPE_SECONDS):
+            return message_out(last[0])
     try:
         if body.mode=='records':answer,evidence=service.records_answer(ctx,body.question)
         else:answer,evidence=await asyncio.to_thread(service.llm_answer,ctx,body.question,await repo.messages(session,thread.id))
