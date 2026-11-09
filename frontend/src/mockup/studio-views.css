@@ -365,3 +365,4 @@
 #liveReport .rp-obs-item blockquote{margin:0;padding:10px 12px;border-radius:10px;background:#f6f2eb;font:600 13.5px/1.6 var(--sans)}
 #liveReport .rp-obs-item cite{display:block;margin-top:4px;font:500 11.5px var(--sans);color:var(--sv-fg3);font-style:normal}
 #liveReport .rp-fix small{display:block;margin-top:6px;font-size:11.5px;color:var(--sv-fg3)}
+.llm-notice{display:flex;gap:10px;align-items:flex-start;cursor:pointer}.llm-notice input{margin-top:3px;flex:none}

@@ -305,6 +305,49 @@ test('library panel and Act-only flow use stored server responses without planni
   });
 });
 
+test('AI (LLM) runs need the OpenAI-transmission acknowledgement before any run is created',async()=>{
+  await environment(async({dom,mount})=>{
+    const calls=[];
+    const panel=[{id:7,attributes:{profile:{age:28,job_group:'학생'},card_text:'엔진에서 받은 카드',traits:{},source:{persona_id:'ENGINE007',scoring_version:'v-test',library_entry_id:107,library_panel_id:7}}}];
+    const ask={usage_intention:2,willingness_to_pay:0,needed_features:['일정 정리'],unneeded_features:[],concern:'PRIVACY',reason:'서버의 실제 형식 응답'};
+    const act={path:['S01','S02'],events:[{turn:1,screen:'S01',action:'click',target:'시작하기',to:'S02',reason:'첫 화면 탐색'},{turn:2,screen:'S02',action:'abandon',target:null,to:null,reason:'서버에서 받은 이탈 이유',drop_reason:'PRIVACY'}],end:{result:'drop',screen:'S02',drop_reason:'PRIVACY'}};
+    const result=(includeAct)=>[{id:7,persona_id:'ENGINE007',ask:null,act:includeAct?act:null}];
+    globalThis.fetch=async(url,options={})=>{
+      const body=options.body?JSON.parse(options.body):undefined; calls.push({url,body});
+      let data={};
+      if(url.endsWith('/capabilities'))data={persona_ready:true,llm_ready:true,provider:'openai',agent_engine:'llm',persona_transmission_allowed:true,library_ready:true,library_count:400,model:'gpt-5.4-mini',missing:[]};
+      else if(url==='/api/studies') data=body?{id:42}:[];
+      else if(url==='/api/persona-library/panels')data=[{id:7,panel_key:'panel_univ_n100_seed42',count:100,version_hash:'v1',source_commit:'commit',metadata:{}}];
+      else if(url.endsWith('/panel/import'))data=panel;
+      else if(url.endsWith('/runs'))data={id:body.mode==='ask'?101:102,status:'pending',progress:0,mode:body.mode};
+      else if(url.endsWith('/status'))data={id:url.includes('101')?101:102,status:'done',progress:1};
+      else if(url.endsWith('/report'))data={study_id:42,ask_run_id:101,act_run_id:url.includes('101')?null:102,results:result(!url.includes('101'))};
+      return new Response(JSON.stringify(data),{status:200,headers:{'content-type':'application/json'}});
+    };
+    mount(); const d=dom.window.document;
+    await until(()=>d.getElementById('engineStatus').textContent==='엔진 연결됨');
+    for(const[id,value]of Object.entries({pname:'실제 입력 제품',pdesc:'입력한 제품 설명',pfeat:'일정 정리'})){d.getElementById(id).value=value;d.getElementById(id).dispatchEvent(new dom.window.Event('input',{bubbles:true}));}
+    registerFixtureScreens(dom);
+    d.getElementById('samplePanel').click();
+    await until(()=>d.getElementById('tickets').textContent.includes('ENGINE007'));
+    assert.deepEqual(calls.find(c=>c.url.endsWith('/panel/import')).body,{panel_id:7,n:30,seed:42});
+    assert.ok(!calls.some(c=>c.url.endsWith('/panel/generate')));
+    assert.ok(!calls.some(c=>c.url.endsWith('/questions')));
+    assert.ok(d.getElementById('tickets').textContent.includes('엔진에서 받은 카드'));
+    dom.window.location.hash='#run';
+    // 확인 체크 없이는 실행이 만들어지지 않고, 무엇이 전송되는지 알려 준다
+    assert.equal(d.getElementById('llmNotice').hidden,false);
+    d.getElementById('startRun').click();
+    await until(()=>d.getElementById('liveNotice').textContent.includes('OpenAI로 전송'));
+    assert.ok(!calls.some(c=>c.url.endsWith('/runs')));
+    // 확인하면 그때 실행이 시작된다
+    d.getElementById('llmConsent').checked=true;
+    d.getElementById('startRun').click();
+    await until(()=>d.getElementById('liveNotice').textContent.includes('서버에 저장되었습니다'));
+    assert.deepEqual(calls.filter(c=>c.url.endsWith('/runs')).map(c=>c.body.mode),['act']);
+  });
+});
+
 test('deferred card transmission keeps library selection but never queues a run',async()=>{
   await environment(async({dom,mount})=>{
     const calls=[];

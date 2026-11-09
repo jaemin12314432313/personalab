@@ -610,6 +610,8 @@ export function mountMockup(root: HTMLElement) {
     el('transmissionStatus').hidden=!reason;
     // 규칙 기반 엔진이면 비용이 없다는 것과 결과가 체험용이라는 것을 실행 전에 알린다
     el('engineNotice').hidden=capabilities?.agent_engine!=='rule'||running||executedLayout();
+    // AI(LLM) 실행은 외부 전송과 비용이 따르므로 시작 전에 알리고 확인을 받는다
+    el('llmNotice').hidden=capabilities?.agent_engine!=='llm'||running||executedLayout()||hasRun;
     el('transmissionStatus').textContent=reason;
     const button=el<HTMLButtonElement>('startRun');button.disabled=running||Boolean(reason);
     button.textContent=running?'실행 상태 확인 중…':hasRun?'상태 새로고침':'실행하기 →';button.classList.toggle('solid',!records);button.hidden=hasRun&&state.canReport;
@@ -711,6 +713,7 @@ export function mountMockup(root: HTMLElement) {
     const owner = sessionEpoch, draftId = study.id;
     await probe(); requireSession(owner, draftId);
     if (!study.runs?.act && capabilities?.agent_engine !== 'rule' && capabilities?.persona_transmission_allowed === false) throw new Error('실제 페르소나 카드의 외부 전송이 보류되어 있습니다.');
+    if (!study.runs?.act && capabilities?.agent_engine === 'llm' && !el<HTMLInputElement>('llmConsent').checked) throw new Error('AI 실행은 페르소나 카드와 화면 캡처가 OpenAI로 전송돼요. 안내를 확인하고 체크한 뒤 실행해 주세요.');
     if (!study.runs?.act && !study.runs?.ask) await prepare();
     requireSession(owner, draftId); if (!serverReady || (!study.runs?.act&&capabilities?.agent_engine!=='rule'&&!capabilities?.llm_ready)) throw new Error('실제 실행 서버와 LLM 키를 준비해 주세요. 상단 연결 상태에서 확인할 수 있습니다.');
     if (!study.serverId || !study.personas.length) throw new Error('실제 페르소나 패널을 먼저 생성해 주세요.');
