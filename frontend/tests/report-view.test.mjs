@@ -74,7 +74,7 @@ test('print report includes every finding, coverage, source and original quote s
   const s=fixture();s.product.name='<img src=x onerror=alert(1)>';const host=dom.window.document.getElementById('a');host.innerHTML=printer.printableReport(s);
   assert.equal(host.querySelectorAll('img,script').length,0);assert.ok(host.textContent.includes('UI 목데이터'));
   assert.ok(host.textContent.includes('개인정보 요구'));assert.ok(host.textContent.includes('복잡한 절차'));
-  assert.ok(host.textContent.includes('결과 없음 1명'));assert.ok(host.textContent.includes('탐색 한도 1명'));assert.ok(host.textContent.includes('수정 효과가 입증된 결론이 아닌'));
+  assert.ok(host.textContent.includes('결과 없음 1명'));assert.ok(host.textContent.includes('횟수까지 살펴봄 1명'));assert.ok(host.textContent.includes('수정 효과가 입증된 결론이 아닌'));
   for(const p of s.personas)assert.ok(host.textContent.includes(p.attributes.source.persona_id));
   for(const screen of s.screens)assert.ok(host.textContent.includes(screen.label));
 }));
@@ -89,8 +89,8 @@ test('revision comparison distinguishes changed goals and unobserved issues from
   assert.ok(workflow.comparisonMarkup(a,b).includes('탐색 조건이 달라졌습니다.'));
   b.results=[];
   const out=workflow.comparisonMarkup(a,b);
-  assert.ok(out.includes('이번 회차에서 관찰되지 않음'));
-  assert.ok(out.includes('해결 여부는 방문 범위를 함께 확인'));
+  assert.ok(out.includes('관련 화면을 이번 회차에서 아무도 방문하지 않음'));
+  assert.ok(out.includes('해결로 볼 수 없어요'));   // 안 본 화면의 문제를 해결로 표시하지 않는다
 }));
 
 
@@ -174,7 +174,7 @@ test('comparison keeps neutral metrics neutral, flags AI noise and changed model
   const sys=(s,n)=>{s.results=s.results.map((r,i)=>i<n&&r.act?{...r,act:{...r.act,end:{result:'drop',screen:r.act.path.at(-1),drop_reason:'MAX_TURNS'}}}:r);};
   sys(a,0);sys(b,2);
   const rule=workflow.comparisonMarkup(a,b);
-  const systemCard=rule.split('<div class="cmp-card">').find(c=>c.includes('탐색 마침·한도'));
+  const systemCard=rule.split('<div class="cmp-card">').find(c=>c.includes('탐색 마침·횟수까지'));
   assert.ok(systemCard&&!/cmp-delta (good|bad)/.test(systemCard));
   assert.ok(!rule.includes('오차 범위'));   // 규칙 기반은 같은 입력이면 같은 결과라 오차 경고가 없다
   // AI(LLM) 실행: 작은 차이는 오차 범위, 모델·프롬프트가 달라지면 조건 변경 안내

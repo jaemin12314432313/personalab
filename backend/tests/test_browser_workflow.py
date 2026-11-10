@@ -1196,3 +1196,27 @@ async def test_workflow_without_images_drops_capture_data_but_keeps_settings(cli
         light.json()["source"]["kind"] == "html" and light.json()["scope"] == full.json()["scope"]
     )
     assert len(light.content) < len(full.content)
+
+
+def test_extra_good_observations_are_trimmed_not_rejected(monkeypatch):
+    """잘 된 점이 여럿이어도 그 사람의 실행을 버리지 않고 첫 번째만 남긴다."""
+    good = {"dimension": "이해", "polarity": "good", "severity": None, "note": "첫 번째"}
+    other = {"dimension": "시각", "polarity": "good", "severity": None, "note": "두 번째"}
+    issue = {"dimension": "신뢰", "polarity": "issue", "severity": "minor", "note": "문제"}
+
+    def fake(system, contents, schema, check=None):
+        out = {"action": "click", "target": "pl-0", "observations": [good, other, issue]}
+        assert (
+            check({**out, "value": None, "drop_reason": None, "reason": "r"}) is None
+        )  # 검사는 통과시키고, 자르기는 반환 후에 한다
+        return out
+
+    monkeypatch.setattr(browser, "require_persona_transmission", lambda: None)
+    monkeypatch.setattr(browser, "call_llm", fake)
+    monkeypatch.setattr(browser, "image_part", lambda i: None)
+    screen = {
+        "id": "S",
+        "elements": [{"id": "pl-0", "text": "다음", "kind": "a", "type": "", "in_view": True}],
+    }
+    result = browser.decide_browser({"card_text": "가상"}, "과제", screen, None, [])
+    assert result["observations"] == [good, issue]

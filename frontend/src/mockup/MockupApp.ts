@@ -300,7 +300,10 @@ export function mountMockup(root: HTMLElement) {
       if(stayRevisionServer){
         // 워크스페이스 개요에서 만들면 화면을 옮기지 않고, 바로 오른쪽에 새 회차 카드가 생긴다
         const from=stayRevisionServer;stayRevisionServer=0;
-        void task(async()=>{const owner=sessionEpoch;const created=await api.createRevision(from,note);requireSession(owner);await probe();renderWorkspace();notice(`새 회차를 만들었어요. 오른쪽 카드에서 이어서 설정하세요.${created.id?'':''}`);});
+        void task(async()=>{const owner=sessionEpoch;const created=await api.createRevision(from,note);requireSession(owner);await probe();renderWorkspace();notice(`새 회차를 만들었어요. 마지막 회차 카드에서 이어서 설정하세요.${created.id?'':''}`);
+          // 회차가 많으면 새 카드가 가로 스크롤 오른쪽 밖에 생긴다. 보이는 곳으로 옮기고 잠깐 강조한다. 목록이 늦게 갱신될 수 있어 몇 번 시도한다.
+          const reveal=(tries:number)=>{const cards=document.querySelectorAll<HTMLElement>('.ws-rounds-row .ws-round-card:not(.ws-round-add)'),last=cards[cards.length-1];if(!last){if(tries>0)setTimeout(()=>reveal(tries-1),300);return;}last.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});last.classList.add('is-new');setTimeout(()=>last.classList.remove('is-new'),2400);};
+          reveal(4);});
         return;
       }
       if(afterRevisionPrepare){const prepare=afterRevisionPrepare;void task(async()=>{await prepare();await createStudy(true,note,true);});}
@@ -586,7 +589,7 @@ export function mountMockup(root: HTMLElement) {
       }
       if(study.runs?.act&&!study.execution&&!running&&!runRefreshPaused)await refreshStoredRun();
       renderLibraryControls(); renderTransmissionState();renderStudioContext();
-      el('engineStatus').textContent = (libraryPanels.length || capabilities.persona_ready) && capabilities.agent_engine === 'rule' ? '규칙 기반 탐색 · 비용 없음' : (libraryPanels.length || capabilities.persona_ready) && capabilities.llm_ready ? cap.persona_transmission_allowed === false ? '연결됨 · 카드 전송 보류' : '엔진 연결됨' : '서버 연결 · 준비 필요';
+      el('engineStatus').textContent = (libraryPanels.length || capabilities.persona_ready) && capabilities.agent_engine === 'rule' ? '새 실행은 규칙 기반 · 비용 없음' : (libraryPanels.length || capabilities.persona_ready) && capabilities.llm_ready ? cap.persona_transmission_allowed === false ? '연결됨 · 카드 전송 보류' : '엔진 연결됨' : '서버 연결 · 준비 필요';
       el('connectionContents').innerHTML = `<p>서버와 DB 연결 확인</p><p>페르소나 보관함 ${libraryPanels.reduce((n,p) => n+p.count,0)}명 · ${escape(cap.provider)} · ${escape(cap.model || '서버 설정 모델')}</p><ul>${cap.missing.map(m => `<li>${escape(m)}</li>`).join('') || '<li>저장된 페르소나와 LLM이 연결되어 있습니다.</li>'}</ul><p>탐색 상한: ${cap.max_turns ?? '서버 설정'}턴. 한도에 도달한 기록은 사용자 이탈과 구분합니다.</p>`;
     } catch (error) {
       if (!sameSession(owner)) return;
@@ -811,6 +814,9 @@ export function mountMockup(root: HTMLElement) {
       else{view=blocked.view;window.history.replaceState(null,'',`#${view}`);notice(blocked.message,true);}
     }
     shownView=view;
+    // 화면마다 탭 제목이 같으면 여러 탭을 열었을 때 구분이 안 된다
+    { const names:Record<string,string>={workspace:'워크스페이스',product:'화면 연결','source-review':'화면 확인',panel:'대상 사용자',personas:'참여 구성',scope:'탐색 범위',run:'실행',report:'리포트',interview:'1대1 인터뷰',compare:'회차 비교',login:'로그인',sample:'샘플 결과',demo:'체험'};
+      if(names[view])document.title=`${names[view]} · PersonaLab`;else if(view==='landing')document.title='PersonaLab — 화면은 같아도, 경험은 다르니까'; }
     if(returnAfterRunCheck&&!['run',returnAfterRunCheck.view].includes(view))returnAfterRunCheck=undefined;
     if (view === 'login') { if (user) { location.hash = '#workspace'; return; } setAuthMode(authBusy?authMode:key === 'register' ? 'register' : 'login'); }
     if (view !== 'workspace') workspaceSidebar.close();

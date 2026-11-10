@@ -619,11 +619,18 @@ def decide_browser(persona, task, screen, image, history):
         "화면에서 직접 관찰한 사실과 페르소나의 판단을 reason에서 구분한다. 시간, 감정 점수, "
         "실제 사람의 반응을 만들지 않는다. 화면에 보이는 요소만 주어지고, 더 아래에 있는 "
         "요소는 below_fold_elements 개수로만 알려 준다. 필요하면 scroll로 내려서 확인한다. 이 "
-        "화면에서 눈에 띈 점을 observations에 최대 3개 적는다. 각 항목은 "
+        "화면에서 이 페르소나가 실제로 겪을 만한 불편이나 막힘을 observations에 적는다. 각 항목은 "
         "dimension(이해·길찾기·시각·입력·피드백·신뢰·조작성·인상 중 하나), polarity(issue 또는 "
         "good), severity(issue일 때 minor·moderate·blocking, blocking은 이 사람이라면 여기서 "
         "그만둘 만한 수준이고 good이면 null), note(화면에서 본 사실에 근거한 한 문장)로 쓴다. "
-        "불편은 계속 진행하더라도 적고, 잘 된 점도 적는다. 없으면 빈 배열이다."
+        "불편은 계속 진행하더라도 적는다. 불편이 없으면 문제는 적지 않고 빈 배열로 "
+        "둔다. 최대 3개이며 채울 필요가 없다. 잘 된 점은 이 사람의 목표를 직접 돕는 "
+        "구체적인 요소가 있을 때만 최대 1개 적는다. 모든 항목은 화면의 구체적인 "
+        "요소(문구·버튼·입력칸 이름)를 짚고, 이 페르소나의 나이·직업·디지털 "
+        "친숙도·개인정보 우려에 비춘 판단이어야 한다. 어느 화면에나 할 수 있는 "
+        "일반적인 문장(여백이 넓다, 버튼 대비가 좋다, 이동 경로가 분명하다 같은 것)은 "
+        "쓰지 않는다. 시각·인상은 눈에 띄는 구체적 결함이 있을 때만 쓴다. "
+        "target에는 항상 요소 id를 쓰고, 요소 이름은 note에서만 말한다."
     )
     contents = [
         json.dumps(
@@ -639,7 +646,17 @@ def decide_browser(persona, task, screen, image, history):
     part = image_part(image)
     if part is not None:
         contents.append(part)
-    return call_llm(system, contents, schema, check)
+    out = call_llm(system, contents, schema, check)
+    # 잘 된 점은 최대 1개만 남긴다. 모델이 더 내도 그 사람의 실행을 버리지 않고 초과분만 자른다.
+    kept, has_good = [], False
+    for o in out.get("observations") or []:
+        if o["polarity"] == "good":
+            if has_good:
+                continue
+            has_good = True
+        kept.append(o)
+    out["observations"] = kept
+    return out
 
 
 async def act(page, screen, decision):

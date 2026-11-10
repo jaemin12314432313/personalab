@@ -198,7 +198,7 @@ OBS_SEVERITIES: tuple[str, ...] = (
     "moderate",
     "blocking",
 )  # blocking: 이 사람이라면 여기서 그만둘 만한 수준
-PROMPT_REVISION = "2026-11-10.4"
+PROMPT_REVISION = "2026-11-10.5"
 # 같은 질문을 이 시간 안에 다시 보내면 유료 호출을 반복하지 않고 직전 답을 돌려준다(더블 클릭·응답
 # 유실 뒤 재시도 방어).
 INTERVIEW_DEDUPE_SECONDS = 120

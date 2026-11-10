@@ -8,7 +8,25 @@ export const reportSource = (s: Study) => s.reportSource === 'local-demo' ? 'loc
 export const sourceTitle = (s: Study) => s.reportSource === 'local-demo' ? '로컬 연결 점검 · 가상 예시' : s.reportSource === 'ui-mock' ? 'UI 목데이터' : s.source === 'demo' ? '저장된 AI 데모' : '저장된 AI 탐색 기록';
 export const browserReport = (s: Study) => s.workflow?.source.kind === 'web' || s.workflow?.source.kind === 'html';
 export const observationBasis = (s: Study) => browserReport(s) ? (s.workflow?.scope.product_kind&&s.workflow.scope.product_kind!=='web'?'앱용 HTML/웹 프로토타입을 모바일 브라우저에서 탐색한 기록입니다. 설치 앱의 OS·권한·키보드 동작은 검증하지 않습니다.':!s.workflow?.source.site_map?'페이지 목록이 없는 이전 연결의 탐색 기록입니다. 사이트 전체 화면 수와 미방문 영역은 집계하지 않습니다.':'발견한 페이지 목록과 실제 브라우저 탐색 기록을 대조합니다. 구조 확인은 사용성 평가 완료가 아니며, 로그인 뒤 화면과 발견하지 못한 영역은 포함하지 않습니다.') : s.screens.some(screen=>screen.image)?'등록된 화면 시안·설명·버튼 연결에 기반합니다. 설치 앱의 OS 동작·권한 팝업·키보드는 재현하지 않습니다. 방문하지 않은 화면은 평가하지 않습니다.':'등록된 화면 설명과 버튼 연결에 기반합니다. 방문하지 않은 화면은 평가하지 않습니다.';
-export const screenTitle = (s: Study, id?: string | null) => s.screens.find(screen => screen.id === id)?.label || id || '화면 정보 없음';
+/** 화면 이름마다 "— 모아북"처럼 같은 사이트 이름이 붙어 있으면 읽기 어렵다. 대부분의 화면이 공유하는 꼬리표는 떼고 보여 준다. */
+function shownLabels(screens: Study['screens']) {
+  const labels = screens.map(x => x.label || '');
+  if (labels.length < 3) return labels;
+  const SEP = /\s[—–|·-]\s/;
+  const tails = new Map<string, number>();
+  for (const label of labels) { const at = label.split(SEP); if (at.length > 1) { const tail = at[at.length - 1].trim(); tails.set(tail, (tails.get(tail) || 0) + 1); } }
+  const [brand, count] = [...tails.entries()].sort((a, b) => b[1] - a[1])[0] || ['', 0];
+  if (!brand || count < Math.ceil(labels.length * 0.6)) return labels;
+  return labels.map(label => {
+    const parts = label.split(SEP).map(x => x.trim());
+    const kept = parts.length > 1 && parts[parts.length - 1] === brand ? parts.slice(0, -1) : parts.length > 1 && parts[0] === brand ? parts.slice(1) : parts;
+    return kept.join(' · ') || label;
+  });
+}
+export const screenTitle = (s: Study, id?: string | null) => {
+  const at = s.screens.findIndex(screen => screen.id === id);
+  return (at >= 0 ? shownLabels(s.screens)[at] : '') || id || '화면 정보 없음';
+};
 // 규칙 기반 탐색(AI 없음)에서 '더 누를 곳이 없어서' 또는 '이미 본 화면으로 돌아와서' 끝난 것은 사람이 포기한 것이 아니다.
 // 사용자 이탈(문제)로 세지 않고 '탐색 마침'으로 따로 둔다.
 const ruleBased = (r: Result) => Boolean(r.act?.events.some(e => (e.reason || '').startsWith('규칙 기반 탐색')));
@@ -16,7 +34,12 @@ const ruleBased = (r: Result) => Boolean(r.act?.events.some(e => (e.reason || ''
 // 페르소나가 직접 '길을 잃었다'며 포기(abandon)한 기록만 사용자 이탈로 센다.
 const forcedStop = (r: Result) => r.act?.end.drop_reason === 'NAVIGATION_LOST' && r.act.events.at(-1)?.action !== 'abandon';
 export const outcome = (r?: Result): Outcome => !r?.act ? 'pending' : r.act.end.result === 'complete' ? 'complete' : r.act.end.drop_reason === 'MAX_TURNS' || (r.act.end.drop_reason === 'NAVIGATION_LOST' && (ruleBased(r) || forcedStop(r))) ? 'system' : 'drop';
-export const outcomeLabel = (r?: Result) => outcome(r) === 'system' && r?.act?.end.drop_reason !== 'MAX_TURNS' ? '탐색 마침' : ({ complete:'목표 도달', drop:'탐색 중단', system:'탐색 한도', pending:'결과 없음' })[outcome(r)];
+export const outcomeLabel = (r?: Result) => outcome(r) === 'system' && r?.act?.end.drop_reason !== 'MAX_TURNS' ? '탐색 마침' : ({ complete:'목표 도달', drop:'탐색 중단', system:'횟수까지 살펴봄', pending:'결과 없음' })[outcome(r)];
+// 목표 화면이 있는 탐색인가. 전반 탐색에는 목표가 없어서 정해 둔 횟수까지 살펴보는 것이 정상적인 끝이다.
+export const goalFlow = (s: Study) => s.workflow?.scope.exploration === 'journey' || Boolean(s.workflow?.scope.goal_url || s.workflow?.scope.goal_text);
+export const limitNote = (s: Study) => goalFlow(s)
+  ? '목표에 닿기 전에 정한 횟수가 끝난 기록이 있어요. 탐색 횟수를 늘려 다시 실행해 보세요.'
+  : '정한 횟수까지 살펴본 기록이에요. 사용자 이탈이나 문제로 세지 않아요.';
 export const dropLabel = (code?: string | null) => DROP_LABELS[code || ''] || '이유 미기록';
 export const checkHypothesis = (code: string) => ({
   PRIVACY:'각 정보가 필요한 이유와 보관 범위를 안내하고, 필수 입력을 줄일 수 있는지 확인하세요.',

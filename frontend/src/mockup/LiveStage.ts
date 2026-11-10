@@ -4,12 +4,14 @@ import { outcome } from './ReportModel';
 import { portraitMarkup, displayAttributes } from './DisplayPersona';
 import './live-stage.css';
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
-const actionName=(e?:BrowserEvidence)=>e?.action.status==='failed'?'실행 차단':e?({click:'클릭',fill:'입력',scroll:'스크롤',abandon:'탐색 중단',complete:'목표 도달',stop:e.action.drop_reason==='MAX_TURNS'?'한도 종료':'탐색 종료'}[e.action.action||'']||'화면 관찰'):'기록 대기';
+const actionName=(e?:BrowserEvidence)=>e?.action.status==='failed'?'실행 차단':e?({click:'클릭',fill:'입력',scroll:'스크롤',abandon:'탐색 중단',complete:'목표 도달',stop:e.action.drop_reason==='MAX_TURNS'?'횟수까지':'탐색 종료'}[e.action.action||'']||'화면 관찰'):'기록 대기';
+// 타임라인 마커 색: 클릭·입력·중단·목표·횟수까지를 한눈에 구분한다(세션 재생기의 이벤트 마커와 같은 읽는 법)
+const markerKind=(e:BrowserEvidence,last:boolean,result?:string)=>e.action.status==='failed'?'fail':e.action.action==='abandon'?'stop':(e.action.action==='complete'||(last&&result==='complete'))?'goal':e.action.action==='stop'?'sys':e.action.action==='fill'?'fill':'step';
 const imageSource=(value?:string)=>value&&(/^(data:image\/(jpeg|png|webp);base64,|\/api\/runs\/\d+\/evidence\/\d+\/image(?:\?|$))/.test(value))?value:'';
 const IMAGE_WAIT_MS=7000,REPLAY_MS=1500;
 type Frame={node:HTMLButtonElement;image:HTMLImageElement;buffer:HTMLImageElement;requested:string;record?:BrowserEvidence;pending?:BrowserEvidence;loading:boolean;error:boolean;token:number;timer?:ReturnType<typeof setTimeout>};
 export function mountLiveStage(host:HTMLElement){
- let study:Study|null=null,key='',selected=0,person=0,follow=true,automatic=true,playing=false,disposed=false,logAll=true;
+ let study:Study|null=null,key='',selected=0,person=0,follow=true,automatic=true,playing=false,disposed=false,logAll=true,replayScope:'person'|'all'='all';
  let replayTimer:ReturnType<typeof setTimeout>|undefined,liveTimer:ReturnType<typeof setTimeout>|undefined;
  const frames=new Map<number,Frame>();
  host.classList.add('ls-compact');
@@ -91,7 +93,7 @@ export function mountLiveStage(host:HTMLElement){
     const rs2=(study.results||[]).filter(r=>r.act),good=rs2.filter(r=>outcome(r)==='complete').length,bad=rs2.filter(r=>outcome(r)==='drop').length;
     el('[data-ls-sub]').textContent=`${study.product?.name||study.name||'테스트'} · ${total}명 중 ${terminal}명이 끝냈어요${good?` · 목표 도달 ${good}명`:''}${bad?` · 중간에 멈춘 ${bad}명`:''}${lostPeople?` · 오류로 기록이 없는 ${lostPeople}명`:''}`;
     const bar=el('.ls-progress');bar.setAttribute('aria-valuenow',String(pct));bar.querySelector<HTMLElement>('i')!.style.width=`${pct}%`; }
-  const peopleMarkup=study.personas.map(p=>{const last=all.filter(e=>e.persona_id===p.id).at(-1),ended=(study!.results||[]).find(r=>r.id===p.id)?.act;return `<button type="button" data-ls-person="${p.id}" aria-pressed="${person===p.id}"><strong>${esc(personLabel(p.id))}</strong><small>${ended?ended.end.drop_reason==='MAX_TURNS'?'한도 종료':ended.end.result==='complete'?'목표 도달':'탐색 종료':last?actionName(last):'기록 대기'}</small></button>`;}).join('');
+  const peopleMarkup=study.personas.map(p=>{const mine=all.filter(e=>e.persona_id===p.id),last=mine.at(-1),ended=(study!.results||[]).find(r=>r.id===p.id)?.act;const ticks=mine.map((e,i)=>`<b class="is-${markerKind(e,i===mine.length-1,ended?.end.result)}"></b>`).join('');return `<button type="button" data-ls-person="${p.id}" aria-pressed="${person===p.id}"><strong>${esc(personLabel(p.id))}</strong><i class="ls-ticks" aria-hidden="true">${ticks}</i><small>${ended?ended.end.drop_reason==='MAX_TURNS'?'횟수까지':ended.end.result==='complete'?'목표 도달':'탐색 종료':last?actionName(last):'기록 대기'}</small></button>`;}).join('');
   if(el('.ls-people').innerHTML!==peopleMarkup)el('.ls-people').innerHTML=peopleMarkup;
   for(const[id,f]of frames)if(!ids.includes(id)){clearTimeout(f.timer);f.token++;f.node.remove();frames.delete(id);}
   ids.forEach((id,i)=>{
@@ -117,18 +119,18 @@ export function mountLiveStage(host:HTMLElement){
   el('.ls-reason').textContent=fullReason.length>180?fullReason.slice(0,180)+'…':fullReason;
   el('[data-ls-full-reason]').textContent=fullReason;el<HTMLButtonElement>('[data-ls-reason]').hidden=!shown?.action.reason&&!shown?.action.error;
   const profile=study.personas.find(p=>p.id===person);el('[data-ls-portrait]').innerHTML=profile?portraitMarkup(displayAttributes(profile.attributes),'ls-portrait-img'):'';el('[data-ls-identity]').textContent=personLabel(person);el('[data-ls-profile]').textContent=profile?`${profile.attributes.profile.age}세 · ${profile.attributes.profile.job_group}`:'';
-  const timeline=el('.ls-timeline'),items=all.filter(e=>e.persona_id===person);const markup=items.map(e=>`<button type="button" data-ls-evidence="${e.id}" aria-pressed="${shown?.id===e.id}"><span>${String(e.turn+1).padStart(2,'0')}</span> ${esc(actionName(e))}</button>`).join('');if(timeline.innerHTML!==markup)timeline.innerHTML=markup;
+  const timeline=el('.ls-timeline'),items=all.filter(e=>e.persona_id===person);const endResult=(study!.results||[]).find(r=>r.id===person)?.act?.end.result;const markup=items.map((e,i)=>`<button type="button" class="ls-m is-${markerKind(e,i===items.length-1,endResult)}" data-n="${e.turn+1}" title="${esc(`${e.turn+1}번째 · ${actionName(e)}`)}" data-ls-evidence="${e.id}" aria-pressed="${shown?.id===e.id}"><span>${String(e.turn+1).padStart(2,'0')}</span> ${esc(actionName(e))}</button>`).join('');if(timeline.innerHTML!==markup)timeline.innerHTML=markup;
   const log=el('.ls-log'),shownItems=logAll?[...all].reverse().slice(0,60):items;
   host.querySelectorAll<HTMLElement>('[data-ls-logmode]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.lsLogmode==='all')===logAll)));
   const logMarkup=shownItems.map(e=>`<li class="${shown?.id===e.id?'on':''}${e.action.action==='abandon'?' stop':''}"><button type="button" data-ls-log="${e.id}" aria-pressed="${shown?.id===e.id}">${(()=>{const lp=study!.personas.find(p=>p.id===e.persona_id);return lp?portraitMarkup(displayAttributes(lp.attributes),'ls-log-portrait'):'';})()}<b>${logAll?esc(personLabel(e.persona_id)):String(e.turn+1).padStart(2,'0')}</b><span><small>${esc(personLabel(e.persona_id))} · ${esc(e.screen.label)}</small><em>${esc(actionName(e))}</em>${e.action.reason?`<q>${esc(e.action.reason)}</q>`:''}</span></button></li>`).join('')||'<li class="empty">첫 행동이 저장되면 이유와 함께 여기에 쌓여요.</li>';
   if(log.innerHTML!==logMarkup){const keep=log.scrollTop;log.innerHTML=logMarkup;const on=log.querySelector<HTMLElement>('li.on');if(on&&!logAll)log.scrollTop=Math.max(0,on.offsetTop-log.clientHeight/2);else log.scrollTop=logAll?0:keep;}
-  const at=all.findIndex(e=>e.id===selected),mine=all.filter(e=>e.persona_id===person),mineAt=mine.findIndex(e=>e.id===selected);el<HTMLButtonElement>('[data-ls-previous]').disabled=mineAt<=0;el<HTMLButtonElement>('[data-ls-next]').disabled=mineAt<0||mineAt>=mine.length-1;el<HTMLButtonElement>('[data-ls-play]').disabled=!all.length;el('[data-ls-play]').textContent=playing?'멈추기 Ⅱ':'처음부터 다시 보기 ▷';el('[data-ls-play]').setAttribute('aria-pressed',String(playing));el('[data-ls-position]').textContent=all.length?`${at+1}/${all.length}`:'기록 대기';
+  const at=all.findIndex(e=>e.id===selected),mine=all.filter(e=>e.persona_id===person),mineAt=mine.findIndex(e=>e.id===selected);el<HTMLButtonElement>('[data-ls-previous]').disabled=mineAt<=0;el<HTMLButtonElement>('[data-ls-next]').disabled=mineAt<0||mineAt>=mine.length-1;el<HTMLButtonElement>('[data-ls-play]').disabled=!all.length;el('[data-ls-play]').textContent=playing?'멈추기 Ⅱ':'처음부터 다시 보기 ▷';el('[data-ls-play]').setAttribute('aria-pressed',String(playing));{const pos=el('[data-ls-position]');pos.textContent=mine.length?`${personLabel(person)} · ${Math.max(0,mineAt)+1}/${mine.length}번째`:all.length?'이 사람의 기록 대기':'기록 대기';pos.title=all.length?`전체 기록 ${at+1}/${all.length} 중`:'';}
   el<HTMLButtonElement>('[data-ls-zoom]').disabled=!shown;
   const screenDialog=el<HTMLDialogElement>('.ls-screen-dialog');if(screenDialog.open&&shown){screenDialog.querySelector('img')!.src=frame!.image.src;el('[data-ls-zoom-label]').textContent=shown.screen.label;el('[data-ls-zoom-action]').textContent=`${personLabel(person)} · ${actionName(shown)} · ${fullReason}`;}
   followNext();
  }
  function move(delta:number,scope:'person'|'all'='all'){const all=events().filter(e=>scope==='all'||e.persona_id===person),at=all.findIndex(e=>e.id===selected),next=all[Math.max(0,Math.min(all.length-1,at+delta))];if(next){selected=next.id;person=next.persona_id;follow=false;automatic=false;draw();}}
- function schedule(){clearTimeout(replayTimer);if(!playing||disposed)return;replayTimer=setTimeout(()=>{if(frames.get(person)?.loading){schedule();return;}if(frames.get(person)?.error){stop();draw();return;}const all=events(),at=all.findIndex(e=>e.id===selected);if(at>=all.length-1){stop();draw();return;}move(1);schedule();},REPLAY_MS);}
+ function schedule(){clearTimeout(replayTimer);if(!playing||disposed)return;replayTimer=setTimeout(()=>{if(frames.get(person)?.loading){schedule();return;}if(frames.get(person)?.error){stop();draw();return;}const all=events().filter(e=>replayScope==='all'||e.persona_id===person),at=all.findIndex(e=>e.id===selected);if(at>=all.length-1){stop();draw();return;}move(1,replayScope);schedule();},REPLAY_MS);}
  function click(event:Event){const b=(event.target as HTMLElement).closest<HTMLButtonElement>('button');if(!b||b.disabled)return;
   if(b.hasAttribute('data-ls-zoom')){stop();follow=false;el<HTMLDialogElement>('.ls-screen-dialog').showModal();draw();return;}
   else if(b.hasAttribute('data-ls-close-screen')){el<HTMLDialogElement>('.ls-screen-dialog').close();return;}
@@ -142,7 +144,7 @@ export function mountLiveStage(host:HTMLElement){
   else if(b.hasAttribute('data-ls-all')){stop();automatic=true;follow=true;latest();}
   else if(b.hasAttribute('data-ls-previous')){stop();move(-1,'person');return;}
   else if(b.hasAttribute('data-ls-next')){stop();move(1,'person');return;}
-  else if(b.hasAttribute('data-ls-play')){if(playing)stop();else{playing=true;follow=false;automatic=false;if(events().at(-1)?.id===selected&&events().length){selected=events()[0].id;person=events()[0].persona_id;}schedule();}}
+  else if(b.hasAttribute('data-ls-play')){if(playing)stop();else{replayScope=automatic?'all':'person';const list=events().filter(e=>replayScope==='all'||e.persona_id===person);playing=true;follow=false;automatic=false;if(list.length&&list.at(-1)?.id===selected){selected=list[0].id;person=list[0].persona_id;}schedule();}}
   else if(b.hasAttribute('data-ls-retry')){const f=frames.get(person);if(f){f.requested='';f.error=false;}}
   else return;draw();
  }
