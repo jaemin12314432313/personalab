@@ -5,7 +5,7 @@
 설정 파일(JSON)에 화면으로 쓸 페이지 주소, 과제, 목표 화면, 자동으로 못 읽는 버튼 이동(patch)을 적는다.
 페이지는 한 번만 받아 outputs/cache/에 저장하고(요청 사이 1초 대기), 다음부터는 저장본을 쓴다.
 서버에서 완성된 HTML을 주는 사이트만 읽을 수 있다. 양식 제출처럼 실제 동작이 일어나는 요청은 보내지 않는다.
-결과: outputs/flows/<name>_flow.json (사이트 원문이 들어가므로 저장소에 올리지 않는다)"""
+결과: outputs/flows/<name>_flow.json. 받은 페이지 원문(outputs/cache/)은 저장소에 올리지 않는다"""
 import argparse
 import hashlib
 import json

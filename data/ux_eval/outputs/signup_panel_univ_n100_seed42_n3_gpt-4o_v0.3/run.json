@@ -1,0 +1,14 @@
+{
+  "flow": "data/ux_eval/samples/signup_flow.json",
+  "panel": "data/persona_engine/outputs/panel_univ_n100_seed42.csv",
+  "model": "gpt-4o",
+  "prompt_version": "v0.3",
+  "n": 3,
+  "usage": {
+    "calls": 5,
+    "input": 15622,
+    "output": 3363,
+    "reasoning": 0
+  },
+  "cost_usd": 0.0727
+}
