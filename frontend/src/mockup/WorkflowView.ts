@@ -40,19 +40,19 @@ export function comparisonMarkup(a:Study,b:Study){
   }
   for(const g of groups.values()){g.beforeArrived=arrived(a,am,g.screen);g.afterArrived=arrived(b,bm,g.screen);}
   // 방향이 있는 지표만 좋음/나쁨을 칠한다. 방문 페이지·참여 인원·시스템 종료는 개선의 근거가 아니라 중립으로 둔다.
-  const rows:[string,number,number,'up'|'down'|'neutral'][]=[['방문한 페이지',am.visited.size,bm.visited.size,'neutral'],['발견한 문제',am.findings.length,bm.findings.length,'down'],['목표 도달',am.complete.length,bm.complete.length,'up'],['중간에 멈춘 사람',am.dropped.length,bm.dropped.length,'down'],['탐색 마침·한도',am.system.length,bm.system.length,'neutral'],['참여한 사람',am.records.length,bm.records.length,'neutral']];
+  const rows:[string,number,number,'up'|'down'|'neutral'][]=[['방문한 페이지',am.visited.size,bm.visited.size,'neutral'],['발견한 문제',am.findings.length,bm.findings.length,'down'],['목표 도달',am.complete.length,bm.complete.length,'up'],['중간에 멈춘 사람',am.dropped.length,bm.dropped.length,'down'],['탐색 마침·횟수까지',am.system.length,bm.system.length,'neutral'],['참여한 사람',am.records.length,bm.records.length,'neutral']];
   const delta=(x:number,y:number,mode:'up'|'down'|'neutral')=>{
     const d=y-x;if(d===0)return '<em class="cmp-delta">변화 없음</em>';
     const arrow=`${d>0?'▲':'▼'} ${Math.abs(d)}`;
     if(mode==='neutral')return `<em class="cmp-delta">${arrow}</em>`;
-    if(noise&&Math.abs(d)<noise)return `<em class="cmp-delta noise" title="AI 실행은 같은 조건에서도 매번 조금씩 달라요">≈ ${arrow} · 오차 범위</em>`;
+    if(noise&&Math.abs(d)<noise)return `<em class="cmp-delta noise" title="실측한 오차가 아니라 작은 차이를 개선으로 칠하지 않으려는 기준이에요">≈ ${arrow} · 작은 차이, 판단 유보</em>`;
     const good=(mode==='up'?d>0:d<0)?'good':'bad';
     return `<em class="cmp-delta ${good}">${arrow}</em>`;
   };
   const metaNote=metaChanged?`<p>AI 엔진·모델·프롬프트 개정이 달라서(${esc(cmpMetaKey(a).replace(/\|/g,' / '))} → ${esc(cmpMetaKey(b).replace(/\|/g,' / '))}) 결과 차이가 화면 수정 때문이라고 보기 어려워요.</p>`:'';
-  const noiseNote=llm?`<p class="cmp-noise-note">AI 실행은 같은 조건에서도 매번 조금씩 달라요. ${noise}명보다 작은 차이는 고친 효과로 보지 말고, 같은 조건으로 한 번 더 실행해 확인하세요.</p>`:'';
+  const noiseNote=llm?`<p class="cmp-noise-note">AI 실행은 같은 조건에서도 매번 조금씩 달라요. ${noise}명보다 작은 차이는 반복 실행으로 잰 오차가 아니라 임의로 정한 기준이에요. 고친 효과로 단정하지 말고, 같은 조건으로 한 번 더 실행해 확인하세요.</p>`:'';
   return `<div class="wf-compare-note ${same?'':'is-changed'}"><strong>${same?'페르소나와 탐색 조건이 같습니다.':'탐색 조건이 달라졌습니다.'}</strong><p>${same?'같은 조건에서 관찰된 문제의 변화를 확인하세요.':'패널·목적·완료 지점·탐색 방식·화면 크기·집중 항목·제품 소개·대상 사용자·AI 모델과 프롬프트 중 달라진 조건이 있어 직접적인 개선 효과로 단정할 수 없습니다.'}</p>${metaNote}</div>`
     +`<div class="cmp-head"><span>${a.workflow?.revision||1}차</span><i aria-hidden="true">→</i><span>${b.workflow?.revision||2}차</span></div>`
     +`<div class="cmp-grid">${rows.map(([label,x,y,mode])=>`<div class="cmp-card"><span>${label}</span><div class="cmp-vals"><b>${x}</b><i aria-hidden="true">→</i><b>${y}</b></div>${delta(x,y,mode)}</div>`).join('')}</div>${noiseNote}`
-    +`<div class="wf-compare-table" role="table"><div role="row"><strong role="columnheader">관찰된 문제</strong><strong role="columnheader">이전</strong><strong role="columnheader">이후</strong></div>${[...groups.values()].map(g=>`<div role="row"><span role="cell">${esc(g.label)}${g.before&&!g.after?'<small>이번 회차에서 관찰되지 않음 · 해결 여부는 방문 범위를 함께 확인하세요.</small>':''}</span><span role="cell">${g.before}명 멈춤 / 도착 ${g.beforeArrived}명</span><span role="cell">${g.after}명 멈춤 / 도착 ${g.afterArrived}명</span></div>`).join('')||'<p class="cmp-empty">두 회차 모두 사용자가 멈춘 곳이 없어서 비교할 문제가 없어요. 위 숫자와 탐색 범위를 함께 확인하세요.</p>'}</div>`;
+    +`<div class="wf-compare-table" role="table"><div role="row"><strong role="columnheader">관찰된 문제</strong><strong role="columnheader">이전</strong><strong role="columnheader">이후</strong></div>${[...groups.values()].map(g=>`<div role="row"><span role="cell">${esc(g.label)}${g.before&&!g.after?(g.afterArrived===0?'<small>관련 화면을 이번 회차에서 아무도 방문하지 않음 · 해결로 볼 수 없어요.</small>':`<small>이번 회차에서 관찰되지 않음 · 해당 화면 도착 ${g.afterArrived}명. 해결로 단정하지 말고 한 번 더 확인하세요.</small>`):''}</span><span role="cell">${g.before}명 멈춤 / 도착 ${g.beforeArrived}명</span><span role="cell">${g.after}명 멈춤 / 도착 ${g.afterArrived}명</span></div>`).join('')||'<p class="cmp-empty">두 회차 모두 사용자가 멈춘 곳이 없어서 비교할 문제가 없어요. 위 숫자와 탐색 범위를 함께 확인하세요.</p>'}</div>`;
 }

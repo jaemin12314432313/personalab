@@ -196,7 +196,7 @@
 .ws-sec-hint{margin:6px 0 0;font-size:13.5px;color:var(--rd-mu);max-width:560px}
 .ws-ov{gap:40px}
 
-.ws-ask-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
+.ws-ask-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:10px}
 .ws-ask{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px 14px;padding:14px 16px;border:1px solid var(--rd-line);border-radius:18px;background:#fff;text-align:left;font:inherit;color:inherit;cursor:pointer;box-shadow:var(--rd-shadow);transition:border-color .15s,transform .15s}
 .ws-ask:hover:not([disabled]){border-color:var(--rd-ink);transform:translateY(-1px)}
 .ws-ask[disabled]{opacity:.5;cursor:default;box-shadow:none}
@@ -423,3 +423,36 @@
 
 /* 로그인·가입 */
 .auth-eyebrow,.auth-kicker,.auth-shell .lp-eyebrow,#v-login [class*=eyebrow],#v-register [class*=eyebrow]{font:700 12px var(--sans)!important;letter-spacing:.02em!important;text-transform:none!important}
+
+/* 마지막 회차를 아직 안 돌렸을 때: 다음 수정 회차 카드를 눌러지지 않게 둔다 */
+.ws-round-add.is-locked{cursor:not-allowed;opacity:.6}
+.ws-round-add.is-locked:hover{border-color:var(--rd-line);color:var(--rd-mu)}
+.ws-round-locked{margin:0;font-size:12.5px;line-height:1.6;color:var(--rd-mu)}
+.ws-round-card.is-new{animation:ws-new-round-flash 2.4s ease}
+@keyframes ws-new-round-flash{0%,60%{box-shadow:0 0 0 3px var(--rd-ink)}100%{box-shadow:none}}
+@media(prefers-reduced-motion:reduce){.ws-round-card.is-new{animation:none;box-shadow:0 0 0 3px var(--rd-ink)}}
+
+/* 모바일 가로 넘침 방지 */
+.ws-trend,.ws-detail,.ws-rounds-row{min-width:0;max-width:100%}
+@media(max-width:760px){.ws-sec-hd{flex-wrap:wrap}}
+#v-workspace .ws-ov{grid-template-columns:minmax(0,1fr)}
+
+/* ── 실행 화면 디자인 패스: 이벤트 마커 타임라인, 사람별 진행 눈금, 진행 바 ── */
+#browserExecution .ls-timeline{position:relative;gap:0;align-items:flex-start;padding:10px 8px 24px;flex:1;min-width:0;overflow-x:auto}
+#browserExecution .ls-timeline::before{content:"";position:absolute;left:18px;right:18px;top:18px;height:2px;border-radius:2px;background:#e1dbcd}
+#browserExecution .ls-timeline button.ls-m{position:relative;flex:1 1 0;min-width:34px;max-width:72px;width:auto;height:18px;padding:0;border:0;background:none;font-size:0;display:flex;justify-content:center;transform:none;cursor:pointer}
+#browserExecution .ls-timeline button.ls-m::before{content:"";width:14px;height:14px;margin-top:2px;border-radius:50%;background:var(--m,#5f6f95);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--m,#5f6f95);transition:transform .15s,box-shadow .15s}
+#browserExecution .ls-timeline button.ls-m::after{content:attr(data-n);position:absolute;top:24px;font:700 10.5px var(--sans);color:#9a8f7a}
+#browserExecution .ls-timeline button.ls-m:hover::before{transform:scale(1.3)}
+#browserExecution .ls-timeline button.ls-m[aria-pressed=true]{background:none;transform:none}
+#browserExecution .ls-timeline button.ls-m[aria-pressed=true]::before{transform:scale(1.5);box-shadow:0 0 0 2px #1b1916}
+#browserExecution .ls-timeline button.ls-m[aria-pressed=true]::after{color:#1b1916}
+.ls-m.is-step,.ls-ticks b.is-step{--m:#5f6f95}.ls-m.is-fill,.ls-ticks b.is-fill{--m:#c8932b}.ls-m.is-stop,.ls-ticks b.is-stop{--m:#d4503f}.ls-m.is-goal,.ls-ticks b.is-goal{--m:#2f8f5b}.ls-m.is-sys,.ls-ticks b.is-sys{--m:#b9b09f}.ls-m.is-fail,.ls-ticks b.is-fail{--m:#7b3fa0}
+.ls-ticks{display:inline-flex;align-items:flex-end;gap:2px;margin:0 2px 0 8px;height:12px}
+.ls-ticks b{display:block;width:5px;height:12px;border-radius:2px;background:var(--m,#5f6f95)}
+#browserExecution .ls-progress{height:6px;border-radius:99px;background:#e9e3d6;overflow:hidden}
+#browserExecution .ls-progress i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#5f6f95,#2f8f5b);transition:width .6s cubic-bezier(.22,.8,.3,1)}
+#browserExecution .ls-stage-card{background:radial-gradient(120% 90% at 50% 0%,#fff 0%,#f7f2e8 72%);box-shadow:0 1px 0 #fff inset,0 18px 40px -22px rgba(70,56,28,.35)}
+#browserExecution .ls-live-dot{box-shadow:0 0 0 0 rgba(47,143,91,.5);animation:ls-pulse 1.8s ease-out infinite}
+@keyframes ls-pulse{70%{box-shadow:0 0 0 9px rgba(47,143,91,0)}100%{box-shadow:0 0 0 0 rgba(47,143,91,0)}}
+@media(prefers-reduced-motion:reduce){#browserExecution .ls-live-dot{animation:none}}

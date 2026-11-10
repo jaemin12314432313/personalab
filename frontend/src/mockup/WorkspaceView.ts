@@ -193,13 +193,25 @@ function roundsOf(entry: WorkspaceEntry): WorkspaceRound[] {
     : { label: `R${i + 1}`, state: 'prev' as const, stateLabel: '이전 회차' });
 }
 
+/** 마지막 회차가 아직 실행 전이거나 실행 중이면 다음 수정 회차를 만들 수 없다. 안 돌린 회차 위에 회차가 쌓이지 않게 한다. */
+function roundLocked(entry: WorkspaceEntry) {
+  const last = roundsOf(entry).at(-1)?.state ?? entry.state;
+  return last === 'draft' || last === 'ready' || last === 'running';
+}
+function lockedAddNote(entry: WorkspaceEntry) {
+  const last = roundsOf(entry).at(-1)?.state ?? entry.state;
+  return last === 'running' ? '지금 실행이 끝난 뒤 만들 수 있어요' : '마지막 회차를 실행한 뒤 만들 수 있어요';
+}
+
 function roundsView(entry: WorkspaceEntry, trashed: boolean) {
   const rounds = roundsOf(entry);
   const cols = rounds.map(r => {
     const f = r.findings || [];
     return `<div class="ws-lane ws-round" data-round="${r.state}"><div class="ws-lane-hd">${escape(r.label)} · ${escape(r.stateLabel)}<b>${f.length}</b></div><div class="ws-lane-body">${f.map((x) => `<article class="ws-pc"><span class="ws-kind" data-kind="${x.kind}">${KIND[x.kind]}</span><h3>${escape(x.title)}</h3><div class="ws-pc-ft"><span>${escape(x.screen)}</span><span>${x.kind === 'gone' ? '진행 중이라 확정 아님' : `${x.people}/${x.total}명`}</span></div></article>`).join('') || `<div class="ws-lane-empty">${r.state === 'draft' ? '설정을 마치면 쌓여요' : '관찰 기록이 아직 없어요'}</div>`}</div></div>`;
   }).join('');
-  const add = trashed ? '' : `<div class="ws-lane ws-round ws-round-new"><div class="ws-lane-hd">새 회차<b>+</b></div><div class="ws-lane-body"><button type="button" class="ws-new-round" ${parts(entry).revise}>${icon('plus')} 수정 회차 만들기</button></div></div>`;
+  const add = trashed ? '' : roundLocked(entry)
+    ? `<div class="ws-lane ws-round ws-round-new"><div class="ws-lane-hd">새 회차<b>+</b></div><div class="ws-lane-body"><p class="ws-round-locked" role="note">${lockedAddNote(entry)}</p></div></div>`
+    : `<div class="ws-lane ws-round ws-round-new"><div class="ws-lane-hd">새 회차<b>+</b></div><div class="ws-lane-body"><button type="button" class="ws-new-round" ${parts(entry).revise}>${icon('plus')} 수정 회차 만들기</button></div></div>`;
   const none = rounds.every(r => !(r.findings || []).length);
   const note = none ? '<p class="ws-tab-note">회차별 발견(반복 관찰·새로 관찰)은 실행이 끝난 뒤 분석되면 여기에 쌓여요. 지금은 회차 목록만 보여요.</p>' : '';
   return `${note}<div class="ws-board ws-rounds" style="--n:${Math.min(rounds.length + (trashed ? 0 : 1), 4)}">${cols}${add}</div>`;
@@ -213,18 +225,18 @@ function delta(now: number, before: number | undefined, mode: 'up' | 'down' | 'n
   if (before === undefined || now === before) return '';
   const d = now - before, arrow = `${d > 0 ? '▲' : '▼'} ${Math.abs(d)}`;
   if (mode === 'neutral') return `<i class="ws-d">${arrow}</i>`;
-  if (noise && Math.abs(d) < noise) return `<i class="ws-d noise" title="AI 실행은 같은 조건에서도 매번 조금씩 달라서 작은 차이는 고친 효과로 보기 어려워요">≈ ${arrow}</i>`;
+  if (noise && Math.abs(d) < noise) return `<i class="ws-d noise" title="작은 차이라 판단을 유보해요. 실측한 오차가 아니라 임의 기준이니 같은 조건으로 한 번 더 확인하세요">≈ ${arrow}</i>`;
   const good = mode === 'up' ? d > 0 : d < 0;
   return `<i class="ws-d ${good ? 'good' : 'bad'}">${arrow}</i>`;
 }
 function roundCard(r: WorkspaceRound, prev: WorkspaceRound | undefined, latest: boolean, trashed = false, deletable = false) {
   const st = r.stats, pst = prev?.stats;
   const noise = st && pst && (st.llm || pst.llm) ? Math.max(2, Math.round(Math.max(st.total, pst.total) * 0.1)) : 0;
-  const bar = st && st.total ? `<div class="ws-rbar" role="img" aria-label="목표 도달 ${st.complete}명, 중단 ${st.drop}명, 한도 ${st.system}명"><span style="flex:${st.complete}" data-k="complete"></span><span style="flex:${st.drop}" data-k="drop"></span><span style="flex:${st.system}" data-k="system"></span></div>` : '<div class="ws-rbar empty"></div>';
+  const bar = st && st.total ? `<div class="ws-rbar" role="img" aria-label="목표 도달 ${st.complete}명, 중단 ${st.drop}명, 횟수까지 ${st.system}명"><span style="flex:${st.complete}" data-k="complete"></span><span style="flex:${st.drop}" data-k="drop"></span><span style="flex:${st.system}" data-k="system"></span></div>` : '<div class="ws-rbar empty"></div>';
   // 전반 탐색에는 목표 화면이 없으므로 '목표 도달'이 아니라 방문 페이지와 발견한 문제를 보여 준다
   const nums = st ? (r.site
     ? `<dl class="ws-rnums"><div><dt>방문 페이지</dt><dd>${st.visited}<small>개</small>${delta(st.visited, pst?.visited, 'neutral')}</dd></div><div><dt>발견한 문제</dt><dd>${st.problems}<small>곳</small>${delta(st.problems, pst?.problems, 'down', noise)}</dd></div><div><dt>참여</dt><dd>${st.total}<small>명</small></dd></div></dl>`
-    : `<dl class="ws-rnums"><div><dt>목표 도달</dt><dd>${st.complete}<small>/${st.total}</small>${delta(st.complete, pst?.complete, 'up', noise)}</dd></div><div><dt>탐색 중단</dt><dd>${st.drop}${delta(st.drop, pst?.drop, 'down', noise)}</dd></div><div><dt>탐색 한도</dt><dd>${st.system}${delta(st.system, pst?.system, 'neutral')}</dd></div></dl>`)
+    : `<dl class="ws-rnums"><div><dt>목표 도달</dt><dd>${st.complete}<small>/${st.total}</small>${delta(st.complete, pst?.complete, 'up', noise)}</dd></div><div><dt>탐색 중단</dt><dd>${st.drop}${delta(st.drop, pst?.drop, 'down', noise)}</dd></div><div><dt>횟수까지 살펴봄</dt><dd>${st.system}${delta(st.system, pst?.system, 'neutral')}</dd></div></dl>`)
     : `<p class="ws-rwait">${r.state === 'running' ? '탐색이 끝나면 결과가 쌓여요.' : r.state === 'draft' || r.state === 'ready' ? '아직 실행 전이에요.' : '저장된 결과가 없어요.'}</p>`;
   const hasResult = r.state === 'done' || r.state === 'failed' || r.state === 'partial';
   const open = trashed ? '<p class="ws-rtrash">휴지통에 있어요. 복원하면 리포트와 인터뷰를 열 수 있어요.</p>' : r.studyId ? (hasResult
@@ -250,7 +262,9 @@ function overviewView(entry: WorkspaceEntry) {
   const finished = rounds.filter(r => r.stats);
   const hasResults = entry.state === 'done' || entry.state === 'failed';
   const cmp = finished.length >= 2 && entry.server ? `<button type="button" class="ws-link" data-open-server="${entry.server}" data-then-hash="compare">회차 비교하기 →</button>` : '';
-  const addCard = entry.trashed ? '' : `<button type="button" class="ws-round-card ws-round-add" ${revise}>${icon('plus')}<b>수정 회차 만들기</b><span>고친 뒤 같은 조건으로 다시 확인해요</span></button>`;
+  const addCard = entry.trashed ? '' : roundLocked(entry)
+    ? `<div class="ws-round-card ws-round-add is-locked" role="note" aria-disabled="true">${icon('plus')}<b>수정 회차 만들기</b><span>${lockedAddNote(entry)}</span></div>`
+    : `<button type="button" class="ws-round-card ws-round-add" ${revise}>${icon('plus')}<b>수정 회차 만들기</b><span>고친 뒤 같은 조건으로 다시 확인해요</span></button>`;
   // 결과가 있을 때는 큰 '다음 할 일' 카드를 두지 않고 상태 문장을 회차 머리글로 쓴다(리포트·인터뷰 길은 카드에 있다)
   const trendTitle = hasResults ? next.t : `${rounds.length}개 회차`;
   const trendHint = rounds.length === 1 && hasResults ? '고친 뒤 수정 회차를 만들면 이 줄에 결과가 쌓이고 서로 비교돼요.' : rounds.length > 1 ? '회차끼리 숫자를 비교해 고친 효과를 확인하세요.' : '';
@@ -261,7 +275,7 @@ function overviewView(entry: WorkspaceEntry) {
   const canAsk = entry.server && !entry.trashed;
   const interviewCard = (p: WorkspacePerson) => {
     const ok = canAsk && p.pid && p.state && p.state !== 'pending';
-    const tag = p.state === 'drop' ? '<span class="ws-itag drop">중단</span>' : p.state === 'complete' ? '<span class="ws-itag good">도착</span>' : p.state === 'system' ? `<span class="ws-itag">${p.code === 'NAVIGATION_LOST' ? '마침' : '한도'}</span>` : '<span class="ws-itag">기록 없음</span>';
+    const tag = p.state === 'drop' ? '<span class="ws-itag drop">중단</span>' : p.state === 'complete' ? '<span class="ws-itag good">도착</span>' : p.state === 'system' ? `<span class="ws-itag">${p.code === 'NAVIGATION_LOST' ? '마침' : '횟수까지'}</span>` : '<span class="ws-itag">기록 없음</span>';
     const why = p.state === 'drop' ? (p.code ? (DROP_TEXT[p.code] || '이유 미기록') : '이유 미기록') : p.state === 'system' ? (p.code === 'NAVIGATION_LOST' ? '더 갈 곳이 없어 탐색을 마쳤어요' : '정해 둔 횟수까지 살펴봤어요') : p.state === 'complete' ? '끝까지 도착했어요' : '아직 종료 기록이 없어요';
     const attrs = ok ? `data-open-server="${p.studyId || entry.server}" data-then-hash="interview" data-then-persona="${p.pid}"` : 'disabled';
     return `<button type="button" class="ws-ask" ${attrs}><span class="ws-pc-face">${p.face}</span><span class="ws-ask-body"><b>${escape(p.id)} · ${escape(p.age)}세 ${escape(p.job)}</b><span class="ws-ask-why">${why}${p.screen ? ` · ${escape(p.screen)}` : ''}</span>${p.asked ? `<span class="ws-ask-saved">대화 ${p.asked}개 저장됨</span>` : ''}</span>${tag}<span class="ws-ask-go" aria-hidden="true">물어보기 →</span></button>`;
@@ -300,7 +314,7 @@ function calView(entry: WorkspaceEntry) {
 
 function detail(entry: WorkspaceEntry) {
   const { state, primary, menu, revise } = parts(entry);
-  const canRevise = !entry.trashed && (entry.state === 'done' || entry.state === 'failed');
+  const canRevise = !entry.trashed && (entry.state === 'done' || entry.state === 'failed') && !roundLocked(entry);
   const people = entry.people || [];
   const faces = people.length ? `<span class="ws-faces">${people.slice(0, 4).map(p => `<span class="ws-pc-face">${p.face}</span>`).join('')}${people.length > 4 ? `<span class="ws-more">+${people.length - 4}</span>` : ''}</span>` : '';
   if (!visibleTabs(entry).includes(tab)) tab = 'overview';

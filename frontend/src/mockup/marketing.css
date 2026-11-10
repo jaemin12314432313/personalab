@@ -381,3 +381,20 @@
   #v-landing .btn:hover>span[aria-hidden],#v-landing .lp-text-link:hover>span,#v-landing .lp-start-sample:hover>span{transform:translateX(3px)}
   .lp-person-row:hover .lp-row-arrow{transform:translateX(4px)}
 }
+
+/* 제품·회차 미리보기: 실제 워크스페이스의 회차 카드 모양을 랜딩 톤으로 옮긴 것 */
+.lp-round-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 20px}
+.lp-round-card{display:flex;flex-direction:column;gap:10px;padding:15px 16px;border:1px solid var(--line);border-radius:7px;background:#fff}
+.lp-round-card.lp-round-next{border-style:dashed;background:#faf9fb}
+.lp-round-card header{display:flex;align-items:baseline;gap:8px}
+.lp-round-card header b{font-size:17px;font-weight:700;letter-spacing:-.04em;color:#43394a}
+.lp-round-state{margin-left:auto;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:#efecf2;color:#6f6677}
+.lp-round-state.done{background:#e8f1ea;color:#4a7355}
+.lp-round-note{margin:0;font-size:12.5px;line-height:1.6;color:#6a6270}
+.lp-round-note small{margin-left:6px;color:#9a93a0}
+.lp-round-nums{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:0}
+.lp-round-nums div{display:flex;flex-direction:column;gap:2px}
+.lp-round-nums dt{font-size:11px;color:#8b8590}
+.lp-round-nums dd{margin:0;font-size:20px;font-weight:700;letter-spacing:-.03em;color:#43394a}
+.lp-round-nums dd small{font-size:12px;font-weight:500;color:#8b8590;margin-left:2px}
+@media(max-width:760px){.lp-round-pair{grid-template-columns:1fr}}
