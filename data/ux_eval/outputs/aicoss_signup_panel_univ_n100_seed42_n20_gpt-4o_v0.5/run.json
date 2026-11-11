@@ -1,0 +1,14 @@
+{
+  "flow": "data/ux_eval/outputs/flows/aicoss_signup_flow.json",
+  "panel": "data/persona_engine/outputs/panel_univ_n100_seed42.csv",
+  "model": "gpt-4o",
+  "prompt_version": "v0.5",
+  "n": 20,
+  "usage": {
+    "calls": 41,
+    "input": 222809,
+    "output": 25534,
+    "reasoning": 0
+  },
+  "cost_usd": 0.8124
+}
