@@ -208,22 +208,27 @@
   .ai-tag { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
 
   /* 누가 */
-  .multiples { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 36px 48px; }
-  .axis h3 { font-size: 15px; font-weight: 800; margin-bottom: 8px; }
-  .grow { display: grid; grid-template-columns: 72px minmax(0, 1fr) 60px; gap: 8px; align-items: center; width: 100%; border: 0; background: none; text-align: left; padding: 7px 6px; margin: 0 -6px; border-radius: 8px; cursor: pointer; }
-  .grow:hover { background: var(--sunk); }
-  .grow[aria-pressed="true"] { background: var(--data-soft); }
-  .grow .g { font-size: 13px; color: var(--ink-2); }
-  .track { position: relative; height: 18px; }
-  .track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--line-strong); }
-  .track .avg { position: absolute; top: -4px; bottom: -4px; border-left: 1.5px solid var(--muted); }
-  .track .pt { position: absolute; top: 50%; width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: var(--data); border: 2px solid var(--page); box-shadow: 0 0 0 1px var(--data); }
-  .track .pt.low { background: var(--loss); box-shadow: 0 0 0 1px var(--loss); }
-  .grow .v { font-size: 13px; text-align: right; line-height: 1.25; }
-  .grow .v b { display: block; font-size: 14px; }
+  .multiples { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .axis { background: var(--sunk); border-radius: var(--radius); padding: 20px 22px 16px; }
+  .axis h3 { font-size: 17px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.01em; }
+  .grow { display: grid; grid-template-columns: 76px minmax(0, 1fr) 70px; gap: 12px; align-items: center; width: 100%; border: 0; background: none; text-align: left; padding: 9px 8px; margin: 0 -8px; width: calc(100% + 16px); border-radius: 10px; cursor: pointer; }
+  .grow:hover { background: var(--page); }
+  .grow[aria-pressed="true"] { background: var(--page); box-shadow: inset 0 0 0 2px var(--data); }
+  .grow .g { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .track { position: relative; height: 16px; border-radius: 4px; background: var(--line); }
+  .track .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--data); min-width: 3px; }
+  .track .fill.low { background: var(--loss); }
+  .track .avg { position: absolute; top: -5px; bottom: -5px; width: 0; border-left: 2px solid var(--ink); }
+  .grow .v { text-align: right; line-height: 1.2; }
+  .grow .v b { display: block; font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
   .grow .v b.low { color: var(--loss-ink); }
   .grow .v span { color: var(--muted); font-size: 12px; }
-  .axis .avg-l { font-size: 12px; color: var(--muted); margin: 6px 0 0 80px; }
+  .axis .avg-l { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+  .axis .avg-l::before { content: ""; width: 0; height: 12px; border-left: 2px solid var(--ink); }
+  .who-low { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 28px; padding: 18px 22px; border-radius: var(--radius); background: var(--loss-soft); }
+  .who-low b { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; color: var(--loss-ink); line-height: 1.1; }
+  .who-low span { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .who-low small { font-size: 14px; color: var(--ink-2); }
   .who-help { font-size: 13px; color: var(--muted); margin: 24px 0 0; }
   .group-detail { margin-top: 36px; padding: 32px; background: var(--sunk); border-radius: var(--radius); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 40px; }
   .group-detail .gd-head h3 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
@@ -695,15 +700,16 @@ function renderWho(d) {
       return `<button class="grow" data-act="group" data-a="${esc(a.key)}" data-g="${esc(g)}" aria-pressed="${on}"
           aria-label="${esc(a.name)} ${esc(g)}: 끝까지 하겠다 ${gi.done}/${gi.ok.length}명 (${pct(gi.rate)})">
         <span class="g">${esc(g)}</span>
-        <span class="track" aria-hidden="true"><span class="avg" style="left:${avg * 100}%"></span>${gi.ok.length ? `<span class="pt ${isLow ? "low" : ""}" style="left:${gi.rate * 100}%"></span>` : ""}</span>
+        <span class="track" aria-hidden="true">${gi.ok.length ? `<span class="fill ${isLow ? "low" : ""}" style="width:${gi.rate * 100}%"></span>` : ""}<span class="avg" style="left:${avg * 100}%"></span></span>
         <span class="v"><b class="${isLow ? "low" : ""}">${gi.ok.length ? pct(gi.rate) : "-"}</b><span>${gi.done}/${gi.ok.length}명</span></span></button>`;
     }).join("");
-    return `<div class="axis"><h3>${esc(a.name)}</h3>${rows}<p class="avg-l">세로선 = 전체 ${pct(avg)}</p></div>`;
+    return `<div class="axis"><h3>${esc(a.name)}</h3>${rows}<p class="avg-l">전체 평균 ${pct(avg)}</p></div>`;
   }).join("");
-  const title = low ? `${esc(low.name)} ${esc(low.g)} 그룹이 ${pct(low.rate)}로 가장 적게 끝까지 갔습니다` : "고객 구분별 결과";
+  const title = low ? `${esc(low.name)} ${esc(low.g)} 그룹이 가장 적게 끝까지 갔습니다` : "고객 구분별 결과";
   $("who").innerHTML = `
     <div class="sec-head"><h2 id="who-h"><span class="q">누가 멈췄나</span><br>${title}</h2>
-      <p>고객 구분별로 ‘끝까지 하겠다’고 한 비율입니다. 빨간 점은 전체 평균보다 낮은 그룹입니다. 그룹을 누르면 그 그룹의 그만둔 화면, 중요하게 본 기준, 실제 의견이 펼쳐지고, 아래 화면별 한마디와 페르소나 목록이 그 그룹만 남습니다.</p></div>
+      <p>고객 구분별로 ‘끝까지 하겠다’고 한 비율입니다. 빨간 막대는 전체 평균보다 낮은 그룹입니다. 그룹을 누르면 그 그룹의 그만둔 화면, 중요하게 본 기준, 실제 의견이 펼쳐지고, 아래 화면별 한마디와 페르소나 목록이 그 그룹만 남습니다.</p></div>
+    ${low ? `<p class="who-low"><b>${pct(low.rate)}</b><span>${esc(low.name)} ${esc(low.g)}</span><small>끝까지 하겠다 ${Math.round(low.rate * low.n)}/${low.n}명 · 전체 평균 ${pct(avg)}</small></p>` : ""}
     <div class="multiples">${blocks}</div>
     <div id="group-detail"></div>`;
   renderGroup(d);
