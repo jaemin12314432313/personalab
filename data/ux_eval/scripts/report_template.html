@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PersonaLab 결과 리포트</title>
+<style>
+  /* 결과 리포트: 결론(어두운 띠) -> 어디서 -> 왜 -> 누가 -> 무엇이 -> 화면별 한마디 -> 사람들.
+     외부 폰트·스크립트 없이 이 파일 하나로 열린다. */
+  :root {
+    --page: #ffffff; --sunk: #f4f3f0; --line: #e4e2dd; --line-strong: #cfccc5;
+    --ink: #17171b; --ink-2: #3c3c44; --muted: #5d5d68;
+    --band: #1b1b20; --band-2: #26262d; --band-ink: #f5f5f6; --band-muted: #b9b9c2; --band-line: #3a3a43;
+    --data: #5a44a6; --data-ink: #47358a; --data-soft: #ece8f7;
+    --loss: #d23c3c; --loss-ink: #b02828; --loss-soft: #fbe5e3;
+    --mid: #e3a019; --mid-ink: #8f5b00; --mid-soft: #fbf0d6;
+    --good: #2f9a46; --good-ink: #237636; --good-soft: #e1f3e4;
+    --na: #a5a5ae; --na-ink: #5d5d68; --na-soft: #ececee;
+    --mark: #f2b8a8;
+    --focus: #5a44a6;
+    --font: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --radius: 14px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page: #121215; --sunk: #1b1b20; --line: #2c2c33; --line-strong: #3d3d46;
+      --ink: #f2f2f4; --ink-2: #d4d4da; --muted: #a3a3ae;
+      --band: #0a0a0c; --band-2: #17171b; --band-line: #2c2c33;
+      --data: #9c8ae6; --data-ink: #b8aaf0; --data-soft: #2a2442;
+      --loss: #ef6a6a; --loss-ink: #ff8f8f; --loss-soft: #3a1f1f;
+      --mid: #f0b63f; --mid-ink: #f5c766; --mid-soft: #3a2f17;
+      --good: #4fbf65; --good-ink: #74d488; --good-soft: #1b3322;
+      --na: #85858f; --na-ink: #b4b4bd; --na-soft: #2a2a30;
+      --mark: #7a3b2c; --focus: #b8aaf0;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page: #121215; --sunk: #1b1b20; --line: #2c2c33; --line-strong: #3d3d46;
+    --ink: #f2f2f4; --ink-2: #d4d4da; --muted: #a3a3ae;
+    --band: #0a0a0c; --band-2: #17171b; --band-line: #2c2c33;
+    --data: #9c8ae6; --data-ink: #b8aaf0; --data-soft: #2a2442;
+    --loss: #ef6a6a; --loss-ink: #ff8f8f; --loss-soft: #3a1f1f;
+    --mid: #f0b63f; --mid-ink: #f5c766; --mid-soft: #3a2f17;
+    --good: #4fbf65; --good-ink: #74d488; --good-soft: #1b3322;
+    --na: #85858f; --na-ink: #b4b4bd; --na-soft: #2a2a30;
+    --mark: #7a3b2c; --focus: #b8aaf0;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 116px; scrollbar-color: var(--line-strong) transparent; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.65 var(--font);
+         -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; word-break: keep-all; overflow-wrap: anywhere; }
+  ::selection { background: var(--data-soft); color: var(--ink); }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  button { font: inherit; color: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-inline: 32px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+
+  /* 상단 막대 */
+  .top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--page) 94%, transparent);
+         backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); }
+  .top-in { display: flex; align-items: center; gap: 20px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; white-space: nowrap; }
+  .brand svg { width: 18px; height: 20px; }
+  .brand small { font-weight: 500; font-size: 14px; color: var(--muted); letter-spacing: 0; }
+  .run-pick { margin-left: auto; display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .run-pick label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .select { position: relative; min-width: 0; }
+  .select select { appearance: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); background: var(--sunk);
+                   border: 1px solid var(--line); border-radius: 10px; padding: 7px 36px 7px 12px; max-width: 100%; cursor: pointer; }
+  .select select:hover { border-color: var(--line-strong); }
+  .select svg { position: absolute; right: 12px; top: 50%; width: 12px; height: 12px; margin-top: -6px; pointer-events: none; color: var(--muted); }
+  .secnav { border-top: 1px solid var(--line); }
+  .secnav-in { display: flex; align-items: center; gap: 4px; height: 44px; overflow-x: auto; scrollbar-width: none; }
+  .secnav-in::-webkit-scrollbar { display: none; }
+  .secnav a { flex: none; color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; padding: 6px 10px; border-radius: 8px; }
+  .secnav a:hover { color: var(--ink); background: var(--sunk); }
+  .secnav a.on { color: var(--ink); background: var(--sunk); }
+  .chip { flex: none; margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;
+          background: var(--data-soft); color: var(--data-ink); border: 0; border-radius: 999px; padding: 4px 6px 4px 12px; cursor: pointer; white-space: nowrap; }
+  .chip svg { width: 18px; height: 18px; padding: 4px; border-radius: 50%; background: color-mix(in srgb, var(--data) 18%, transparent); }
+  .chip:hover svg { background: color-mix(in srgb, var(--data) 32%, transparent); }
+
+  /* 결론 띠 */
+  .band { background: var(--band); color: var(--band-ink); }
+  .hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 56px; padding-block: 64px 48px; align-items: center; }
+  .hero-meta { font-size: 14px; color: var(--band-muted); margin: 0 0 18px; }
+  .hero h1 { font-size: clamp(28px, 3.1vw, 42px); line-height: 1.22; font-weight: 800; letter-spacing: -0.03em; }
+  .hero h1 .rate { color: #fff; }
+  .hero h1 mark { background: linear-gradient(transparent 70%, color-mix(in srgb, var(--loss) 70%, transparent) 70%); color: inherit; padding: 0 2px; }
+  .hero-sub { margin: 20px 0 0; color: var(--band-muted); font-size: 15px; max-width: 58ch; }
+  .hero-sub b { color: var(--band-ink); font-weight: 600; }
+  .facts-line { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; padding: 0; list-style: none; }
+  .facts-line li { font-size: 13px; color: var(--band-ink); background: var(--band-2); border: 1px solid var(--band-line); border-radius: 999px; padding: 3px 11px; }
+  .facts-line li.no { color: #ffc9a8; }
+  .common-note { font-size: 13px; color: var(--band-muted); margin: 12px 0 0; }
+  .waffle-box { justify-self: end; width: 100%; max-width: 440px; }
+  .waffle { display: grid; gap: 6px; justify-content: end; }
+  .person { width: var(--d); height: var(--d); padding: 0; border: 0; background: none; cursor: pointer; border-radius: 6px; display: grid; place-items: center; }
+  .person svg { width: 100%; height: 100%; overflow: visible; }
+  .person:hover svg, .person:focus-visible svg { transform: scale(1.15); }
+  .person svg { transition: transform .18s cubic-bezier(.2, .8, .2, 1); }
+  .person[data-o="done"] { color: #4cc566; }
+  .person[data-o="drop"] { color: #ff7070; }
+  .person[data-o="drop2"] { color: #ffb066; }
+  .person[data-o="fail"] { color: #8d8d98; }
+  .legend-w { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 16px; margin: 18px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--band-muted); }
+  .legend-w li { display: flex; align-items: center; gap: 6px; }
+  .legend-w i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .waffle-note { text-align: right; font-size: 12px; color: var(--band-muted); margin: 8px 0 0; }
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--band-line); }
+  .stat { padding: 22px 24px 26px; border-left: 1px solid var(--band-line); }
+  .stat:first-child { border-left: 0; padding-left: 0; }
+  .stat b { display: block; font-size: 30px; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
+  .stat .k { display: block; font-size: 14px; font-weight: 600; margin-top: 8px; }
+  .stat .s { display: block; font-size: 13px; color: var(--band-muted); margin-top: 2px; }
+  .synthetic { font-size: 13px; color: var(--band-muted); padding-block: 0 26px; margin: 0; }
+
+  /* 공통 섹션 */
+  section.sec { padding-block: 88px 0; }
+  .sec-head { max-width: 760px; margin-bottom: 32px; }
+  .sec-head h2 { font-size: 30px; line-height: 1.3; font-weight: 800; letter-spacing: -0.025em; }
+  .sec-head p { margin: 10px 0 0; color: var(--muted); font-size: 15px; }
+  .sec-head .q { color: var(--muted); font-weight: 700; }
+  .filtered-note { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; font-weight: 600; color: var(--data-ink); background: var(--data-soft); border-radius: 999px; padding: 2px 10px; margin-top: 12px; }
+  .panel { background: var(--page); border: 1px solid var(--line); border-radius: var(--radius); }
+  .empty { color: var(--muted); font-size: 15px; padding: 28px; background: var(--sunk); border-radius: var(--radius); margin: 0; }
+  .bar-track { height: 10px; border-radius: 5px; background: var(--sunk); overflow: hidden; }
+  .bar-track span { display: block; height: 100%; border-radius: 5px; }
+
+  /* 어디서: 화면 흐름 깔때기 */
+  .funnel { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); align-items: end; border-bottom: 1px solid var(--line); }
+  .fcol { position: relative; display: flex; flex-direction: column; justify-content: flex-end; text-align: left; border: 0; background: none; cursor: pointer;
+          padding: 10px 12px 14px 0; border-radius: 10px 10px 0 0; min-width: 0; }
+  .fcol .cnt { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; margin-bottom: 8px; }
+  .fcol .cnt small { font-size: 14px; font-weight: 600; color: var(--muted); }
+  .fcol .col { width: 56px; height: calc(var(--h) * 180px + 4px); background: var(--data); border-radius: 6px 6px 0 0; transition: filter .15s; }
+  .fcol.goal .col { background: var(--good); }
+  .fcol:hover .col { filter: brightness(1.08); }
+  .fcol.on::after { content: ""; position: absolute; left: 0; right: 12px; bottom: -1px; height: 3px; background: var(--ink); border-radius: 2px; }
+  .gap { position: absolute; left: 70px; right: 6px; bottom: 14px; height: calc(var(--h2) * 180px + 4px); border-top: 1px dashed var(--line-strong); font-size: 13px; color: var(--muted); padding: 6px 4px 0; pointer-events: none; }
+  .gap.big { border-top: 1px solid var(--loss); }
+  .gap .pass { display: block; }
+  .gap .lost { display: block; }
+  .gap.big .lost { color: var(--loss-ink); font-weight: 700; }
+  .gap.big .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--loss-ink); margin-bottom: 2px; }
+  .gap.big .tag::before { content: ""; width: 8px; height: 8px; background: var(--loss); border-radius: 2px; }
+  .fnames { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); padding-top: 12px; }
+  .fname { border: 0; background: none; text-align: left; padding: 0 12px 0 0; cursor: pointer; min-width: 0; }
+  .fname b { display: block; font-size: 14px; }
+  .fname span { display: block; font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .fname span.warn { color: var(--mid-ink); }
+  .fname .left { color: var(--loss-ink); font-weight: 700; }
+  .funnel-help { font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+
+  .screen-detail { display: grid; grid-template-columns: 264px minmax(0, 1fr); gap: 40px; margin-top: 40px; padding: 32px; background: var(--sunk); border-radius: var(--radius); }
+  .phone { background: var(--page); border: 1.5px solid var(--line-strong); border-radius: 26px; padding: 16px 14px 18px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 8px 24px -12px rgb(0 0 0 / .18); }
+  .phone.dropped { border-color: var(--loss); }
+  .phone.goal { border-color: var(--good); }
+  .ph-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 2px; }
+  .ph-head b { color: var(--ink); font-size: 14px; }
+  .ph-text { font-size: 13px; margin: 0; line-height: 1.55; }
+  .ph-more { font-size: 12px; color: var(--muted); margin: 0; }
+  .field { display: flex; justify-content: space-between; gap: 6px; font-size: 13px; background: var(--sunk); border-radius: 7px; padding: 5px 9px; }
+  .field .unnamed { color: var(--loss-ink); font-style: italic; }
+  .req { flex: none; font-size: 12px; color: var(--muted); }
+  .req.none { color: var(--mid-ink); font-weight: 600; }
+  .btns { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 8px; margin-top: auto; }
+  .pbtn { font-size: 12px; border: 1px solid var(--ink-2); color: var(--ink); border-radius: 7px; padding: 2px 8px; }
+  .pbtn.dead { border-style: dashed; color: var(--muted); border-color: var(--line-strong); }
+  .sd-body h3 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+  .sd-body h3 small { font-size: 15px; font-weight: 600; color: var(--muted); margin-left: 6px; }
+  .sd-lead { margin: 8px 0 0; color: var(--ink-2); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 22px; }
+  .tile { background: var(--page); border-radius: 12px; padding: 14px 16px; }
+  .tile b { display: block; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+  .tile span { font-size: 13px; color: var(--muted); }
+  .tile.warn b { color: var(--mid-ink); }
+  .tile.bad b { color: var(--loss-ink); }
+  .tile.good b { color: var(--good-ink); }
+  .sd-why { margin-top: 22px; }
+  .sd-why h4, .group-detail h4 { margin: 0 0 8px; font-size: 14px; color: var(--muted); font-weight: 700; }
+  .key { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); margin: 22px 0 0; padding: 0; list-style: none; }
+  .key li { display: flex; align-items: center; gap: 6px; }
+  .key .sw { display: inline-block; width: 18px; height: 12px; border-radius: 3px; }
+
+  /* 왜 */
+  .why { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+  .reasons { list-style: none; margin: 0; padding: 0; }
+  .reasons li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(80px, 1fr) 48px; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .reasons li:first-child { border-top: 1px solid var(--line); }
+  .reasons .name { font-weight: 600; }
+  .reasons .bar-track span { background: var(--loss); }
+  .reasons .n { text-align: right; font-weight: 700; }
+  .quotes { display: flex; flex-direction: column; gap: 14px; }
+  .quote { margin: 0; background: var(--page); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; box-shadow: 0 10px 30px -18px rgb(0 0 0 / .25); }
+  .quote p { margin: 0; font-size: 17px; line-height: 1.6; font-weight: 600; letter-spacing: -0.01em; }
+  .quote footer { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .avatar { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--data-soft); color: var(--data-ink); font-size: 12px; font-weight: 800; display: grid; place-items: center; }
+  .who-line b { display: block; font-size: 14px; }
+  .who-line span { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex: none; }
+  .ai-tag { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
+
+  /* 누가 */
+  .multiples { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .axis { background: var(--sunk); border-radius: var(--radius); padding: 20px 22px 16px; }
+  .axis h3 { font-size: 17px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.01em; }
+  .grow { display: grid; grid-template-columns: 76px minmax(0, 1fr) 70px; gap: 12px; align-items: center; width: 100%; border: 0; background: none; text-align: left; padding: 9px 8px; margin: 0 -8px; width: calc(100% + 16px); border-radius: 10px; cursor: pointer; }
+  .grow:hover { background: var(--page); }
+  .grow[aria-pressed="true"] { background: var(--page); box-shadow: inset 0 0 0 2px var(--data); }
+  .grow .g { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .track { position: relative; height: 16px; border-radius: 4px; background: var(--line); }
+  .track .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--data); min-width: 3px; }
+  .track .fill.low { background: var(--loss); }
+  .track .avg { position: absolute; top: -5px; bottom: -5px; width: 0; border-left: 2px solid var(--ink); }
+  .grow .v { text-align: right; line-height: 1.2; }
+  .grow .v b { display: block; font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+  .grow .v b.low { color: var(--loss-ink); }
+  .grow .v span { color: var(--muted); font-size: 12px; }
+  .axis .avg-l { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+  .axis .avg-l::before { content: ""; width: 0; height: 12px; border-left: 2px solid var(--ink); }
+  .who-low { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 28px; padding: 18px 22px; border-radius: var(--radius); background: var(--loss-soft); }
+  .who-low b { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; color: var(--loss-ink); line-height: 1.1; }
+  .who-low span { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .who-low small { font-size: 14px; color: var(--ink-2); }
+  .who-help { font-size: 13px; color: var(--muted); margin: 24px 0 0; }
+  .group-detail { margin-top: 36px; padding: 32px; background: var(--sunk); border-radius: var(--radius); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 40px; }
+  .group-detail .gd-head h3 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+  .group-detail .gd-head p { margin: 4px 0 0; color: var(--muted); }
+  .big-rate { display: flex; align-items: baseline; gap: 10px; margin: 20px 0 8px; }
+  .big-rate b { font-size: 44px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .big-rate span { color: var(--muted); font-size: 14px; }
+  .meter { height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
+  .meter span { display: block; height: 100%; background: var(--good); }
+  .gd-block { margin-top: 22px; }
+  .gd-block p { margin: 0; }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { font-size: 13px; font-weight: 600; background: var(--page); border-radius: 999px; padding: 3px 11px; }
+  .gd-quotes { display: flex; flex-direction: column; gap: 12px; }
+  .gd-quotes .quote { box-shadow: none; padding: 16px 18px; }
+  .gd-quotes .quote p { font-size: 15px; font-weight: 500; }
+  .gd-quotes .quote cite { display: block; margin-top: 8px; font-style: normal; font-size: 12px; color: var(--muted); }
+  .gd-quotes h4 { margin-top: 6px; }
+  .text-btn { border: 0; background: none; padding: 0; color: var(--data-ink); font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* 무엇이: 기준별 평가 */
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); margin: 0 0 14px; padding: 0; list-style: none; }
+  .legend li { display: flex; align-items: center; gap: 6px; }
+  .crit { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .crit th { text-align: left; font-size: 13px; font-weight: 600; color: var(--muted); padding: 0 0 10px; border-bottom: 1px solid var(--line-strong); }
+  .crit td { padding: 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .cbtn { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; text-align: left; padding: 14px 12px 14px 0; cursor: pointer; font-weight: 700; font-size: 15px; }
+  .cbtn svg { width: 12px; height: 12px; flex: none; color: var(--muted); transition: transform .2s cubic-bezier(.2, .8, .2, 1); }
+  .cbtn[aria-expanded="true"] svg { transform: rotate(90deg); }
+  .stack { display: flex; height: 22px; border-radius: 5px; overflow: hidden; gap: 2px; background: var(--page); }
+  .stack span { display: flex; align-items: center; padding-left: 6px; font-size: 12px; font-weight: 700; color: #fff; min-width: 0; overflow: hidden; }
+  .stack .좋음 { background: var(--good); } .stack .보통 { background: var(--mid); color: #2b1d00; } .stack .나쁨 { background: var(--loss); } .stack .판단불가 { background: var(--na); color: #1d1d22; }
+  .rep { display: flex; align-items: center; gap: 6px; font-size: 14px; white-space: nowrap; padding-left: 20px; }
+  .rep b { font-weight: 700; }
+  .imp { display: grid; grid-template-columns: minmax(40px, 1fr) 40px; gap: 10px; align-items: center; padding-left: 20px; font-size: 14px; }
+  .imp .bar-track { height: 6px; } .imp .bar-track span { background: var(--data); }
+  .imp span.n { text-align: right; }
+  .cdetail td { border-bottom: 1px solid var(--line); }
+  .cdetail .in { padding: 0 0 18px 20px; color: var(--ink-2); font-size: 14px; max-width: 80ch; }
+  .cdetail .in p { margin: 0 0 6px; }
+  .cdetail .in .ev { color: var(--muted); }
+
+  /* 화면별 한마디 */
+  .comments { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .ccol { background: var(--sunk); border-radius: var(--radius); padding: 22px; }
+  .ccol h3 { font-size: 16px; font-weight: 800; display: flex; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+  .ccol h3 small { font-weight: 600; color: var(--muted); font-size: 13px; }
+  .cq { margin: 0 0 14px; }
+  .cq p { margin: 0; font-size: 14px; }
+  .cq cite { display: block; font-style: normal; font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* 사람들 */
+  .ptools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 16px; }
+  .seg { display: inline-flex; background: var(--sunk); border-radius: 10px; padding: 3px; }
+  .seg button { border: 0; background: none; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--page); color: var(--ink); box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
+  .seg button:disabled { opacity: .45; cursor: default; }
+  .pcount { font-size: 14px; color: var(--muted); }
+  .people { border-top: 1px solid var(--line-strong); }
+  details.prow { border-bottom: 1px solid var(--line); }
+  details.prow > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 52px minmax(0, 1.4fr) minmax(0, 1.5fr) auto 16px; gap: 16px; align-items: center; padding: 14px 4px; }
+  details.prow > summary::-webkit-details-marker { display: none; }
+  details.prow > summary:hover { background: var(--sunk); }
+  .pid { font-weight: 800; font-size: 14px; }
+  .pprof { font-size: 14px; min-width: 0; }
+  .pprof span { display: block; color: var(--muted); font-size: 12px; }
+  .pverdict { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; min-width: 0; }
+  .pverdict.no { color: var(--loss-ink); }
+  .pverdict.yes { color: var(--good-ink); }
+  .pverdict.fail { color: var(--muted); }
+  .labs { display: flex; gap: 3px; }
+  .labs i { width: 14px; height: 14px; border-radius: 3px; display: block; }
+  .labs .좋음 { background: var(--good); } .labs .보통 { background: var(--mid); } .labs .나쁨 { background: var(--loss); } .labs .판단불가 { background: var(--na); }
+  .chev { width: 12px; height: 12px; color: var(--muted); transition: transform .2s cubic-bezier(.2, .8, .2, 1); }
+  details[open] > summary .chev { transform: rotate(90deg); }
+  .pbody { padding: 4px 4px 28px 72px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px 40px; }
+  .pbody h4 { margin: 0 0 8px; font-size: 13px; color: var(--muted); font-weight: 700; }
+  .reason { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.6; }
+  .code { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .badge { font-size: 12px; font-weight: 600; background: var(--sunk); color: var(--ink-2); border-radius: 999px; padding: 2px 10px; }
+  .ops { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; font-size: 14px; }
+  .ops dt { color: var(--muted); font-weight: 700; }
+  .ops dd { margin: 0; }
+  .ctable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .ctable th { text-align: left; font-weight: 600; padding: 6px 10px 6px 0; border-top: 1px solid var(--line); white-space: nowrap; vertical-align: top; }
+  .ctable td { padding: 6px 0; border-top: 1px solid var(--line); vertical-align: top; }
+  .lab { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 999px; }
+  .lab.좋음 { background: var(--good-soft); color: var(--good-ink); } .lab.보통 { background: var(--mid-soft); color: var(--mid-ink); }
+  .lab.나쁨 { background: var(--loss-soft); color: var(--loss-ink); } .lab.판단불가 { background: var(--na-soft); color: var(--na-ink); }
+  .ctable .ev { color: var(--ink-2); }
+  .ctable .ir { color: var(--muted); font-size: 13px; }
+  .full { grid-column: 1 / -1; }
+  .card-text { white-space: pre-line; font-size: 13px; color: var(--ink-2); background: var(--sunk); border-radius: 10px; padding: 14px 16px; margin: 0; }
+  .sc { margin: 0; padding: 0; list-style: none; font-size: 14px; }
+  .sc li { padding: 4px 0; } .sc b { margin-right: 6px; }
+  .fail-msg { font-size: 13px; color: var(--muted); font-family: ui-monospace, Consolas, monospace; background: var(--sunk); border-radius: 10px; padding: 12px 14px; margin: 0; overflow-wrap: anywhere; }
+  .more-row { padding: 18px 0 0; }
+  .more { border: 1px solid var(--line-strong); background: var(--page); border-radius: 10px; padding: 9px 16px; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .more:hover { background: var(--sunk); }
+
+  footer.foot { margin-top: 96px; border-top: 1px solid var(--line); padding-block: 28px 56px; font-size: 13px; color: var(--muted); }
+  footer.foot p { margin: 0 0 6px; max-width: 110ch; }
+  footer.foot b { color: var(--ink-2); }
+
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; gap: 36px; padding-block: 44px 36px; }
+    .waffle-box { justify-self: start; }
+    .waffle { justify-content: start; }
+    .legend-w { justify-content: flex-start; }
+    .waffle-note { text-align: left; }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stat:nth-child(3) { border-left: 0; padding-left: 0; }
+    .stat:nth-child(n+3) { border-top: 1px solid var(--band-line); }
+    .why, .group-detail { grid-template-columns: 1fr; gap: 32px; }
+    .screen-detail { grid-template-columns: 1fr; }
+    .phone { max-width: 320px; }
+  }
+  @media (max-width: 720px) {
+    .wrap { padding-inline: 16px; }
+    .run-pick label { display: none; }
+    .brand small { display: none; }
+    .select select { font-size: 13px; padding-right: 30px; }
+    section.sec { padding-block: 64px 0; }
+    .sec-head h2 { font-size: 24px; }
+    .stat { padding: 16px 12px 18px 16px; }
+    .stat b { font-size: 24px; }
+    .funnel, .fnames { display: none; }
+    .fmobile { display: block !important; }
+    .screen-detail, .group-detail { padding: 20px; margin-left: -4px; margin-right: -4px; }
+    .crit thead { display: none; }
+    .crit, .crit tbody, .crit tr, .crit td { display: block; width: 100%; }
+    .crit tr.crow { display: grid; grid-template-columns: minmax(0, 1fr) auto; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .crit tr.crow td { border: 0; }
+    .crit tr.crow td.c-stack { grid-column: 1 / -1; order: 3; padding-top: 6px; }
+    .crit tr.crow td.c-imp { grid-column: 1 / -1; order: 4; padding-top: 8px; }
+    .cbtn { padding: 0; }
+    .rep { padding-left: 0; }
+    .imp { padding-left: 0; grid-template-columns: auto minmax(40px, 1fr) 40px; }
+    .imp::before { content: "중요도 높음"; font-size: 13px; color: var(--muted); }
+    .cdetail .in { padding-left: 0; }
+    details.prow > summary { grid-template-columns: 44px minmax(0, 1fr) 14px; gap: 4px 12px; }
+    details.prow > summary .pverdict { grid-column: 2; grid-row: 2; }
+    details.prow > summary .labs { grid-column: 2; grid-row: 3; }
+    details.prow > summary .chev { grid-column: 3; grid-row: 1; }
+    .pbody { grid-template-columns: 1fr; padding-left: 4px; }
+  }
+  .fmobile { display: none; }
+  .frow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; width: 100%; border: 0; background: none; text-align: left; padding: 12px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .frow.on { box-shadow: inset 3px 0 0 var(--ink); padding-left: 10px; }
+  .frow b { font-size: 15px; } .frow .n { font-weight: 800; font-size: 18px; }
+  .frow .bar-track { grid-column: 1 / -1; } .frow .bar-track span { background: var(--data); }
+  .frow.goal .bar-track span { background: var(--good); }
+  .frow .lost { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+  .frow .lost.big { color: var(--loss-ink); font-weight: 700; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .waffle.enter .person { animation: rise .7s cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--i) * 14ms); }
+    @keyframes rise { from { opacity: .25; transform: translateY(6px) scale(.8); } }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand"><svg viewBox="0 0 18 20" aria-hidden="true"><path fill="currentColor" d="M0 0h10a8 8 0 0 1 0 16H5v4H0zM5 5v6h5a3 3 0 0 0 0-6z"/></svg>PersonaLab <small>결과 리포트</small></div>
+    <div class="run-pick">
+      <label for="run">실행</label>
+      <div class="select"><select id="run"></select><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></div>
+    </div>
+  </div>
+  <nav class="secnav" aria-label="리포트 섹션">
+    <div class="wrap secnav-in" id="secnav"></div>
+  </nav>
+</header>
+
+<main>
+  <div class="band"><div class="wrap" id="hero"></div></div>
+  <div class="wrap">
+    <section class="sec" id="where" aria-labelledby="where-h"></section>
+    <section class="sec" id="why" aria-labelledby="why-h"></section>
+    <section class="sec" id="who" aria-labelledby="who-h"></section>
+    <section class="sec" id="what" aria-labelledby="what-h"></section>
+    <section class="sec" id="voices" aria-labelledby="voices-h"></section>
+    <section class="sec" id="people" aria-labelledby="people-h"></section>
+    <footer class="foot" id="foot"></footer>
+  </div>
+</main>
+<div class="sr" aria-live="polite" id="live"></div>
+
+<script>
+const RUNS = /*__RUNS__*/null;
+const META = /*__META__*/null;
+const FLOW_NAME = { signup: "샘플 앱 회원가입", aicoss_signup: "AICOSS 사이트 회원가입" };
+const LAB_COLOR = { "좋음": "var(--good)", "보통": "var(--mid)", "나쁨": "var(--loss)", "판단불가": "var(--na)" };
+const PEOPLE_STEP = 12;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pct = x => Math.round(x * 100) + "%";
+const short = p => (p.profile || (p.age ? p.age + "세" : "")).replace(/ 지역에 산다\.$/, "").replace(/\.$/, "");
+const num = id => String(id).replace(/\D/g, "").replace(/^0+(?=\d{3})/, "");
+const chev = '<svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
+const xIcon = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.6"/></svg>';
+
+const S = {
+  run: RUNS.reduce((b, r, i) => r.mtime > RUNS[b].mtime ? i : b, 0),   // 가장 최근 실행부터
+  axis: null, group: null, screen: null, outcome: "all", shown: PEOPLE_STEP, crit: new Set(),
+};
+
+/* ---------- 계산 ---------- */
+function derive(r) {
+  const f = r.flow, ok = r.people.filter(p => p.status === "ok");
+  const label = Object.fromEntries(f.screens.map(s => [s.id, s.label]));
+  const idx = Object.fromEntries(f.screens.map((s, i) => [s.id, i]));
+  const done = ok.filter(p => p.eval.complete === "예");
+  const dropped = ok.filter(p => p.eval.complete === "아니오");
+  const drops = {}, why = {}, whyAt = {};
+  dropped.forEach(p => {
+    const s = p.eval.drop_screen, w = p.eval.drop_reason;
+    drops[s] = (drops[s] || 0) + 1; why[w] = (why[w] || 0) + 1;
+    (whyAt[s] = whyAt[s] || {})[w] = (whyAt[s][w] || 0) + 1;
+  });
+  const top = Object.entries(drops).sort((a, b) => b[1] - a[1])[0] || null;
+  // 화면마다 들어온 사람: 앞 화면에서 그만둔 사람을 뺀 수
+  let left = ok.length;
+  const funnel = f.screens.map(s => { const enter = left; left -= (drops[s.id] || 0); return { s, enter, drop: drops[s.id] || 0 }; });
+  const stats = META.criteria.map(c => {
+    const counts = Object.fromEntries(META.labels.map(l => [l, 0]));
+    ok.forEach(p => { const l = p.eval.criteria[c.key].label; counts[l] = (counts[l] || 0) + 1; });
+    const mode = META.labels.reduce((a, b) => counts[b] > counts[a] ? b : a, META.labels[0]);
+    const hi = ok.filter(p => p.eval.criteria[c.key].importance === "높음").length;
+    const ex = ok.find(p => p.eval.criteria[c.key].label === mode);
+    return { ...c, counts, mode, agree: ok.length ? counts[mode] / ok.length : 0, hi: ok.length ? hi / ok.length : 0,
+             ev: ex ? ex.eval.criteria[c.key].evidence : "" };
+  });
+  const agree = stats.length ? stats.reduce((s, c) => s + c.agree, 0) / stats.length : 0;
+  const axes = META.segments.filter(s => r.people.some(p => p.seg && p.seg[s.key] != null));
+  const rate = ok.length ? done.length / ok.length : 0;
+  return { r, f, ok, done, dropped, drops, why, whyAt, top, funnel, stats, agree, label, idx, axes, rate };
+}
+
+function groupsOf(d, axis) {
+  const seg = META.segments.find(s => s.key === axis);
+  const present = [...new Set(d.r.people.map(p => p.seg[axis]).filter(v => v != null))];
+  return [...seg.order.filter(g => present.includes(g)), ...present.filter(g => !seg.order.includes(g))];
+}
+
+function groupInfo(d, axis, g) {
+  const mem = d.r.people.filter(p => p.seg[axis] === g), ok = mem.filter(p => p.status === "ok");
+  const done = ok.filter(p => p.eval.complete === "예").length;
+  const dropScr = {}, dropWhy = {};
+  ok.filter(p => p.eval.complete === "아니오").forEach(p => {
+    dropScr[p.eval.drop_screen] = (dropScr[p.eval.drop_screen] || 0) + 1;
+    dropWhy[p.eval.drop_reason] = (dropWhy[p.eval.drop_reason] || 0) + 1; });
+  const topScr = Object.entries(dropScr).sort((a, b) => b[1] - a[1])[0];
+  const why = Object.entries(dropWhy).sort((a, b) => b[1] - a[1]);
+  const imp = META.criteria.map(c => ({ name: c.name, key: c.key,
+      share: ok.length ? ok.filter(p => p.eval.criteria[c.key].importance === "높음").length / ok.length : 0 }))
+    .sort((a, b) => b.share - a.share).slice(0, 3).filter(x => x.share > 0);
+  return { mem, ok, done, rate: ok.length ? done / ok.length : 0, topScr, why, imp };
+}
+
+/* ---------- 상단 ---------- */
+function renderRunPick() {
+  const byFlow = {};
+  RUNS.forEach((r, i) => (byFlow[r.flow.name] = byFlow[r.flow.name] || []).push(i));
+  const latest = RUNS.reduce((b, r, i) => r.mtime > RUNS[b].mtime ? i : b, 0);
+  $("run").innerHTML = Object.entries(byFlow).map(([name, ids]) =>
+    `<optgroup label="${esc(FLOW_NAME[name] || name)}">${ids.map(i =>
+      `<option value="${i}" ${i === S.run ? "selected" : ""}>${esc(FLOW_NAME[name] || name)} · ${esc(RUNS[i].version)} · ${RUNS[i].people.length}명${i === latest ? " (최근)" : ""}</option>`).join("")}</optgroup>`).join("");
+}
+
+function renderNav(d) {
+  const items = [["where", "어디서 멈췄나"], ["why", "왜 멈췄나"], ["who", "누가 멈췄나"], ["what", "무엇이 문제였나"]];
+  if (d.ok.some(p => p.eval.opinions)) items.push(["voices", "화면별 한마디"]);
+  items.push(["people", "페르소나별 응답"]);
+  const seg = S.group != null ? META.segments.find(s => s.key === S.axis) : null;
+  $("secnav").innerHTML = items.map(([id, t]) => `<a href="#${id}" data-nav="${id}">${t}</a>`).join("") +
+    (seg ? `<button class="chip" data-act="clear" aria-label="필터 해제: ${esc(seg.name)} ${esc(S.group)}">${esc(seg.name)} ${esc(S.group)}만 보는 중 ${xIcon}</button>` : "");
+}
+
+/* ---------- 결론 띠 ---------- */
+function personGlyph(o) {
+  const dash = o === "fail" ? ' stroke-dasharray="2.2 2.2"' : "";
+  const fill = o === "done" ? "currentColor" : "none";
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="4.2" fill="${fill}" stroke="currentColor" stroke-width="1.8"${dash}/>
+    <path d="M3.8 21.5a8.2 8.2 0 0 1 16.4 0z" fill="${fill}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"${dash}/></svg>`;
+}
+
+function renderHero(d) {
+  const { r, f, ok, done, top, rate } = d, ff = r.flow_facts;
+  const n = ok.length, failed = r.people.length - n;
+  const scr = top ? `${top[0]} ${d.label[top[0]] || ""}`.trim() : "";
+  const headline = !n ? "응답에 성공한 페르소나가 없습니다." :
+    done.length === n ? `${n}명 모두 끝까지 하겠다고 했습니다.` :
+    `${n}명 중 <span class="rate">${done.length}명</span>만 끝까지 하겠다고 했고,<br>${top[1]}명은 <mark>${esc(scr)}</mark>에서 멈췄습니다.`;
+  const order = r.people.map(p => {
+    if (p.status !== "ok") return { p, o: "fail" };
+    if (p.eval.complete === "예") return { p, o: "done" };
+    return { p, o: top && p.eval.drop_screen === top[0] ? "drop" : "drop2" };
+  });
+  const rank = { done: 0, drop: 1, drop2: 2, fail: 3 };
+  order.sort((a, b) => rank[a.o] - rank[b.o] || (d.idx[a.p.eval?.drop_screen] ?? 0) - (d.idx[b.p.eval?.drop_screen] ?? 0));
+  const total = r.people.length, cols = total <= 10 ? total : 10, size = total <= 5 ? 52 : total <= 20 ? 34 : 28;
+  const outcomeText = ({ p, o }) => o === "fail" ? "응답 실패" : o === "done" ? "끝까지 한다" :
+    `${p.eval.drop_screen} ${d.label[p.eval.drop_screen] || ""}에서 그만둔다 · ${META.drop_ko[p.eval.drop_reason] || p.eval.drop_reason}`;
+  const otherDrops = Object.entries(d.drops).filter(([s]) => !top || s !== top[0]).sort((a, b) => (d.idx[a[0]] ?? 0) - (d.idx[b[0]] ?? 0));
+  const legend = [`<li><i style="background:#4cc566"></i>끝까지 ${done.length}</li>`]
+    .concat(top && done.length < n ? [`<li><i style="background:#ff7070"></i>${esc(top[0])} 이탈 ${top[1]}</li>`] : [])
+    .concat(otherDrops.map(([s, c]) => `<li><i style="background:#ffb066"></i>${esc(s)} 이탈 ${c}</li>`))
+    .concat(failed ? [`<li><i style="border:1.5px dashed #8d8d98"></i>응답 실패 ${failed}</li>`] : []);
+  const facts = [
+    [`시작 ${f.screens[0].id} → 목표 ${f.goal}`], [`최소 ${ff.steps}번 이동`], [`입력칸 ${ff.fields}개`],
+    [`소셜 로그인 ${ff.social ? "있음" : "없음"}`, !ff.social], [`도움말 ${ff.help ? "있음" : "없음"}`, !ff.help],
+    [`진행 단계 표시 ${ff.progress ? "있음" : "없음"}`, !ff.progress]];
+  const segRates = d.axes.flatMap(a => groupsOf(d, a.key).map(g => groupInfo(d, a.key, g)).filter(x => x.ok.length).map(x => x.rate));
+  const range = segRates.length ? ` · 고객 구분별 ${pct(Math.min(...segRates))}~${pct(Math.max(...segRates))}` : "";
+  const high = d.stats.filter(c => c.agree >= 0.85).length;
+  $("hero").innerHTML = `
+    <div class="hero">
+      <div>
+        <p class="hero-meta">${esc(FLOW_NAME[f.name] || f.name)} · ${esc(r.version)} · 페르소나 ${total}명</p>
+        <h1>${headline}</h1>
+        <p class="hero-sub"><b>과제</b> ${esc(f.task)}</p>
+        <ul class="facts-line" aria-label="흐름 정보">${facts.map(([t, no]) => `<li class="${no ? "no" : ""}">${esc(t)}</li>`).join("")}</ul>
+        ${f.common ? `<p class="common-note">모든 화면 공통 메뉴 ${f.common.menu.length}개(${esc(f.common.menu.slice(0, 6).join(", "))} 등)는 화면 그림에서 뺐습니다.</p>` : ""}
+      </div>
+      <div class="waffle-box">
+        <div class="waffle enter" style="grid-template-columns:repeat(${cols}, var(--d)); --d:${size}px" role="group" aria-label="페르소나 ${total}명의 결과. 누르면 아래 응답으로 이동합니다.">
+          ${order.map((x, i) => `<button class="person" data-o="${x.o}" data-act="person" data-pid="${esc(x.p.persona_id)}" style="--i:${i}"
+            title="${esc(x.p.persona_id)} · ${esc(outcomeText(x))}" aria-label="${esc(x.p.persona_id)}: ${esc(outcomeText(x))}">${personGlyph(x.o)}</button>`).join("")}
+        </div>
+        <ul class="legend-w">${legend.join("")}</ul>
+        <p class="waffle-note">한 사람이 한 명의 AI 페르소나입니다. 누르면 그 사람의 응답을 엽니다.</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>${pct(rate)}</b><span class="k">끝까지 하겠다</span><span class="s">${done.length} / ${n}명${range}</span></div>
+      <div class="stat"><b>${top ? esc(top[0]) : "없음"}</b><span class="k">가장 많이 그만둔 화면</span><span class="s">${top ? `${esc(d.label[top[0]] || "")} · ${top[1]}명 (진입 ${d.funnel[d.idx[top[0]]]?.enter ?? n}명 중)` : "그만둔 사람 없음"}</span></div>
+      <div class="stat"><b>${pct(d.agree)}</b><span class="k">평균 라벨 일치도</span><span class="s">7개 기준 중 ${high}개가 85% 이상</span></div>
+      <div class="stat"><b>${failed}명</b><span class="k">응답 실패</span><span class="s">실행 비용 ${r.cost != null ? "$" + r.cost.toFixed(3) : "-"} · ${esc(r.model)}</span></div>
+    </div>
+    <p class="synthetic">모든 평가는 Synthetic User Response이며 실제 사용자 응답이 아닙니다. AI 페르소나가 화면 흐름을 7개 사용성 기준(ISO 9241-11 · 닐슨 휴리스틱)으로 평가하고 끝까지 할지 판단했습니다.</p>`;
+}
+
+/* ---------- 어디서 ---------- */
+function phoneCard(d, s) {
+  const f = d.f, goal = s.id === f.goal, dn = d.drops[s.id] || 0;
+  const all = s.texts || [];
+  const texts = all.slice(0, 8).map(t => `<p class="ph-text">${esc(t)}</p>`).join("") +
+    (all.length > 8 ? `<p class="ph-more">… 문구 ${all.length - 8}개 더</p>` : "");
+  const fields = (s.fields || []).map(x => {
+    const req = x.required === true ? "필수" : x.required === false ? "선택" : "표시 없음";
+    const name = x.label ? `<span>${esc(x.label)}</span>` : `<span class="unnamed">(이름 없음) ${esc(x.hint || "")}</span>`;
+    return `<div class="field">${name}<span class="req ${x.required == null ? "none" : ""}">${req}</span></div>`;
+  }).join("");
+  const btns = (s.elements || []).filter(e => !e.outside).map(e =>
+    `<span class="pbtn ${e.to ? "" : "dead"}" title="${e.to ? "→ " + esc(e.to) : "이동 없음"}">${esc(e.text)}${e.to ? " → " + esc(e.to) : ""}</span>`).join("");
+  return `<div class="phone ${goal ? "goal" : ""} ${dn ? "dropped" : ""}" aria-label="AI가 받은 ${esc(s.id)} 화면">
+    <div class="ph-head"><b>${esc(s.label)}</b><span>${esc(s.id)}</span></div>${texts}${fields}<div class="btns">${btns}</div></div>`;
+}
+
+function renderWhere(d) {
+  const { f, funnel, ok } = d, n = ok.length || 1;
+  if (S.screen == null || !(S.screen in d.idx)) S.screen = d.top ? d.top[0] : f.goal;
+  let big = -1, bigLoss = 0;
+  funnel.forEach((x, i) => { if (x.drop > bigLoss) { bigLoss = x.drop; big = i; } });
+  const facts = s => {
+    const fx = s.facts, out = [`입력칸 ${fx.fields}`];
+    if (fx.unmarked) out.push(`<span class="warn">표시 없음 ${fx.unmarked}</span>`);
+    if (fx.unnamed) out.push(`<span class="warn">이름 없음 ${fx.unnamed}</span>`);
+    if (!fx.exit.length) out.push(`<span class="warn">뒤로/취소 없음</span>`);
+    if (s.id === f.goal) out.push("목표 화면");
+    return out.map(t => t.startsWith("<") ? t : `<span>${t}</span>`).join("");
+  };
+  const cols = funnel.map((x, i) => {
+    const next = funnel[i + 1];
+    const gap = next ? `<div class="gap ${i === big ? "big" : ""}" style="--h2:${next.enter / n}" aria-hidden="true">
+        ${i === big ? `<span class="tag">가장 큰 손실</span>` : ""}
+        <span class="pass">${x.enter ? pct(next.enter / x.enter) : "-"} 통과</span>${x.drop ? `<span class="lost">${x.drop}명 이탈</span>` : ""}</div>` : "";
+    return `<button class="fcol ${x.s.id === f.goal ? "goal" : ""} ${S.screen === x.s.id ? "on" : ""}" data-act="screen" data-s="${esc(x.s.id)}"
+      aria-pressed="${S.screen === x.s.id}" style="--h:${x.enter / n}" aria-label="${esc(x.s.id)} ${esc(x.s.label)}: ${x.enter}명 진입, ${x.drop}명 그만둠">
+      <span class="cnt">${x.enter}<small>명</small></span><span class="col"></span>${gap}</button>`;
+  }).join("");
+  const names = funnel.map(x => `<button class="fname" data-act="screen" data-s="${esc(x.s.id)}" tabindex="-1">
+      <b>${esc(x.s.id)} ${esc(x.s.label)}</b>${facts(x.s)}${x.drop ? `<span class="left">여기서 그만둠 ${x.drop}명</span>` : ""}</button>`).join("");
+  const mobile = funnel.map((x, i) => `<button class="frow ${x.s.id === f.goal ? "goal" : ""} ${S.screen === x.s.id ? "on" : ""}" data-act="screen" data-s="${esc(x.s.id)}" aria-pressed="${S.screen === x.s.id}">
+      <b>${esc(x.s.id)} ${esc(x.s.label)}</b><span class="n">${x.enter}명</span>
+      <span class="bar-track"><span style="width:${x.enter / n * 100}%"></span></span>
+      ${x.drop ? `<span class="lost ${i === big ? "big" : ""}">여기서 ${x.drop}명 그만둠${i === big ? " · 가장 큰 손실" : ""}</span>` : ""}</button>`).join("");
+  const title = d.top ? `${d.top[1]}명이 ${esc(d.top[0])} ${esc(d.label[d.top[0]] || "")}에서 멈췄습니다` : "모든 화면을 지나 목표에 도착했습니다";
+  $("where").innerHTML = `
+    <div class="sec-head"><h2 id="where-h"><span class="q">어디서 멈췄나</span><br>${title}</h2>
+      <p>막대는 각 화면에 들어온 인원이고, 화면 사이 숫자는 다음 화면으로 넘어간 비율입니다. 페르소나가 '여기서 그만두겠다'고 답한 화면을 기준으로 셉니다. 화면을 누르면 AI가 받은 화면 정보가 아래에 펼쳐집니다.</p></div>
+    <div class="funnel" style="--n:${funnel.length}">${cols}</div>
+    <div class="fnames" style="--n:${funnel.length}">${names}</div>
+    <div class="fmobile">${mobile}</div>
+    <div id="screen-detail"></div>`;
+  renderScreen(d);
+}
+
+function renderScreen(d) {
+  const s = d.f.screens[d.idx[S.screen]], fx = s.facts, x = d.funnel[d.idx[S.screen]];
+  const outside = (s.elements || []).filter(e => e.outside).length;
+  const reasons = Object.entries(d.whyAt[s.id] || {}).sort((a, b) => b[1] - a[1]);
+  const tiles = [
+    [fx.fields + "개", "입력칸", ""],
+    [fx.unmarked + "개", "필수/선택 표시 없음", fx.unmarked ? "warn" : ""],
+    [fx.unnamed + "개", "이름 없는 입력칸", fx.unnamed ? "warn" : ""],
+    [fx.exit.length ? "있음" : "없음", "뒤로/취소", fx.exit.length ? "" : "warn"],
+    s.chars ? [s.chars.toLocaleString() + "자", "화면 글자 수", s.chars > 3000 ? "warn" : ""] : null,
+    outside ? [outside + "개", "다른 페이지 링크", ""] : null,
+    s.id === d.f.goal ? ["목표", "목표 화면", "good"] : null,
+    [x.drop + "명", "여기서 그만둠", x.drop ? "bad" : ""],
+  ].filter(Boolean);
+  $("screen-detail").innerHTML = `<div class="screen-detail">
+      ${phoneCard(d, s)}
+      <div class="sd-body">
+        <h3>AI가 받은 ‘${esc(s.label)}’ 화면 <small>${esc(s.id)}</small></h3>
+        <p class="sd-lead">${x.enter}명이 이 화면에 들어왔고 ${x.drop ? `${x.drop}명이 여기서 그만두겠다고 했습니다.` : "여기서 그만둔 사람은 없습니다."}</p>
+        <div class="tiles">${tiles.map(([b, t, c]) => `<div class="tile ${c}"><b>${esc(b)}</b><span>${esc(t)}</span></div>`).join("")}</div>
+        ${reasons.length ? `<div class="sd-why"><h4>이 화면에서 그만둔 이유</h4><div class="pills">${reasons.map(([k, c]) =>
+          `<span class="pill">${esc(META.drop_ko[k] || k)} ${c}명</span>`).join("")}</div></div>` : ""}
+        <ul class="key" aria-label="화면 그림 읽는 법">
+          <li><span class="sw" style="border:1px dashed var(--line-strong)"></span>점선 버튼: 이동할 곳이 없는 버튼</li>
+          <li><span class="sw" style="background:var(--mid-soft)"></span><span style="color:var(--mid-ink);font-weight:600">표시 없음</span>: 필수/선택 표시가 없는 입력칸</li>
+          <li><span class="sw" style="border:1.5px solid var(--loss)"></span>빨간 테두리: 페르소나가 그만둔 화면</li>
+        </ul>
+      </div></div>`;
+}
+
+/* ---------- 왜 ---------- */
+function quoteCard(d, p, text) {
+  return `<blockquote class="quote"><footer><span class="avatar" aria-hidden="true">${esc(num(p.persona_id))}</span>
+      <span class="who-line"><b>${esc(short(p))}</b><span><i class="dot" style="background:${p.eval.complete === "예" ? "var(--good)" : "var(--loss)"}"></i>${esc(p.persona_id)} · ${p.eval.complete === "예" ? "끝까지 한다" : `${esc(p.eval.drop_screen)}에서 그만둠`}</span></span></footer>
+      <p>“${esc(text)}”</p></blockquote>`;
+}
+
+function renderWhy(d) {
+  const list = Object.entries(d.why).sort((a, b) => b[1] - a[1]);
+  const total = d.dropped.length, max = list.length ? list[0][1] : 1;
+  const topSet = d.top ? d.dropped.filter(p => p.eval.drop_screen === d.top[0]) : [];
+  const picks = [];
+  for (const [k] of list) { const p = topSet.find(q => q.eval.drop_reason === k && !picks.includes(q)) || d.dropped.find(q => q.eval.drop_reason === k && !picks.includes(q)); if (p) picks.push(p); if (picks.length === 2) break; }
+  const title = !total ? "그만둔 사람이 없습니다" : list.length === 1 ? `모두 ‘${esc(META.drop_ko[list[0][0]])}’를 골랐습니다` :
+    `‘${esc(META.drop_ko[list[0][0]])}’가 ${list[0][1]}명으로 가장 많았습니다`;
+  $("why").innerHTML = `
+    <div class="sec-head"><h2 id="why-h"><span class="q">왜 멈췄나</span><br>${title}</h2>
+      <p>${total ? `그만둔 ${total}명이 고른 이유입니다. 이유는 정해진 8개 중 하나를 고릅니다.` : "응답에 성공한 페르소나가 모두 끝까지 하겠다고 했습니다."}</p></div>
+    ${total ? `<div class="why">
+      <ul class="reasons">${list.map(([k, c]) => `<li><span class="name">${esc(META.drop_ko[k] || k)}</span>
+        <span class="bar-track" aria-hidden="true"><span style="width:${c / max * 100}%"></span></span><span class="n">${c}명</span></li>`).join("")}</ul>
+      <div class="quotes">${picks.map(p => quoteCard(d, p, p.eval.complete_reason)).join("")}
+        <p class="ai-tag">AI 페르소나의 응답(Synthetic User Response)입니다.</p></div>
+    </div>` : ""}`;
+}
+
+/* ---------- 누가 ---------- */
+function renderWho(d) {
+  if (!d.axes.length) { $("who").innerHTML = `<div class="sec-head"><h2 id="who-h"><span class="q">누가 멈췄나</span><br>고객 구분 정보가 없습니다</h2></div>`; return; }
+  const avg = d.rate;
+  let low = null;
+  const blocks = d.axes.map(a => {
+    const rows = groupsOf(d, a.key).map(g => {
+      const gi = groupInfo(d, a.key, g);
+      if (gi.ok.length && (!low || gi.rate < low.rate || (gi.rate === low.rate && gi.ok.length > low.n))) low = { name: a.name, g, rate: gi.rate, n: gi.ok.length };
+      const isLow = gi.ok.length && gi.rate < avg;
+      const on = S.axis === a.key && S.group === g;
+      return `<button class="grow" data-act="group" data-a="${esc(a.key)}" data-g="${esc(g)}" aria-pressed="${on}"
+          aria-label="${esc(a.name)} ${esc(g)}: 끝까지 하겠다 ${gi.done}/${gi.ok.length}명 (${pct(gi.rate)})">
+        <span class="g">${esc(g)}</span>
+        <span class="track" aria-hidden="true">${gi.ok.length ? `<span class="fill ${isLow ? "low" : ""}" style="width:${gi.rate * 100}%"></span>` : ""}<span class="avg" style="left:${avg * 100}%"></span></span>
+        <span class="v"><b class="${isLow ? "low" : ""}">${gi.ok.length ? pct(gi.rate) : "-"}</b><span>${gi.done}/${gi.ok.length}명</span></span></button>`;
+    }).join("");
+    return `<div class="axis"><h3>${esc(a.name)}</h3>${rows}<p class="avg-l">전체 평균 ${pct(avg)}</p></div>`;
+  }).join("");
+  const title = low ? `${esc(low.name)} ${esc(low.g)} 그룹이 가장 적게 끝까지 갔습니다` : "고객 구분별 결과";
+  $("who").innerHTML = `
+    <div class="sec-head"><h2 id="who-h"><span class="q">누가 멈췄나</span><br>${title}</h2>
+      <p>고객 구분별로 ‘끝까지 하겠다’고 한 비율입니다. 빨간 막대는 전체 평균보다 낮은 그룹입니다. 그룹을 누르면 그 그룹의 그만둔 화면, 중요하게 본 기준, 실제 의견이 펼쳐지고, 아래 화면별 한마디와 페르소나 목록이 그 그룹만 남습니다.</p></div>
+    ${low ? `<p class="who-low"><b>${pct(low.rate)}</b><span>${esc(low.name)} ${esc(low.g)}</span><small>끝까지 하겠다 ${Math.round(low.rate * low.n)}/${low.n}명 · 전체 평균 ${pct(avg)}</small></p>` : ""}
+    <div class="multiples">${blocks}</div>
+    <div id="group-detail"></div>`;
+  renderGroup(d);
+}
+
+function renderGroup(d) {
+  const box = $("group-detail");
+  if (!box) return;
+  if (S.group == null) { box.innerHTML = ""; return; }
+  const seg = META.segments.find(s => s.key === S.axis), gi = groupInfo(d, S.axis, S.group);
+  const none = '<p style="color:var(--muted)">없음</p>';
+  const who = p => `${esc(p.persona_id)} · ${esc(short(p))}`;
+  const quotes = gi.ok.slice(0, 2).map(p => `<blockquote class="quote"><p>“${esc(p.eval.complete_reason)}”</p><cite>${who(p)}</cite></blockquote>`);
+  if (gi.imp.length) {
+    const p = gi.ok.find(q => q.eval.criteria[gi.imp[0].key].importance === "높음");
+    if (p) quotes.push(`<blockquote class="quote"><p>“${esc(p.eval.criteria[gi.imp[0].key].importance_reason)}”</p><cite>${esc(p.persona_id)} · ${esc(gi.imp[0].name)}이(가) 중요한 이유</cite></blockquote>`);
+  }
+  const sugg = gi.ok.filter(p => p.eval.opinions).slice(0, 2);
+  box.innerHTML = `<div class="group-detail" tabindex="-1" id="gd">
+    <div>
+      <div class="gd-head"><h3>${esc(seg.name)} ${esc(S.group)}</h3>
+        <p>${gi.mem.length}명${gi.mem.length > gi.ok.length ? ` (응답 실패 ${gi.mem.length - gi.ok.length})` : ""}${seg.desc[S.group] ? ` · ${esc(seg.desc[S.group])}` : ""}</p></div>
+      <div class="big-rate"><b>${pct(gi.rate)}</b><span>끝까지 하겠다 ${gi.done}/${gi.ok.length}명</span></div>
+      <div class="meter" aria-hidden="true"><span style="width:${gi.rate * 100}%"></span></div>
+      <div class="gd-block"><h4>주로 그만둔 화면</h4>${gi.topScr ? `<p><b>${esc(gi.topScr[0])} ${esc(d.label[gi.topScr[0]] || "")}</b> (${gi.topScr[1]}명)</p>
+        <div class="pills" style="margin-top:8px">${gi.why.map(([k, c]) => `<span class="pill">${esc(META.drop_ko[k] || k)} ${c}명</span>`).join("")}</div>` : none}</div>
+      <div class="gd-block"><h4>중요하게 본 기준</h4>${gi.imp.length ? `<div class="pills">${gi.imp.map(x => `<span class="pill">${esc(x.name)} ${pct(x.share)}</span>`).join("")}</div>` : none}</div>
+      <div class="gd-block"><button class="text-btn" data-act="goto-people">이 그룹 ${gi.mem.length}명의 응답 보기</button></div>
+    </div>
+    <div class="gd-quotes"><h4>의견 (Synthetic User Response)</h4>${quotes.join("") || none}
+      ${sugg.length ? `<h4>개선 제안</h4>${sugg.map(p => `<blockquote class="quote"><p>“${esc(p.eval.opinions.suggestion)}”</p><cite>${esc(p.persona_id)}</cite></blockquote>`).join("")}` : ""}</div>
+  </div>`;
+}
+
+/* ---------- 무엇이 ---------- */
+function renderWhat(d) {
+  const n = d.ok.length || 1, bad = d.stats.filter(c => c.mode === "나쁨").length;
+  const title = bad ? `7개 기준 중 ${bad}개에서 ‘나쁨’이 가장 많았습니다` : "7개 기준 모두 ‘나쁨’이 대표 라벨이 아니었습니다";
+  const rows = d.stats.map(c => {
+    const open = S.crit.has(c.key);
+    const segs = META.labels.filter(l => c.counts[l]).map(l =>
+      `<span class="${l}" style="flex:${c.counts[l]}" title="${l} ${c.counts[l]}명">${c.counts[l] / n >= 0.06 ? c.counts[l] : ""}</span>`).join("");
+    return `<tr class="crow">
+      <td class="c-name"><button class="cbtn" data-act="crit" data-k="${c.key}" aria-expanded="${open}" aria-controls="cd-${c.key}">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>${esc(c.name)}</button></td>
+      <td class="c-stack"><div class="stack" role="img" aria-label="${META.labels.map(l => `${l} ${c.counts[l]}명`).join(", ")}">${segs}</div></td>
+      <td><span class="rep"><i class="dot" style="background:${LAB_COLOR[c.mode]}"></i><b>${c.mode}</b> ${pct(c.agree)}</span></td>
+      <td class="c-imp"><span class="imp"><span class="bar-track" aria-hidden="true"><span style="width:${c.hi * 100}%"></span></span><span class="n">${pct(c.hi)}</span></span></td></tr>
+      <tr class="cdetail" id="cd-${c.key}" ${open ? "" : "hidden"}><td colspan="4"><div class="in"><p>${esc(c.desc)}</p><p class="ev">근거 예: ${esc(c.ev)}</p></div></td></tr>`;
+  }).join("");
+  $("what").innerHTML = `
+    <div class="sec-head"><h2 id="what-h"><span class="q">무엇이 문제였나</span><br>${title}</h2>
+      <p>응답에 성공한 ${d.ok.length}명이 7개 사용성 기준마다 매긴 라벨입니다. 라벨은 화면에 있는 사실이라 페르소나가 달라도 같아야 합니다. 일치도가 낮으면 프롬프트나 화면 정보가 모호하다는 뜻입니다. 기준을 누르면 설명과 근거 예가 펼쳐집니다.</p></div>
+    <ul class="legend">${META.labels.map(l => `<li><i class="dot" style="background:${LAB_COLOR[l]}"></i>${l}</li>`).join("")}</ul>
+    <table class="crit"><thead><tr><th style="width:22%">기준</th><th>라벨 분포 (${d.ok.length}명)</th><th style="width:15%;padding-left:20px">대표 라벨 · 일치도</th><th style="width:18%;padding-left:20px">중요도 높음</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
+}
+
+/* ---------- 화면별 한마디 ---------- */
+function pool(d) { return S.group == null ? d.ok : d.ok.filter(p => p.seg[S.axis] === S.group); }
+
+function renderVoices(d) {
+  const sec = $("voices");
+  if (!d.ok.some(p => p.eval.opinions)) { sec.hidden = true; sec.innerHTML = ""; return; }
+  sec.hidden = false;
+  const ps = pool(d).filter(p => p.eval.opinions);
+  const seg = S.group != null ? META.segments.find(s => s.key === S.axis) : null;
+  const cols = d.f.screens.map(s => {
+    const cs = ps.flatMap(p => p.eval.opinions.screen_comments.filter(c => c.screen === s.id).map(c => ({ p, c })));
+    if (!cs.length) return "";
+    return `<div class="ccol"><h3>${esc(s.id)} ${esc(s.label)} <small>${cs.length}개</small></h3>
+      ${cs.map(({ p, c }) => `<blockquote class="cq"><p>“${esc(c.comment)}”</p><cite>${esc(p.persona_id)} · ${esc(short(p))}</cite></blockquote>`).join("")}</div>`;
+  }).join("");
+  sec.innerHTML = `
+    <div class="sec-head"><h2 id="voices-h">화면별 한마디</h2>
+      <p>페르소나가 화면마다 남긴 의견입니다(Synthetic User Response).</p>
+      ${seg ? `<span class="filtered-note">${esc(seg.name)} ${esc(S.group)} 그룹만</span>` : ""}</div>
+    ${cols ? `<div class="comments">${cols}</div>` : `<p class="empty">이 그룹이 남긴 화면별 의견이 없습니다.</p>`}`;
+}
+
+/* ---------- 페르소나별 응답 ---------- */
+function personRow(d, p) {
+  if (p.status !== "ok") return `<details class="prow" id="p-${esc(p.persona_id)}"><summary>
+      <span class="pid">${esc(p.persona_id)}</span><span class="pprof">${esc(short(p)) || "&nbsp;"}</span>
+      <span class="pverdict fail">응답 실패</span><span></span>${chev}</summary>
+      <div class="pbody"><div class="full"><h4>실패 메시지</h4><p class="fail-msg">${esc(String(p.status).slice(0, 220))}</p></div></div></details>`;
+  const e = p.eval, yes = e.complete === "예";
+  const verdict = yes ? "끝까지 한다" : `${esc(e.drop_screen)} ${esc(d.label[e.drop_screen] || "")}에서 그만둔다`;
+  const labs = META.criteria.map(c => `<i class="${e.criteria[c.key].label}" title="${esc(c.name)}: ${e.criteria[c.key].label}"></i>`).join("");
+  const sc = e.opinions ? e.opinions.screen_comments.map(c => `<li><b>${esc(c.screen)} ${esc(d.label[c.screen] || "")}</b>${esc(c.comment)}</li>`).join("") : "";
+  return `<details class="prow" id="p-${esc(p.persona_id)}"><summary>
+      <span class="pid">${esc(p.persona_id)}</span>
+      <span class="pprof">${esc(short(p))}<span>가격 민감 ${esc(p.ps_grade)} · 디지털 ${esc(p.da_grade)}</span></span>
+      <span class="pverdict ${yes ? "yes" : "no"}"><i class="dot" style="background:${yes ? "var(--good)" : "var(--loss)"}"></i>${verdict}${yes ? "" : `<span class="code" style="font-weight:500">· ${esc(META.drop_ko[e.drop_reason] || e.drop_reason)}</span>`}</span>
+      <span class="labs" role="img" aria-label="7개 기준 라벨: ${META.criteria.map(c => `${c.name} ${e.criteria[c.key].label}`).join(", ")}">${labs}</span>${chev}</summary>
+    <div class="pbody">
+      <div>
+        <h4>${yes ? "끝까지 하는 이유" : "그만두는 이유"}</h4>
+        <p class="reason">“${esc(e.complete_reason)}”</p>
+        ${yes ? "" : `<p class="code" style="margin:8px 0 0">이탈 이유: ${esc(META.drop_ko[e.drop_reason] || "")} (${esc(e.drop_reason)})</p>`}
+        <div class="badges"><span class="badge">가격 민감 ${esc(p.ps_grade)}</span><span class="badge">디지털 ${esc(p.da_grade)}</span></div>
+      </div>
+      <div>${e.opinions ? `<h4>의견</h4><dl class="ops"><dt>좋았던 점</dt><dd>${esc(e.opinions.liked)}</dd>
+        <dt>불편했던 점</dt><dd>${esc(e.opinions.disliked)}</dd><dt>개선 제안</dt><dd>${esc(e.opinions.suggestion)}</dd></dl>` : ""}
+        ${sc ? `<h4 style="margin-top:18px">화면별 한마디</h4><ul class="sc">${sc}</ul>` : ""}</div>
+      <div class="full"><h4>기준별 라벨과 근거</h4><table class="ctable"><tbody>${META.criteria.map(c => { const x = e.criteria[c.key];
+        return `<tr><th>${esc(c.name)}</th><td style="width:90px"><span class="lab ${x.label}">${x.label}</span></td>
+          <td><div class="ev">근거: ${esc(x.evidence)}</div><div class="ir">중요도 ${esc(x.importance)}: ${esc(x.importance_reason)}</div></td></tr>`; }).join("")}</tbody></table></div>
+      <div class="full"><h4>페르소나 카드</h4><p class="card-text">${esc(p.card)}</p></div>
+    </div></details>`;
+}
+
+function renderPeople(d) {
+  const r = d.r, seg = S.group != null ? META.segments.find(s => s.key === S.axis) : null;
+  const base = S.group == null ? r.people : r.people.filter(p => p.seg[S.axis] === S.group);
+  const test = { all: () => true, yes: p => p.status === "ok" && p.eval.complete === "예",
+                 no: p => p.status === "ok" && p.eval.complete === "아니오", fail: p => p.status !== "ok" };
+  const cnt = k => base.filter(test[k]).length;
+  if (S.outcome !== "all" && !cnt(S.outcome)) S.outcome = "all";
+  const list = base.filter(test[S.outcome]);
+  const visible = list.slice(0, S.shown);
+  const opts = [["all", "전체"], ["yes", "끝까지"], ["no", "그만둠"], ["fail", "응답 실패"]];
+  $("people").innerHTML = `
+    <div class="sec-head"><h2 id="people-h">페르소나별 응답</h2>
+      <p>한 줄이 한 명입니다. 오른쪽 작은 칸 7개는 7개 기준의 라벨이고, 줄을 누르면 이유, 의견, 기준별 근거, 페르소나 카드 원문이 펼쳐집니다.</p></div>
+    <div class="ptools">
+      <div class="seg" role="group" aria-label="결과로 거르기">${opts.map(([k, t]) =>
+        `<button data-act="outcome" data-k="${k}" aria-pressed="${S.outcome === k}" ${k !== "all" && !cnt(k) ? "disabled" : ""}>${t} ${cnt(k)}</button>`).join("")}</div>
+      <span class="pcount">${seg ? `${esc(seg.name)} ${esc(S.group)} · ${base.length}명만 보는 중 <button class="text-btn" data-act="clear">전체 보기</button>` : `전체 ${r.people.length}명`}</span>
+    </div>
+    <div class="people">${visible.map(p => personRow(d, p)).join("")}</div>
+    ${list.length > visible.length ? `<div class="more-row"><button class="more" data-act="more">나머지 ${list.length - visible.length}명 모두 보기</button></div>` : ""}`;
+}
+
+function renderFoot(d) {
+  const r = d.r;
+  $("foot").innerHTML = `
+    <p><b>읽는 법</b> 완주율 = ‘끝까지 하겠다’ 인원 ÷ 응답에 성공한 인원(${d.ok.length}명). 라벨 일치도 = 가장 많은 라벨 수 ÷ 응답 성공 인원, 7개 기준 평균.</p>
+    <p>모든 평가는 Synthetic User Response이며 실제 사용자 응답이 아닙니다. 화면은 글(구조 요약)로만 전달되어 색·배치·속도는 평가하지 않습니다.</p>
+    <p>실행 ${esc(r.id)} · 페르소나 ${r.people.length}명 · Persona Engine 카드 + ${esc(r.model)}</p>`;
+}
+
+/* ---------- 그리기와 상호작용 ---------- */
+let D = null;
+function render(focusSel) {
+  D = derive(RUNS[S.run]);
+  renderRunPick(); renderNav(D); renderHero(D); renderWhere(D); renderWhy(D); renderWho(D); renderWhat(D);
+  renderVoices(D); renderPeople(D); renderFoot(D); watchNav();
+  if (focusSel) document.querySelector(focusSel)?.focus({ preventScroll: true });
+}
+function refreshFilter(focusSel) {
+  renderNav(D); renderWho(D); renderVoices(D); renderPeople(D); watchNav();
+  if (focusSel) document.querySelector(focusSel)?.focus({ preventScroll: true });
+}
+const say = t => { $("live").textContent = t; };
+
+$("run").addEventListener("change", e => {
+  S.run = +e.target.value; S.group = null; S.axis = null; S.screen = null; S.outcome = "all"; S.shown = PEOPLE_STEP; S.crit.clear();
+  render(); say(`${e.target.selectedOptions[0].textContent} 실행을 보는 중`);
+});
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el) return;
+  const act = el.dataset.act;
+  if (act === "screen") {
+    S.screen = el.dataset.s; renderWhere(D);
+    document.querySelector(`.fcol[data-s="${CSS.escape(S.screen)}"]`)?.focus({ preventScroll: true });
+    if (window.matchMedia("(max-width: 720px)").matches) document.querySelector(`.frow[data-s="${CSS.escape(S.screen)}"]`)?.focus({ preventScroll: true });
+  } else if (act === "group") {
+    const same = S.axis === el.dataset.a && S.group === el.dataset.g;
+    S.axis = same ? null : el.dataset.a; S.group = same ? null : el.dataset.g; S.shown = PEOPLE_STEP; S.outcome = "all";
+    refreshFilter(`.grow[data-a="${CSS.escape(el.dataset.a)}"][data-g="${CSS.escape(el.dataset.g)}"]`);
+    say(same ? "그룹 필터를 해제했습니다" : `${el.dataset.g} 그룹만 보는 중`);
+    if (!same) $("gd")?.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  } else if (act === "clear") {
+    S.axis = null; S.group = null; S.shown = PEOPLE_STEP; refreshFilter(); say("그룹 필터를 해제했습니다");
+  } else if (act === "crit") {
+    const k = el.dataset.k, open = !S.crit.has(k);
+    open ? S.crit.add(k) : S.crit.delete(k);
+    el.setAttribute("aria-expanded", open); $("cd-" + k).hidden = !open;
+  } else if (act === "outcome") {
+    S.outcome = el.dataset.k; S.shown = PEOPLE_STEP; renderPeople(D);
+    document.querySelector(`[data-act="outcome"][data-k="${el.dataset.k}"]`)?.focus();
+  } else if (act === "more") {
+    const first = S.shown; S.shown = Infinity; renderPeople(D);
+    document.querySelectorAll("#people details.prow")[first]?.querySelector("summary")?.focus();
+  } else if (act === "goto-people") {
+    $("people").scrollIntoView(); $("people").querySelector("summary")?.focus({ preventScroll: true });
+  } else if (act === "person") {
+    const pid = el.dataset.pid;
+    if (S.group != null && !D.r.people.find(p => p.persona_id === pid && p.seg[S.axis] === S.group)) { S.group = null; S.axis = null; refreshFilter(); }
+    S.outcome = "all"; S.shown = Infinity; renderPeople(D);
+    const row = document.getElementById("p-" + pid);
+    if (row) { row.open = true; row.scrollIntoView({ block: "start" }); row.querySelector("summary").focus({ preventScroll: true }); }
+  }
+});
+
+let navObs = null;
+function watchNav() {
+  navObs?.disconnect();
+  const links = [...document.querySelectorAll("#secnav a")];
+  navObs = new IntersectionObserver(es => {
+    es.forEach(en => { if (en.isIntersecting) links.forEach(a => a.classList.toggle("on", a.dataset.nav === en.target.id)); });
+  }, { rootMargin: "-120px 0px -65% 0px" });
+  links.forEach(a => { const t = document.getElementById(a.dataset.nav); if (t) navObs.observe(t); });
+}
+
+render();
+</script>
+</body>
+</html>
