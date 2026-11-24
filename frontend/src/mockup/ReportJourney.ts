@@ -75,8 +75,17 @@ function flowChart(study: Study, model: Model) {
   const heads = cols.map((_, col) => `<text x="${LEFT + col * COL_W}" y="16" font-size="10" letter-spacing="1.2" font-weight="700" fill="#a59a84">${col + 1}번째 화면</text>`).join('');
   const present = (['complete', 'drop', 'system'] as Kind[]).filter(k => recs.some(r => outcome(r) === k));
   const legend = `<div class="rc-legend">${present.map(k => `<span><i class="rc-key is-${k}"></i>${KIND_LABEL[k]}</span>`).join('')}<span class="rc-hint">리본 한 줄 = 한 사람 · 사각형 높이 = 그 화면에 있던 사람 수</span></div>`;
+  const stepCounts = Array.from({ length: steps }, (_, col) => seqs.filter(seq => seq.length > col).length);
+  const maxStep = Math.max(...stepCounts, 1);
+  const stepMarkup = stepCounts.map((count, col) => {
+    const names = [...new Set(seqs.filter(seq => seq.length > col).map(seq => screenTitle(study, seq[col])))];
+    const next = stepCounts[col + 1];
+    const continued = next === undefined ? '' : `<div class="rc-step-transition"><b>${Math.round(next / count * 100)}%</b><span>다음 화면으로 이어감</span>${count > next ? `<small>${count - next}명 기록 종료</small>` : ''}</div>`;
+    return `<div class="rc-step-item"><div class="rc-step-chart"><strong>${count}명</strong><div class="rc-step-bar" style="height:${Math.max(4, count / maxStep * 120)}px"></div></div><div class="rc-step-name"><b>${col + 1}번째 화면</b><span>${esc(names.join(' \u00b7 '))}</span></div>${continued}</div>`;
+  }).join('');
+  const stepSummary = `<div class="rc-step-summary"><h4>화면을 지날 때마다 남은 사람</h4><p>순서별 화면 기록이 있는 인원과 다음 기록으로 이어진 비율을 보여줍니다. 같은 순서에 서로 다른 화면이 포함될 수 있어요.</p><div class="rc-step-scroll"><div class="rc-step-list">${stepMarkup}</div></div></div>`;
   const aria = `사람별 화면 이동 흐름. ${recs.length}명이 최대 ${steps}번째 화면까지 이동했습니다.`;
-  return `<section class="rc-card rc-wide"><h3>사람별 화면 흐름</h3><p class="rc-sub">누가 어떤 화면을 지나 어디서 끝났는지 한 장으로 보여요. 같은 색 리본이 몰리는 곳이 공통 경로예요. 가로로 밀어서 볼 수 있어요.</p>${legend}<div class="rc-flow-scroll"><svg class="rc-flow" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="${esc(aria)}">${heads}${ribbons.join('')}${rects.join('')}${marks.join('')}${labels.join('')}</svg></div></section>`;
+  return `<section class="rc-card rc-wide"><h3>사람별 화면 흐름</h3><p class="rc-sub">참여자들이 화면을 지나며 어디까지 탐색했는지 확인하세요.</p>${stepSummary}</section>`;
 }
 
 /** 사람 × 화면. 칸 안의 숫자는 그 화면을 몇 번째로 봤는지다. 빗금은 가지 않은 화면이다. */

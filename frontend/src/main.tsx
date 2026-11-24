@@ -12,7 +12,9 @@ import "./mockup/studio-shell.css";
 import "./mockup/studio-topbar.css";
 import "./mockup/redesign.css";
 import "./mockup/studio-views.css";
+import "./mockup/workspace-reference.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");
 mountMockup(root);
+
