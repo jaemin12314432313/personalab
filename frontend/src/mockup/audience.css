@@ -68,6 +68,11 @@
 .ab-roster.is-empty{border-top:0;padding-top:0}
 .ab-roster.is-empty>summary{display:none}
 
+#audienceBuilder[data-page=personas] .ab-compose .ab-context,
+#audienceBuilder[data-page=personas] .ab-compose .ab-note,
+#audienceBuilder[data-page=personas] .ab-condition-facets .ab-facet:last-child>legend,
+#audienceBuilder[data-page=personas] .ab-condition-facets .ab-facet:last-child>legend>span{color:#000!important}
+
 /* 수정 회차: 이전 회차에 적어 둔 내용을 가져오는 제안 */
 .wf-carry-offer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px;padding:12px 16px 12px 20px;border:1px dashed #cdc8be;border-radius:16px;background:#fffdf9;color:#4d443a;font-size:13px}
 .wf-carry-offer[hidden]{display:none}

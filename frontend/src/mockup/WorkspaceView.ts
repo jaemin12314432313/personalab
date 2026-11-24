@@ -49,8 +49,8 @@ const escape = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, c => 
 const states: Record<string, { label: string; action: string; priority: number }> = {
   running: { label: '실행 중', action: '실행 보기', priority: 0 },
   failed: { label: '확인 필요', action: '상태 확인', priority: 1 },
-  draft: { label: '작성 중', action: '이어서 설정', priority: 2 },
-  ready: { label: '실행 준비', action: '이어서 설정', priority: 3 },
+  draft: { label: '작성 중', action: '이어서 설정 →', priority: 2 },
+  ready: { label: '실행 준비', action: '이어서 설정 →', priority: 3 },
   pending: { label: '실행 대기', action: '테스트 열기', priority: 4 },
   done: { label: '최근 실행 완료', action: '결과 보기', priority: 5 },
 };
@@ -296,15 +296,15 @@ function calView(entry: WorkspaceEntry) {
   const dates = rounds.map(r => parse(r.date!));
   const latest = new Date(Math.max(...dates.map(d => d.getTime())));
   if (calFor !== (entry.key || '') || calMonth.m < 0) { calFor = entry.key || ''; calMonth = { y: latest.getFullYear(), m: latest.getMonth() }; }
-  const first = new Date(calMonth.y, calMonth.m, 1), lead = (first.getDay() + 6) % 7; // 월요일 시작
+  const first = new Date(calMonth.y, calMonth.m, 1), lead = first.getDay(); // 일요일 시작
   const weeks = Math.ceil((lead + new Date(calMonth.y, calMonth.m + 1, 0).getDate()) / 7);
   const byDay = new Map<string, WorkspaceRound[]>();
   rounds.forEach((r, i) => { const key = dayKey(dates[i]); byDay.set(key, [...(byDay.get(key) || []), r]); });
   const today = dayKey(new Date());
-  const heads = ['월', '화', '수', '목', '금', '토', '일'].map(d => `<div class="ws-cal-h">${d}</div>`).join('');
+  const heads = ['일', '월', '화', '수', '목', '금', '토'].map(d => `<div class="ws-cal-h">${d}</div>`).join('');
   const cells = Array.from({ length: weeks * 7 }, (_, i) => {
     const d = new Date(calMonth.y, calMonth.m, 1 - lead + i), key = dayKey(d), list = byDay.get(key) || [], out = d.getMonth() !== calMonth.m;
-    const shown = list.slice(0, 3).map(r => `<div class="ws-cal-e" data-round="${escape(r.state)}"><b>${escape(r.label)}</b><small>${escape(r.stateLabel)}</small></div>`).join('');
+    const shown = list.slice(0, 3).map(r => `<div class="ws-cal-e" data-round="${escape(r.state)}"><b>${escape(r.label)}</b><small> · ${escape(r.stateLabel)}</small></div>`).join('');
     const more = list.length > 3 ? `<div class="ws-cal-more">+${list.length - 3}개 더</div>` : '';
     return `<div class="ws-cal-d${out ? ' out' : ''}${key === today ? ' td' : ''}"><span class="ws-cal-n">${d.getDate()}</span>${shown}${more}</div>`;
   }).join('');
@@ -319,8 +319,9 @@ function detail(entry: WorkspaceEntry) {
   const faces = people.length ? `<span class="ws-faces">${people.slice(0, 4).map(p => `<span class="ws-pc-face">${p.face}</span>`).join('')}${people.length > 4 ? `<span class="ws-more">+${people.length - 4}</span>` : ''}</span>` : '';
   if (!visibleTabs(entry).includes(tab)) tab = 'overview';
   const body = tab === 'overview' ? overviewView(entry) : tab === 'rounds' ? roundsView(entry, Boolean(entry.trashed)) : tab === 'cal' ? calView(entry) : board(entry);
+  if (tab === 'cal') return `<section class="ws-detail ws-calendar-detail" aria-label="Calendar"><h2 class="ws-calendar-title">Calendar</h2>${body}</section>`;
   const chips = (tab === 'board') && people.length ? `<button type="button" class="ws-chip${onlyFinished ? ' on' : ''}" data-ws-only aria-pressed="${onlyFinished}">기록이 끝난 사람만</button>` : '';
-  return `<section class="ws-detail" aria-label="선택한 테스트"><div class="ws-bc">내 앱·웹 / ${escape(entry.name)}${entry.testTitle ? ' / ' + escape(entry.testTitle) : ''}</div><div class="ws-hd"><div class="ws-hd-l"><h2>${escape(entry.name)}</h2>${(entry.testTitle || entry.note || (entry.rounds || 1) > 1) ? `<p class="ws-dt-test">${[entry.testTitle, (entry.rounds || 1) > 1 ? `${entry.rounds}회차` : '', entry.note].filter(Boolean).map(escape).join(' · ')}</p>` : ''}<p class="ws-dt-desc">${escape(entry.context || entry.description)}</p></div><div class="ws-hd-r"><span class="ws-state" data-state="${escape(entry.state)}">${state.label}</span><span class="ws-dt-act">${tab === 'overview' ? '' : primary}</span>${menu ? `<span class="ws-hd-menu">${menu}</span>` : ''}</div></div><div class="ws-meta">${faces}${chips}<span class="ws-sub">${escape(summary(entry))}</span></div>${body}<p class="ws-dt-note">얼굴은 AI 대표 이미지이며 여러 프로필에 재사용될 수 있어요. AI 페르소나의 탐색 기록이며 실제 사용자 조사가 아닙니다.</p></section>`;
+  return `<section class="ws-detail" aria-label="선택한 테스트"><h2 class="ws-testing-title">Testing</h2><div class="ws-hd"><div class="ws-hd-l"><div class="ws-title-line"><h2>${escape(entry.name)}</h2>${entry.state === 'draft' ? '' : `<span class="ws-state" data-state="${escape(entry.state)}">${state.label}</span>`}</div>${(entry.testTitle || entry.note || (entry.rounds || 1) > 1) ? `<p class="ws-dt-test">${[entry.testTitle, (entry.rounds || 1) > 1 ? `${entry.rounds}회차` : '', entry.note].filter(Boolean).map(escape).join(' · ')}</p>` : ''}<p class="ws-dt-desc">${escape(entry.context || entry.description)}</p></div><div class="ws-hd-r"><span class="ws-dt-act">${tab === 'overview' ? '' : primary}</span>${menu ? `<span class="ws-hd-menu">${menu}</span>` : ''}</div></div><div class="ws-meta">${faces}${chips}<span class="ws-sub">${escape(summary(entry))}</span></div>${body}<p class="ws-dt-note">얼굴은 AI 대표 이미지이며 여러 프로필에 재사용될 수 있어요. AI 페르소나의 탐색 기록이며 실제 사용자 조사가 아닙니다.</p></section>`;
 }
 
 export function workspaceContent(entries: WorkspaceEntry[], query: string, sort: string, serverReady: boolean, loading = false, view='active', status='all') {
@@ -330,4 +331,21 @@ export function workspaceContent(entries: WorkspaceEntry[], query: string, sort:
   if (loading&&!entries.length) return '<div class="ws-message ws-loading" role="status">저장된 테스트를 불러오는 중입니다.</div>';
   if (loading) return content + '<p class="workspace-server-note ws-loading" role="status">저장된 테스트를 불러오는 중입니다.</p>';
   return content + (!serverReady ? '<p class="workspace-server-note" role="status">서버 목록을 불러오지 못했습니다. 이 브라우저에 저장된 테스트만 표시합니다. 계정 메뉴에서 연결 상태를 확인하세요.</p>' : '');
+}
+
+/** 프로젝트 목록과 휴지통에 같은 관리 메뉴를 제공한다. */
+export function workspaceTable(entries: WorkspaceEntry[], query: string, sort: string, view: string, loading: boolean, owner?: string) {
+  const visible = filterEntries(entries, query, sort, view, 'all');
+  const date = (value?: string) => { if (!value) return '—'; const d = new Date(value); return Number.isNaN(d.getTime()) ? '—' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' }).format(d); };
+  const rows = visible.map(entry => {
+    const { menu } = parts(entry);
+    const creator = entry.manageable && owner ? owner : '—';
+    if (entry.key === 'web-ui-sample') return `<div class="ws-list-row" role="row"><div class="ws-list-name" role="cell"><button type="button" data-open-web-sample><span class="ws-list-icon" aria-hidden="true">W</span><span>${escape(entry.name)} <small>· UI 예시</small></span></button></div><span role="cell">${entry.personas ?? '—'}</span><span role="cell">—</span><span role="cell">—</span><span role="cell"><button type="button" class="ws-list-result" data-open-web-sample data-web-interview>바로 가기</button></span><span role="cell"><button type="button" class="ws-list-result" data-open-web-sample data-web-result>결과 보기</button></span><span></span></div>`;
+    const canOpenResult = !entry.trashed && !entry.key?.startsWith('demo:') && (entry.state === 'done' || (entry.state === 'failed' && Boolean(entry.records))) && Boolean(entry.local || entry.server);
+    const openResult = entry.local ? `data-open-local="${escape(entry.local)}"` : `data-open-server="${entry.server}"`;
+    const result = canOpenResult ? `<button type="button" class="ws-list-result" ${openResult} data-then-hash="report">결과 보기</button>` : '<span class="ws-list-no-result">—</span>';
+    const interview = canOpenResult ? `<button type="button" class="ws-list-result" ${openResult} data-then-hash="interview">바로 가기</button>` : '<span class="ws-list-no-result">—</span>';
+    return `<div class="ws-list-row" role="row"><div class="ws-list-name" role="cell"><button type="button" data-ws-list-open="${escape(entry.key || '')}" ${entry.trashed ? 'disabled' : ''}><span class="ws-list-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7H3v13h14v-2M8 4h4l2 2h6v12H6V6a2 2 0 0 1 2-2z"/></svg></span><span>${escape(entry.name)}${entry.testTitle ? ` <small>· ${escape(entry.testTitle)}</small>` : ''}</span></button></div><span role="cell">${entry.personas ?? '—'}</span><span role="cell">${escape(creator)}</span><span role="cell">${date(entry.created)}</span><span role="cell">${interview}</span><span role="cell">${result}</span><span role="cell" class="ws-list-actions">${menu}</span></div>`;
+  }).join('');
+  return `<div class="ws-list-table" role="table" aria-label="${view === 'trash' ? '휴지통' : '프로젝트 목록'}"><div class="ws-list-row ws-list-columns" role="row"><span role="columnheader">Name</span><span role="columnheader">Persona Total</span><span role="columnheader">Created by</span><span role="columnheader">Created</span><span role="columnheader">1대1 인터뷰</span><span role="columnheader">Result</span><span></span></div>${rows || `<p class="ws-list-empty">${loading ? '프로젝트를 불러오는 중입니다.' : query ? '검색 결과가 없습니다.' : view === 'trash' ? '휴지통이 비어 있어요.' : view === 'archived' ? '보관된 프로젝트가 없어요.' : '아직 프로젝트가 없어요.'}</p>`}</div>`;
 }

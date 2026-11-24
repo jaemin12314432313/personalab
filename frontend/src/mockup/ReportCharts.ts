@@ -144,26 +144,68 @@ function attributeBlocks(study: Study) {
   return { groupsByDim, html: `<section class="rc-card rc-wide"><h3>페르소나 속성별 결과</h3><p class="rc-sub">같은 화면을 본 AI 구성의 속성별로 나눠 센 값이에요. ${esc(note)}</p>${legend}<div class="rc-dims">${blocks}</div>${same.length ? `<p class="rc-more">모두 같은 값이라 나누지 않은 속성: ${esc(same.join(', '))}</p>` : ''}</section>` };
 }
 
+function dropAnalysis(study: Study, model: Model) {
+  const records = model.records;
+  if (!records.length) return '';
+  const dims: [string, (p: Study['personas'][number]) => string][] = [
+    ['디지털 수용도', p => String(displayAttributes(p.attributes).traits.digital || '')],
+    ['가격 민감도', p => String(p.attributes.traits.price || p.attributes.traits.price_sensitivity || '')],
+    ['개인정보 우려', p => String(displayAttributes(p.attributes).traits.privacy || '')],
+    ['성별', p => String(p.attributes.profile.sex || '')],
+    ['연령대', p => ageBand(p.attributes.profile.age)],
+  ];
+  if (study.source === 'demo') {
+    const examples: [string, [string, number, number][]][] = [
+      ['\ub514\uc9c0\ud138 \uc218\uc6a9\ub3c4', [['\uc911\uac04',1,2],['\ub192\uc74c',1,3]]],
+      ['\uac00\uaca9 \ubbfc\uac10\ub3c4', [['\ub0ae\uc74c',1,2],['\uc911\uac04',1,1],['\ub192\uc74c',0,2]]],
+      ['\uac1c\uc778\uc815\ubcf4 \uc6b0\ub824', [['\ub0ae\uc74c',1,1],['\ub192\uc74c',0,2],['\ub9e4\uc6b0 \ub192\uc74c',1,2]]],
+      ['\uc131\ubcc4', [['\ub0a8',1,3],['\uc5ec',1,2]]],
+      ['\uc5f0\ub839\ub300', [['19~21\uc138',2,4],['22~24\uc138',0,1]]],
+    ];
+    const cards = examples.map(([label, rows]) => `<article class="rc-drop-group"><h4>${label}</h4>${rows.map(([name,n,total]) => { const rate=Math.round(n/total*100); return `<div class="rc-drop-row"><span>${name}</span><div class="rc-drop-bar"><i style="width:${rate}%"></i><b style="left:40%"></b></div><strong>${rate}%<small>${n}/${total}\uba85</small></strong></div>`; }).join('')}<small>\uc804\uccb4 \ud3c9\uade0 40%</small></article>`).join('');
+    return `<section class="rc-card rc-wide"><h3>\uc774\ud0c8 \uc6d0\uc778 \ubd84\uc11d</h3><p class="rc-sub">\uc774\ubbf8\uc9c0\uc5d0 \uc81c\uc2dc\ub41c \uc608\uc2dc \uc218\uce58\uc608\uc694. \uc2e4\uc81c \uc2e4\ud589 \uae30\ub85d\uc758 \uc9d1\uacc4\uac00 \uc544\ub2d9\ub2c8\ub2e4.</p><div class="rc-drop-grid">${cards}</div></section>`;
+  }
+  const average = Math.round(model.dropped.length / records.length * 100);
+  const cards = dims.map(([label, keyOf]) => {
+    const groups = new Map<string, {total:number; dropped:number}>();
+    for (const r of records) {
+      const p = study.personas.find(person => person.id === r.id);
+      if (!p) continue;
+      const key = keyOf(p);
+      if (!key || key === '미등록') continue;
+      const group = groups.get(key) || {total:0, dropped:0};
+      group.total++; if (outcome(r) === 'drop') group.dropped++;
+      groups.set(key, group);
+    }
+    if (!groups.size) return `<article class="rc-drop-group"><h4>${esc(label)}</h4><p class="rc-drop-empty">\uae30\ub85d\ub41c \uc18d\uc131 \uc815\ubcf4\uac00 \uc5c6\uc5b4\uc694.</p></article>`;
+    const rows = [...groups].map(([key, g]) => {
+      const rate = Math.round(g.dropped / g.total * 100);
+      return `<div class="rc-drop-row"><span>${esc(key)}</span><div class="rc-drop-bar"><i style="width:${rate}%"></i><b style="left:${average}%" title="전체 중단률 ${average}%"></b></div><strong>${rate}%<small>${g.dropped}/${g.total}명</small></strong></div>`;
+    }).join('');
+    return `<article class="rc-drop-group"><h4>${esc(label)}</h4>${rows}<small>전체 중단률 ${average}%</small></article>`;
+  }).join('');
+  return `<section class="rc-card rc-wide"><h3>이탈 원인 분석</h3><p class="rc-sub">종료 기록이 있는 AI 페르소나의 속성별 중단 비율이에요. 소수 기록의 분포이며 중단 원인이나 실제 사용자의 경향을 입증하지 않아요.</p>${cards ? `<div class="rc-drop-grid">${cards}</div>` : '<p class="rc-sub">비교할 속성 기록이 없어요.</p>'}</section>`;
+}
+
 function reasonAndObservation(study: Study, model: Model) {
   const parts: string[] = [];
   const byCode = stopReasons(model);
-  if (byCode.size >= 2) {
+  if (byCode.size >= 1) {
     const max = Math.max(...byCode.values());
     const rows = [...byCode.entries()].sort((a, b) => b[1] - a[1]).map(([code, n]) => `<div class="rc-row"><span class="rc-label">${esc(dropLabel(code))}</span><span class="rc-bar" role="img" aria-label="${esc(`${dropLabel(code)} ${n}명`)}">${seg('is-flow', n, max, `${dropLabel(code)} ${n}명`)}</span><span class="rc-val">${n}명</span></div>`).join('');
     parts.push(`<section class="rc-card"><h3>멈춘 이유</h3><p class="rc-sub">사용자 중단만 센 값이에요. 이유 분류는 8개 코드를 그대로 써요.</p><div class="rc-rows">${rows}</div></section>`);
   }
-  if (model.evaluation.length) {
-    const tally = OBS_DIMENSIONS.map(dim => {
-      const items = model.evaluation.filter(e => e.dimension === dim);
-      const issue = items.filter(e => e.polarity === 'issue').reduce((s, e) => s + e.people.length, 0);
-      const good = items.filter(e => e.polarity === 'good').reduce((s, e) => s + e.people.length, 0);
-      return { dim, issue, good };
-    }).filter(t => t.issue || t.good);
-    const scale = Math.max(1, ...tally.map(t => t.issue + t.good));
-    const rows = tally.map(t => `<div class="rc-row"><span class="rc-label">${esc(t.dim)}${t.dim === '시각' || t.dim === '인상' ? '<small>AI 인상</small>' : ''}</span><span class="rc-bar" role="img" aria-label="${esc(`${t.dim}: 문제 ${t.issue}건, 잘 된 점 ${t.good}건`)}">${seg('is-stop', t.issue, scale, `${t.dim}: 문제 ${t.issue}건`)}${seg('is-good-soft', t.good, scale, `${t.dim}: 잘 된 점 ${t.good}건`)}</span><span class="rc-val">문제 ${t.issue} · 잘 된 점 ${t.good}</span></div>`).join('');
-    parts.push(`<section class="rc-card"><h3>UX 관찰 차원별 기록</h3><p class="rc-sub">AI가 화면마다 남긴 관찰의 기록 수예요. 시각·인상은 AI 인상이라 근거가 약해요.</p><div class="rc-legend"><span><i class="rc-key is-stop"></i>문제</span><span><i class="rc-key is-good-soft"></i>잘 된 점</span></div><div class="rc-rows">${rows}</div></section>`);
-  }
-  return parts.join('');
+  return parts.join('') || `<section class="rc-card"><h3>\uba48\ucd98 \uc774\uc720</h3><p class="rc-sub">\uae30\ub85d\ub41c \uc911\ub2e8 \uc774\uc720\uac00 \uc5c6\uc5b4\uc694.</p></section>`;
+}
+
+function usabilityCriteria(study: Study) {
+  const rows: [string,number,number,number,string][] = [
+    ['\ub2e8\uc21c\ud568',0,48,38,'\ub098\uc068 100%'], ['\uc0c1\ud0dc \ubc0f \ud53c\ub4dc\ubc31',21,27,31,'\ub098\uc068 56%'],
+    ['\ud1b5\uc81c',30,18,33,'\ubcf4\ud1b5 63%'], ['\uc774\ud574',42,6,60,'\ubcf4\ud1b5 88%'],
+    ['\uc77c\uad00\uc131',41,7,6,'\ubcf4\ud1b5 85%'], ['\uc624\ub958 \uc608\ubc29 \ubc0f \ubcf5\uad6c',0,48,73,'\ub098\uc068 100%'], ['\uc720\uc5f0\uc131 \ubc0f \ub3c4\uc6c0',0,48,60,'\ub098\uc068 100%']
+  ];
+  if (study.source !== 'demo') return `<section class="rc-card rc-wide"><h3>\uc0ac\uc6a9\uc131 \uae30\uc900</h3><p class="rc-sub">\uc774 \uc2e4\ud589\uc5d0\ub294 7\uac1c \uae30\uc900\uc758 \ub77c\ubca8\uacfc \uc911\uc694\ub3c4 \uae30\ub85d\uc774 \uc5c6\uc5b4\uc694.</p></section>`;
+  return `<section class="rc-card rc-wide"><h3>\uc0ac\uc6a9\uc131 \uae30\uc900</h3><p class="rc-sub">\uc774\ubbf8\uc9c0\uc5d0 \uc81c\uc2dc\ub41c 48\uba85\uc758 \uc608\uc2dc \uc218\uce58\uc608\uc694. \ud604\uc7ac \uc2e4\ud589 \uae30\ub85d\uc758 \uc9d1\uacc4\uac00 \uc544\ub2d9\ub2c8\ub2e4.</p><div class="rc-use-scroll"><div class="rc-use-table"><div class="rc-use-row rc-use-head"><span>\uae30\uc900</span><span>\ub77c\ubca8 \ubd84\ud3ec</span><span>\ub300\ud45c \ub77c\ubca8</span><span>\uc911\uc694\ub3c4 \ub192\uc74c</span></div>${rows.map(([name,neutral,bad,importance,label])=>`<div class="rc-use-row"><strong>${name}</strong><div class="rc-use-bar">${neutral?`<i class="neutral" style="width:${neutral/48*100}%">${neutral}</i>`:''}${bad?`<i class="bad" style="width:${bad/48*100}%">${bad}</i>`:''}</div><span>${label}</span><div class="rc-use-importance"><i style="width:${importance}%"></i><span>${importance}%</span></div></div>`).join('')}</div></div></section>`;
 }
 
 function tables(screens: ReturnType<typeof screenRows>['rows'], attrs: { dim: string; groups: Group[] }[], paths: (string | number)[][]) {
@@ -180,5 +222,5 @@ export function chartsMarkup(study: Study, model: Model): string {
   const screens = screenRows(study, model);
   const attrs = attributeBlocks(study);
   const j = journeyMarkup(study, model);
-  return `<section class="rc-wrap" aria-label="지표와 분포"><header class="rc-head"><span class="rc-eyebrow">METRICS</span><h2>지표와 분포</h2><p>AI 구성의 기록을 센 값이에요. 실제 사용자의 비율이 아니고, 체류 시간·시선·만족도는 측정하지 않아요.</p></header>${hero(study, model)}${kpiRow(model)}${j.flow}${j.tiers}<div class="rc-grid">${screens.html}${personRows(study, model)}</div>${j.heatmap}${attrs.html}<div class="rc-grid">${reasonAndObservation(study, model)}</div>${tables(screens.rows, attrs.groupsByDim, journeyRows(study, model))}</section>`;
+  return `<section class="rc-wrap" aria-label="지표와 분포"><header class="rc-head"><span class="rc-eyebrow">METRICS</span><h2>지표와 분포</h2><p>AI 구성의 기록을 센 값이에요. 실제 사용자의 비율이 아니고, 체류 시간·시선·만족도는 측정하지 않아요.</p></header>${hero(study, model)}${kpiRow(model)}${j.flow}${j.tiers}<div class="rc-grid">${screens.html}${personRows(study, model)}</div>${dropAnalysis(study, model)}<div class="rc-grid">${reasonAndObservation(study, model)}</div>${usabilityCriteria(study)}${attrs.html}${tables(screens.rows, attrs.groupsByDim, journeyRows(study, model))}</section>`;
 }

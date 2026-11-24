@@ -87,6 +87,7 @@ export function mountWorkspaceSidebar(root: HTMLElement, options: Options) {
   }
   function render() {
     workspace.querySelectorAll<HTMLElement>('[data-ws-page]').forEach(button => { if (button.dataset.wsPage === page) button.setAttribute('aria-current', 'page'); else button.removeAttribute('aria-current'); });
+    if (page !== 'tests') workspace.querySelectorAll<HTMLElement>('[data-ws-list], [data-ws-calendar], [data-ws-testing], [data-ws-trash]').forEach(button => button.removeAttribute('aria-current'));
     el('workspace-title').textContent = pages[page].title; el('workspaceDescription').textContent = pages[page].description; el('workspaceDescription').hidden = !pages[page].description; el('workspaceBreadcrumb').textContent = page === 'tests' ? '내 테스트' : pages[page].title;
     el('workspaceTestsPanel').hidden = page !== 'tests'; el('workspaceLibraryPanel').hidden = page !== 'library'; el('workspaceHistoryPanel').hidden = page !== 'history';
     if (page === 'library') el('workspaceLibraryContents').innerHTML = catalog();
@@ -100,6 +101,14 @@ export function mountWorkspaceSidebar(root: HTMLElement, options: Options) {
   }
   function click(event: MouseEvent) {
     const button = (event.target as HTMLElement).closest<HTMLElement>('button'); if (!button || !workspace.contains(button)) return;
+    if (button.hasAttribute('data-ws-collapse') || button.hasAttribute('data-ws-expand')) {
+      const collapsed = button.hasAttribute('data-ws-collapse');
+      workspace.toggleAttribute('data-sidebar-collapsed', collapsed);
+      workspace.querySelector<HTMLElement>('[data-ws-collapse]')?.setAttribute('aria-expanded', String(!collapsed));
+      workspace.querySelector<HTMLElement>('[data-ws-expand]')?.setAttribute('aria-expanded', String(!collapsed));
+      workspace.querySelector<HTMLElement>(collapsed ? '[data-ws-expand]' : '[data-ws-collapse]')?.focus();
+      return;
+    }
     if (button.hasAttribute('data-ws-toggle')) { const opened = workspace.hasAttribute('data-sidebar-open'); if (opened) closeSidebar(); else { workspace.setAttribute('data-sidebar-open', ''); button.setAttribute('aria-expanded','true'); workspace.querySelector<HTMLElement>('.ws-sidebar-backdrop')!.hidden = false; workspace.querySelector<HTMLElement>('.ws-navigation [aria-current="page"]')?.focus(); } return; }
     if (button.hasAttribute('data-ws-close')) { closeSidebar(true); return; }
     if (button.dataset.wsPage && button.dataset.wsPage in pages) { show(button.dataset.wsPage as Page); return; }
