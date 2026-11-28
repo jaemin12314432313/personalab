@@ -137,7 +137,7 @@ export function mountMockup(root: HTMLElement) {
   function setAuthMode(mode: 'login' | 'register') {
     if (authMode !== mode) { input('authPassword').value='';input('authConfirm').value='';resetPasswordVisibility();clearAuthErrors(); }
     authMode=mode;const signup=mode==='register';
-    el('authEyebrow').textContent=signup?'CREATE ACCOUNT':'SIGN IN';el('authTitle').textContent=signup?'회원가입':'로그인';
+    el('authTitle').textContent=signup?'회원가입':'로그인';
     el('authDescription').textContent=signup?'이메일로 가입하고 내 워크스페이스를 만드세요.':'로그인하고 내 테스트를 이어서 살펴보세요.';
     el('authConfirmField').hidden=!signup;el<HTMLInputElement>('authConfirm').required=signup;el<HTMLInputElement>('authPassword').autocomplete=signup?'new-password':'current-password';
     el('authSwitchLabel').textContent=signup?'이미 계정이 있으신가요?':'아직 계정이 없으신가요?';
