@@ -118,7 +118,9 @@ def strict_schema(schema: dict) -> dict:
     return result
 
 
-def openai_text(system: str, contents: list, schema: dict) -> str:
+def openai_text(
+    system: str, contents: list, schema: dict, max_output_tokens: int | None = None
+) -> str:
     if not settings.llm_api_key:
         raise FatalLLMError("서버에 LLM_API_KEY를 설정해 주세요.")
     user_content = []
@@ -142,7 +144,7 @@ def openai_text(system: str, contents: list, schema: dict) -> str:
                 "schema": strict_schema(schema),
             }
         },
-        "max_output_tokens": settings.llm_max_output_tokens,
+        "max_output_tokens": max_output_tokens or settings.llm_max_output_tokens,
         "store": False,
     }
     if model.startswith("gpt-5.4"):
@@ -194,18 +196,24 @@ def openai_text(system: str, contents: list, schema: dict) -> str:
     return "".join(texts)
 
 
-def call_llm(system: str, contents: list, schema: dict, check: Check | None = None) -> dict:
+def call_llm(
+    system: str,
+    contents: list,
+    schema: dict,
+    check: Check | None = None,
+    max_output_tokens: int | None = None,
+) -> dict:
     last_error = "사용할 수 있는 JSON 응답이 없습니다."
     for attempt in range(settings.llm_max_retries):
         try:
             if settings.llm_provider == "openai":
-                text = openai_text(system, contents, schema)
+                text = openai_text(system, contents, schema, max_output_tokens)
             else:
                 config = types.GenerateContentConfig(
                     system_instruction=system,
                     response_mime_type="application/json",
                     response_json_schema=schema,
-                    max_output_tokens=settings.llm_max_output_tokens,
+                    max_output_tokens=max_output_tokens or settings.llm_max_output_tokens,
                 )
                 response = get_client().models.generate_content(
                     model=settings.llm_model or LLM_DEFAULT_MODEL, contents=contents, config=config

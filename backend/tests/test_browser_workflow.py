@@ -1220,3 +1220,61 @@ def test_extra_good_observations_are_trimmed_not_rejected(monkeypatch):
     }
     result = browser.decide_browser({"card_text": "가상"}, "과제", screen, None, [])
     assert result["observations"] == [good, issue]
+
+
+async def test_flow_evals_are_saved_and_returned_in_report(client, session, monkeypatch):
+    """탐색이 끝나면 페르소나별 흐름 평가가 저장되고 리포트로 내려간다(실제 AI 호출 없이)."""
+    from app.services import flow_eval, runner
+
+    sid, run = await _two_persona_run(client, session)
+    original = browser.explore
+
+    def decide(persona, task, screen, image, history):
+        element = next(e for e in screen["elements"] if e["text"] == "결과 보기")
+        return {
+            "action": "click",
+            "target": element["id"],
+            "value": None,
+            "drop_reason": None,
+            "reason": "누른다",
+        }
+
+    def fake_call(system, contents, schema, check=None, max_output_tokens=None):
+        out = {
+            "criteria": {
+                key: {
+                    "label": "보통",
+                    "evidence": "S01 화면에서 확인",
+                    "importance": "중간",
+                    "importance_reason": "일반적인 사용자다",
+                }
+                for key in flow_eval.CRITERIA
+            },
+            "complete": "예",
+            "complete_reason": "끝까지 해 볼 만했어요",
+            "drop_screen": "",
+            "drop_reason": "",
+            "opinions": {
+                "screen_comments": [{"screen": "S01", "comment": "시작 화면이 단순해요"}],
+                "liked": "단순했다",
+                "disliked": "불편한 점은 적었다",
+                "suggestion": "안내 문구를 더해 주세요",
+            },
+        }
+        assert check(out) is None
+        return out
+
+    async def simulated(*args, **kw):
+        return await original(*args, decide=decide, **kw)
+
+    monkeypatch.setattr(runner, "require_persona_transmission", lambda: None)
+    monkeypatch.setattr(runner.rule_agent, "use_rule_engine", lambda: False)
+    monkeypatch.setattr(browser, "explore", simulated)
+    monkeypatch.setattr(flow_eval, "call_llm", fake_call)
+    await runner.execute_run(session, run.id)
+    report = (await client.get(f"/runs/{run.id}/report")).json()
+    assert report["meta"]["flow_eval"]["done"] == 2
+    assert report["meta"]["flow_eval"]["failed"] == 0
+    assert len(report["flow_evals"]) == 2
+    one = next(iter(report["flow_evals"].values()))
+    assert one["complete"] == "예" and "S01" in one["screens"]

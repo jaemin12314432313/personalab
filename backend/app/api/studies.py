@@ -331,6 +331,9 @@ async def get_report(
             if act_run and (m := await workflow_repo.run_meta(session, study.id, act_run.id))
             else None
         ),
+        flow_evals=(
+            await workflow_repo.flow_evals(session, study.id, act_run.id) if act_run else None
+        ),
     )
 
 

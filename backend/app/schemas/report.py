@@ -78,6 +78,8 @@ class RunMetaOut(BaseModel):
     prompt_rev: str | None = None
     usage: dict | None = None  # {calls, input_tokens, output_tokens}. 규칙 기반이면 None
     failed_personas: int = 0
+    # 탐색 뒤 흐름 평가(AI·데이터 팀 7개 기준) 진행: {version, done, failed}. 규칙 기반이면 None
+    flow_eval: dict | None = None
 
 
 class ReportOut(BaseModel):
@@ -92,3 +94,5 @@ class ReportOut(BaseModel):
     engine: Literal["rule", "llm"] | None = None
     saved_at: datetime | None = None
     meta: RunMetaOut | None = None
+    # 페르소나 id(문자열) -> 흐름 평가 결과(7개 기준 라벨·근거, 완주 판단, 의견). 없으면 None
+    flow_evals: dict[str, dict] | None = None

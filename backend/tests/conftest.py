@@ -25,6 +25,20 @@ def pin_llm_engine(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def block_real_flow_eval_calls(monkeypatch):
+    """
+    실행 뒤 흐름 평가가 테스트에서 진짜 AI를 부르지 않게 막는다. 필요한 테스트는 따로 대체한다.
+    """
+    from app.services import flow_eval
+    from app.services.llm import LLMError
+
+    def refuse(*args, **kwargs):
+        raise LLMError("테스트에서는 실제 AI를 호출하지 않습니다.")
+
+    monkeypatch.setattr(flow_eval, "call_llm", refuse)
+
+
+@pytest.fixture(autouse=True)
 def clear_auth_rate_state():
     from app.services.auth import _attempts
 

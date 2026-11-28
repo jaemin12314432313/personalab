@@ -60,6 +60,7 @@ async def run_report(
             outcome=snapshot.outcome,
             saved_at=snapshot.built_at,
             meta=await _meta(session, run),
+            flow_evals=await workflow_repo.flow_evals(session, run.study_id, run.id),
         )
     personas = await study_repo.list_personas(session, run.study_id)
     asks = await run_repo.list_ask_responses(session, ask.id) if ask else []
@@ -79,4 +80,5 @@ async def run_report(
         ),
         engine=detect_engine(live),
         meta=await _meta(session, run),
+        flow_evals=(await workflow_repo.flow_evals(session, run.study_id, act.id) if act else None),
     )

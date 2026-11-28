@@ -41,6 +41,23 @@ async def save_run_meta(session, study_id, run_id, meta):
     await session.commit()
 
 
+async def flow_evals(session, study_id, run_id):
+    """실행 뒤 흐름 평가(AI·데이터 팀 7개 기준) 결과. 키는 persona id 문자열."""
+    row = await get(session, study_id)
+    return ((row.source_json or {}).get("flow_eval") or {}).get(str(run_id)) if row else None
+
+
+async def save_flow_evals(session, study_id, run_id, evals):
+    """persona id(문자열) -> 평가 결과를 source_json의 flow_eval에 남긴다(DB 구조 변경 없이)."""
+    row = await ensure(session, study_id)
+    source = dict(row.source_json or {})
+    saved = dict(source.get("flow_eval") or {})
+    saved[str(run_id)] = evals
+    source["flow_eval"] = saved
+    row.source_json = source
+    await session.commit()
+
+
 async def ensure(session, study_id):
     row = await get(session, study_id)
     if row is None:
@@ -152,6 +169,26 @@ async def evidence(session, run_id, persona_id=None):
     if persona_id is not None:
         q = q.where(BrowserEvidence.persona_id == persona_id)
     return list(await session.scalars(q.order_by(BrowserEvidence.id)))
+
+
+async def evidence_light(session, run_id):
+    """흐름 평가용: 이미지 열(image_data)은 읽지 않는다. persona_id별 [{turn, screen, action}]."""
+    rows = await session.execute(
+        select(
+            BrowserEvidence.persona_id,
+            BrowserEvidence.turn,
+            BrowserEvidence.screen_json,
+            BrowserEvidence.action_json,
+        )
+        .where(BrowserEvidence.run_id == run_id)
+        .order_by(BrowserEvidence.id)
+    )
+    grouped: dict[int, list[dict]] = {}
+    for persona_id, turn, screen, action in rows:
+        grouped.setdefault(persona_id, []).append(
+            {"turn": turn, "screen": screen or {}, "action": action or {}}
+        )
+    return grouped
 
 
 async def annotations(session, run_id):

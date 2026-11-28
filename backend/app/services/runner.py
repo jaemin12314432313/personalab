@@ -18,7 +18,7 @@ from app.core.db import SessionLocal
 from app.repositories import run as run_repo
 from app.repositories import study as study_repo
 from app.repositories import workflow as workflow_repo
-from app.services import browser, rule_agent, site_map
+from app.services import browser, flow_eval, rule_agent, site_map
 from app.services.act.decide import decide_step
 from app.services.act.loop import agent_loop
 from app.services.ask.answer import ask_persona, check_ask
@@ -91,6 +91,45 @@ async def persist_run_meta(session: AsyncSession, run, meta: dict, sink, failed:
     except Exception:
         await session.rollback()
         log.exception("실행 조건 저장 실패 run_id=%s", run.id)
+
+
+async def run_flow_evals(session: AsyncSession, run, personas, task_text: str, cancelled) -> dict:
+    """탐색이 끝난 뒤, 페르소나마다 지나간 화면 흐름을 7개 기준으로 평가한다(AI·데이터 팀 방식).
+
+    한 명의 실패는 그 사람의 평가만 비운다. 취소는 그대로 올린다. 이 단계의 실패가 탐색 결과를
+    버리게 하지는 않는다.
+    """
+    grouped = await workflow_repo.evidence_light(session, run.id)
+    gate = asyncio.Semaphore(max(1, settings.run_concurrency))
+    results: dict[str, dict] = {}
+    failed = 0
+
+    async def one(persona):
+        nonlocal failed
+        flow = flow_eval.build_flow(task_text, grouped.get(persona.id, []))
+        if flow is None:
+            return
+        async with gate:
+            if await cancelled():
+                raise browser.BrowserCancelled("사용자가 실행을 취소했습니다.")
+            try:
+                out = await asyncio.to_thread(
+                    flow_eval.evaluate_flow, persona.attributes_json.get("card_text", ""), flow
+                )
+            except LLMError as error:
+                failed += 1
+                log.warning("흐름 평가 실패 run_id=%s persona_id=%s: %s", run.id, persona.id, error)
+                return
+            results[str(persona.id)] = out
+
+    try:
+        async with asyncio.TaskGroup() as group:
+            for persona in personas:
+                group.create_task(one(persona))
+    except ExceptionGroup as group_error:
+        raise group_error.exceptions[0] from None
+    await workflow_repo.save_flow_evals(session, run.study_id, run.id, results)
+    return {"version": flow_eval.FLOW_EVAL_VERSION, "done": len(results), "failed": failed}
 
 
 async def execute_run(session: AsyncSession, run_id: int) -> None:
@@ -282,6 +321,14 @@ async def execute_run(session: AsyncSession, run_id: int) -> None:
             raise browser.BrowserCancelled("사용자가 실행을 취소했습니다.")
         if failures and len(failures) >= total:
             raise LLMError(f"모든 페르소나의 실행이 실패했습니다. 첫 오류: {failures[0][1]}")
+        if run.mode == "act" and browser_source and not rule:
+            run_meta["flow_eval"] = await run_flow_evals(
+                session,
+                run,
+                [p for p in personas if p.id not in {pid for pid, _ in failures}],
+                task.description,
+                cancelled,
+            )
         await run_repo.set_run_state(session, run, status=RUN_STATUS_DONE)
         await persist_run_meta(session, run, run_meta, sink, len(failures))
         if failures:
