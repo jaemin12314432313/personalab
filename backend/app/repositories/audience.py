@@ -11,7 +11,16 @@ from app.schemas.audience import AudienceFacetsOut
 
 
 async def catalog(session):
-    return list(await session.scalars(select(PersonaLibraryEntry).order_by(PersonaLibraryEntry.id)))
+    from app.repositories.persona_library import latest_panel_ids
+
+    # 같은 패널의 이전 버전은 후보에서 가린다(저장된 선택은 아래 entry_ids로 그대로 읽힌다)
+    return list(
+        await session.scalars(
+            select(PersonaLibraryEntry)
+            .where(PersonaLibraryEntry.panel_id.in_(latest_panel_ids()))
+            .order_by(PersonaLibraryEntry.id)
+        )
+    )
 
 
 def identity_keys(entry):

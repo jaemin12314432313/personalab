@@ -37,6 +37,9 @@ V02_TRAITS = {
     "online_tx": "ot_grade",
     "ai": "ai_familiarity",
     "digital_skill": "ds_level",
+    # 점수 v0.3: 막혔을 때 도움 가용성, 자주 쓰는 앱
+    "help": "help_grade",
+    "app_habit": "app_habit",
 }
 
 
@@ -120,6 +123,7 @@ def prepare_panel(path: Path, source_commit: str, viewer: dict | None = None) ->
         card = row["card_text"]
         if not isinstance(card, str) or not card.strip() or f"{age}세" not in card.splitlines()[0]:
             raise ValueError(f"{pid}: 카드 문구와 프로필이 맞지 않습니다.")
+        behavior_lines: list[str] = []
         if viewer is not None:
             viewed = viewer_rows.get(pid)
             if viewed is None or int(viewed["age"]) != age or viewed["sex"] != row["sex"]:
@@ -128,6 +132,7 @@ def prepare_panel(path: Path, source_commit: str, viewer: dict | None = None) ->
             viewer_card = "\n".join(parts["head"] + parts["story"] + parts["behavior"])
             if viewer_card != card:
                 raise ValueError(f"{pid}: 뷰어와 카드 문구가 다릅니다.")
+            behavior_lines = list(parts["behavior"])
         attributes = {
             "profile": {
                 "age": age,
@@ -141,6 +146,9 @@ def prepare_panel(path: Path, source_commit: str, viewer: dict | None = None) ->
                 "marital": row.get("marital"),
             },
             "card_text": card,
+            # AI가 이 사람에 대해 아는 화면 행동 문장(서술·이름 제외).
+            # 고객 화면의 "AI가 아는 내용"에 쓴다
+            **({"behavior_lines": behavior_lines} if behavior_lines else {}),
             "traits": {
                 "price": row["ps_grade"],
                 "digital": row["da_grade"],

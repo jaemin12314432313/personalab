@@ -12,10 +12,16 @@ from app.models.run import Persona, Run
 from app.models.study import Study
 
 
+def latest_panel_ids():
+    """같은 panel_key의 가장 최근 버전만. 이전 버전은 지우지 않고 목록에서만 가린다."""
+    return select(func.max(PersonaLibraryPanel.id)).group_by(PersonaLibraryPanel.panel_key)
+
+
 async def list_panels(session: AsyncSession):
     query = (
         select(PersonaLibraryPanel, func.count(PersonaLibraryEntry.id))
         .outerjoin(PersonaLibraryEntry, PersonaLibraryEntry.panel_id == PersonaLibraryPanel.id)
+        .where(PersonaLibraryPanel.id.in_(latest_panel_ids()))
         .group_by(PersonaLibraryPanel.id)
         .order_by(PersonaLibraryPanel.id)
     )

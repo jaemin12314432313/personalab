@@ -20,19 +20,28 @@ def public_attributes(attributes, display_id=""):
     }
     if "region" in visible:
         visible["region"] = region_name(visible["region"])
-    digital = grade(traits.get("digital"))
+    # 점수 v0.2부터 카드에는 기존 디지털 수용도 대신 학습 용이성을 쓴다. 있으면 그것을 보여 준다
+    digital = grade(traits.get("learn") or traits.get("digital"))
     novelty = grade(traits.get("novelty"))
     privacy = grade(traits.get("privacy"))
     behaviors = {"digital": digital, "novelty": novelty, "privacy": privacy}
+    if traits.get("help") in ("낮음", "중간", "높음"):
+        behaviors["help"] = traits["help"]
     summary = (
         f"{visible.get('age', '')}세 · {visible.get('job_group', '사용자')} · "
-        f"{visible.get('region', '지역 미등록')}. 디지털 친숙도 {digital}, 새로운 기능 친숙도 "
+        f"{visible.get('region', '지역 미등록')}. 새 서비스 적응 {digital}, 새로운 기능 친숙도 "
         f"{novelty}, 개인정보 우려 {privacy}."
     )
+    # 실제 카드에서 화면 행동 문장만 따로 내려 준다(이름·성격 서술은 제외).
+    # 이 밖에 나이·직업·성격 설명도 AI에게 전달된다
+    lines = [x for x in attributes.get("behavior_lines") or [] if isinstance(x, str) and x.strip()]
     origin = {k: source[k] for k in ("library_entry_id", "library_panel_id", "stub") if k in source}
     if source.get("local_demo") is True:
         origin["local_demo"] = True
     if display_id:
         origin["persona_id"] = display_id
     origin["synthetic"] = True
-    return {"profile": visible, "traits": behaviors, "card_text": summary, "source": origin}
+    out = {"profile": visible, "traits": behaviors, "card_text": summary, "source": origin}
+    if lines:
+        out["behavior_lines"] = lines
+    return out

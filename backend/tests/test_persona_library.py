@@ -190,3 +190,39 @@ async def test_catalog_auth_ownership_pagination_and_run_snapshot(session, tmp_p
             ] == "테스트 복사본 수정"
     finally:
         app.dependency_overrides.clear()
+
+
+async def test_older_panel_versions_are_hidden_from_listings(session):
+    """같은 panel_key의 이전 버전은 목록·후보에서 빠지고, 지워지지는 않는다."""
+    from app.repositories import audience as audience_repo
+    from app.repositories import persona_library as repo
+
+    def panel(version, ids):
+        return {
+            "panel_key": "panel_hidden_check",
+            "version_hash": version * 64,
+            "source_commit": "0" * 40,
+            "metadata": {},
+            "entries": [
+                {
+                    "source_persona_id": pid,
+                    "profile_hash": pid * 8,
+                    "attributes_json": {
+                        "profile": {"age": 30, "sex": "남", "job_group": "학생"},
+                        "traits": {},
+                        "card_text": "30세 남자 학생이다.",
+                        "source": {"persona_id": pid},
+                    },
+                }
+                for pid in ids
+            ],
+        }
+
+    old_id, _ = await repo.store_panel(session, panel("a", ["O1", "O2"]))
+    new_id, _ = await repo.store_panel(session, panel("b", ["N1", "N2", "N3"]))
+    listed = {p.id: count for p, count in await repo.list_panels(session)}
+    assert new_id in listed and old_id not in listed
+    candidates = await audience_repo.catalog(session)
+    assert all(row.panel_id != old_id for row in candidates)
+    assert sum(row.panel_id == new_id for row in candidates) == 3
+    assert await repo.get_panel(session, old_id) is not None  # 지워지지 않았다

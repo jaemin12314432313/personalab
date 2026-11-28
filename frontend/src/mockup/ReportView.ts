@@ -210,7 +210,7 @@ export function mountReport(host: HTMLElement, initial: Study, options: ReportOp
     return `<aside class="rv-interview-context id-card"><div class="id-top"><span>PERSONA CARD</span><span>${esc(label)}</span></div>
       <label class="rv-person-select">대화할 페르소나<select data-rv-select-person>${study.personas.map(p=>`<option value="${p.id}" ${person===p.id?'selected':''} ${study.results.find(r=>r.id===p.id)?.act?'':'disabled'}>${esc(personaId(p))} · ${p.attributes.profile.age}세 · ${esc(p.attributes.profile.job_group)}</option>`).join('')}</select></label>
       <div class="rv-identity id-who">${a?portraitMarkup(a,'id-portrait'):`<span class="id-portrait persona-no-photo">AI</span>`}<div><strong>${esc(label)}</strong><span>${p?`${p.attributes.profile.age}세${a?.profile.sex?` · ${esc(a.profile.sex)}`:''} · ${esc(p.attributes.profile.job_group)}${a?.profile.region?` · ${esc(a.profile.region)}`:''}`:''}</span></div></div>
-      ${a?`<div class="id-traits">${trait('디지털 친숙도',String(a.traits.digital))}${trait('새 기능 친숙도',String(a.traits.novelty))}${trait('개인정보 우려',String(a.traits.privacy))}</div>`:''}
+      ${a?`<div class="id-traits">${trait('새 서비스 적응',String(a.traits.digital))}${trait('새 기능 친숙도',String(a.traits.novelty))}${trait('개인정보 우려',String(a.traits.privacy))}</div>`:''}
       <div class="id-path" aria-label="탐색 경로"><div class="id-segs">${segs}</div><small>${r?.act?`${esc(screenTitle(study,path[0]||''))} → ${esc(screenTitle(study,path.at(-1)||''))}${dropped?'에서 멈춤':' 도착'} · 기록 ${r.act.events.length}건`:'탐색 기록 없음'}</small></div>
       ${badge(r)}${fromFinding()}
       <div class="rv-interview-last"><span>마지막 화면</span><strong>${esc(last||'탐색 기록 없음')}</strong></div>

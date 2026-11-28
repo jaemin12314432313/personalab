@@ -5,7 +5,7 @@ export const DROP_LABELS: Record<string, string> = {
 };
 export interface Product { name: string; description: string; features: string[]; price: string }
 export interface Screen { image?:string|null; id: string; label: string; description: string; elements: { text: string; to: string | null }[] }
-export interface Persona { id: number; attributes: { profile: { age: number; sex?: string; region?: string; job_group: string }; card_text: string; traits: Record<string, string | number>; source: { persona_id?: string; stub?: boolean; scoring_version?: string; match_level?: number; stand_in?: boolean; library_entry_id?: number; library_panel_id?: number; library_version?: string; panel_key?: string; nvidia_uuid?: string } } }
+export interface Persona { id: number; attributes: { profile: { age: number; sex?: string; region?: string; job_group: string }; card_text: string; behavior_lines?: string[]; traits: Record<string, string | number>; source: { persona_id?: string; stub?: boolean; scoring_version?: string; match_level?: number; stand_in?: boolean; library_entry_id?: number; library_panel_id?: number; library_version?: string; panel_key?: string; nvidia_uuid?: string } } }
 export interface RunMeta { engine: "rule" | "llm"; model?: string | null; prompt_rev?: string | null; usage?: { calls: number; input_tokens: number; output_tokens: number } | null; failed_personas?: number }
 export interface Ask { usage_intention: number; willingness_to_pay: number; concern: string; needed_features: string[]; unneeded_features: string[]; reason: string }
 export interface Observation { dimension: string; polarity: "issue" | "good"; severity?: "minor" | "moderate" | "blocking" | null; note: string }

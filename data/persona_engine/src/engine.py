@@ -10,11 +10,12 @@ from .utils import allocate, grade_shares
 SCORE_OUT = ["price_sensitivity", "ps_grade", "digital_adoption", "da_grade",
              "novelty_seeking", "ns_grade", "privacy_concern", "ott_payment",
              "learn_ease", "le_grade", "info_check", "ic_grade", "online_tx", "ot_grade",
-             "ai_familiarity", "digital_skill", "ds_level"]
-GRADE_COLS = ["le_grade", "ic_grade", "ot_grade", "ns_grade", "ps_grade", "da_grade"]
-CARD_GRADES = GRADE_COLS[:4]                  # 등급 경고는 카드에 쓰는 특성만
+             "ai_familiarity", "digital_skill", "ds_level",
+             "help_availability", "help_grade", "app_habit"]
+GRADE_COLS = ["le_grade", "ic_grade", "ot_grade", "ns_grade", "help_grade", "ps_grade", "da_grade"]
+CARD_GRADES = GRADE_COLS[:5]                  # 등급 경고는 카드에 쓰는 특성만
 # 분포 일치 점검 대상 = 카드에 쓰는 특성
-DIST_COLS = ["le_grade", "ic_grade", "ot_grade", "privacy_concern", "ai_familiarity"]
+DIST_COLS = ["le_grade", "ic_grade", "ot_grade", "privacy_concern", "ai_familiarity", "help_grade"]
 HABIT_OUT = ["d01001", "d01002", "d01003", "i02004", "d26092"]
 
 

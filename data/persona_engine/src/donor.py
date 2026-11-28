@@ -106,6 +106,18 @@ def compute_scores(d: pd.DataFrame) -> pd.DataFrame:
     # 정보 검증 성향: 접한 정보의 사실 · 근거 · 의도를 따져 보는가 (5문항). 높을수록 그대로 믿지 않는다
     icols = [c for c in C.INFO_ITEMS if c in d.columns]
     d["info_check"] = weighted_percentile(d[icols].mean(axis=1, skipna=True), w).fillna(0.5)
+    # 도움 가용성 (v0.3): 막혔을 때 물어볼 사람이 있는가 (1문항). 높을수록 도움을 받기 쉽다
+    hcols = [c for c in C.HELP_ITEMS if c in d.columns]
+    d["help_availability"] = weighted_percentile(d[hcols].mean(axis=1, skipna=True), w).fillna(0.5)
+    # 자주 쓰는 앱 (v0.3): 1~3순위 범주를 짧은 이름으로 이어 붙인다 (익숙한 화면 방식). 없으면 빈 문자열
+    def app_habit(row):
+        names = []
+        for c in ("d01001", "d01002", "d01003"):
+            v = row.get(c)
+            if pd.notna(v) and int(v) in C.APP_SHORT and C.APP_SHORT[int(v)] not in names:
+                names.append(C.APP_SHORT[int(v)])
+        return "·".join(names)
+    d["app_habit"] = d.apply(app_habit, axis=1)
     # 온라인 거래 익숙함: 쇼핑 빈도 · 간편결제 · 인터넷전문은행 · 예약/예매 · 모바일 금융 (금액은 쓰지 않음)
     ow = C.ONLINE_TX_WEIGHTS
     x_shop = ((d["i01033"] - 1) / 7).clip(0, 1).fillna(0.0)          # 결측 = 온라인 쇼핑 안 함
@@ -133,6 +145,7 @@ def compute_scores(d: pd.DataFrame) -> pd.DataFrame:
     d["ns_grade"] = gb("novelty_seeking")
     d["le_grade"] = gb("learn_ease")
     d["ic_grade"] = gb("info_check")
+    d["help_grade"] = gb("help_availability")
     d["ot_grade"] = gb("online_tx")
     d["ott_payment"] = d["d26061"].map({3: "단독", 2: "친구와 나눔", 1: "가족"}).fillna("미이용")
     return d

@@ -1,15 +1,15 @@
 # Persona Engine 산출물
 
-점수 버전 `v0.2-draft` · 생성: `python scripts/make_panel.py --preset <이름>` · 뷰어: `python scripts/make_viewer.py`
+점수 버전 `v0.3-draft` · 생성: `python scripts/make_panel.py --preset <이름>` · 뷰어: `python scripts/make_viewer.py`
 
 ## 품질 점검 (N=100, seed=42)
 
 | 패널 | 인원 | 할당 일치 | 분포 일치 p (학습 / 정보 검증 / 온라인 거래 / 개인정보 / 생성형 AI) | 매칭 level 1 · 3+ | donor 사용 / 최대 재사용 / 상한 초과 | 카드 중복 0 | 카드 숫자 0 | 등급 경고 |
 |---|---|---|---|---|---|---|---|---|
-| 30s_office_n100_seed42 | 100/100 | ✅ | le_grade 0.88 / ic_grade 0.64 / ot_grade 0.42 / privacy_concern 0.41 / ai_familiarity 0.57 | 93% · 3+ 7% ✅ | 74 / 2회 / 0 | ✅ | ✅ | - |
-| 40s_all_n100_seed42 | 100/100 | ✅ | le_grade 0.46 / ic_grade 0.01 / ot_grade 0.12 / privacy_concern 0.54 / ai_familiarity 0.78 | 81% · 3+ 6% ✅ | 97 / 2회 / 0 | ✅ | ✅ | - |
-| 60plus_n100_seed42 | 100/100 | ✅ | le_grade 0.34 / ic_grade 0.26 / ot_grade 0.72 / privacy_concern 0.85 / ai_familiarity 0.91 | 95% · 3+ 3% ✅ | 99 / 2회 / 0 | ✅ | ✅ | - |
-| univ_n100_seed42 | 100/100 | ✅ | le_grade 0.37 / ic_grade 0.54 / ot_grade 0.07 / privacy_concern 0.20 / ai_familiarity 0.62 | 91% · 3+ 1% ✅ | 81 / 2회 / 0 | ✅ | ✅ | - |
+| 30s_office_n100_seed42 | 100/100 | ✅ | le_grade 0.88 / ic_grade 0.64 / ot_grade 0.42 / privacy_concern 0.41 / ai_familiarity 0.57 / help_grade 0.45 | 93% · 3+ 7% ✅ | 74 / 2회 / 0 | ✅ | ✅ | - |
+| 40s_all_n100_seed42 | 100/100 | ✅ | le_grade 0.46 / ic_grade 0.01 / ot_grade 0.12 / privacy_concern 0.54 / ai_familiarity 0.78 / help_grade 0.02 | 81% · 3+ 6% ✅ | 97 / 2회 / 0 | ✅ | ✅ | - |
+| 60plus_n100_seed42 | 100/100 | ✅ | le_grade 0.34 / ic_grade 0.26 / ot_grade 0.72 / privacy_concern 0.85 / ai_familiarity 0.91 / help_grade 0.50 | 95% · 3+ 3% ✅ | 99 / 2회 / 0 | ✅ | ✅ | - |
+| univ_n100_seed42 | 100/100 | ✅ | le_grade 0.37 / ic_grade 0.54 / ot_grade 0.07 / privacy_concern 0.20 / ai_familiarity 0.62 / help_grade 0.76 | 91% · 3+ 1% ✅ | 81 / 2회 / 0 | ✅ | ✅ | - |
 
 분포 일치는 카이제곱 검정으로 p > 0.05면 donor 부분집합의 가중 분포와 다르지 않다는 뜻이다.
 

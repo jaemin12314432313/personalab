@@ -55,7 +55,7 @@ export function mountAudienceBuilder(host:HTMLElement,options:{get:()=>Study;key
     <section class="ab-compose"><div class="ab-compose-heading"><h2>참여 조건과 인원</h2><span class="ab-source-label">AI 페르소나</span></div><p class="ab-context">${esc(a.description||'대상 사용자 설명을 먼저 작성해 주세요.')}</p><p class="ab-note">설명은 탐색 맥락이며, 참여 조건은 직접 정해주세요.</p>
      <fieldset class="ab-conditions"><legend class="sr-only">참여 조건과 인원</legend><p id="audienceCriteriaState" class="ab-criteria-state"></p>
       <div class="ab-condition-basics"><div class="ab-age"><label for="audienceAgeMin">나이<input class="input" type="number" min="0" max="120" id="audienceAgeMin" value="${f.age_min??''}" placeholder="최소"></label><span>—</span><label for="audienceAgeMax"><span class="sr-only">최대 나이</span><input class="input" type="number" min="0" max="120" id="audienceAgeMax" value="${f.age_max??''}" placeholder="최대"></label></div><label class="ab-count-field" for="audienceCount">참여 인원<div><input class="input" id="audienceCount" type="number" min="1" max="${facets?.max_selection||100}" value="${desiredCount}"><span>명</span></div></label></div>
-      <div class="ab-condition-facets">${chips('jobs','직무·생활',facets?.jobs||[])}${chips('regions','거주 지역',facets?.regions||[])}${chips('digital','디지털 친숙도',facets?.digital||[])}</div>
+      <div class="ab-condition-facets">${chips('jobs','직무·생활',facets?.jobs||[])}${chips('regions','거주 지역',facets?.regions||[])}${chips('digital','새 서비스 적응',facets?.digital||[])}</div>
       <label class="label" for="audienceQuery">프로필에 포함된 단어 <span>선택</span><input class="input" id="audienceQuery" maxlength="200" value="${esc(f.query)}" placeholder="예: 예약 온라인"></label><p class="ab-note">입력한 단어가 모두 있는 프로필을 찾아요. 조건은 자동으로 넓히지 않아요.</p>
       <div class="ab-compose-footer"><button class="ab-text-button" type="button" data-audience-action="reset">조건 초기화</button><button type="button" class="btn solid" data-audience-action="auto">${loading?'구성을 확인하고 있어요…':selected.size?'다시 추천받기 →':'구성 추천받기 →'}</button></div>
      </fieldset>
@@ -99,12 +99,12 @@ export function mountAudienceBuilder(host:HTMLElement,options:{get:()=>Study;key
   const bar=(label:string,v:unknown)=>`<div class="ab-trait"><span>${label}</span><div><i style="width:${Math.round(level(v)*100)}%"></i></div><b>${esc(v||'미등록')}</b></div>`;
   const rankOf=(key:string)=>{const mine=level(a.traits[key]);const below=rows.filter(r=>level(r.a.traits[key])<mine).length;return Math.round((1-below/rows.length)*100);};
   box.innerHTML=`<div class="ab-map-head"><div><h3>${rows.length}명이 이렇게 퍼져 있어요</h3><p>점 하나가 한 사람이에요. 색은 연령대이고, 점을 누르면 그 사람의 정보가 옆에 나와요.</p></div><div class="ab-keys">${legend}</div></div>
-   <div class="ab-map-body"><div class="ab-plot-wrap"><span class="ab-axis y">↑ 개인정보 우려</span><div class="ab-plot" role="group" aria-label="디지털 친숙도와 개인정보 우려로 본 참여자 분포"><i class="g v"></i><i class="g v2"></i><i class="g h"></i><i class="g h2"></i>${dots}</div><span class="ab-axis x">디지털 친숙도 →</span></div>
+   <div class="ab-map-body"><div class="ab-plot-wrap"><span class="ab-axis y">↑ 개인정보 우려</span><div class="ab-plot" role="group" aria-label="새 서비스 적응과 개인정보 우려로 본 참여자 분포"><i class="g v"></i><i class="g v2"></i><i class="g h"></i><i class="g h2"></i>${dots}</div><span class="ab-axis x">디지털 친숙도 →</span></div>
    <aside class="ab-dot-detail" aria-live="polite"><div class="ab-dot-id">${portraitMarkup(a)}<div><strong>${esc(cur.p.source_persona_id)}</strong><span class="ab-chip" style="--c:${color(ageGroup(a.profile.age))}">${esc(ageGroup(a.profile.age))}</span></div></div>
    <p class="ab-dot-line">${esc([`${a.profile.age}세`,a.profile.sex,a.profile.job_group,a.profile.region].filter(Boolean).join(' · '))}</p>
-   ${bar('디지털 친숙도',a.traits.digital)}${bar('개인정보 우려',a.traits.privacy)}
-   <p class="ab-rank">이 구성에서 디지털 친숙도는 상위 ${rankOf('digital')}%, 개인정보 우려는 상위 ${rankOf('privacy')}%예요.</p>
-   <div class="ab-dot-card"><span>AI에게 전달되는 설명</span><p>${esc(a.card_text)}</p></div>
+   ${bar('새 서비스 적응',a.traits.digital)}${bar('개인정보 우려',a.traits.privacy)}${a.traits.help?bar('막혔을 때 도움',a.traits.help):''}
+   <p class="ab-rank">이 구성에서 새 서비스 적응은 상위 ${rankOf('digital')}%, 개인정보 우려는 상위 ${rankOf('privacy')}%예요.</p>
+   <div class="ab-dot-card"><span>${a.behavior_lines?.length?'AI가 아는 화면 행동':'AI에게 전달되는 요약'}</span><p style="white-space:pre-line">${esc(a.behavior_lines?.length?a.behavior_lines.join(String.fromCharCode(10)):a.card_text)}</p>${a.behavior_lines?.length?'<small>이 밖에 나이·직업·성격 설명도 함께 전달돼요.</small>':''}</div>
    <button type="button" class="btn" data-audience-map-replace="${cur.p.id}" ${locked()?'disabled':''}>이 사람 교체</button></aside></div>
    <div class="ab-shares" aria-label="연령대별 인원">${bars}</div>`;
  }

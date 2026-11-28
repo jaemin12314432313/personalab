@@ -10,7 +10,7 @@ APP_KW = ["앱", "어플", "애플리케이션", "스마트폰", "유튜브", "�
 MONEY = re.compile(r"\d[\d,.]*\s*(원|만원|천원|%|퍼센트)")      # 금액·비율 숫자가 든 문장은 쓰지 않는다
 HEALTH = re.compile(C.HEALTH_PATTERN)                          # 건강 서술 문장도 쓰지 않는다
 
-# 카드 문장 표 (v0.2). 평가 · 인터뷰 프롬프트와 공유하므로 바꾸면 config.SCORING_VERSION을 올린다.
+# 카드 문장 표 (v0.3). 평가 · 인터뷰 프롬프트와 공유하므로 바꾸면 config.SCORING_VERSION을 올린다.
 # 가격 민감도 · OTT 결제 방식 문장은 v0.2부터 카드에 쓰지 않는다 (제품이 가격을 묻지 않음).
 LEARN_S = {"높음": "새 앱에 금방 익숙해지고 사용법을 따로 찾아보지 않는다.",
            "중간": "새 앱은 화면이 익숙하면 쓰고, 낯설면 조금 헤맨다.",
@@ -33,12 +33,23 @@ PROVINCE_DISPLAY = {"경상남": "경남", "경상북": "경북", "충청남": "
 NO_FIELD = {"해당없음", ""}                                    # 전공 계열 없음 (전문대 등)
 
 NOVELTY_S = "새로운 서비스가 나오면 먼저 깔아보는 편이다."
+# v0.3: 막혔을 때 도움을 받을 수 있는가 (기술 수용도 문항). 포기 여부를 정하지 않고 상황만 적는다
+HELP_S = {"높음": "화면에서 막히면 주변에 물어볼 사람이 있다.",
+          "중간": "화면에서 막히면 직접 찾아보거나 주변에 물어보기도 한다.",
+          "낮음": "화면에서 막혀도 도와줄 사람이 마땅치 않아 혼자 해결해야 한다."}
+APP_PREFIX = "평소 "                                           # 자주 쓰는 앱 문장의 시작 (뷰어가 행동 문장으로 가른다)
+
+
+def app_sentence(habit) -> str:
+    if not isinstance(habit, str) or not habit.strip():
+        return ""
+    return f"{APP_PREFIX}{habit} 앱을 주로 써서, 그 앱들의 화면 방식에 익숙하다."
 
 
 def privacy_sentence(v) -> str:
     v = int(v)
     if v >= 5:
-        return "가입할 때 개인정보를 많이 물으면 이유를 모르는 항목에서 바로 멈춘다."
+        return "가입할 때 개인정보를 많이 물으면 걱정이 크고, 이유가 보이지 않는 항목은 특히 불안하다."
     if v == 4:
         return "가입 때 묻는 개인정보가 많으면 불편하다."
     if v == 3:
@@ -72,7 +83,6 @@ def build_card(p: pd.Series) -> str:
     hs = sent(p.get("hobbies_and_interests"))
     hit = [s for s in hs if any(k in s for k in APP_KW)]
     L += (hit or hs[:1])[:2]
-    L += sent(p.get("cultural_background"))[:1]
     L.append(LEARN_S[p["le_grade"]])
     if p.get("ds_level") in SKILL_S:                          # 디지털 활용 능력은 부족할 때만 쓴다
         L.append(SKILL_S[p["ds_level"]])
@@ -80,6 +90,11 @@ def build_card(p: pd.Series) -> str:
     L.append(INFO_S[p["ic_grade"]])
     L.append(privacy_sentence(p["privacy_concern"]))
     L.append(AI_S[p["ai_familiarity"]])
+    if p.get("help_grade") in HELP_S:
+        L.append(HELP_S[p["help_grade"]])
+    habit = app_sentence(p.get("app_habit"))
+    if habit:
+        L.append(habit)
     if p["ns_grade"] == "높음":
         L.append(NOVELTY_S)
     return "\n".join(L)

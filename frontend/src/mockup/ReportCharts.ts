@@ -148,7 +148,7 @@ function dropAnalysis(study: Study, model: Model) {
   const records = model.records;
   if (!records.length) return '';
   const dims: [string, (p: Study['personas'][number]) => string][] = [
-    ['디지털 수용도', p => String(displayAttributes(p.attributes).traits.digital || '')],
+    ['새 서비스 적응', p => String(displayAttributes(p.attributes).traits.digital || '')],
     ['가격 민감도', p => String(p.attributes.traits.price || p.attributes.traits.price_sensitivity || '')],
     ['개인정보 우려', p => String(displayAttributes(p.attributes).traits.privacy || '')],
     ['성별', p => String(p.attributes.profile.sex || '')],
