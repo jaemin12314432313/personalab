@@ -1,6 +1,6 @@
 # Persona Engine 산출물
 
-점수 버전 `v0.3-draft` · 생성: `python scripts/make_panel.py --preset <이름>` · 뷰어: `python scripts/make_viewer.py`
+점수 버전 `v0.3.1-draft` · 생성: `python scripts/make_panel.py --preset <이름>` · 뷰어: `python scripts/make_viewer.py`
 
 ## 품질 점검 (N=100, seed=42)
 

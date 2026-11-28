@@ -9,11 +9,10 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src import config as C                                   # noqa: E402
-from src.cards import (APP_PREFIX, HELP_S, AI_S, INFO_S, LEARN_S, NOVELTY_S, PROVINCE_DISPLAY, SKILL_S, TX_S,   # noqa: E402
+from src.cards import (ALL_BEHAVIOR, APP_PREFIX, HELP_S, AI_S, INFO_S, LEARN_S, NOVELTY_S, PROVINCE_DISPLAY, SKILL_S, TX_S,   # noqa: E402
                        privacy_sentence)
 
-BEHAVIOR = set(LEARN_S.values()) | set(INFO_S.values()) | set(TX_S.values()) | set(AI_S.values()) | \
-           set(SKILL_S.values()) | set(HELP_S.values()) | {NOVELTY_S} | {privacy_sentence(v) for v in range(1, 6)}
+BEHAVIOR = ALL_BEHAVIOR                                   # cards.py가 만들 수 있는 모든 행동 문장
 FLAGS = {"건강 서술": C.HEALTH_PATTERN, "구직 서술": C.JOBSEEK_PATTERN}   # 카드에서 걸러졌어야 할 표현
 COLS = ["persona_id", "age", "sex", "province", "occupation", "education_level", "job_group",
         "student_inferred", "le_grade", "ic_grade", "ot_grade", "ai_familiarity", "ds_level",

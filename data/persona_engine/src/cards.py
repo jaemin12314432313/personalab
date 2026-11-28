@@ -13,11 +13,11 @@ HEALTH = re.compile(C.HEALTH_PATTERN)                          # 건강 서술 �
 # 카드 문장 표 (v0.3). 평가 · 인터뷰 프롬프트와 공유하므로 바꾸면 config.SCORING_VERSION을 올린다.
 # 가격 민감도 · OTT 결제 방식 문장은 v0.2부터 카드에 쓰지 않는다 (제품이 가격을 묻지 않음).
 LEARN_S = {"높음": "새 앱에 금방 익숙해지고 사용법을 따로 찾아보지 않는다.",
-           "중간": "새 앱은 화면이 익숙하면 쓰고, 낯설면 조금 헤맨다.",
+           "중간": "새 앱은 익숙한 화면이면 바로 쓰고, 낯선 화면에서는 한두 번 헤맨 뒤 익힌다.",
            "낮음": "낯선 화면이 나오면 어디를 눌러야 할지 자주 망설인다."}
 INFO_S = {"높음": "처음 보는 서비스는 출처와 근거를 확인하고, 광고처럼 보이는 문구는 의심한다.",
-          "중간": "안내 문구는 대체로 믿지만, 중요한 내용은 한 번 더 확인한다.",
-          "낮음": "화면에 나온 안내와 문구를 대체로 그대로 믿는다."}
+          "중간": "안내 문구는 믿고 따르지만, 결제나 개인정보 같은 중요한 내용은 한 번 더 확인한다.",
+          "낮음": "화면에 나온 안내와 문구를 그대로 믿는다."}
 TX_S = {"높음": "온라인 쇼핑 · 예약 · 간편결제가 익숙해 가입과 결제 절차를 빠르게 넘긴다.",
         "중간": "온라인 쇼핑과 예약은 해 봤지만, 처음 보는 절차는 천천히 확인한다.",
         "낮음": "온라인으로 결제하거나 예약하는 일이 드물어, 절차가 길면 부담스러워한다."}
@@ -44,6 +44,35 @@ def app_sentence(habit) -> str:
     if not isinstance(habit, str) or not habit.strip():
         return ""
     return f"{APP_PREFIX}{habit} 앱을 주로 써서, 그 앱들의 화면 방식에 익숙하다."
+
+
+def learn_line(le: str, ds: str, ns: str) -> str:
+    """학습 용이성 문장. 낮음일 때 다른 특성과 어긋나 보이지 않게 한 문장으로 잇는다 (v0.3.1)."""
+    if le != "낮음":
+        return LEARN_S[le]
+    lead = []
+    if ds == "충분":
+        lead.append("스마트폰 조작은 익숙하고")
+    if ns == "높음":
+        lead.append("새로운 서비스는 먼저 설치해 보지만")
+    if not lead:
+        return LEARN_S["낮음"]
+    return " ".join(lead) + ", 낯선 화면에서는 어디를 눌러야 할지 자주 망설인다."
+
+
+def tx_line(ot: str, le: str) -> str:
+    """온라인 거래 문장. 낯선 화면에서 망설이는 사람은 '익숙한 절차'만 빠르게 넘긴다고 쓴다 (v0.3.1)."""
+    if ot == "높음" and le == "낮음":
+        return "익숙한 온라인 쇼핑 · 예약 · 간편결제 절차는 빠르게 넘긴다."
+    return TX_S[ot]
+
+
+def privacy_line(pc, ot: str, ic: str) -> str:
+    """개인정보 문장. 앞 문장과 어긋나 보이면 '다만'으로 잇는다 (v0.3.1)."""
+    base = privacy_sentence(pc)
+    if int(pc) >= 5 and (ic == "낮음" or ot == "높음"):
+        return "다만 " + base
+    return base
 
 
 def privacy_sentence(v) -> str:
@@ -83,19 +112,19 @@ def build_card(p: pd.Series) -> str:
     hs = sent(p.get("hobbies_and_interests"))
     hit = [s for s in hs if any(k in s for k in APP_KW)]
     L += (hit or hs[:1])[:2]
-    L.append(LEARN_S[p["le_grade"]])
+    L.append(learn_line(p["le_grade"], p.get("ds_level"), p["ns_grade"]))
     if p.get("ds_level") in SKILL_S:                          # 디지털 활용 능력은 부족할 때만 쓴다
         L.append(SKILL_S[p["ds_level"]])
-    L.append(TX_S[p["ot_grade"]])
+    L.append(tx_line(p["ot_grade"], p["le_grade"]))
     L.append(INFO_S[p["ic_grade"]])
-    L.append(privacy_sentence(p["privacy_concern"]))
+    L.append(privacy_line(p["privacy_concern"], p["ot_grade"], p["ic_grade"]))
     L.append(AI_S[p["ai_familiarity"]])
     if p.get("help_grade") in HELP_S:
         L.append(HELP_S[p["help_grade"]])
     habit = app_sentence(p.get("app_habit"))
     if habit:
         L.append(habit)
-    if p["ns_grade"] == "높음":
+    if p["ns_grade"] == "높음" and p["le_grade"] != "낮음":      # 낮음이면 학습 문장에 이미 녹였다
         L.append(NOVELTY_S)
     return "\n".join(L)
 
@@ -104,3 +133,22 @@ def add_cards(panel: pd.DataFrame) -> pd.DataFrame:
     panel = panel.copy()
     panel["card_text"] = panel.apply(build_card, axis=1)
     return panel
+
+
+def _all_behavior() -> set:
+    out = set(LEARN_S.values()) | set(INFO_S.values()) | set(TX_S.values()) | set(AI_S.values())
+    out |= set(SKILL_S.values()) | set(HELP_S.values()) | {NOVELTY_S}
+    for pc in range(1, 6):
+        for ot in ("낮음", "중간", "높음"):
+            for ic in ("낮음", "중간", "높음"):
+                out.add(privacy_line(pc, ot, ic))
+    for le in ("낮음", "중간", "높음"):
+        for ds in ("낮음", "중간", "충분"):
+            for ns in ("낮음", "중간", "높음"):
+                out.add(learn_line(le, ds, ns))
+        for ot in ("낮음", "중간", "높음"):
+            out.add(tx_line(ot, le))
+    return out
+
+
+ALL_BEHAVIOR = _all_behavior()
