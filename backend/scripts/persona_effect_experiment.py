@@ -1,4 +1,5 @@
 # ruff: noqa: E501
+# ruff: noqa: E501
 """페르소나가 탐색 결과를 실제로 바꾸는지 보는 실험 (S = B − P).
 
 같은 사이트·같은 과제에서 세 가지를 비교한다.
@@ -114,6 +115,13 @@ OLD_BEHAVIOR = (
 )
 
 
+STRONG = False
+
+
+def strong(rule: str) -> str:
+    return rule.replace("그만둘 수 있다", "그만둔다").replace("멈출 수 있다", "멈춘다")
+
+
 def build_rules_card(card_text: str, t: dict) -> str:
     """엔진 v0.4 형태: 데이터 문장은 그대로 두고, 설계 가설 규칙 블록을 끝에 붙인다."""
     rules = [
@@ -125,6 +133,8 @@ def build_rules_card(card_text: str, t: dict) -> str:
     ]
     if t["ds_level"] in RULES["ds_level"]:
         rules.append(RULES["ds_level"][t["ds_level"]])
+    if STRONG:
+        rules = [r if i in (3, 4) else strong(r) for i, r in enumerate(rules)]
     return chr(10).join([card_text, "화면에서의 행동 규칙(설계 가설):", *rules])
 
 
@@ -230,6 +240,7 @@ async def main() -> None:
         "--fresh", action="store_true", help="처음 실험의 6명을 제외하고 새로 뽑는다"
     )
     parser.add_argument("--tag", default="", help="결과 파일 이름 꼬리표")
+    parser.add_argument("--strong", action="store_true", help="규칙을 단정형(그만둔다)으로")
     parser.add_argument("--max-calls", type=int, default=150, help="이 호출 수를 넘으면 중단")
     parser.add_argument("--out", default=str(ROOT / ".localtools" / "persona_effect"))
     args = parser.parse_args()
@@ -266,6 +277,7 @@ async def main() -> None:
         )
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return
+    globals()["STRONG"] = args.strong
     personas = pick_personas(args.group_size, args.seed, args.fresh)
     if args.rules_card:
         rr: list[dict] = []
