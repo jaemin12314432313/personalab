@@ -28,6 +28,16 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
+sys.path.insert(0, str(ROOT / "data" / "persona_engine"))
+from src.cards import (  # noqa: E402
+    HELP_S,
+    INFO_S,
+    LEARN_S,
+    SKILL_S,
+    TX_S,
+    privacy_sentence,
+)
+
 from app.core.config import settings  # noqa: E402
 from app.services import browser, rule_agent  # noqa: E402
 from app.services.llm import LLMError, start_usage  # noqa: E402
@@ -59,6 +69,65 @@ def site_bundle() -> dict:
     }
 
 
+# 구체적 규칙 카드(실험용 가설): "화면 상황 -> 행동". 데이터가 아니라 설계 가설이다
+RULES = {
+    "privacy": {
+        5: "이유 설명 없이 휴대폰 번호·주소 같은 항목을 요구하면 가입을 그만둔다.",
+        4: "휴대폰 번호·주소 같은 항목을 요구하면 망설이고, 이유가 보이면 계속한다.",
+        3: "개인정보 항목은 크게 신경 쓰지 않고 입력한다.",
+        2: "개인정보 항목은 크게 신경 쓰지 않고 입력한다.",
+        1: "개인정보 항목은 크게 신경 쓰지 않고 입력한다.",
+    },
+    "le_grade": {
+        "낮음": "처음 보는 화면에서 무엇을 눌러야 할지 안내가 없으면 두세 번 헤매다 그만둔다.",
+        "중간": "처음 보는 화면은 안내가 있으면 따라 하고, 없으면 한두 번 더 눌러 본다.",
+        "높음": "처음 보는 화면도 안내 없이 스스로 눌러 보며 익힌다.",
+    },
+    "help_grade": {
+        "낮음": "막혀도 도움말이나 문의가 보이지 않으면 오래 붙잡지 않고 그만둔다.",
+        "중간": "막히면 도움말을 찾아보거나 한두 번 더 시도한다.",
+        "높음": "막히면 도움말이나 주변에 물어보며 계속한다.",
+    },
+    "ic_grade": {
+        "높음": "출처가 없는 광고성 문구나 과장된 약속은 믿지 않고 다른 곳에서 확인하려 한다.",
+        "중간": "안내 문구는 대체로 믿되 중요한 내용은 한 번 더 확인한다.",
+        "낮음": "화면에 나온 안내와 문구를 그대로 믿고 진행한다.",
+    },
+    "ds_level": {
+        "낮음": "인증·설치·설정 같은 단계가 나오면 혼자 하기 어렵다고 느끼고 멈춘다.",
+        "중간": "설정이나 인증이 나오면 천천히 따라 하며 한 번 더 확인한다.",
+    },
+    "ot_grade": {
+        "낮음": "입력·결제·예약 단계가 길어지면 부담을 느끼고 그만둘 수 있다.",
+        "중간": "처음 보는 절차는 천천히 확인한다.",
+        "높음": "가입·결제 절차는 빠르게 넘긴다.",
+    },
+}
+OLD_BEHAVIOR = (
+    set(LEARN_S.values())
+    | set(INFO_S.values())
+    | set(TX_S.values())
+    | set(SKILL_S.values())
+    | set(HELP_S.values())
+    | {privacy_sentence(v) for v in range(1, 6)}
+)
+
+
+def build_rules_card(card_text: str, t: dict) -> str:
+    """기존 행동 문장(추상적)을 빼고, 같은 특성을 화면 상황→행동 규칙으로 바꿔 끝에 붙인다."""
+    kept = [x for x in card_text.split(chr(10)) if x not in OLD_BEHAVIOR]
+    rules = [
+        RULES["privacy"][int(t["pc"])],
+        RULES["le_grade"][t["le_grade"]],
+        RULES["help_grade"][t["help_grade"]],
+        RULES["ic_grade"][t["ic_grade"]],
+        RULES["ot_grade"][t["ot_grade"]],
+    ]
+    if t["ds_level"] in RULES["ds_level"]:
+        rules.append(RULES["ds_level"][t["ds_level"]])
+    return chr(10).join([*kept, "화면에서의 행동 규칙:", *rules])
+
+
 def pick_personas() -> list[dict]:
     frames = [
         pd.read_csv(f, encoding="utf-8-sig") for f in sorted(PANELS.glob("panel_*_seed42.csv"))
@@ -78,7 +147,10 @@ def pick_personas() -> list[dict]:
             "group": g,
             "persona_id": r["persona_id"],
             "age": int(r["age"]),
-            "traits": {k: r[k] for k in ("le_grade", "ot_grade", "ic_grade", "ds_level", "pc")},
+            "traits": {
+                k: r[k]
+                for k in ("le_grade", "ot_grade", "ic_grade", "ds_level", "pc", "help_grade")
+            },
             "card_text": r["card_text"],
         }
         for g, r in chosen
@@ -140,6 +212,9 @@ async def main() -> None:
     parser.add_argument(
         "--positive-control", action="store_true", help="명시적 포기 지시 카드로 6회만 돌린다"
     )
+    parser.add_argument(
+        "--rules-card", action="store_true", help="구체적 행동 규칙 카드로 A조건만 돌린다"
+    )
     parser.add_argument("--max-calls", type=int, default=150, help="이 호출 수를 넘으면 중단")
     parser.add_argument("--out", default=str(ROOT / ".localtools" / "persona_effect"))
     args = parser.parse_args()
@@ -177,6 +252,50 @@ async def main() -> None:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return
     personas = pick_personas()
+    if args.rules_card:
+        rr: list[dict] = []
+        async with browser.shared_browser():
+            for p in personas:
+                card = build_rules_card(p["card_text"], p["traits"])
+                for rep in range(REPEATS):
+                    if not args.dry_run and sink.snapshot()["calls"] >= args.max_calls:
+                        raise SystemExit("호출 한도에 도달해 중단했습니다.")
+                    result = await run_once(p, card, decide, args.dry_run)
+                    rr.append(
+                        {"persona": p["persona_id"], "group": p["group"], "rep": rep, **result}
+                    )
+                    print(
+                        "R",
+                        p["persona_id"],
+                        p["group"],
+                        rep,
+                        result["pages"][-1],
+                        result["end"],
+                        result["drop_reason"],
+                        flush=True,
+                    )
+        by = {}
+        for r in rr:
+            g = by.setdefault(r["group"], {"runs": 0, "abandoned": 0, "reasons": [], "screens": []})
+            g["runs"] += 1
+            if r["end"] == "abandon":
+                g["abandoned"] += 1
+                g["reasons"].append(r["drop_reason"])
+                g["screens"].append(r["pages"][-1])
+        summary = {
+            "mode": "rules-card",
+            "by_group": by,
+            "example_card": build_rules_card(personas[0]["card_text"], personas[0]["traits"]),
+            "usage": None if args.dry_run else sink.snapshot(),
+        }
+        out = Path(args.out)
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "result_rules.json").write_text(
+            json.dumps({"summary": summary, "runs": rr}, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return
     runs: list[dict] = []
 
     async with browser.shared_browser():
