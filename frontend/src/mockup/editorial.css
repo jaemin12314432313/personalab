@@ -155,11 +155,21 @@
   #v-login .auth-card h1 { font-size: 1.5rem; }
 }
 @media (min-width: 761px) {
+  /* The desktop headline is the exception to the global font reset. */
+  @layer auth-headline {
+    #v-login .auth-story h2, #v-login .auth-story-emphasis {
+      font-family: 'Noto Serif KR', Batang, serif !important;
+    }
+  }
   #v-login .auth-story h2 {
     font-size: clamp(2.125rem, 3.8vw, 3rem);
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.17;
-    letter-spacing: -.045em;
+    letter-spacing: -.04em;
+  }
+  #v-login .auth-story-emphasis {
+    color: var(--auth-link);
+    background: linear-gradient(90deg, #d7e6f9, #e4eefa) left 93% / 100% .24em no-repeat;
   }
   #v-login .auth-story p { line-height: 1.65; }
   #v-login .auth-story-path { gap: 10px; margin-block: 24px; }
@@ -204,7 +214,12 @@
   #v-login #authSubmit:hover:not(:disabled, :active) { box-shadow: 0 4px 10px #101b3333; }
   #v-login #authSubmit:active:not(:disabled) { box-shadow: none; }
 }
+@keyframes auth-headline-highlight {
+  from { background-size: 0 .24em; }
+  to { background-size: 100% .24em; }
+}
 @media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+  #v-login.on .auth-story-emphasis { animation: auth-headline-highlight .55s ease-out both; }
   #v-login #authSubmit {
     transition: background-color .16s ease, box-shadow .16s ease, transform .12s ease;
   }
