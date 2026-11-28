@@ -128,7 +128,9 @@ def build_rules_card(card_text: str, t: dict) -> str:
     return chr(10).join([*kept, "화면에서의 행동 규칙:", *rules])
 
 
-def pick_personas() -> list[dict]:
+def pick_personas(
+    group_size: int = GROUP_SIZE, seed: int = SEED, fresh: bool = False
+) -> list[dict]:
     frames = [
         pd.read_csv(f, encoding="utf-8-sig") for f in sorted(PANELS.glob("panel_*_seed42.csv"))
     ]
@@ -136,16 +138,23 @@ def pick_personas() -> list[dict]:
     df["pc"] = df.privacy_concern.round().astype(int)
     high = df[(df.le_grade == "낮음") & (df.pc >= PRIVACY_HIGH)]
     low = df[(df.le_grade == "높음") & (df.pc <= PRIVACY_LOW_MAX) & (df.ds_level == "충분")]
-    if len(high) < GROUP_SIZE or len(low) < GROUP_SIZE:
+    if fresh:  # 처음 실험의 6명(시드 42, 3+3)을 제외하고 새로 뽑는다
+        first = random.Random(SEED)
+        used = {r["uuid"] for r in first.sample(high.to_dict("records"), GROUP_SIZE)} | {
+            r["uuid"] for r in first.sample(low.to_dict("records"), GROUP_SIZE)
+        }
+        high, low = high[~high.uuid.isin(used)], low[~low.uuid.isin(used)]
+    if len(high) < group_size or len(low) < group_size:
         raise SystemExit("대조할 페르소나가 부족합니다.")
-    rng = random.Random(SEED)
-    chosen = [("마찰 큼", r) for r in rng.sample(high.to_dict("records"), GROUP_SIZE)] + [
-        ("마찰 작음", r) for r in rng.sample(low.to_dict("records"), GROUP_SIZE)
+    rng = random.Random(seed)
+    chosen = [("마찰 큼", r) for r in rng.sample(high.to_dict("records"), group_size)] + [
+        ("마찰 작음", r) for r in rng.sample(low.to_dict("records"), group_size)
     ]
     return [
         {
             "group": g,
             "persona_id": r["persona_id"],
+            "uuid": r["uuid"],
             "age": int(r["age"]),
             "traits": {
                 k: r[k]
@@ -215,6 +224,12 @@ async def main() -> None:
     parser.add_argument(
         "--rules-card", action="store_true", help="구체적 행동 규칙 카드로 A조건만 돌린다"
     )
+    parser.add_argument("--group-size", type=int, default=GROUP_SIZE, help="그룹별 페르소나 수")
+    parser.add_argument("--seed", type=int, default=SEED, help="페르소나 선별 시드")
+    parser.add_argument(
+        "--fresh", action="store_true", help="처음 실험의 6명을 제외하고 새로 뽑는다"
+    )
+    parser.add_argument("--tag", default="", help="결과 파일 이름 꼬리표")
     parser.add_argument("--max-calls", type=int, default=150, help="이 호출 수를 넘으면 중단")
     parser.add_argument("--out", default=str(ROOT / ".localtools" / "persona_effect"))
     args = parser.parse_args()
@@ -251,7 +266,7 @@ async def main() -> None:
         )
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return
-    personas = pick_personas()
+    personas = pick_personas(args.group_size, args.seed, args.fresh)
     if args.rules_card:
         rr: list[dict] = []
         async with browser.shared_browser():
@@ -262,7 +277,14 @@ async def main() -> None:
                         raise SystemExit("호출 한도에 도달해 중단했습니다.")
                     result = await run_once(p, card, decide, args.dry_run)
                     rr.append(
-                        {"persona": p["persona_id"], "group": p["group"], "rep": rep, **result}
+                        {
+                            "persona": p["persona_id"],
+                            "uuid": p["uuid"],
+                            "age": p["age"],
+                            "group": p["group"],
+                            "rep": rep,
+                            **result,
+                        }
                     )
                     print(
                         "R",
@@ -290,7 +312,7 @@ async def main() -> None:
         }
         out = Path(args.out)
         out.mkdir(parents=True, exist_ok=True)
-        (out / "result_rules.json").write_text(
+        (out / f"result_rules{args.tag}.json").write_text(
             json.dumps({"summary": summary, "runs": rr}, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
