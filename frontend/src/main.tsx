@@ -13,6 +13,9 @@ import "./mockup/studio-topbar.css";
 import "./mockup/redesign.css";
 import "./mockup/studio-views.css";
 import "./mockup/workspace-reference.css";
+import "./mockup/source-review-layout.css";
+import "./mockup/scope-layout.css";
+import "./mockup/global-font.css";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");

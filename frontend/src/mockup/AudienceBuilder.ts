@@ -1,5 +1,5 @@
 import {regionOptions} from './RegionNames';
-import {portraitMarkup,displayAttributes} from './DisplayPersona';
+import {portraitMarkup,portraitPath,displayAttributes} from './DisplayPersona';
 import * as api from '../api/studio';
 import type {AudienceDefinition, Study} from '../studio/model';
 import './audience.css';
@@ -119,9 +119,10 @@ export function mountAudienceBuilder(host:HTMLElement,options:{get:()=>Study;key
   // 참여자 전체 카드는 기본으로 접어 둔다. 점을 눌러 한 명씩 보고 교체할 수 있어 긴 목록은 필요할 때만 연다. 선택이 없을 땐 안내 문구가 보이도록 펼친다
   const roster=host.querySelector<HTMLDetailsElement>('#audienceRoster');
   if(roster){roster.classList.toggle('is-empty',!ids.length);if(!ids.length)roster.open=true;host.querySelector('#audienceRosterSummary')!.textContent=`참여자 ${ids.length}명 전체 목록 보기`;}
-  host.querySelector('#audienceSelectedList')!.innerHTML=ids.length?ids.slice(0,reviewLimit).map(id=>{
+  host.querySelector('#audienceSelectedList')!.innerHTML=ids.length?ids.slice(0,reviewLimit).map((id,index)=>{
    const p=known.get(id),a=p?displayAttributes(p.attributes):undefined;
-   return `<article class="ab-review-person ab-selected-person"><div class="ab-review-profile">${a?portraitMarkup(a):'<span class="ab-initial">AI</span>'}<div><strong>${a?`${a.profile.age}세 · ${esc(a.profile.job_group||'사용자')}`:'선택한 프로필을 확인하고 있어요.'}</strong><small>${esc(a?.profile.region||'')}</small></div></div>${a?`<div class="ab-review-traits"><span>디지털 친숙도 <b>${esc(a.traits.digital||'미등록')}</b></span><span>개인정보 우려 <b>${esc(a.traits.privacy||'미등록')}</b></span></div><details><summary>프로필 요약 보기</summary><p>${esc(a.card_text)}</p></details>`:''}<div class="ab-review-controls"><button type="button" data-audience-replace="${id}" ${locked()?'disabled':''}>교체 ↗</button></div></article>`;
+   const portrait=a&&portraitPath(a)?portraitMarkup(a):`<span class="ab-initial"><span class="sr-only">참여자 </span>${String(index+1).padStart(2,'0')}</span>`;
+   return `<article class="ab-review-person ab-selected-person"><div class="ab-review-profile">${portrait}<div><strong>${a?`${a.profile.age}세 · ${esc(a.profile.job_group||'사용자')}`:'선택한 프로필을 확인하고 있어요.'}</strong><small>${esc(a?.profile.region||'')}</small></div></div>${a?`<div class="ab-review-traits"><span>디지털 친숙도 <b>${esc(a.traits.digital||'미등록')}</b></span><span>개인정보 우려 <b>${esc(a.traits.privacy||'미등록')}</b></span></div><details><summary>프로필 요약 보기</summary><p>${esc(a.card_text)}</p></details>`:''}<div class="ab-review-controls"><button type="button" data-audience-replace="${id}" ${locked()?'disabled':''}>교체 ↗</button></div></article>`;
   }).join('')+(ids.length>reviewLimit?`<button class="btn ab-review-more" data-audience-action="review-more" type="button">나머지 ${ids.length-reviewLimit}명 더 보기 ↓</button>`:''):'<div class="ab-empty ab-recommend-empty"><strong>어떤 시선이 모일지 확인해보세요.</strong><p>왼쪽에서 조건과 인원을 정한 뒤 추천받으세요.<br>확인 후 필요한 사람만 교체할 수 있어요.</p></div>';
   const f=audience.filters,conditions=[f.age_min!==null||f.age_max!==null?`${f.age_min??'최소'}–${f.age_max??'최대'}세`:'',...f.jobs,...f.regions,...f.digital.map(v=>`친숙도 ${v}`),f.query?`단어: ${f.query}`:''].filter(Boolean);
   for(const field of ['jobs','regions','digital'] as const){const label=host.querySelector(`[data-audience-selection="${field}"]`);if(label)label.textContent=facetValue(field);}

@@ -1,4 +1,4 @@
-/* 실행(무대) · 리포트(대시보드) · 1대1 인터뷰(스포트라이트) — 확정한 Greige 톤. 마지막에 로드해 앞선 규칙을 덮는다 */
+/* 실행, 리포트, 1대1 인터뷰 */
 :root{
   --sv-bg:#eeebe6;--sv-surface:#fffdf9;--sv-surface-2:#e7e4de;--sv-ink:#17161a;--sv-fg:#1f1a15;--sv-fg2:#4d443a;--sv-fg3:#7f7b74;
   --sv-line:#dedad2;--sv-line2:#cdc8be;--sv-run:#2f5fd0;--sv-coral:#d06d5b;--sv-green:#2f8f5b;--sv-amber:#b9852f;--sv-red:#c4473a;
@@ -92,10 +92,26 @@
 #liveReport .rp-card{border-color:var(--sv-line);border-radius:22px;background:var(--sv-surface)}
 #liveReport .rv-empty-small{background:var(--sv-surface);border:1px solid var(--sv-line);border-radius:18px}
 
-/* ───────── 1대1 인터뷰 · 스포트라이트 ───────── */
-#v-interview .rv-heading h1{font:800 34px/1.3 var(--serif);letter-spacing:-.045em}
+/* ───────── 1대1 인터뷰 ───────── */
+#v-interview.studio-view {
+  --sv-bg: #f7fafe;
+  --sv-surface: #fff;
+  --sv-surface-2: #edf3fa;
+  --sv-ink: #254d76;
+  --sv-fg: #101b33;
+  --sv-fg2: #334155;
+  --sv-fg3: #475569;
+  --sv-line: #dce6f0;
+  --sv-line2: #c6d9f3;
+  --sv-run: #2456a2;
+  background: var(--sv-bg);
+  color: var(--sv-fg);
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+#v-interview .rv-heading h1{color:var(--sv-fg)}
 #v-interview .rv-interview-layout{display:block!important;max-width:720px;margin:0 auto;padding-bottom:140px}
-#v-interview .rv-interview-context{position:sticky;top:70px;z-index:8;display:flex!important;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:12px 18px;margin:0 0 14px;border:1px solid var(--sv-line);border-radius:28px;background:#fffdf9ee;backdrop-filter:blur(8px);box-shadow:0 8px 24px #2f251c10}
+#v-interview .rv-interview-context{position:sticky;top:70px;z-index:8;display:flex!important;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:12px 18px;margin:0 0 14px;border:1px solid var(--sv-line);border-radius:14px;background:var(--sv-surface);box-shadow:0 1px 3px #10233c0a}
 #v-interview .rv-interview-context .rv-person-select{order:3;margin-left:auto;font-size:12px;color:var(--sv-fg3)}
 #v-interview .rv-interview-context .rv-person-select select{border-radius:99px}
 #v-interview .rv-interview-context .rv-identity{order:1}
@@ -112,13 +128,13 @@
 #v-interview .rv-answer{align-self:flex-start;max-width:86%;margin:0;padding:14px 18px;border-radius:22px 22px 22px 6px;background:#fff;border:1px solid var(--sv-line);color:var(--sv-fg);line-height:1.75;font-size:15px}
 #v-interview .rv-answer-evidence{margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--sv-surface-2);font-size:12.5px;color:var(--sv-fg2)}
 #v-interview .rv-chat-empty{text-align:center;padding:40px 0;color:var(--sv-fg3)}
-#v-interview .rv-chat-empty strong{font:800 24px var(--serif);letter-spacing:-.04em;color:var(--sv-fg)}
+#v-interview .rv-chat-empty strong{color:var(--sv-fg)}
 #v-interview .rv-question-chips{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 12px}
 #v-interview .rv-question-chips button{border:1px solid var(--sv-line2);background:#fff;border-radius:99px;padding:8px 16px;font:650 13px var(--sans);cursor:pointer;color:var(--sv-fg2)}
 #v-interview .rv-conversation form{border:1px solid var(--sv-line2);border-radius:99px;background:var(--sv-surface);padding:6px 8px 6px 20px;display:flex;align-items:center;gap:10px}
 #v-interview .rv-conversation form textarea{border:0;background:transparent;resize:none;min-height:44px;padding:12px 0;outline:0;flex:1}
-#v-interview .rv-conversation form .btn{background:var(--sv-ink);border-color:var(--sv-ink);color:#fff;border-radius:99px}
-#v-interview .rv-conversation form:focus-within{border-color:var(--sv-ink);box-shadow:0 0 0 3px #17161a1f}
+#v-interview .rv-conversation form .btn{background:var(--sv-ink);border-color:var(--sv-ink);color:#fff;border-radius:8px}
+#v-interview .rv-conversation form:focus-within{border-color:var(--sv-run);box-shadow:0 0 0 3px #e9f2ff}
 #v-interview .rv-mode-note{font-size:12px;color:var(--sv-fg3)}
 #liveReport .rv-summary-line{align-items:stretch!important}
 #liveReport .rv-summary-line>strong{grid-column:1/-1;justify-self:start;flex-direction:row;padding:7px 16px;border-radius:99px;font-size:13px}
@@ -259,19 +275,19 @@
 @media(max-width:1000px){#liveReport .rp-layout{grid-template-columns:1fr}#liveReport aside.rp-card{position:static}}
 @media(max-width:640px){#liveReport .rp-row{grid-template-columns:28px minmax(0,1fr) 40px}#liveReport .rp-row .rp-sev,#liveReport .rp-row .rp-bar,#liveReport .rp-head span:nth-child(3),#liveReport .rp-head span:nth-child(4){display:none}}
 
-/* ───────── v2 인터뷰 · 신분증 (왼쪽 카드 + 오른쪽 문답) ───────── */
+/* ───────── 인터뷰 프로필과 문답 ───────── */
 #v-interview .id-grid{display:grid!important;grid-template-columns:360px minmax(0,1fr);gap:34px;max-width:1120px;margin:0 auto;padding:6px 0 120px;align-items:start}
-#v-interview .id-card{position:sticky!important;top:76px;display:grid!important;flex-direction:column!important;gap:14px;padding:26px!important;margin:0!important;border:1px solid var(--sv-line)!important;border-radius:30px!important;background:linear-gradient(160deg,#fffdf9,#e9e4da)!important;box-shadow:0 40px 70px -40px #2f251c77!important;backdrop-filter:none;max-height:none!important;overflow:visible!important}
-#v-interview .id-top{display:flex;justify-content:space-between;font:700 11px "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;color:var(--sv-fg3)}
-#v-interview .id-card .rv-person-select{display:flex;align-items:center;gap:8px;margin:0;font-size:12px;color:var(--sv-fg3)}
-#v-interview .id-card .rv-person-select select{flex:1;min-width:0;border-radius:99px}
-#v-interview .id-who{display:grid!important;gap:12px;margin:0!important}
-#v-interview .id-who>div{display:grid;gap:2px}
-#v-interview .id-portrait{width:100%;height:270px;border-radius:20px;object-fit:cover;object-position:50% 14%;background:var(--sv-surface-2);display:grid;place-items:center;font:800 40px var(--sans);color:var(--sv-fg3)}
-#v-interview .id-who strong{font:800 32px/1.2 "Hahmlet","Noto Serif KR",serif;letter-spacing:-.06em}
+#v-interview .id-card{position:sticky!important;top:76px;display:grid!important;grid-template-columns:minmax(0,1fr);gap:16px;padding:20px!important;margin:0!important;border:1px solid var(--sv-line)!important;border-radius:14px!important;background:var(--sv-surface)!important;box-shadow:0 1px 3px #10233c0a!important;backdrop-filter:none;max-height:none!important;overflow:visible!important}
+#v-interview .id-card .rv-person-select{display:flex;align-items:center;gap:8px;margin:0;font-size:13px;color:var(--sv-fg3)}
+#v-interview .id-card .rv-person-select select{width:100%;min-width:0;border-radius:8px;text-overflow:ellipsis}
+#v-interview .id-who{display:grid!important;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:12px;margin:0!important}
+#v-interview .id-who>div{display:grid;gap:3px;min-width:0;overflow-wrap:anywhere}
+#v-interview .id-portrait{width:52px;height:52px;border-radius:10px;object-fit:cover;object-position:50% 20%;background:var(--sv-surface-2);display:grid;place-items:center;color:var(--sv-fg3)}
+#v-interview .id-who .id-portrait.persona-no-photo{font-size:15px;font-weight:700;color:var(--sv-ink)}
+#v-interview .id-card .id-who strong{font-size:23px;font-weight:750;line-height:1.3;letter-spacing:-.025em;color:var(--sv-fg)}
 #v-interview .id-who span{color:var(--sv-fg3);font-size:14px}
 #v-interview .id-traits{display:grid;gap:9px}
-#v-interview .id-trait{display:grid;grid-template-columns:96px 1fr 40px;gap:10px;align-items:center;font-size:12.5px}
+#v-interview .id-trait{display:grid;grid-template-columns:96px minmax(0,1fr) 3em;gap:10px;align-items:center;font-size:14px}
 #v-interview .id-trait i{height:7px;border-radius:99px;background:var(--sv-line2);overflow:hidden}
 #v-interview .id-trait b{display:block;height:100%;background:var(--sv-ink)}
 #v-interview .id-trait em{font-style:normal;font-weight:700;text-align:right}
@@ -279,11 +295,11 @@
 #v-interview .id-segs i{flex:1;border-radius:99px;background:var(--sv-ink)}
 #v-interview .id-segs i.x{background:var(--sv-red)}
 #v-interview .id-segs i.o{background:var(--sv-line2)}
-#v-interview .id-path small{display:block;margin-top:8px;font-size:12px;color:var(--sv-fg3)}
+#v-interview .id-path small{display:block;margin-top:8px;font-size:13px;color:var(--sv-fg3);overflow-wrap:anywhere}
 #v-interview .id-card .rv-interview-last{display:flex;gap:8px;align-items:baseline;font-size:12px;color:var(--sv-fg3);margin:0}
 #v-interview .id-card .rv-interview-preview{display:block;width:100%!important;height:96px!important;border-radius:12px;overflow:hidden;border:1px solid var(--sv-line);padding:0;background:var(--sv-surface-2);position:relative}
 #v-interview .id-card .rv-interview-preview img{width:100%;height:100%!important;object-fit:cover;object-position:top}
-#v-interview .id-card .rv-interview-preview span{display:block!important;position:absolute;right:8px;bottom:8px;padding:3px 9px;border-radius:99px;background:#17161aE8;color:#fff;font:700 11px var(--sans)}
+#v-interview .id-card .rv-interview-preview span{display:block!important;position:absolute;right:8px;bottom:8px;padding:3px 9px;border-radius:99px;background:var(--sv-ink);color:#fff;font:700 11px var(--sans)}
 #v-interview .id-card .rv-profile{border-top:1px solid var(--sv-line);padding-top:10px;font-size:13px}
 #v-interview .id-grid .rv-conversation{min-width:0}
 #v-interview .id-grid .rv-messages{gap:6px}
@@ -293,29 +309,142 @@
 #v-interview .id-grid .rv-answer{align-self:flex-start;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;max-width:92%;margin:6px 0 20px;padding:0;border:0;border-radius:0;background:transparent}
 #v-interview .id-face{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:50% 18%;background:var(--sv-surface-2)}
 #v-interview .id-name{display:none}
-#v-interview .id-text{margin:0 0 8px;font:700 21px/1.6 "Hahmlet","Noto Serif KR",serif;letter-spacing:-.04em;color:var(--sv-fg)}
-#v-interview .rv-answer.is-ai .id-text{color:#8a847a;font-weight:600}
-#v-interview .id-src{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:6px;font-size:11px;font-weight:750}
-#v-interview .id-src.rec{background:var(--sv-ink);color:#fff}
-#v-interview .id-src.ai{background:#e9e5dd;color:#6a645a}
+#v-interview .rv-answer .id-text{margin:0 0 8px;font-size:15px;font-weight:500;line-height:1.75;letter-spacing:normal;color:var(--sv-fg)}
+#v-interview .id-src{display:inline-flex;align-items:center;min-height:24px;padding:2px 9px;border-radius:6px;font-size:12px;font-weight:700}
 #v-interview .id-grid .rv-answer-evidence{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;padding:0;background:transparent}
 #v-interview .id-evc{display:inline-grid;grid-template-columns:44px auto;gap:12px;align-items:center;padding:6px 14px 6px 6px;border-radius:12px;background:var(--sv-surface);border:1px solid var(--sv-line2);text-align:left;cursor:pointer;font:inherit;color:var(--sv-fg)}
 #v-interview .id-evc:not(:has(img)){grid-template-columns:auto;padding:8px 14px}
 #v-interview .id-evc img{width:44px;height:58px;object-fit:cover;object-position:top;border-radius:8px;background:var(--sv-surface-2)}
-#v-interview .id-evc b{display:block;font-size:12.5px}
-#v-interview .id-evc small{color:var(--sv-run);font-weight:700}
-#v-interview .id-grid .rv-conversation form{box-shadow:0 10px 30px -14px #2f251c33}
-@media(max-width:900px){#v-interview .id-grid{grid-template-columns:1fr}#v-interview .id-card{position:static!important}#v-interview .id-portrait{height:200px}}
+#v-interview .id-evc b{display:block;font-size:14px}
+#v-interview .id-evc small{color:var(--sv-run);font-size:13px;font-weight:600}
+@media(max-width:900px){#v-interview .id-grid{grid-template-columns:1fr}#v-interview .id-card{position:static!important}}
 #v-interview .id-card>*{order:0!important}
 #v-interview .id-grid{margin:0!important;max-width:none!important}
 #v-interview .rv-compact-meta{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
-#v-interview .rv-answer .id-src.rec{background:var(--sv-ink);color:#fff}
-#v-interview .rv-answer .id-src.ai{background:#e9e5dd;color:#6a645a}
+#v-interview .rv-answer .id-src.rec{background:#e2efff;color:var(--sv-ink)!important}
+#v-interview .rv-answer .id-src.ai{background:#e9eef4;color:var(--sv-fg2)!important}
 #v-interview .id-grid .rv-answer-evidence{border:0!important;box-shadow:none!important}
-#v-interview .rv-answer .id-src.rec{color:#fff!important}
-#v-interview .rv-answer .id-src.ai{color:#6a645a!important}
 #v-interview .id-evc span,#v-interview .id-evc b,#v-interview .id-evc small{background:transparent!important}
 #v-interview .id-evc b{color:var(--sv-fg)!important}
+
+#v-interview #liveReport .rv-root {
+  --rv-ink: var(--sv-fg);
+  --rv-muted: var(--sv-fg3);
+  --rv-line: var(--sv-line);
+  --rv-soft: var(--sv-bg);
+  --rv-accent: var(--sv-run);
+  color: var(--rv-ink);
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+#v-interview #liveReport .rv-heading p,
+#v-interview #liveReport .rv-compact-meta,
+#v-interview #liveReport .rv-interview-last > span,
+#v-interview #liveReport .rv-chat-empty p,
+#v-interview #liveReport .rv-chat-loading { color: var(--sv-fg3); }
+
+#v-interview #liveReport .rv-compact-meta > span:first-child { background: var(--sv-surface-2); color: var(--sv-ink); }
+#v-interview #liveReport .rv-compact-meta details > p { border-color: var(--sv-line); }
+#v-interview #liveReport .rv-compact-meta summary { color: var(--sv-fg2); }
+#v-interview #liveReport .rv-compact .rv-tabs button { color: var(--sv-fg2); }
+#v-interview #liveReport .rv-text-link { color: var(--sv-run); text-decoration-color: var(--sv-line2); }
+#v-interview #liveReport :is(.id-top, .rv-chat-header h2) { margin: 0; color: var(--sv-fg); font-size: 18px; font-weight: 700; line-height: 1.5; letter-spacing: -.02em; }
+#v-interview #liveReport .id-card .rv-person-select { align-items: stretch; gap: 6px; min-width: 0; font-size: 14px; }
+#v-interview #liveReport :is(.rv-person-select select, .rv-interview-controls select) {
+  border: 1px solid var(--sv-line);
+  background: var(--sv-surface);
+  color: var(--sv-fg);
+  font-size: 14px;
+}
+
+#v-interview #liveReport .id-record { display: grid; gap: 10px; padding-top: 14px; border-top: 1px solid var(--sv-line); }
+#v-interview #liveReport .id-record-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+#v-interview #liveReport .id-record-head h3 { margin: 0; color: var(--sv-fg); font-size: 15px; font-weight: 700; }
+#v-interview #liveReport .id-record .rv-interview-last { order: 0; flex-direction: row; flex-wrap: wrap; gap: 5px 8px; margin: 0; }
+#v-interview #liveReport .id-record .rv-interview-last :is(span, strong) { font-size: 13px; overflow-wrap: anywhere; }
+#v-interview #liveReport .id-record .rv-from-finding { background: var(--sv-bg); border: 1px solid var(--sv-line); }
+
+#v-interview #liveReport .id-grid .rv-conversation {
+  padding: 20px;
+  border: 1px solid var(--sv-line);
+  border-radius: 14px;
+  background: var(--sv-surface);
+  box-shadow: 0 1px 3px #10233c0a;
+}
+
+#v-interview #liveReport .rv-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  flex: none;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--sv-line);
+}
+
+#v-interview #liveReport .rv-chat-header .rv-interview-controls label,
+#v-interview #liveReport .rv-chat-loading { font-size: 14px; }
+#v-interview #liveReport .rv-chat-error { background: #fff0f2; color: #9d3446; font-size: 14px; }
+#v-interview #liveReport .id-grid .rv-chat-empty strong { font-size: 20px!important; font-weight: 700!important; }
+#v-interview #liveReport .id-grid .rv-chat-empty p { font-size: 15px; }
+#v-interview #liveReport .id-grid .rv-question { border-radius: 12px 12px 4px 12px; }
+#v-interview #liveReport .id-grid :is(.rv-question p, .rv-answer .id-text) { font-size: 16px; line-height: 1.7; }
+#v-interview #liveReport .id-grid .rv-answer { padding: 0; }
+#v-interview #liveReport .id-grid .rv-answer > div {
+  padding: 12px 14px;
+  border: 1px solid var(--sv-line);
+  border-radius: 4px 12px 12px 12px;
+  background: var(--sv-bg);
+}
+
+#v-interview #liveReport .rv-answer > .id-face.persona-no-photo {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--sv-ink)!important;
+}
+
+#v-interview #liveReport :is(.id-evc, .id-detail-button, .rv-question-chips button) { border-color: var(--sv-line); border-radius: 8px; color: var(--sv-fg); }
+#v-interview #liveReport :is(.id-detail-button, .rv-question-chips button) { font-size: 14px; }
+#v-interview #liveReport .id-detail-button { width: 100%; background: var(--sv-bg); color: var(--sv-ink); }
+#v-interview #liveReport .id-evc { max-width: 100%; grid-template-columns: 44px minmax(0,1fr); }
+#v-interview #liveReport .id-evc:not(:has(img)) { grid-template-columns: minmax(0,1fr); }
+#v-interview #liveReport :is(.rv-question-chips button, .id-evc, .id-detail-button):hover:not(:disabled) {
+  border-color: #a8c3e8;
+  background: #edf4fd;
+  box-shadow: 0 2px 6px #10233c10;
+  transform: translateY(-1px);
+}
+
+#v-interview #liveReport .rv-conversation form { align-items: flex-end; padding: 6px 8px; border-radius: 10px; border-color: var(--sv-line); background: var(--sv-bg); }
+#v-interview #liveReport .rv-conversation form:focus-within { border-color: var(--sv-run); box-shadow: 0 0 0 3px #e9f2ff; }
+#v-interview #liveReport .rv-conversation textarea { field-sizing: content; min-height: 44px; max-height: 112px; resize: none; overflow-y: auto; font-size: 16px; }
+#v-interview #liveReport .rv-conversation textarea::placeholder { color: var(--sv-fg3); }
+#v-interview #liveReport .rv-conversation form .btn { min-width: 84px; white-space: nowrap; font-size: 14px; }
+#v-interview #liveReport .rv-conversation form .btn:hover:not(:disabled) { background: #1b3c5e; border-color: #1b3c5e; }
+#v-interview #liveReport .rv-conversation form .btn:active:not(:disabled) { transform: translateY(1px); }
+#v-interview #liveReport :is(.rv-question-chips button, .id-evc, .id-detail-button, .rv-person-select select, .rv-conversation form, .rv-conversation form .btn) {
+  transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #v-interview #liveReport :is(.rv-question-chips button, .id-evc, .id-detail-button, .rv-person-select select, .rv-conversation form, .rv-conversation form .btn) { transition: none; }
+  #v-interview #liveReport :is(.rv-question-chips button, .id-evc, .id-detail-button):hover:not(:disabled),
+  #v-interview #liveReport .rv-conversation form .btn:active:not(:disabled) { transform: none; }
+}
+#v-interview #liveReport .rv-mode-warning { background: #edf4fd; color: var(--sv-ink); }
+#v-interview #liveReport .rv-badge.system { background: var(--sv-surface-2); border-color: var(--sv-line); color: var(--sv-ink); }
+#v-interview #liveReport .rv-badge.drop { background: #fff0f2; border-color: #f6dbe1; color: #9d3446; }
+
+#v-interview #liveReport .rv-detail-dialog { border-color: var(--sv-line); color: var(--sv-fg); }
+#v-interview #liveReport .rv-detail-dialog::backdrop { background: #101b3366; }
+#v-interview #liveReport .rv-detail-dialog :is(.rv-evidence-body, .rv-quote-panel) { background: var(--sv-bg); }
+#v-interview #liveReport :is(button, select, summary):focus-visible { outline: 2px solid var(--sv-run); outline-offset: 2px; }
+
+#v-interview .report-document-actions { background: var(--sv-bg); border-top-color: var(--sv-line); }
+#v-interview .report-document-actions .btn { border-color: var(--sv-line); background: var(--sv-surface); color: var(--sv-fg); font-size: 13px; }
+#v-interview .report-document-actions .btn.solid { border-color: var(--sv-ink); background: var(--sv-ink); color: #fff; }
 
 /* 회차 카드: 바꾼 점 한두 줄 */
 .ws-rnote-wrap{display:flex;align-items:flex-start;gap:8px}
@@ -331,7 +460,6 @@
 .ws-rnote-wrap,.ws-rnote-editor{position:relative;z-index:3}
 
 /* 인터뷰 카드 간격 정리 · 하단 바 */
-#v-interview .id-card{gap:10px!important}
 #v-interview .id-card .rv-interview-last{display:flex;gap:8px;align-items:baseline;margin:0}
 #v-interview .id-card .rv-interview-last strong{font-size:13px;font-weight:650;color:var(--sv-fg2)}
 #v-interview .id-card .rv-text-link{justify-self:start}

@@ -8,3 +8,37 @@
 .app-notifications>[hidden]{display:none!important}
 @media(max-width:480px){.app-notifications{top:max(10px,env(safe-area-inset-top));width:calc(100vw - 24px)}.app-notifications>#liveNotice,.app-notifications>#workspaceToast{padding:10px 13px;font-size:12px}}
 @media(max-width:480px){.app-notifications>#liveNotice{font-size:14px}}
+
+.app-notifications>#liveNotice.notice-warning {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  align-self: center;
+  width: min(100%, 460px);
+  border-color: #c6d9f3;
+  background: #fff;
+  color: #475569;
+}
+.notice-warning-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #e9f2ff;
+  color: #2456a2;
+  font-weight: 800;
+}
+.notice-warning strong {
+  display: block;
+  color: #171717;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+.notice-warning p {
+  margin: 3px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+}
