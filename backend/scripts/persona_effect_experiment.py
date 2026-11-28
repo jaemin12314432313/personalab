@@ -40,6 +40,9 @@ SEED = 42
 GROUP_SIZE = 3
 REPEATS = 2
 NO_CARD_RUNS = 6
+CONTROL_RUNS = 6
+# 양성 대조: 카드에 아주 명시적인 포기 지시를 넣었을 때도 포기가 안 나오면 에이전트·프롬프트가 병목이다
+POSITIVE_RULE = "회원가입에서 이유 없이 휴대폰 번호와 주소를 요구하면 그 자리에서 가입을 포기한다."
 MAX_TURNS = 6
 PRIVACY_HIGH = 5
 PRIVACY_LOW_MAX = 3
@@ -134,6 +137,9 @@ def mean(xs: list[float]) -> float | None:
 async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="AI 호출 없이 규칙 엔진으로 점검")
+    parser.add_argument(
+        "--positive-control", action="store_true", help="명시적 포기 지시 카드로 6회만 돌린다"
+    )
     parser.add_argument("--max-calls", type=int, default=150, help="이 호출 수를 넘으면 중단")
     parser.add_argument("--out", default=str(ROOT / ".localtools" / "persona_effect"))
     args = parser.parse_args()
@@ -142,6 +148,34 @@ async def main() -> None:
         settings.rule_step_delay_ms = 0  # 점검용이라 체험용 지연을 끈다
     decide = rule_agent.decide_browser if args.dry_run else browser.decide_browser
     sink = start_usage()
+    if args.positive_control:
+        card = NEUTRAL_CARD + chr(10) + POSITIVE_RULE
+        control: list[dict] = []
+        async with browser.shared_browser():
+            for i in range(CONTROL_RUNS):
+                if not args.dry_run and sink.snapshot()["calls"] >= args.max_calls:
+                    raise SystemExit("호출 한도에 도달해 중단했습니다.")
+                result = await run_once({}, card, decide, args.dry_run)
+                control.append({"cond": "P", "rep": i, **result})
+                print("P", i, result["pages"], result["end"], result["drop_reason"], flush=True)
+        dropped = [r for r in control if r["end"] == "abandon"]
+        summary = {
+            "mode": "positive-control",
+            "card": card,
+            "runs": len(control),
+            "abandoned": len(dropped),
+            "drop_reasons": [r["drop_reason"] for r in dropped],
+            "ends": [r["end"] for r in control],
+            "usage": None if args.dry_run else sink.snapshot(),
+        }
+        out = Path(args.out)
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "result_control.json").write_text(
+            json.dumps({"summary": summary, "runs": control}, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return
     personas = pick_personas()
     runs: list[dict] = []
 
