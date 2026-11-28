@@ -12,7 +12,9 @@ except Exception:
 RAW_COLS = ["pid", "gender", "age1", "school1", "school2", "school13", "job1", "job3",
             "mar", "area", "income", "d26061", "d26057", "c06006", "c06010", "d31007",
             "d23003", "i02004", "d26092", "d01001", "d01002", "d01003", "wt"] + \
-           [f"m01{i:03d}" for i in range(1, 25)]
+           [f"m01{i:03d}" for i in range(1, 25)] + \
+           [c for c in C.PRIVACY_ITEMS + C.INFO_ITEMS + C.SKILL_ITEMS if c != "d23003"] + \
+           ["i01002", "i01033", "i02001", "d31001", "d31002"]
 
 
 def load_donor(path=C.SAV) -> pd.DataFrame:
@@ -93,11 +95,44 @@ def compute_scores(d: pd.DataFrame) -> pd.DataFrame:
     d["digital_adoption"] = weighted_percentile(tech, w).fillna(0.5)
     d["novelty_seeking"] = weighted_percentile(nov, w).fillna(0.5)
 
-    priv = d["d23003"].where(d["d23003"].between(1, 5))      # 8(온라인 활동 안함) -> 결측
-    d["privacy_concern"] = priv.fillna(weighted_median(priv, w)).round().astype("Int64")
+    # 개인정보 우려 (v0.2): 5문항 평균을 반올림한 1~5. 8(온라인 활동 안 함)·결측은 부분집합 가중 중앙값
+    pcols = [c for c in C.PRIVACY_ITEMS if c in d.columns]
+    pitems = d[pcols].where(d[pcols].apply(lambda s: s.between(1, 5)))
+    priv = pitems.mean(axis=1, skipna=True)
+    d["privacy_concern"] = priv.fillna(weighted_median(priv, w)).round().clip(1, 5).astype("Int64")
 
-    d["ps_grade"] = grade_balanced(d["price_sensitivity"], w, C.GRADE_LABELS, C.GRADE_SHARE_RANGE)
-    d["da_grade"] = grade_balanced(d["digital_adoption"], w, C.GRADE_LABELS, C.GRADE_SHARE_RANGE)
-    d["ns_grade"] = grade_balanced(d["novelty_seeking"], w, C.GRADE_LABELS, C.GRADE_SHARE_RANGE)
+    # 학습 용이성: 새 디지털 서비스에 쉽게 익숙해지고 배우기 쉬운가 (2문항)
+    d["learn_ease"] = weighted_percentile(d[C.LEARN_ITEMS].mean(axis=1, skipna=True), w).fillna(0.5)
+    # 정보 검증 성향: 접한 정보의 사실 · 근거 · 의도를 따져 보는가 (5문항). 높을수록 그대로 믿지 않는다
+    icols = [c for c in C.INFO_ITEMS if c in d.columns]
+    d["info_check"] = weighted_percentile(d[icols].mean(axis=1, skipna=True), w).fillna(0.5)
+    # 온라인 거래 익숙함: 쇼핑 빈도 · 간편결제 · 인터넷전문은행 · 예약/예매 · 모바일 금융 (금액은 쓰지 않음)
+    ow = C.ONLINE_TX_WEIGHTS
+    x_shop = ((d["i01033"] - 1) / 7).clip(0, 1).fillna(0.0)          # 결측 = 온라인 쇼핑 안 함
+    x_pay = (d["i02004"] == 1).astype(float)
+    x_bank = (d["i02001"] == 1).astype(float)
+    x_res = ((d["d25073"] - 1) / 4).clip(0, 1).fillna(0.0)
+    x_mb = ((d["d25072"] - 1) / 4).clip(0, 1).fillna(0.0)
+    tx = (ow["shop"] * x_shop + ow["easypay"] * x_pay + ow["netbank"] * x_bank
+          + ow["reserve"] * x_res + ow["mbank"] * x_mb)
+    d["online_tx"] = weighted_percentile(tx, w).fillna(0.5)
+    # 생성형 AI 친숙도: 이용 여부 + 인지 정도 (범주)
+    aware = d["d31001"].map({4: "앎", 3: "앎", 2: "들어봄", 1: "모름"})
+    d["ai_familiarity"] = aware.where(d["d31002"] != 1, "이용").fillna("모름")
+    # 디지털 활용 능력 (보조): 스마트기기 활용 14문항 평균의 절대 수준
+    scols = [c for c in C.SKILL_ITEMS if c in d.columns]
+    d["digital_skill"] = d[scols].mean(axis=1, skipna=True)
+    lo_cut, hi_cut = C.DIGITAL_SKILL_CUTS
+    d["ds_level"] = np.select([d["digital_skill"] < lo_cut, d["digital_skill"] < hi_cut],
+                              C.DIGITAL_SKILL_LABELS[:2], default=C.DIGITAL_SKILL_LABELS[2])
+    d.loc[d["digital_skill"].isna(), "ds_level"] = C.DIGITAL_SKILL_LABELS[2]
+
+    gb = lambda col: grade_balanced(d[col], w, C.GRADE_LABELS, C.GRADE_SHARE_RANGE)
+    d["ps_grade"] = gb("price_sensitivity")       # v0.2: 카드에는 쓰지 않음 (호환용)
+    d["da_grade"] = gb("digital_adoption")        # v0.2: 카드에는 학습 용이성(le_grade)을 씀
+    d["ns_grade"] = gb("novelty_seeking")
+    d["le_grade"] = gb("learn_ease")
+    d["ic_grade"] = gb("info_check")
+    d["ot_grade"] = gb("online_tx")
     d["ott_payment"] = d["d26061"].map({3: "단독", 2: "친구와 나눔", 1: "가족"}).fillna("미이용")
     return d

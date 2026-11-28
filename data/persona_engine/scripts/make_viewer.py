@@ -9,14 +9,15 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src import config as C                                   # noqa: E402
-from src.cards import DIGI_S, NOVELTY_S, OTT_S, PRICE_S, PROVINCE_DISPLAY, privacy_sentence   # noqa: E402
+from src.cards import (AI_S, INFO_S, LEARN_S, NOVELTY_S, PROVINCE_DISPLAY, SKILL_S, TX_S,   # noqa: E402
+                       privacy_sentence)
 
-BEHAVIOR = set(OTT_S.values()) | set(PRICE_S.values()) | set(DIGI_S.values()) | {NOVELTY_S} | \
-           {privacy_sentence(v) for v in range(1, 6)}
+BEHAVIOR = set(LEARN_S.values()) | set(INFO_S.values()) | set(TX_S.values()) | set(AI_S.values()) | \
+           set(SKILL_S.values()) | {NOVELTY_S} | {privacy_sentence(v) for v in range(1, 6)}
 FLAGS = {"건강 서술": C.HEALTH_PATTERN, "구직 서술": C.JOBSEEK_PATTERN}   # 카드에서 걸러졌어야 할 표현
 COLS = ["persona_id", "age", "sex", "province", "occupation", "education_level", "job_group",
-        "student_inferred", "ps_grade", "da_grade", "ns_grade", "privacy_concern", "ott_payment",
-        "match_level", "pool_size", "over_cap"]
+        "student_inferred", "le_grade", "ic_grade", "ot_grade", "ai_familiarity", "ds_level",
+        "ns_grade", "privacy_concern", "match_level", "pool_size", "over_cap"]
 
 
 def split_card(text: str) -> dict:
@@ -46,7 +47,8 @@ def load():
                       "match": rep["match_level_counts"], "donors_used": rep["donors_used"],
                       "max_reuse": rep["donor_max_reuse"], "shortfall": rep["shortfall"],
                       "warnings": rep.get("grade_warnings", []), "scoring": rep["scoring_version"],
-                      "checks": {k: v["ok"] for k, v in ck.items() if isinstance(v, dict) and "ok" in v},
+                      "checks": {**{k: v["ok"] for k, v in ck.items() if isinstance(v, dict) and "ok" in v},
+                                 "dist": all(v["ok"] for v in ck["dist"].values())},
                       "dist_p": {k: v["p"] for k, v in ck["dist"].items()}, "rows": rows}
     return data
 

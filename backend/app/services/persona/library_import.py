@@ -30,6 +30,14 @@ REQUIRED = {
     "card_text",
 }
 GRADES = {"낮음", "중간", "높음"}
+# 점수 v0.2 특성: traits 키 -> parquet 열
+V02_TRAITS = {
+    "learn": "le_grade",
+    "info_check": "ic_grade",
+    "online_tx": "ot_grade",
+    "ai": "ai_familiarity",
+    "digital_skill": "ds_level",
+}
 
 
 def digest_json(value) -> str:
@@ -139,6 +147,12 @@ def prepare_panel(path: Path, source_commit: str, viewer: dict | None = None) ->
                 "novelty": row["ns_grade"],
                 "privacy": privacy,
                 "ott": row["ott_payment"],
+                # 점수 v0.2부터 카드에 쓰는 특성 (v0.1 패널에는 없으므로 있을 때만 담는다)
+                **{
+                    key: row[col]
+                    for key, col in V02_TRAITS.items()
+                    if isinstance(row.get(col), str) and row.get(col)
+                },
             },
             "source": {
                 "persona_id": pid,
