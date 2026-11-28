@@ -288,7 +288,7 @@
 #v-workspace .ws-side-sec .ws-nav-count{margin-left:0;padding:1px 8px;border-radius:99px;background:#0000000d;font-size:11px}
 
 /* ================= 정리: 색 통일(검정 버튼 · Greige), 사이드바 간소화 ================= */
-#v-workspace{--bg:#f4f1ec;--sb:#efebe4;--ln:#dedad2;--ink:#17161a;--mu:#5f584d;--ac:#17161a;--acs:#e7e4de}
+#v-workspace{--bg:#fff;--sb:#fff;--ln:#dedad2;--ink:#17161a;--mu:#5f584d;--ac:#17161a;--acs:#e7e4de}
 #v-workspace .ws-open:hover,#v-workspace .ws-fab:hover,#v-workspace .btn.solid.ws-create:hover{background:#2f2e33}
 #v-workspace .btn.solid.ws-create{box-shadow:0 10px 22px -12px #17161a66}
 #v-workspace .ws-tag{background:#e7e4de;color:#4d443a}

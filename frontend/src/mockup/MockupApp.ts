@@ -8,7 +8,7 @@ import { mountWorkspaceManager } from './WorkspaceManager';
 import { unzipSync } from 'fflate';
 import { sourceMarkup, scopeMarkup, overviewMarkup, comparisonMarkup, browserSource, defaultScope, productKindLabel } from './WorkflowView';
 import { mountWorkspaceSidebar } from './WorkspaceSidebar';
-import { workspaceContent, workspaceSideList, toggleWorkspaceAskAll, selectWorkspace, selectedWorkspaceKey, shiftCalendar, calendarToday, setWorkspaceTab, getWorkspaceTab, toggleWorkspaceFinished, visibleTabs, type WorkspaceEntry, type WorkspacePerson, type WorkspaceRound } from './WorkspaceView';
+import { workspaceContent, workspaceSideList, workspaceTable, toggleWorkspaceAskAll, selectWorkspace, selectedWorkspaceKey, shiftCalendar, calendarToday, setWorkspaceTab, getWorkspaceTab, toggleWorkspaceFinished, visibleTabs, type WorkspaceEntry, type WorkspacePerson, type WorkspaceRound } from './WorkspaceView';
 import { demoEnabled, demoEntries } from './WorkspaceDemo';
 import { mountReport } from './ReportView';
 import template from './template.html?raw';
@@ -20,9 +20,13 @@ import { LANDING_ANCHORS, mountMarketing, updateMarketingAuth } from './Marketin
 import { brandMarkup } from './Brand';
 import { outcome, recordAnswer } from './ReportModel';
 import { withSampleMock } from './SampleMock';
+import { demoStudy } from './DemoData';
+import { webSampleStudy } from './WebSample';
+import webSampleCapture from './web-sample-capture.json';
+import { workspaceHome } from './WorkspaceHome';
 import { SAMPLE_SITE, sampleSitePayload } from './sampleSite';
 import * as api from '../api/studio';
-import { DEFAULT_SCREENS, DROP_LABELS, studyTitle, newStudy, percent, personaId, reachable, statistics, validateScreens } from '../studio/model';
+import { DEFAULT_SCREENS, DEMO, DROP_LABELS, studyTitle, newStudy, percent, personaId, reachable, statistics, validateScreens } from '../studio/model';
 import type { Persona, Result, Screen, Study, Revision, BrowserEvidence, AudienceDefinition, WorkflowScope } from '../studio/model';
 
 const STORAGE_PREFIX = 'personalab-connected-mockup-v1';
@@ -68,6 +72,8 @@ export function mountMockup(root: HTMLElement) {
   let workspaceChecked = false;
   let serverStudies: api.StudyListEntry[] = [];
   let workspaceView='active',workspaceEntries=new Map<string,WorkspaceEntry>();
+  let workspaceScreen: 'home' | 'list' | 'calendar' | 'trash' | 'testing' = 'home';
+  let previewOriginal: Study | null = null;
   const audienceBuilder=mountAudienceBuilder(el('audienceBuilder'),{
     get:()=>study,key:()=>`${sessionEpoch}:${study.id}:${Boolean(user&&capabilities?.audience_builder_ready)}:${study.runs?.act||study.runs?.ask||''}`,ready:()=>Boolean(user&&serverReady&&capabilities?.audience_builder_ready),
     draft:a=>{if(user&&!study.runs?.act&&!study.runs?.ask){study.audienceDraft=a;persist();}},notify:notice,changed:()=>renderPanelNavigation(),
@@ -453,17 +459,32 @@ export function mountMockup(root: HTMLElement) {
       else if (row.startedAt) { const last = row.roundList[row.roundList.length - 1]; last.date = row.startedAt; last.dateKind = 'started'; }
     }
     if (demoEnabled()) demoEntries().forEach(e => rows.set(e.key!, e)); // 실제 테스트는 그대로 두고 예시를 뒤에 덧붙인다
+    rows.set('web-ui-sample', {key:'web-ui-sample',name:'모아북 · 웹 UI 예시',description:'데스크톱 웹사이트의 탐색 과정과 결과를 보는 가상 예시입니다.',state:'done',personas:5,records:5,kind:'웹 서비스',source:'UI 목데이터'});
     const query = input('workspaceSearch').value.trim().toLocaleLowerCase('ko-KR');
     workspaceEntries=rows;
     const activeCount=[...rows.values()].filter(r=>!r.archived&&!r.trashed).length;
     el('workspaceCount').textContent=String(activeCount);el('workspaceNavCount').textContent=String(new Set([...rows.values()].filter(r=>!r.archived&&!r.trashed).map(r=>r.productId||r.key)).size);
     root.querySelectorAll<HTMLElement>('[data-wm-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.wmView===workspaceView)));
-    el('workspaceSideList').innerHTML = workspaceSideList([...rows.values()], query, input('workspaceSort').value, workspaceView, input('workspaceFilter').value, !workspaceChecked);
-    el('workspaceStudies').innerHTML = workspaceContent([...rows.values()], query, input('workspaceSort').value, serverReady, !workspaceChecked,workspaceView,input('workspaceFilter').value);
+    el('workspaceSideList').innerHTML = workspaceSideList([...rows.values()].filter(row => row.key !== 'web-ui-sample'), query, input('workspaceSort').value, workspaceView, input('workspaceFilter').value, !workspaceChecked);
+    const listScreen = workspaceScreen === 'list' || workspaceScreen === 'trash';
+    el('v-workspace').dataset.workspaceScreen = workspaceScreen;
+    el('workspaceHome').hidden = workspaceScreen !== 'home'; el('workspaceList').hidden = !listScreen; el('workspaceStudies').hidden = listScreen || workspaceScreen === 'home';
+    if (workspaceScreen === 'home') el('workspaceHome').innerHTML = workspaceHome([...rows.values()], !workspaceChecked);
+    root.querySelector<HTMLElement>('.ws-tabbar')!.hidden = listScreen || workspaceScreen === 'home' || workspaceScreen === 'calendar' || workspaceScreen === 'testing';
+    el('workspaceListTitle').textContent = workspaceScreen === 'trash' ? 'Trash' : 'Projects';
+    input('workspaceListView').hidden = workspaceScreen === 'trash';
+    root.querySelector<HTMLElement>('.ws-list-create')!.hidden = workspaceScreen === 'trash';
+    el('workspaceListRows').innerHTML = workspaceTable([...rows.values()], query, input('workspaceSort').value, workspaceView, !workspaceChecked, user?.email);
+    el('workspaceStudies').innerHTML = workspaceContent([...rows.values()].filter(row => row.key !== 'web-ui-sample'), query, input('workspaceSort').value, serverReady, !workspaceChecked,workspaceView,input('workspaceFilter').value);
     root.querySelectorAll<HTMLElement>('[data-ws-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.wsTab === getWorkspaceTab())));
     const shown = root.querySelector<HTMLElement>('.ws-it.sel')?.dataset.wsSelect; if (shown) void ensureServerDetail(shown);
     { const open = visibleTabs(shown ? workspaceEntries.get(shown) : undefined); root.querySelectorAll<HTMLElement>('[data-ws-tab]').forEach(b => { b.hidden = !open.includes(b.dataset.wsTab as never); b.setAttribute('aria-selected', String(b.dataset.wsTab === getWorkspaceTab())); }); }
     workspaceSidebar.render();
+    const onTestsPage = !el('workspaceTestsPanel').hidden;
+    root.querySelectorAll<HTMLElement>('[data-ws-home], [data-ws-list], [data-ws-calendar], [data-ws-testing], [data-ws-trash]').forEach(b => {
+      const active = onTestsPage && ((b.hasAttribute('data-ws-home') && workspaceScreen === 'home') || (b.hasAttribute('data-ws-list') && (workspaceScreen === 'list' || workspaceScreen === 'testing')) || (b.hasAttribute('data-ws-calendar') && workspaceScreen === 'calendar') || (b.hasAttribute('data-ws-testing') && workspaceScreen === 'testing') || (b.hasAttribute('data-ws-trash') && workspaceScreen === 'trash'));
+      if (active) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
   }
   function trackServerDraft(id:number){if(!serverStudies.some(s=>s.id===id))serverStudies.push({id,name:study.product.name||study.name,status:'draft',root_study_id:id,revision:1,product_id:study.productId,test_title:study.testTitle,round_note:study.roundNote,workspace:study.workspace});}
   async function manageWorkspaceEntry(entry:WorkspaceEntry,action:api.ManagementAction,fields:{name?:string;confirmation?:string}) {
@@ -535,7 +556,7 @@ export function mountMockup(root: HTMLElement) {
   }
   let noticeTimer=0;
   function notice(text: string, error = false) { const n = el('liveNotice'); window.clearTimeout(noticeTimer); if(text)noticeTimer=window.setTimeout(()=>{n.hidden=true;n.textContent='';},error?12000:5000); n.textContent = text; n.classList.toggle('error', error); n.setAttribute('role',error?'alert':'status'); n.hidden = !text || !(steps.includes(location.hash.slice(1)) || location.hash === '#workspace'); }
-  function persist() { renderStudioContext();renderPanelNavigation(); if (!user) return; try { localStorage.setItem(KEY, JSON.stringify(browserSnapshot(study)));rememberSetup(location.hash.slice(1)); } catch { notice('브라우저 저장 공간이 부족합니다. 현재 화면을 닫기 전에 결과를 내려받으세요.', true); } }
+  function persist() { renderStudioContext();renderPanelNavigation(); if (!user || previewOriginal) return; try { localStorage.setItem(KEY, JSON.stringify(browserSnapshot(study)));rememberSetup(location.hash.slice(1)); } catch { notice('브라우저 저장 공간이 부족합니다. 현재 화면을 닫기 전에 결과를 내려받으세요.', true); } }
   const message = (error: unknown) => error instanceof Error ? error.message : String(error);
   async function task(work: () => Promise<void>) { if (!user) return; if (busy) { notice('이전 작업이 끝나는 중이에요. 잠시 뒤 다시 눌러 주세요.', true); return; } const owner = sessionEpoch; busy = true; try { await work(); } catch (error) { if (sameSession(owner)) notice(message(error), true); } finally { if (sameSession(owner)) busy = false; } }
   function syncInputs() {
@@ -617,8 +638,10 @@ export function mountMockup(root: HTMLElement) {
     el('llmNotice').hidden=capabilities?.agent_engine!=='llm'||running||executedLayout()||hasRun;
     el('transmissionStatus').textContent=reason;
     const button=el<HTMLButtonElement>('startRun');button.disabled=running||Boolean(reason);
+    el('previewRun').hidden=executed||Boolean(previewOriginal);
+    el('runPreviewBanner').hidden=!previewOriginal;
     button.textContent=running?'실행 상태 확인 중…':hasRun?'상태 새로고침':'실행하기 →';button.classList.toggle('solid',!records);button.hidden=hasRun&&state.canReport;
-    el('runActionTitle').textContent=executed?(state.partial?'부분 실행 기록':state.final?'탐색 종료':'실행 관찰'):'6 / 6 · 실행';
+    el('runActionTitle').textContent=executed?(state.partial?'부분 실행 기록':state.final?'탐색 종료':'실행 관찰'):'6 실행';
     el('runActionState').textContent=reason||(runRefreshPaused?'서버 실행 상태를 다시 확인하세요. 연결 지연으로 완료 여부를 판단하지 않습니다.':'')||(executed?state.message:'설정을 확인하고 탐색을 시작하세요.');
     el('runTitle').textContent=!executed?'탐색할 준비가 됐나요?':study.status==='running'?'페르소나가 화면을 살펴보고 있어요.':study.status==='failed'?'실행 상태를 확인해 주세요.':records?'탐색 기록이 저장됐어요.':'실행이 종료됐어요.';
     el('runDescription').textContent=!executed?'대상 화면, 페르소나와 범위를 확인한 뒤 탐색을 시작하세요.':study.status==='running'?'저장된 행동과 화면이 순서대로 쌓입니다. 화면을 나가도 서버 실행은 계속됩니다.':study.status==='failed'?'완료하지 못한 실행입니다. 남은 기록을 확인하고, 다시 탐색하려면 수정 회차를 만들어 주세요.':records?'보고서에서 발견한 지점과 원문을 확인하고, 같은 페르소나와 대화를 이어가세요.':'실행은 종료됐지만 저장된 탐색 기록이 없습니다. 연결 상태를 확인하거나 수정 회차에서 다시 시작하세요.';
@@ -792,9 +815,17 @@ export function mountMockup(root: HTMLElement) {
     });
   }
   let shownView = '';
+  function setStudioSidebar(open: boolean) {
+    root.classList.toggle('studio-sidebar-open', open);
+    el('studioSidebar').hidden = !open;
+    root.querySelector<HTMLElement>('.studio-sidebar-backdrop')!.hidden = !open;
+    root.querySelector<HTMLElement>('[data-studio-sidebar-toggle]')!.setAttribute('aria-expanded', String(open));
+    if (open) el('studioSidebar').querySelector<HTMLElement>('[data-studio-sidebar-close]')?.focus();
+  }
   function route() {
     closeAccountMenus();
     const key = location.hash.slice(1) || 'landing';
+    if (previewOriginal && !['run','report','interview'].includes(key)) { study=previewOriginal; previewOriginal=null; clearPlayback(); syncInputs(); lockInputs(); }
     const landingAnchor = LANDING_ANCHORS.includes(key);
     let view = landingAnchor ? 'landing' : key === 'register' ? 'login' : panelViews.includes(key)?key:el('root').querySelector(`#v-${CSS.escape(key)}`) ? key : 'landing';
     if ((steps.includes(view) || view === 'workspace') && !authChecked) view = 'auth-loading';
@@ -807,12 +838,14 @@ export function mountMockup(root: HTMLElement) {
       if(stay){notice(go==='run'?'아직 열 수 없어요. 탐색을 실행하고 나면 열려요.':go===stay?'아직 열 수 없어요. 지금 단계를 먼저 마쳐 주세요.':`아직 열 수 없어요. 먼저 ‘${stepName(go)||'설정'}’ 단계를 마쳐 주세요.`,true);view=stay;}else view=go;
       window.history.replaceState(null,'',`#${view}`);
     }
-    const blocked=user?navigationIssue(view):null;
+    // 설정 화면은 미리 살펴볼 수 있도록 열되, 실제 저장·실행 시 검증은 유지한다.
+    const blocked=user&&!setupViews.includes(view)?navigationIssue(view):null;
     if(blocked){
       if(resultViews.includes(view)&&executionState(study).phase==='checking'&&study.runs?.act)returnAfterRunCheck={view,id:study.id,run:study.runs.act,owner:sessionEpoch};
       if(stay&&setupViews.includes(view)&&blocked.view!==stay&&blocked.view!==view){notice(`아직 열 수 없어요. ${stepName(blocked.view)?`‘${stepName(blocked.view)}’ 단계: `:''}${blocked.message}`,true);view=stay;window.history.replaceState(null,'',`#${view}`);blocked.focus=undefined;}
       else{view=blocked.view;window.history.replaceState(null,'',`#${view}`);notice(blocked.message,true);}
     }
+    if (!steps.includes(view) || !steps.includes(shownView)) setStudioSidebar(false);
     shownView=view;
     // 화면마다 탭 제목이 같으면 여러 탭을 열었을 때 구분이 안 된다
     { const names:Record<string,string>={workspace:'워크스페이스',product:'화면 연결','source-review':'화면 확인',panel:'대상 사용자',personas:'참여 구성',scope:'탐색 범위',run:'실행',report:'리포트',interview:'1대1 인터뷰',compare:'회차 비교',login:'로그인',sample:'샘플 결과',demo:'체험'};
@@ -823,7 +856,7 @@ export function mountMockup(root: HTMLElement) {
     document.querySelectorAll<HTMLElement>('.view').forEach(v => v.classList.toggle('on', v.id === `v-${panelViews.includes(view)?'panel':view}`)); el('apphead').hidden = !steps.includes(view);el('studioContext').hidden=!steps.includes(view);root.classList.toggle('studio-active',steps.includes(view));renderStudioContext();
     el('liveNotice').hidden = !(steps.includes(view)||view==='workspace') || !el('liveNotice').textContent;
     if(view!=='workspace')el('workspaceToast').hidden=true;
-    rememberSetup(view);
+    if (!previewOriginal) rememberSetup(view);
     if (view === 'workspace') { renderWorkspace(); void probe(); }
     if(view==='overview'){renderOverview();void loadRevisions();}
     if(view==='compare'){void loadComparison();}
@@ -852,11 +885,35 @@ export function mountMockup(root: HTMLElement) {
     if (target.closest('.wm-menu,button,a,input,select')) return;
     const item = target.closest<HTMLElement>('[data-ws-select]'); if (!item?.dataset.wsSelect) return;
     if (event instanceof KeyboardEvent) event.preventDefault();
-    selectWorkspace(item.dataset.wsSelect); renderWorkspace();
+    selectWorkspace(item.dataset.wsSelect); workspaceSidebar.show('tests'); renderWorkspace();
     const backdrop = root.querySelector<HTMLElement>('.ws-sidebar-backdrop'); if (backdrop && !backdrop.hidden) backdrop.click();
     root.querySelector<HTMLElement>(`[data-ws-select="${CSS.escape(item.dataset.wsSelect)}"]`)?.focus();
   };
   for (const id of ['workspaceTestsPanel', 'workspaceSideList']) { el(id).addEventListener('click', pickWorkspace); el(id).addEventListener('keydown', pickWorkspace); }
+  root.querySelector<HTMLElement>('[data-ws-home]')?.addEventListener('click', () => { workspaceScreen = 'home'; workspaceView = 'active'; input('workspaceSearch').value = ''; setWorkspaceTab('overview'); workspaceSidebar.show('tests'); renderWorkspace(); });
+  root.querySelector<HTMLElement>('[data-studio-sidebar-toggle]')?.addEventListener('click', () => setStudioSidebar(true));
+  root.querySelectorAll<HTMLElement>('[data-studio-sidebar-close]').forEach(button => button.addEventListener('click', () => { setStudioSidebar(false); root.querySelector<HTMLElement>('[data-studio-sidebar-toggle]')?.focus(); }));
+  root.querySelectorAll<HTMLElement>('[data-studio-nav]').forEach(button => button.addEventListener('click', () => {
+    const selectors: Record<string, string> = {home:'[data-ws-home]', library:'[data-ws-page="library"]', list:'[data-ws-list]', calendar:'[data-ws-calendar]', testing:'[data-ws-testing]', trash:'[data-ws-trash]', history:'[data-ws-page="history"]'};
+    const selector = selectors[button.dataset.studioNav || ''];
+    if (selector) root.querySelector<HTMLElement>(selector)?.click();
+    setStudioSidebar(false);
+    location.hash = '#workspace';
+  }));
+  root.addEventListener('keydown', event => { if (event.key === 'Escape' && !el('studioSidebar').hidden) { setStudioSidebar(false); root.querySelector<HTMLElement>('[data-studio-sidebar-toggle]')?.focus(); } });
+  root.querySelector<HTMLElement>('[data-ws-calendar]')?.addEventListener('click', () => { workspaceScreen = 'calendar'; workspaceView = 'active'; input('workspaceSearch').value = ''; setWorkspaceTab('cal'); workspaceSidebar.show('tests'); renderWorkspace(); });
+  root.querySelector<HTMLElement>('[data-ws-testing]')?.addEventListener('click', () => { workspaceScreen = 'testing'; workspaceView = 'active'; input('workspaceSearch').value = ''; setWorkspaceTab('overview'); workspaceSidebar.show('tests'); renderWorkspace(); });
+  el('workspaceHome').addEventListener('click', event => {
+    const target=(event.target as HTMLElement).closest<HTMLElement>('[data-home-nav], [data-home-project]'); if (!target) return;
+    if(target.dataset.homeProject){selectWorkspace(target.dataset.homeProject);workspaceScreen='testing';workspaceView='active';input('workspaceSearch').value='';setWorkspaceTab('overview');renderWorkspace();return;}
+    const selector:Record<string,string>={projects:'[data-ws-list]',personas:'[data-ws-page="library"]',calendar:'[data-ws-calendar]'};
+    const next=selector[target.dataset.homeNav||''];if(next)root.querySelector<HTMLElement>(next)?.click();
+  });
+  root.querySelector<HTMLElement>('[data-ws-list]')?.addEventListener('click', () => { workspaceScreen = 'list'; workspaceView = 'active'; input('workspaceListView').value = 'active'; input('workspaceSearch').value = ''; input('workspaceListSearch').value = ''; workspaceSidebar.show('tests'); renderWorkspace(); });
+  root.querySelector<HTMLElement>('[data-ws-trash]')?.addEventListener('click', () => { workspaceScreen = 'trash'; workspaceView = 'trash'; input('workspaceSearch').value = ''; input('workspaceListSearch').value = ''; workspaceSidebar.show('tests'); renderWorkspace(); });
+  input('workspaceListSearch').addEventListener('input', () => { input('workspaceSearch').value = input('workspaceListSearch').value; renderWorkspace(); });
+  input('workspaceListView').addEventListener('change', () => { workspaceView = input('workspaceListView').value; renderWorkspace(); });
+  el('workspaceListRows').addEventListener('click', event => { const button = (event.target as HTMLElement).closest<HTMLElement>('[data-ws-list-open]'); if (!button?.dataset.wsListOpen) return; selectWorkspace(button.dataset.wsListOpen); workspaceScreen = 'testing'; input('workspaceSearch').value = ''; setWorkspaceTab('overview'); renderWorkspace(); });
   el('workspaceSearch').addEventListener('input', renderWorkspace);
   el('workspaceSort').addEventListener('change', renderWorkspace);
   el('workspaceFilter').addEventListener('change',renderWorkspace);
@@ -984,6 +1041,23 @@ export function mountMockup(root: HTMLElement) {
     if(button.hasAttribute('data-create-revision')){askRevision();return;}
     if(button.dataset.carryApply){applyCarry(button.dataset.carryApply);return;}
     if(button.dataset.openRevision){void task(()=>openStudy(undefined,Number(button.dataset.openRevision)));return;}
+    if(button.hasAttribute('data-open-web-sample')){
+      if(previewOriginal||running)return;
+      previewOriginal=structuredClone(study);study=webSampleStudy();
+      clearPlayback();visualPaused=false;syncInputs();renderRoster();renderRunControls();renderWorkflowContext();ingest(study.results,0);location.hash=button.hasAttribute('data-web-interview')?'#interview':button.hasAttribute('data-web-result')?'#report':'#run';return;
+    }
+    if(button.id==='previewRun'){
+      if(previewOriginal||running)return;
+      readInputs(); persist(); previewOriginal=structuredClone(study);
+      const kind=study.workflow?.scope.product_kind||root.querySelector<HTMLInputElement>('[name="productKind"]:checked')?.value||'web';
+      const viewport=study.workflow?.scope.viewport||root.querySelector<HTMLInputElement>('[name="sourceViewport"]:checked')?.value||'desktop';
+      study=kind==='web'&&viewport==='desktop'?webSampleStudy():demoStudy(DEMO.personas.map(p=>p.id)); study.reportSource='ui-mock';
+      clearPlayback();visualPaused=false;syncInputs();renderRoster();renderRunControls();renderWorkflowContext();ingest(study.results,0);route();return;
+    }
+    if(button.id==='exitRunPreview'||button.id==='exitReportPreview'){
+      if(!previewOriginal)return;
+      study=previewOriginal;previewOriginal=null;clearPlayback();syncInputs();renderRoster();renderRunControls();renderWorkflowContext();if(location.hash!=='#run')location.hash='#run';else route();return;
+    }
     if(button.id==='cancelRun'){const owner=sessionEpoch,id=study.id,run=study.runs?.act;if(!run||cancelRequestedRun===run)return;cancelRequestedRun=run;renderRunControls();void api.cancelRun(run).then(()=>{if(sameSession(owner,id))notice('취소를 요청했습니다. 진행 중인 행동이 끝나면 기록을 보존하고 멈춥니다.');}).catch(error=>{if(sameSession(owner,id)){cancelRequestedRun=0;renderRunControls();notice(message(error),true);}});return;}
     if (button.id === 'startRun') void task(execute);
     if (button.id === 'pauseBtn') { visualPaused = !visualPaused; button.textContent = visualPaused ? '화면 이어보기' : '화면 일시정지'; if (!visualPaused) play(); }
@@ -1006,6 +1080,7 @@ export function mountMockup(root: HTMLElement) {
       } finally { if(sameSession(owner,draftId)) (button as HTMLButtonElement).disabled=false; }
     });
     const href = button.getAttribute('href');
+    if (href?.startsWith('#') && button.closest('#workflowProgress')) return;
     if(href?.startsWith('#')&&(button.closest('#stepper')||resultViews.includes(href.slice(1)))){const issue=navigationIssue(href.slice(1));if(issue){event.preventDefault();notice(issue.message,true);if(issue.view!==location.hash.slice(1)){location.hash='#'+issue.view;route();}if(issue.focus)el(issue.focus).focus({preventScroll:true});return;}}
     if((href==='#source-review'||href==='#panel')&&['product','proto','source-review'].includes(location.hash.slice(1))&&!hasExecution()){
       event.preventDefault();if(href===location.hash)return;const destination=href==='#source-review'||['product','proto'].includes(location.hash.slice(1))?'source-review':'panel';const issue=navigationIssue(destination);
@@ -1049,7 +1124,12 @@ export function mountMockup(root: HTMLElement) {
     root.querySelectorAll<HTMLInputElement|HTMLButtonElement>('.wf-source-panel input,.wf-source-panel textarea,.wf-source-panel button').forEach(n=>n.disabled=disabled);
   }
   function renderSourceDetails(){
-    const detail=el('sourceDetails');detail.innerHTML=sourceDetailsMarkup(study,sourceCheck,sourceScreenId,recognitionSelection);detail.hidden=!detail.innerHTML;
+    const detail=el('sourceDetails');
+    if (!study.screens.length && !study.workflow?.source.preview && sourceCheck.phase === 'idle') {
+      detail.innerHTML=`<div class="sr-example"><div class="sr-example-head"><div><span class="sr-example-badge">화면 구성 예시</span><h2>연결한 화면을 이렇게 확인해요</h2><p>아직 연결된 화면이 없어 예시를 보여드리고 있어요. 화면을 연결하면 실제 수집 내용으로 바뀝니다.</p></div><a href="#product">화면 연결하기 →</a></div><div class="sr-example-body"><div class="sr-example-preview"><div class="sr-example-browser"><span></span><span></span><span></span><small>데스크톱 화면 예시</small></div><img src="${webSampleCapture}" alt="독서 기록 웹사이트의 예시 화면"></div><div class="sr-example-info"><span>미리보기</span><h3>시작 화면</h3><p>연결한 첫 화면의 모습과 메뉴, 이동할 수 있는 영역을 이곳에서 확인할 수 있어요.</p><div><span>홈</span><span>메뉴</span><span>시작하기</span></div><small>위 내용은 이해를 돕기 위한 예시이며 이 프로젝트에서 수집한 화면이 아닙니다.</small></div></div></div>`;
+      detail.hidden=false;detail.setAttribute('aria-busy','false');return;
+    }
+    detail.innerHTML=sourceDetailsMarkup(study,sourceCheck,sourceScreenId,recognitionSelection);detail.hidden=!detail.innerHTML;
     detail.setAttribute('aria-busy',String(sourceCheck.phase==='loading'));
   }
   function selectRecognitionTab(tab:RecognitionTab,scroll=false){
@@ -1080,7 +1160,7 @@ export function mountMockup(root: HTMLElement) {
     el('panelPageTitle').textContent=info.title;el('panelPageDescription').textContent=info.description;el('panelPageEyebrow').textContent=info.eyebrow;
     el<HTMLAnchorElement>('panelBackLink').href='#'+info.back;el('panelBackLink').textContent='← 이전 · '+info.backLabel;
     el('audienceBuilder').hidden=page==='scope';audienceBuilder.showPage(page==='personas'?'personas':'people');el('workflowScope').hidden=page!=='scope';
-    el('panelActionSelection').textContent=page==='panel'?'3 / 6 · 대상 사용자':page==='personas'?`4 / 6 · 참여 구성 ${state.selected}명`:'5 / 6 · 탐색 범위';
+    el('panelActionSelection').textContent=page==='panel'?'3 대상 사용자':page==='personas'?`4 참여 구성 ${state.selected}명`:'5 탐색 범위';
     el('panelActionState').textContent=panelContinuing||state.saving?'설정을 저장하고 있어요.':locked?'실행한 회차의 설정입니다.':page==='panel'?'작성한 설명은 이전 화면으로 이동해도 유지돼요.':page==='personas'?state.loading?'조건과 구성을 확인하고 있어요.':!state.selected?'구성을 추천받거나 직접 선택으로 참여자를 추가하세요.':state.dirty?'선택한 구성을 저장하고 다음으로 이동합니다.':'선택한 페르소나로 탐색 범위를 설정하세요.':!panelScopeReady()?'선택한 탐색 방식과 핵심 확인 항목을 확인해 주세요.':'탐색 범위를 저장하고 실행 전 마지막 확인으로 이동합니다.';
     const button=el<HTMLButtonElement>('panelContinue');button.disabled=panelContinuing||state.saving||(page==='personas'&&state.loading);
     button.textContent=panelContinuing||state.saving?'저장 중…':page==='scope'&&!locked?'실행 시작 →':'다음 · '+info.next+' →';renderRunControls();renderCarryOffer();
@@ -1161,8 +1241,8 @@ export function mountMockup(root: HTMLElement) {
     for(const a of root.querySelectorAll<HTMLAnchorElement>('#v-report .report-document-actions a[href="#interview"]')){a.setAttribute('aria-disabled',String(!state.canInterview));if(!state.canInterview)a.title='종료 기록이 있는 페르소나가 있어야 인터뷰를 열 수 있어요.';else a.removeAttribute('title');}
     el('workflowProgress').hidden=!setup;
     el('workflowProgress').innerHTML=[['product','화면 연결'],['source-review','화면 확인'],['panel','대상 사용자'],['personas','참여 구성'],['scope','탐색 범위'],['run','실행']].map(([id,label],i,all)=>{const current=all.findIndex(([x])=>x===view||x==='product'&&view==='proto'),done=current>=0&&i<current;return `<a href="#${id}" class="${done?'done':''}" ${i===current?'aria-current="step"':''}><b aria-hidden="true">${done?'✓':i+1}</b><span>${label}</span></a>`;}).join('');
-    for(const a of root.querySelectorAll<HTMLAnchorElement>('#workflowProgress a')){const issue=navigationIssue(a.hash.slice(1));a.setAttribute('aria-disabled',String(Boolean(issue)));if(issue)a.title=issue.message;else a.removeAttribute('title');}
-    root.querySelectorAll<HTMLAnchorElement>('#v-product [data-step-next],#v-proto [data-step-next]').forEach(a=>{a.href='#source-review';a.setAttribute('aria-disabled',String(Boolean(navigationIssue('source-review'))));a.textContent='다음 · 화면 확인 →';});
+    for(const a of root.querySelectorAll<HTMLAnchorElement>('#workflowProgress a')){a.removeAttribute('aria-disabled');a.removeAttribute('title');}
+    root.querySelectorAll<HTMLAnchorElement>('#v-product [data-step-next],#v-proto [data-step-next]').forEach(a=>{a.href='#source-review';a.setAttribute('aria-disabled',String(Boolean(navigationIssue('source-review'))));a.textContent='다음 단계로 →';});
     const connectIssue=navigationIssue('source-review'),reviewIssue=navigationIssue('panel');
     el('sourceContinueHint').textContent=executed?'실행 당시 연결한 화면입니다.':connectIssue?.message||'시작 화면이 맞다면 다음 페이지에서 수집한 화면 이미지를 확인하세요.';
     el('sourceReviewContinue').setAttribute('aria-disabled',String(Boolean(reviewIssue)));

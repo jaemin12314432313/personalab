@@ -62,9 +62,13 @@ def main():
     (C.OUT / f"{name}_report.json").write_text(
         json.dumps({"report": rep, "checks": ck}, ensure_ascii=False, indent=2, default=str),
         encoding="utf-8")
-    ok = all(v["ok"] for v in ck.values() if isinstance(v, dict) and "ok" in v)
+    ok = all(v["ok"] for v in ck.values() if isinstance(v, dict) and "ok" in v) and \
+        all(v["ok"] for v in ck["dist"].values())               # 분포 점검은 한 단계 안쪽에 있다
+    bad_dist = [f"{k} p={v['p']:.2f}" for k, v in ck["dist"].items() if not v["ok"]]
     print(f"{name} | {len(panel)}명 (요청 {a.n}) | 실제 응답자 {rep['donor_n']}명 기반"
           f" | 매칭 수준 {rep['match_level_counts']} | 자동 점검 {'통과' if ok else '확인 필요'}")
+    if bad_dist:
+        print("  ! 분포 불일치 (100명 표본이라 우연히 생길 수 있음):", ", ".join(bad_dist))
     if rep["shortfall"]:
         print("  ! 후보가 모자란 칸:", rep["shortfall"])
     if rep.get("grade_warnings"):

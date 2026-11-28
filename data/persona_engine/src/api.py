@@ -97,8 +97,11 @@ def generate_with_report(conditions: dict, n: int, seed: int) -> tuple[list[dict
                         "region": PROVINCE_DISPLAY.get(p["province"], p["province"]), "region3": p["region3"],
                         "job_group": p["job_group"], "school": p["school"], "occupation": p["occupation"]},
             "card_text": p["card_text"],
-            "traits": {"price": p["ps_grade"], "digital": p["da_grade"], "novelty": p["ns_grade"],
-                       "privacy": int(p["privacy_concern"]), "ott": p["ott_payment"]},
+            "traits": {"learn": p["le_grade"], "info_check": p["ic_grade"], "online_tx": p["ot_grade"],
+                       "ai": p["ai_familiarity"], "digital_skill": p["ds_level"], "novelty": p["ns_grade"],
+                       "privacy": int(p["privacy_concern"]),
+                       # v0.1 호환 (카드에는 쓰지 않음)
+                       "price": p["ps_grade"], "digital": p["da_grade"], "ott": p["ott_payment"]},
             "source": {"persona_id": p["persona_id"], "nvidia_uuid": p["uuid"], "donor_pid": int(p["donor_pid"]),
                        "match_level": int(p["match_level"]), "student_inferred": bool(p["student_inferred"]),
                        "scoring_version": C.SCORING_VERSION, "seed": seed},

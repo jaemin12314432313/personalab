@@ -74,14 +74,14 @@
 <!--/HEAD-->
 <header>
   <h1>페르소나 카드 뷰어</h1>
-  <div class="sub">NVIDIA Nemotron-Personas-Korea(누구인가) + 한국미디어패널 2024(돈과 앱을 어떻게 쓰는가) · 분포 기반 페르소나 샘플링 결과 · NVIDIA 데이터 CC BY 4.0</div>
+  <div class="sub">NVIDIA Nemotron-Personas-Korea(누구인가) + 한국미디어패널 2024(화면과 앱을 어떻게 쓰는가) · 분포 기반 페르소나 샘플링 결과 · NVIDIA 데이터 CC BY 4.0</div>
 </header>
 <div class="sticky">
 <div class="bar" id="tabs"></div>
 <div class="bar">
-  가격 민감 <select id="fPs" aria-label="가격 민감 등급"><option value="">전체</option><option>낮음</option><option>중간</option><option>높음</option></select>
-  디지털 <select id="fDa" aria-label="디지털 등급"><option value="">전체</option><option>낮음</option><option>중간</option><option>높음</option></select>
-  OTT <select id="fOtt" aria-label="OTT 결제"><option value="">전체</option><option>단독</option><option>친구와 나눔</option><option>가족</option><option>미이용</option></select>
+  학습 <select id="fPs" aria-label="학습 용이성 등급"><option value="">전체</option><option>낮음</option><option>중간</option><option>높음</option></select>
+  온라인 거래 <select id="fDa" aria-label="온라인 거래 익숙함 등급"><option value="">전체</option><option>낮음</option><option>중간</option><option>높음</option></select>
+  생성형 AI <select id="fOtt" aria-label="생성형 AI 친숙도"><option value="">전체</option><option>이용</option><option>앎</option><option>들어봄</option><option>모름</option></select>
   <label class="chk"><input type="checkbox" id="fFlag"> 점검 표시만</label>
   <span class="spacer"></span>
   <input type="search" id="fQ" aria-label="검색" placeholder="직업·지역·문장 검색">
@@ -128,10 +128,11 @@ function summary(d) {
 
 function card(r) {
   const g = (lab, v) => `<span class="chip ${esc(v)}">${lab} ${esc(v)}</span>`;
-  const chips = [g("가격민감", r.ps_grade), g("디지털", r.da_grade),
-                 r.ns_grade === "높음" ? `<span class="chip">새것선호 높음</span>` : "",
+  const chips = [g("학습", r.le_grade), g("온라인 거래", r.ot_grade), g("정보 검증", r.ic_grade),
                  `<span class="chip">개인정보 우려 ${r.privacy_concern}/5</span>`,
-                 `<span class="chip">OTT ${esc(r.ott_payment)}</span>`,
+                 `<span class="chip">생성형 AI ${esc(r.ai_familiarity)}</span>`,
+                 r.ds_level !== "충분" ? `<span class="chip 낮음">디지털 활용 ${esc(r.ds_level)}</span>` : "",
+                 r.ns_grade === "높음" ? `<span class="chip">새것선호 높음</span>` : "",
                  ...r.flags.map(f => `<span class="chip flag">⚠ ${esc(f)}</span>`)].join("");
   const ps = arr => arr.map(x => `<p>${esc(x)}</p>`).join("");
   return `<article class="card">
@@ -152,7 +153,7 @@ function render() {
   const ps = $("fPs").value, da = $("fDa").value, ott = $("fOtt").value, fl = $("fFlag").checked;
   const q = $("fQ").value.trim();
   const rows = d.rows.filter(r =>
-    (!ps || r.ps_grade === ps) && (!da || r.da_grade === da) && (!ott || r.ott_payment === ott) &&
+    (!ps || r.le_grade === ps) && (!da || r.ot_grade === da) && (!ott || r.ai_familiarity === ott) &&
     (!fl || r.flags.length) &&
     (!q || [r.occupation, r.province, ...r.card.head, ...r.card.story, ...r.card.behavior].join(" ").includes(q)));
   $("grid").innerHTML = rows.length ? rows.map(card).join("") : `<div class="empty">조건에 맞는 카드가 없습니다.</div>`;
