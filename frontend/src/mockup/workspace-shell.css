@@ -88,10 +88,6 @@
 #v-workspace .ws-hd-menu .wm-menu summary{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid var(--ln);background:#fff;color:var(--ink);cursor:pointer;list-style:none}
 #v-workspace .ws-hd-menu .wm-menu summary::-webkit-details-marker{display:none}
 #v-workspace .ws-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-#v-workspace .ws-faces{display:inline-flex}
-#v-workspace .ws-faces .ws-pc-face{width:34px;height:34px;border:3px solid var(--bg);margin-left:-9px}
-#v-workspace .ws-faces .ws-pc-face:first-child{margin-left:0}
-#v-workspace .ws-more{width:34px;height:34px;border-radius:50%;border:3px solid var(--bg);margin-left:-9px;background:#efe8dc;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--mu)}
 #v-workspace .ws-chip{border:1px solid var(--ln);border-radius:11px;padding:7px 14px;background:#fff;font:700 13px var(--f);color:var(--ink);cursor:default}
 #v-workspace button.ws-chip{cursor:pointer}
 #v-workspace .ws-chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
