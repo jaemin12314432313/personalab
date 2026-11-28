@@ -199,32 +199,46 @@ export function mountReport(host: HTMLElement, initial: Study, options: ReportOp
     const c=siteCoverage(study),rows=c?c.pages:model.coverage.map(x=>({label:x.screen.label,url:x.screen.id,state:'loaded',visitors:Array.from({length:x.arrived}),screen:x.screen.id}));coveragePage=Math.min(coveragePage,Math.max(0,Math.ceil(rows.length/6)-1));
     return `<section class="rv-compact-coverage"><div class="rv-section-heading"><h2>확인 범위</h2><p>구조 수집과 실제 방문은 다릅니다.</p></div><div class="rv-record-table"><table><thead><tr><th>페이지</th><th>${c?'구조 수집':'등록 상태'}</th><th>실제 방문</th><th><span class="sr-only">근거 보기</span></th></tr></thead><tbody>${rows.slice(coveragePage*6,coveragePage*6+6).map((p,j)=>`<tr><td><strong>${esc(p.label)}</strong><small class="rv-url" title="${esc(p.url)}">${esc(p.url)}</small></td><td>${!c?'등록됨':p.state==='loaded'?'확인':p.state==='error'?'접근 실패':'미확인'}</td><td>${p.visitors.length?`${p.visitors.length}명`:'방문 없음'}</td><td>${p.visitors.length?c?`<button type="button" class="rv-text-link" data-rv-site="${coveragePage*6+j}">근거 보기 ↗</button>`:`<button type="button" class="rv-text-link" data-rv-coverage="${esc(p.url)}">근거 보기 ↗</button>`:''}</td></tr>`).join('')||'<tr><td colspan="4">확인 범위가 없습니다.</td></tr>'}</tbody></table></div>${pager('coverage',coveragePage,rows.length,6)}<p class="rv-muted">${c?.map.limit_reached?'수집 한도에서 멈춘 목록입니다. ':''}발견한 범위 기준이며 사이트 전체를 확인했다는 의미는 아닙니다.${c?.extras.length?` 목록 밖에서 추가로 방문한 주소 ${c.extras.length}개.`:''}</p></section>`;
   }
-  // 신분증: 왼쪽에 한 사람의 카드, 오른쪽에 그 사람과의 문답. 답마다 출처(저장된 기록 / AI 생성)를 표시한다.
+  // 인터뷰에서 현재 페르소나의 프로필과 탐색 기록을 함께 보여 준다.
   const MEter:Record<string,number>={낮음:25,중간:55,높음:85};
   function idCard(){
     const p=study.personas.find(p=>p.id===person),r=result(),a=p?displayAttributes(p.attributes):null,label=p?personaId(p):r?.persona_id||'기록 없음';
-    const path=r?.act?.path||[],total=Math.max(path.length,study.screens.length,1),end=r?.act?.end,dropped=end?.result==='drop';
+    const path=r?.act?.path||[],total=Math.max(path.length,study.screens.length,1),dropped=outcome(r)==='drop';
     const segs=Array.from({length:total},(_,i)=>`<i class="${i<path.length?(dropped&&i===path.length-1?'x':''):'o'}"></i>`).join('');
     const last=r?.act?screenTitle(study,r.act.end.screen||path.at(-1)||''):'';
     const trait=(name:string,v:string)=>`<div class="id-trait"><span>${name}</span><i><b style="width:${MEter[v]??0}%"></b></i><em>${esc(v)}</em></div>`;
-    return `<aside class="rv-interview-context id-card"><div class="id-top"><span>PERSONA CARD</span><span>${esc(label)}</span></div>
+    return `<aside class="rv-interview-context id-card" aria-labelledby="${uid}-profile-title">
+      <h2 class="id-top" id="${uid}-profile-title">페르소나 프로필</h2>
       <label class="rv-person-select">대화할 페르소나<select data-rv-select-person>${study.personas.map(p=>`<option value="${p.id}" ${person===p.id?'selected':''} ${study.results.find(r=>r.id===p.id)?.act?'':'disabled'}>${esc(personaId(p))} · ${p.attributes.profile.age}세 · ${esc(p.attributes.profile.job_group)}</option>`).join('')}</select></label>
       <div class="rv-identity id-who">${a?portraitMarkup(a,'id-portrait'):`<span class="id-portrait persona-no-photo">AI</span>`}<div><strong>${esc(label)}</strong><span>${p?`${p.attributes.profile.age}세${a?.profile.sex?` · ${esc(a.profile.sex)}`:''} · ${esc(p.attributes.profile.job_group)}${a?.profile.region?` · ${esc(a.profile.region)}`:''}`:''}</span></div></div>
       ${a?`<div class="id-traits">${trait('디지털 친숙도',String(a.traits.digital))}${trait('새 기능 친숙도',String(a.traits.novelty))}${trait('개인정보 우려',String(a.traits.privacy))}</div>`:''}
-      <div class="id-path" aria-label="탐색 경로"><div class="id-segs">${segs}</div><small>${r?.act?`${esc(screenTitle(study,path[0]||''))} → ${esc(screenTitle(study,path.at(-1)||''))}${dropped?'에서 멈춤':' 도착'} · 기록 ${r.act.events.length}건`:'탐색 기록 없음'}</small></div>
-      ${badge(r)}${fromFinding()}
-      <div class="rv-interview-last"><span>마지막 화면</span><strong>${esc(last||'탐색 기록 없음')}</strong></div>
-      <button type="button" class="rv-text-link" data-rv-detail>화면·원문 보기 ↗</button></aside>`;
+      <section class="id-record" aria-labelledby="${uid}-path-title">
+        <div class="id-record-head"><h3 id="${uid}-path-title">탐색 기록</h3>${badge(r)}</div>
+        <div class="id-path" aria-label="탐색 경로"><div class="id-segs" aria-hidden="true">${segs}</div><small>${r?.act?`${esc(screenTitle(study,path[0]||''))} → ${esc(screenTitle(study,path.at(-1)||''))} · 기록 ${r.act.events.length}건`:'탐색 기록 없음'}</small></div>
+        ${fromFinding()}
+        <div class="rv-interview-last"><span>마지막 화면</span><strong>${esc(last||'탐색 기록 없음')}</strong></div>
+        <button type="button" class="btn id-detail-button" data-rv-detail>화면·원문 보기 ↗</button>
+      </section></aside>`;
   }
   function compactInterview(){
-    const p=study.personas.find(p=>p.id===person),r=result(),thread=chats[person]||[],disabled=asking||!hasRecord()||Boolean(loading)&&loading===person;
+    const p=study.personas.find(p=>p.id===person),r=result(),thread=chats[person]||[];
+    const recordAvailable=hasRecord(),llmAvailable=allowsLlm(),disabled=asking||!recordAvailable||Boolean(loading)&&loading===person;
     const face=p?portraitMarkup(displayAttributes(p.attributes),'id-face'):'';
     const answer=(m:Message)=>{
       const ai=m.mode==='llm';
-      const refs=(m.evidence||[]).map(ref=>{const shot=study.evidence?.find(e=>e.persona_id===person&&e.screen.id===ref.screen_id);return `<button type="button" class="id-evc" data-rv-citation="${esc(ref.screen_id)}" title="${esc(ref.quote||'이 화면의 탐색 근거 확인')}">${shot?`<img src="${esc(shot.image)}" alt="">`:''}<span><b>${esc(ref.screen_id)} ${esc(ref.screen_label)}</b><small>근거 #${ref.log_id} · 장면 보기 ▶</small></span></button>`;}).join('');
+      const refs=(m.evidence||[]).map(ref=>{const shot=study.evidence?.find(e=>e.persona_id===person&&e.screen.id===ref.screen_id);return `<button type="button" class="id-evc" data-rv-citation="${esc(ref.screen_id)}" title="${esc(ref.quote||'이 화면의 탐색 근거 확인')}">${shot?.image?`<img src="${esc(shot.image)}" alt="">`:''}<span><b>${esc(ref.screen_label||ref.screen_id)}</b><small>근거 #${ref.log_id} · 장면 보기 ↗</small></span></button>`;}).join('');
       return `<article class="rv-question"><span>내 질문</span><p>${esc(m.question)}</p></article><article class="rv-answer ${ai?'is-ai':'is-record'}">${face}<div><span class="id-name">${esc(p?personaId(p):r?.persona_id)}</span><p class="id-text">${esc(m.answer)}</p><div class="id-meta"><span class="id-src ${ai?'ai':'rec'}">${ai?'AI 생성 · 실제 사람의 답변이 아니에요':'저장된 기록 조회'}</span></div>${refs?`<div class="rv-answer-evidence">${refs}</div>`:''}</div></article>`;
     };
-    return `<section class="rv-interview rv-interview-layout id-grid">${idCard()}<div class="rv-conversation" data-rv-conversation-person="${person}">${allowsLlm()||thread.length?`<div class="rv-interview-controls">${allowsLlm()?`<label>답변 방식<select data-rv-mode ${asking?'disabled':''}><option value="records" ${interviewMode==='records'?'selected':''}>저장된 기록으로 답하기</option><option value="llm" ${interviewMode==='llm'?'selected':''}>AI와 대화 · 토큰 사용</option></select></label>`:''}${thread.length?'<button type="button" class="rv-text-link" data-rv-chat-export>대화 내려받기 ↓</button>':''}</div>`:''}${interviewMode==='llm'&&allowsLlm()?'<p class="rv-mode-warning">토큰 사용 · 카드·탐색 기록·최근 문답을 모델에 전송해 새 답변을 생성합니다.</p>':''}${errorPerson===person?`<div class="rv-chat-error" role="alert">${esc(errorText)} <button type="button" class="rv-text-link" data-rv-retry>다시 불러오기</button></div>`:''}${loading===person&&loading?'<p class="rv-chat-loading" role="status">문답 불러오는 중…</p>':''}<div class="rv-messages" aria-live="polite" aria-label="페르소나와의 대화">${thread.map(answer).join('')||`<div class="rv-chat-empty"><strong>${hasRecord()?'어떤 선택이 궁금하세요?':'탐색 종료 기록이 없습니다.'}</strong><p>이 사람의 탐색 기록에서 대화를 이어가세요.</p></div>`}</div>${!thread.length?`<div class="rv-question-chips">${RECORD_QUESTIONS.slice(0,2).map((q,i)=>`<button type="button" data-rv-question="${i}" ${disabled?'disabled':''}>${esc(q)}</button>`).join('')}</div>`:''}<form data-rv-form><label class="sr-only" for="${uid}-question">질문</label><textarea id="${uid}-question" data-rv-input ${disabled?'disabled':''} maxlength="500" rows="1" placeholder="이 선택의 이유를 물어보세요" required>${esc(draft[person]||'')}</textarea><button type="submit" class="btn solid" ${disabled?'disabled':''}>${asking===person&&asking?'답변 중…':'보내기 ↑'}</button></form></div></section>`;
+    return `<section class="rv-interview rv-interview-layout id-grid">${idCard()}
+      <section class="rv-conversation" aria-labelledby="${uid}-chat-title" data-rv-conversation-person="${person}">
+        <header class="rv-chat-header"><h2 id="${uid}-chat-title">대화</h2>${llmAvailable?`<div class="rv-interview-controls"><label>답변 방식<select data-rv-mode ${asking?'disabled':''}><option value="records" ${interviewMode==='records'?'selected':''}>저장된 기록으로 답하기</option><option value="llm" ${interviewMode==='llm'?'selected':''}>AI와 대화 · 토큰 사용</option></select></label></div>`:''}</header>
+        ${interviewMode==='llm'&&llmAvailable?'<p class="rv-mode-warning">토큰 사용 · 카드·탐색 기록·최근 문답을 모델에 전송해 새 답변을 생성합니다.</p>':''}
+        ${errorPerson===person?`<div class="rv-chat-error" role="alert">${esc(errorText)} <button type="button" class="rv-text-link" data-rv-retry>다시 불러오기</button></div>`:''}
+        ${loading&&loading===person?'<p class="rv-chat-loading" role="status">문답 불러오는 중…</p>':''}
+        <div class="rv-messages" aria-live="polite" aria-label="페르소나와의 대화">${thread.map(answer).join('')||`<div class="rv-chat-empty"><strong>${recordAvailable?'어떤 선택이 궁금하세요?':'탐색 종료 기록이 없습니다.'}</strong><p>이 사람의 탐색 기록에서 대화를 이어가세요.</p></div>`}</div>
+        ${!thread.length?`<div class="rv-question-chips">${RECORD_QUESTIONS.slice(0,2).map((q,i)=>`<button type="button" data-rv-question="${i}" ${disabled?'disabled':''}>${esc(q)} ↗</button>`).join('')}</div>`:''}
+        <form data-rv-form><label class="sr-only" for="${uid}-question">질문</label><textarea id="${uid}-question" data-rv-input ${disabled?'disabled':''} maxlength="500" rows="1" placeholder="이 선택의 이유를 물어보세요" required>${esc(draft[person]||'')}</textarea><button type="submit" class="btn solid" ${disabled?'disabled':''}>${asking===person&&asking?'답변 중…':'보내기 ↑'}</button></form>
+      </section></section>`;
   }
   function render(focus?:string) {
     const oldMessages=host.querySelector<HTMLElement>('.rv-messages'),oldPerson=host.querySelector<HTMLElement>('[data-rv-conversation-person]')?.dataset.rvConversationPerson;

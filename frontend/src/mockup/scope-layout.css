@@ -1,0 +1,100 @@
+/* 탐색 범위 단계 */
+#v-panel:has(#workflowScope:not([hidden])) {
+  --scope-ink: #142942;
+  --scope-muted: #536b84;
+  --scope-line: #dce6f0;
+  --scope-accent: #2456a2;
+  background: #f7fafe;
+  color: var(--scope-ink);
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+#v-panel:has(#workflowScope:not([hidden])) .qhead { margin-bottom: 20px; padding-bottom: 0; border-bottom: 0; }
+#v-panel:has(#workflowScope:not([hidden])) .qno { display: none; }
+#v-panel:has(#workflowScope:not([hidden])) .qtitle { margin: 0; font-size: clamp(23px, 2.6vw, 30px); line-height: 1.4; }
+#v-panel:has(#workflowScope:not([hidden])) .qdesc { color: var(--scope-muted); }
+
+#v-panel #workflowScope:not([hidden]) {
+  min-width: 0;
+  padding: clamp(16px, 2.5vw, 24px);
+  background: #fff;
+  border: 1px solid var(--scope-line);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px #1429420a;
+}
+
+#v-panel #workflowScope .wf-section-heading { margin-bottom: 14px; padding-bottom: 12px; border-color: var(--scope-line); }
+#v-panel #workflowScope .wf-section-heading h2 { color: var(--scope-ink); font-size: 18px; }
+#v-panel #workflowScope .site-mode-options { gap: 10px; margin-bottom: 12px; }
+#v-panel #workflowScope .site-mode-options label { padding: 12px; border-color: var(--scope-line); border-radius: 9px; }
+#v-panel #workflowScope .site-mode-options label:has(input:checked) {
+  border-color: #a8c3e8;
+  background: #f0f6ff;
+  box-shadow: inset 0 0 0 1px #c6d9f3;
+}
+
+#v-panel #workflowScope .site-mode-options input { accent-color: var(--scope-accent); }
+#v-panel #workflowScope .site-mode-options label:has(input:focus-visible) { outline: 2px solid var(--scope-accent); outline-offset: 2px; }
+#v-panel #workflowScope .site-mode-options small,
+#v-panel #workflowScope .hint { color: var(--scope-muted); }
+#v-panel #workflowScope #siteScopeInfo .hint { padding: 9px 12px; border-radius: 7px; background: #f3f8fe; }
+
+#v-panel #workflowScope .scope-text { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--scope-line); }
+#v-panel #workflowScope .scope-text-head { gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+#v-panel #workflowScope .scope-text-head .label { margin: 0; }
+#v-panel #workflowScope .label { color: var(--scope-ink); font-size: 14px; font-weight: 700; }
+#v-panel #workflowScope .label span { color: var(--scope-muted); font-size: 12px; }
+#v-panel #workflowScope .scope-text-head .label span { padding: 2px 6px; border-radius: 5px; background: #edf3f9; }
+
+#v-panel #workflowScope :is(.textarea, .input, .select) {
+  box-sizing: border-box;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--scope-line);
+  border-radius: 8px;
+  color: var(--scope-ink);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#v-panel #workflowScope .textarea { display: block; width: 100%; resize: vertical; }
+#v-panel #workflowScope #scopeFocus { min-height: 100px; }
+#v-panel #workflowScope :is(.textarea, .input)::placeholder { color: #677e96; }
+#v-panel #workflowScope :is(.textarea, .input, .select):focus { border-color: #8caede; box-shadow: 0 0 0 3px #e9f2ff; }
+#v-panel #workflowScope .scope-text-head .btn { min-height: 32px; border-color: var(--scope-line); border-radius: 7px; color: var(--scope-accent); font-size: 12px; }
+#v-panel #workflowScope .label:has(#scopeMaxTurns) { padding-top: 14px; border-top: 1px solid var(--scope-line); }
+#v-panel #workflowScope .scope-turns-select {
+  position: relative;
+  display: block;
+  width: min(100%, 270px);
+  margin-top: 8px;
+}
+
+#v-panel #workflowScope .scope-turns-select::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--scope-muted);
+  border-bottom: 2px solid var(--scope-muted);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+#v-panel #workflowScope .scope-turns-select:has(select:disabled)::after { opacity: .5; }
+
+#v-panel #workflowScope #scopeMaxTurns {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  padding-right: 42px;
+  border-color: #b5c9e0;
+}
+
+#v-panel #workflowScope #scopeMaxTurns:hover:not(:disabled),
+#v-panel #workflowScope #scopeMaxTurns:focus-visible { border-color: var(--scope-accent); }
+
+#v-panel #workflowScope :is(button, a):focus-visible { outline: 2px solid var(--scope-accent); outline-offset: 2px; }

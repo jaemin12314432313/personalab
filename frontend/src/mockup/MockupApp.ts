@@ -555,8 +555,21 @@ export function mountMockup(root: HTMLElement) {
     if(study.runs?.act&&study.status==='running')void refreshStoredRun();
   }
   let noticeTimer=0;
-  function notice(text: string, error = false) { const n = el('liveNotice'); window.clearTimeout(noticeTimer); if(text)noticeTimer=window.setTimeout(()=>{n.hidden=true;n.textContent='';},error?12000:5000); n.textContent = text; n.classList.toggle('error', error); n.setAttribute('role',error?'alert':'status'); n.hidden = !text || !(steps.includes(location.hash.slice(1)) || location.hash === '#workspace'); }
-  function persist() { renderStudioContext();renderPanelNavigation(); if (!user || previewOriginal) return; try { localStorage.setItem(KEY, JSON.stringify(browserSnapshot(study)));rememberSetup(location.hash.slice(1)); } catch { notice('브라우저 저장 공간이 부족합니다. 현재 화면을 닫기 전에 결과를 내려받으세요.', true); } }
+  function notice(text: string, error = false, warningTitle?: string) {
+    const n = el('liveNotice');
+    window.clearTimeout(noticeTimer);
+    if (text) noticeTimer = window.setTimeout(() => { n.hidden = true; n.textContent = ''; }, error ? 12000 : 5000);
+    if (warningTitle) {
+      n.innerHTML = `<span class="notice-warning-icon" aria-hidden="true">!</span><div><strong>${escape(warningTitle)}</strong><p>${escape(text)}</p></div>`;
+    } else {
+      n.textContent = text;
+    }
+    n.classList.toggle('error', error);
+    n.classList.toggle('notice-warning', Boolean(warningTitle));
+    n.setAttribute('role', error ? 'alert' : 'status');
+    n.hidden = !text || !(steps.includes(location.hash.slice(1)) || location.hash === '#workspace');
+  }
+  function persist() { renderStudioContext();renderPanelNavigation(); if (!user || previewOriginal) return; try { localStorage.setItem(KEY, JSON.stringify(browserSnapshot(study)));rememberSetup(location.hash.slice(1)); } catch { notice('화면을 닫기 전에 리포트에서 결과를 내려받아 주세요.', true, '브라우저 저장 공간이 부족해요'); } }
   const message = (error: unknown) => error instanceof Error ? error.message : String(error);
   async function task(work: () => Promise<void>) { if (!user) return; if (busy) { notice('이전 작업이 끝나는 중이에요. 잠시 뒤 다시 눌러 주세요.', true); return; } const owner = sessionEpoch; busy = true; try { await work(); } catch (error) { if (sameSession(owner)) notice(message(error), true); } finally { if (sameSession(owner)) busy = false; } }
   function syncInputs() {

@@ -1,0 +1,7 @@
+/* ???? ??? ?? ??? ??? ??? ????. */
+#root#root :is(#workspaceHome, #workspaceList, #v-source-review, #workflowScope, #v-interview, #audienceBuilder[data-page=personas]),
+#root#root :is(#workspaceHome, #workspaceList, #v-source-review, #workflowScope, #v-interview, #audienceBuilder[data-page=personas]) *,
+#root#root :is(#workspaceHome, #workspaceList, #v-source-review, #workflowScope, #v-interview, #audienceBuilder[data-page=personas]) *::before,
+#root#root :is(#workspaceHome, #workspaceList, #v-source-review, #workflowScope, #v-interview, #audienceBuilder[data-page=personas]) *::after {
+  font-family: 'Noto Sans KR', sans-serif !important;
+}
