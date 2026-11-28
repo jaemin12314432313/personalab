@@ -60,14 +60,15 @@ rows = []
 for name, t in PRESETS.items():
     s = compute_scores(_filter(dd, t))
     cells = s.groupby(C.CELL_KEYS).size()
-    sh = {g: grade_shares(s[g], s["wt"]) for g in ["ps_grade", "da_grade", "ns_grade"]}
+    sh = {g: grade_shares(s[g], s["wt"]) for g in ["le_grade", "ic_grade", "ot_grade", "ns_grade"]}
     fmt = lambda x: "/".join(f"{x.get(k, 0):.0%}" for k in C.GRADE_LABELS)
     warn = [f"{g}:{k}" for g, x in sh.items() for k, v in x.items() if not lo <= v <= hi]
     rows.append((name, len(s), len(cells), int((cells < C.MIN_POOL).sum()),
-                 fmt(sh["ps_grade"]), fmt(sh["da_grade"]), fmt(sh["ns_grade"]), ",".join(warn) or "-"))
+                 fmt(sh["le_grade"]), fmt(sh["ic_grade"]), fmt(sh["ot_grade"]), fmt(sh["ns_grade"]),
+                 f"{(s['ds_level'] != '충분').mean():.0%}", ",".join(warn) or "-"))
 print("등급 비율 = 낮음/중간/높음 (가중)")
 print(pd.DataFrame(rows, columns=["프리셋", "donor", "칸", f"donor<{C.MIN_POOL}칸",
-                                  "가격민감", "디지털", "새것선호", "범위 밖"]).to_string(index=False))
+                                  "학습", "정보검증", "온라인거래", "새것선호", "활용부족", "범위 밖"]).to_string(index=False))
 
 # ── 4. 방향성 (전체 19세 이상에서 점수 계산) ──
 print("\n===== 4. 방향성 점검 (가중 평균) =====")
@@ -89,6 +90,12 @@ def trend(col, by, order=None, expect=-1, note=""):
     print("      ", {str(k): round(v, 2) for k, v in m.items()})
 
 
+trend("learn_ease", "age_bin", C.AGE_LABELS)
+trend("online_tx", "age_bin", C.AGE_LABELS)
+trend("digital_skill", "age_bin", C.AGE_LABELS)
+trend("learn_ease", "d26092", [2, 1], expect=+1, note="(숏폼 미이용→이용, 점수와 독립)")
+trend("online_tx", "d26092", [2, 1], expect=+1, note="(숏폼 미이용→이용, 점수와 독립)")
+trend("info_check", "school", C.SCHOOLS, expect=+1, note="(학력↑ → 정보 검증↑, 점수와 독립)")
 trend("digital_adoption", "age_bin", C.AGE_LABELS)
 trend("novelty_seeking", "age_bin", C.AGE_LABELS)
 trend("price_sensitivity", "inc", expect=-1, note="(소득은 WTP 입력 변수라 순환 점검)")

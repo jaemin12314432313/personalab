@@ -8,7 +8,13 @@ from .donor import compute_scores
 from .utils import allocate, grade_shares
 
 SCORE_OUT = ["price_sensitivity", "ps_grade", "digital_adoption", "da_grade",
-             "novelty_seeking", "ns_grade", "privacy_concern", "ott_payment"]
+             "novelty_seeking", "ns_grade", "privacy_concern", "ott_payment",
+             "learn_ease", "le_grade", "info_check", "ic_grade", "online_tx", "ot_grade",
+             "ai_familiarity", "digital_skill", "ds_level"]
+GRADE_COLS = ["le_grade", "ic_grade", "ot_grade", "ns_grade", "ps_grade", "da_grade"]
+CARD_GRADES = GRADE_COLS[:4]                  # 등급 경고는 카드에 쓰는 특성만
+# 분포 일치 점검 대상 = 카드에 쓰는 특성
+DIST_COLS = ["le_grade", "ic_grade", "ot_grade", "privacy_concern", "ai_familiarity"]
 HABIT_OUT = ["d01001", "d01002", "d01003", "i02004", "d26092"]
 
 
@@ -41,9 +47,9 @@ def build_panel(target: dict, n: int = 100, seed: int = 42, *, donor: pd.DataFra
         raise ValueError("조건에 맞는 donor가 없습니다. 타깃을 넓히세요.")
     dsub = compute_scores(dsub)
     lo, hi = C.GRADE_SHARE_RANGE
-    rep["grade_share"] = {c: grade_shares(dsub[c], dsub["wt"]) for c in ["ps_grade", "da_grade", "ns_grade"]}
+    rep["grade_share"] = {c: grade_shares(dsub[c], dsub["wt"]) for c in GRADE_COLS}
     rep["grade_warnings"] = [f"{c} {g} {v:.0%}" for c, sh in rep["grade_share"].items()
-                             for g, v in sh.items() if not lo <= v <= hi]
+                             if c in CARD_GRADES for g, v in sh.items() if not lo <= v <= hi]
     if target.get("price_sensitivity"):
         dsub = dsub[dsub["ps_grade"].isin(target["price_sensitivity"])]
         rep["donor_n_after_score_filter"] = len(dsub)
@@ -110,7 +116,7 @@ def build_panel(target: dict, n: int = 100, seed: int = 42, *, donor: pd.DataFra
     def wshare(col):
         t = dsub.groupby(col)["wt"].sum()
         return {str(k): float(v) for k, v in (t / t.sum()).items()}
-    rep["expected"] = {c: wshare(c) for c in ["ps_grade", "da_grade", "privacy_concern", "ott_payment"]}
+    rep["expected"] = {c: wshare(c) for c in DIST_COLS}
     rep["match_level_counts"] = panel["match_level"].value_counts().sort_index().to_dict()
     rep["donor_cap"] = cap
     rep["donors_used"] = int((used > 0).sum())
