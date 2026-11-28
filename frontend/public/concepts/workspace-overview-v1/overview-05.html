@@ -1,0 +1,79 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>05 회차 표</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;800&display=swap">
+<style>
+:root{--bg:#fff;--panel:#fff;--soft:#f6f6f7;--ink:#17161a;--fg2:#46464d;--fg3:#74747c;--line:#e8e8eb;--line2:#d6d6db;--btn:#17161a;--btn-fg:#fff;--run:#2f5fd0;--ok:#1f8a58;--ok-bg:#e3f3ea;--coral:#d06d5b;--r:16px;--serif:"Noto Serif KR",serif}
+*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--ink);font:400 14px/1.55 "Pretendard Variable",Pretendard,system-ui,sans-serif;min-height:100vh}
+a{cursor:pointer}button{font:inherit;cursor:pointer}ul,ol{list-style:none;padding:0}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.brand{display:flex;align-items:center;gap:8px;font-size:17px}
+.side{display:flex;flex-direction:column;gap:12px;padding:20px 14px}
+.grp{display:flex;justify-content:space-between;font-size:13px;padding:6px 4px}.grp u{text-decoration:none;background:var(--soft);border-radius:99px;padding:0 8px;font-size:11px;color:var(--fg3);margin-left:6px}
+.srch{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:9px 12px;color:var(--fg3);font-size:13px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--soft);border-radius:12px;padding:3px;font-size:12px;text-align:center}.seg a{padding:6px;border-radius:9px;color:var(--fg3)}.seg a.on{background:var(--panel);color:var(--ink);font-weight:650;box-shadow:0 1px 2px #0001}
+.plist{display:flex;flex-direction:column;gap:6px;flex:1}.plist li{display:flex;align-items:center;gap:8px;padding:11px 12px;border-radius:12px;font-size:13px}.plist li.on{background:var(--panel);border:1px solid var(--line)}.plist li span{color:var(--fg3);font-size:12px}.plist li em{margin-left:auto;font-style:normal;color:var(--fg3)}
+.side-foot{display:flex;flex-direction:column;gap:10px}
+.new{background:var(--btn);color:var(--btn-fg);border:0;border-radius:14px;padding:13px;font-weight:650;display:flex;align-items:center;justify-content:center;gap:6px}
+.hist{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--fg2);padding:6px 4px}
+.acct{display:flex;gap:10px;align-items:center;border-top:1px solid var(--line);padding-top:12px;font-size:12px}.acct i{width:30px;height:30px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-style:normal}.acct div{display:flex;flex-direction:column}.acct span{color:var(--fg3)}.acct em{margin-left:auto;font-style:normal;color:var(--fg3)}
+.tabs{display:flex;gap:6px;font-size:14px}.tabs a{display:flex;align-items:center;gap:6px;padding:10px 16px;color:var(--fg3);position:relative}.tabs a.on{color:var(--ink);font-weight:650}.tabs a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;background:var(--ink)}
+.crumb{font-size:12px;color:var(--fg3);margin-bottom:26px}
+.h-row{display:flex;justify-content:space-between;gap:20px;align-items:flex-end}
+.title{font:800 54px/1.1 var(--serif);letter-spacing:-.04em}
+.meta{margin-top:8px;font-weight:650}.desc{color:var(--fg2);margin-top:6px}
+.h-side{display:flex;gap:12px;align-items:center}.status{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:650;color:var(--ok)}
+.more{width:44px;height:44px;border:1px solid var(--line);background:var(--panel);border-radius:12px;font-weight:800}
+.who{display:flex;align-items:center;gap:14px;margin:26px 0 8px;font-size:12px;color:var(--fg2)}
+.avs{display:flex}.avs img{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--panel);margin-left:-8px;background:#ddd}.avs img:first-child{margin-left:0}.avs u{width:30px;height:30px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-size:10px;text-decoration:none;margin-left:-8px;border:2px solid var(--panel)}
+.sec{margin-top:44px}.sec-h{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:16px}
+.sec-h small{font-size:12px;font-weight:650;color:var(--fg2)}.sec-h h2{font-size:24px;letter-spacing:-.03em;margin:2px 0}.sec-h p{color:var(--fg3);font-size:13px}.cnt{font-size:12px;font-weight:500;color:var(--fg3);margin-left:6px}
+.cmp{font-size:13px;font-weight:650;border-bottom:1.5px solid var(--ink);padding-bottom:1px}
+.rounds{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.rc{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px}
+.rc.cur{border:2px solid var(--ink)}.rc header,.tl-h{display:flex;align-items:center;gap:8px}.rc header h3,.tl-h h3{font-size:20px;letter-spacing:-.03em}.rc time,.tl-h time{margin-left:auto;font-size:12px;color:var(--fg3)}
+.pill{background:var(--ok-bg);color:var(--ok);font-size:11px;font-weight:650;padding:2px 9px;border-radius:99px}
+.note{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;color:var(--fg2);font-size:13px;min-height:38px}.note.ph{color:var(--fg3)}
+.ghost{border:1px solid var(--line2);background:var(--panel);border-radius:99px;padding:3px 13px;font-size:12px;font-weight:650;flex:none}
+.bar{height:6px;border-radius:9px;background:var(--line)}.bar i{display:block;height:100%;width:100%;border-radius:9px;background:var(--line2)}
+.mx{display:flex;gap:18px}.mx div{display:flex;flex-direction:column}.mx dt{font-size:11px;color:var(--fg3)}.mx dd{font-size:24px;font-weight:700;margin:0}.mx small{font-size:11px;font-weight:500;color:var(--fg3);margin-left:2px}
+.rc footer,.tl-f{display:flex;flex-direction:column;gap:8px;margin-top:auto}.go{font-weight:650;font-size:13px}.del{font-size:12px;color:var(--fg3);text-decoration:underline}
+.iv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pc{position:relative;display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px}.pc img{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#ddd}.pc h4{font-size:14px}.pc p{font-size:12px;color:var(--fg3);margin:2px 0 6px}.tag{position:absolute;right:14px;top:14px;font-size:10px;background:var(--soft);color:var(--fg2);padding:2px 9px;border-radius:99px}
+.rt{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;font-size:13px}.rt th{text-align:left;font-size:11px;color:var(--fg3);font-weight:600;padding:12px 14px;background:var(--soft)}.rt td{padding:14px;border-top:1px solid var(--line)}.rt tr.cur td{background:var(--soft)}.rt td.ph{color:var(--fg3)}
+.tl{position:relative;display:flex;flex-direction:column;gap:18px;padding-left:28px}.tl::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl li{position:relative}.node{position:absolute;left:-28px;top:8px;width:16px;height:16px;border-radius:50%;background:var(--panel);border:2px solid var(--line2)}.tl li.cur .node{background:var(--ink);border-color:var(--ink)}
+.tl-b{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;display:grid;gap:12px}.tl li.cur .tl-b{border:2px solid var(--ink)}.tl-f{flex-direction:row;gap:18px;margin:0}
+.bignum{display:flex;flex-direction:column}.bignum b{font:800 56px/1 var(--serif);letter-spacing:-.04em}.bignum span{font-size:12px;color:var(--fg3)}.mini{display:flex;gap:14px;font-size:12px;color:var(--fg3)}.mini b{color:var(--ink)}
+.stamp{position:fixed;right:12px;bottom:10px;font-size:11px;color:var(--fg3);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 12px;opacity:.9}
+.shell{display:grid;grid-template-columns:268px 1fr;min-height:100vh}.shell>.side{border-right:1px solid var(--line);background:var(--bar,var(--panel));position:sticky;top:0;height:100vh}
+.topbar{display:flex;align-items:center;gap:20px;border-bottom:1px solid var(--line);padding:0 32px;height:60px;background:var(--panel)}
+.main{max-width:1120px;padding:48px 40px 90px;margin:0 auto;width:100%}
+@media(max-width:1000px){.shell{grid-template-columns:1fr}.shell>.side{position:static;height:auto}.rounds{grid-template-columns:repeat(2,1fr)}.iv{grid-template-columns:1fr}}
+.rt td .ghost{margin-left:6px}.rt tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--ink)}</style></head><body>
+<div class="shell">
+  <aside class="side ">
+    <div class="brand"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M5 3h8a6 6 0 0 1 0 12H9v6H5z M9 7v4h4a2 2 0 0 0 0-4z" fill-rule="evenodd"/></svg><b>PersonaLab</b></div>
+    <div class="grp"><b>내 앱·웹 <u>2</u></b></div>
+    <div class="srch"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg><span>앱·웹·테스트 검색</span></div>
+    <div class="seg"><a class="on">전체</a><a>보관</a><a>휴지통</a></div>
+    <ul class="plist"><li class=" on"><i class="dot"></i><b>00</b><span>전반 탐색</span><em>···</em></li><li class=" "><i class="dot"></i><b>00</b><span>전반 탐색</span><em>···</em></li></ul>
+    <div class="side-foot"><button class="new"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg> 새 앱·웹</button><a class="hist"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/></svg> 전체 실행 기록</a><div class="acct"><i>나</i><div><b>내 계정</b><span>user@example.com</span></div><em>⌃</em></div></div>
+  </aside><div><div class="topbar"><nav class="tabs "><a class="on"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11l8-7 8 7v9H4z"/></svg>개요</a><a><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>캘린더</a></nav></div><main class="main">
+  <nav class="crumb">내 앱·웹 / 00 / 전반 탐색</nav>
+  <div class="h-row">
+    <div class="h-main">
+      <h1 class="title">00</h1>
+      <p class="meta">전반 탐색 · 4회차 · 00</p>
+      <p class="desc">읽은 책을 기록하고 이번 달 독서 목표를 관리하는 앱·웹 서비스 샘플입니다.</p>
+    </div>
+    <div class="h-side"><span class="status"><i class="dot"></i>최근 실행 완료</span><button class="more">···</button></div>
+  </div>
+  <div class="who"><span class="avs"><img src="/personas/portraits/young-male.png" alt=""><img src="/personas/portraits/adult-male.png" alt=""><img src="/personas/portraits/mature-female.png" alt=""><img src="/personas/portraits/young-female.png" alt=""><u>+26</u></span><span>웹 서비스 · 화면 1개 · 30명의 탐색 기록이 저장됐어요</span></div><section class="sec">
+  <div class="sec-h"><div><small>회차</small><h2>탐색 기록이 저장됐어요</h2><p>회차끼리 숫자를 비교해 고친 효과를 확인하세요.</p></div><a class="cmp">회차 비교하기 →</a></div>
+  <table class="rt"><thead><tr><th>회차</th><th>상태</th><th>날짜</th><th>바꾼 점</th><th>방문 페이지</th><th>발견한 문제</th><th>참여</th><th></th></tr></thead><tbody>
+  <tr class=""><td><b>1회차</b></td><td><span class="pill">완료</span></td><td>2026-11-09</td><td class="ph">바꾼 점을 한두 줄로 적어 보세요 <button class="ghost">적기</button></td><td>9개</td><td>0곳</td><td>30명</td><td><a class="go">리포트 보기 →</a></td></tr><tr class=""><td><b>2회차</b></td><td><span class="pill">완료</span></td><td>2026-11-09</td><td class="">00 <button class="ghost">수정</button></td><td>9개</td><td>0곳</td><td>30명</td><td><a class="go">리포트 보기 →</a> <a class="del">삭제</a></td></tr><tr class=""><td><b>3회차</b></td><td><span class="pill">완료</span></td><td>2026-11-10</td><td class="">00 <button class="ghost">수정</button></td><td>9개</td><td>0곳</td><td>30명</td><td><a class="go">리포트 보기 →</a> <a class="del">삭제</a></td></tr><tr class="cur"><td><b>4회차</b></td><td><span class="pill">완료</span></td><td>2026-11-16</td><td class="">00 <button class="ghost">수정</button></td><td>9개</td><td>0곳</td><td>30명</td><td><a class="go">리포트 보기 →</a> <a class="del">삭제</a></td></tr>
+  </tbody></table></section>
+  <section class="sec">
+  <div class="sec-h"><div><small>1대1 인터뷰</small><h2>궁금한 사람을 눌러 직접 물어보세요 <span class="cnt">30명</span></h2><p>멈춘 사람이 먼저 보여요. 사람을 누르면 그 사람의 탐색 기록으로 인터뷰가 열려요.</p></div></div>
+  <div class="iv"><article class="pc"><img src="/personas/portraits/young-male.png" alt=""><div><h4>P4399 · 21세 학생</h4><p>정해 둔 횟수까지 살펴봤어요</p><a class="go">물어보기 →</a></div><span class="tag">횟수까지</span></article><article class="pc"><img src="/personas/portraits/adult-female.png" alt=""><div><h4>P4400 · 33세 사무·관리</h4><p>정해 둔 횟수까지 살펴봤어요</p><a class="go">물어보기 →</a></div><span class="tag">횟수까지</span></article><article class="pc"><img src="/personas/portraits/senior-female.png" alt=""><div><h4>P4401 · 79세 판매·서비스</h4><p>정해 둔 횟수까지 살펴봤어요</p><a class="go">물어보기 →</a></div><span class="tag">횟수까지</span></article></div></section></main></div></div><div class="stamp">시안 05 회차 표 · 가짜 데이터 (실제 앱과 연결되지 않음)</div></body></html>
